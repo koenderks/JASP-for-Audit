@@ -1,0 +1,75 @@
+{
+	"moduleDescription" :
+	{
+		"title" : 									"Audit",
+		"description": 							"JASP for Audit is an officially supported add-on module that is created for auditors. The module includes procedures and analyses that can be used in auditing and eliminates the difficulties that arise from programming statistical analyses and correctly interpreting their results. Currently, the module features methods for planning and evaluating an audit.",
+		"version":									0.1,
+		"author":										"Koen Derks, Ruud Wetzels & Jacques de Swart",
+		"maintainer":								"Koen Derks <k.derks@nyenrode.nl>",
+		"website":									"www.jaspforaudit.com",
+		"license":									"GPL (>= 2)"
+	},
+
+	"requiredPackages":	[],
+
+	"ribbonEntries":
+	[
+		{
+			"title": 									"Planning",
+			"icon": 									"audit-planning.svg",
+			"analyses":
+			[
+				{
+					"title":							"Attributes Planning",
+					"qml":								"attributesPlanning.qml",
+					"function":						"attributesPlanning",
+					"usesJaspResults":		true
+				},
+				{
+					"title":							"Bayesian Attributes Planning",
+					"qml":								"bayesianAttributesPlanning.qml",
+					"function":						"bayesianAttributesPlanning",
+					"usesJaspResults":		true
+				}
+			]
+		},
+		{
+			"title": 									"Summary Stats",
+			"icon": 									"audit-summary-stats.svg",
+			"analyses":
+			[
+				{
+					"title":							"Attributes Bound",
+					"qml":								"summaryAttributesBound.qml",
+					"function":						"summaryAttributesBound",
+					"usesJaspResults":		true
+				},
+				{
+					"title":							"Bayesian Attributes Bound",
+					"qml":								"summaryBayesianAttributesBound.qml",
+					"function":						"summaryBayesianAttributesBound",
+					"usesJaspResults":		true
+				}
+			]
+		},
+		{
+			"title": 									"Evaluation",
+			"icon": 									"audit-evaluation.svg",
+			"analyses":
+			[
+				{
+					"title":							"Attributes Bound",
+					"qml":								"attributesBound.qml",
+					"function":						"attributesBound",
+					"usesJaspResults":		true
+				},
+				{
+					"title":							"Bayesian Attributes Bound",
+					"qml":								"bayesianAttributesBound.qml",
+					"function":						"bayesianAttributesBound",
+					"usesJaspResults":		true
+				}
+			]
+		}
+	]
+}

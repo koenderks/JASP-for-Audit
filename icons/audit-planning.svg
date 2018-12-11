@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   id="Layer_1"
+   x="0px"
+   y="0px"
+   width="74px"
+   height="56px"
+   viewBox="0 0 74 56"
+   enable-background="new 0 0 74 56"
+   xml:space="preserve"
+   sodipodi:docname="audit-planning.svg"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"><metadata
+   id="metadata857" /><defs
+   id="defs855" /><sodipodi:namedview
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1"
+   objecttolerance="10"
+   gridtolerance="10"
+   guidetolerance="10"
+   inkscape:pageopacity="0"
+   inkscape:pageshadow="2"
+   inkscape:window-width="1920"
+   inkscape:window-height="1001"
+   id="namedview853"
+   showgrid="false"
+   inkscape:zoom="0.63"
+   inkscape:cx="37"
+   inkscape:cy="5.8217822"
+   inkscape:window-x="2391"
+   inkscape:window-y="110"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="svg827" />
+<svg
+   height="464pt"
+   viewBox="0 0 464 464"
+   width="464pt"
+   version="1.1"
+   id="svg827"
+   sodipodi:docname="audit-planning-try.svg"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)">
+  <metadata
+   id="metadata833">
+    <rdf:RDF>
+      <cc:Work
+   rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+   rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+   id="defs831" />
+  <sodipodi:namedview
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1"
+   objecttolerance="10"
+   gridtolerance="10"
+   guidetolerance="10"
+   inkscape:pageopacity="0"
+   inkscape:pageshadow="2"
+   inkscape:window-width="1920"
+   inkscape:window-height="1001"
+   id="namedview829"
+   showgrid="false"
+   inkscape:zoom="1.3060345"
+   inkscape:cx="309.33333"
+   inkscape:cy="309.33333"
+   inkscape:window-x="2391"
+   inkscape:window-y="110"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="g3112"
+   fit-margin-top="0"
+   fit-margin-left="0"
+   fit-margin-right="0"
+   fit-margin-bottom="0" />
+  <g
+   transform="matrix(12.298954,0,0,5.3440592,-455.83688,-40.44871)"
+   id="g882">
+    <rect
+   style="fill:#428cf4;stroke-width:1.11782765"
+   x="55.424313"
+   y="9.2335711"
+   width="18.381269"
+   height="41.331173"
+   id="rect876" />
+    <rect
+   style="fill:#428cf4;stroke-width:1.0934701"
+   x="38.070259"
+   y="50.564743"
+   width="17.867662"
+   height="40.686432"
+   id="rect876-6" />
+    <g
+   transform="matrix(0.74838435,0,0,0.7394164,-2.1385617,3.8744739)"
+   id="g3112">
+      <rect
+   style="fill:#fb8c00;stroke-width:1.46632528"
+   x="53.707188"
+   y="7.2695355"
+   width="23.396181"
+   height="55.875221"
+   id="rect3106" />
+      <rect
+   style="opacity:0;fill:#000000;fill-opacity:1;stroke:#0000ff;stroke-width:0.12455697;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+   id="rect3716"
+   width="1.4973558"
+   height="32.843899"
+   x="67.043282"
+   y="30.719297" />
+      <rect
+   style="fill:#fb8c00;stroke-width:1.49333322"
+   x="77.029953"
+   y="62.932278"
+   width="24.456808"
+   height="55.43924"
+   id="rect3106-8" />
+    </g>
+  </g>
+  <ellipse
+   style="fill:#fb8c00;stroke-width:4.66080761"
+   cx="252.68765"
+   cy="119.7327"
+   id="circle3856"
+   rx="37.797798"
+   ry="32.327969" />
+  <ellipse
+   style="fill:#fb8c00;stroke-width:4.66856241"
+   cx="205.73102"
+   cy="343.98016"
+   id="circle3856-3"
+   rx="37.923679"
+   ry="32.327969" />
+  <ellipse
+   style="fill:#428cf4;stroke-width:4.72453403"
+   cx="343.69302"
+   cy="244.62045"
+   id="circle4631"
+   rx="34.050739"
+   ry="36.873466" />
+  <ellipse
+   style="fill:#428cf4;stroke-width:5.0203414"
+   cx="120.0198"
+   cy="210.9203"
+   id="circle4631-2"
+   rx="34.050739"
+   ry="41.635368" />
+</svg>
+</svg>
