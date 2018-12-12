@@ -8,6 +8,44 @@
     }
 }
 
+.priorSampleTable <- function(options, result, jaspResults){
+
+  if(!is.null(jaspResults[["sampletable"]])) return() #The options for this table didn't change so we don't need to rebuild it
+
+  sampletable                       <- createJaspTable("Prior Sample Table")
+  jaspResults[["sampletable"]]      <- sampletable
+  sampletable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.k", "implicitsample", "statistic", "show"))
+
+  sampletable$addColumnInfo(name = 'implicitn', title = "Prior sample size", type = 'string')
+  sampletable$addColumnInfo(name = 'implicitk', title = "Prior errors", type = 'string')
+  sampletable$position <- 2
+
+  if(options[["statistic"]] == "bound"){
+    priorbound <- round(qbeta(p = options[["confidence"]], shape1 = result[["priorA"]], shape2 = result[["priorB"]]), 3)
+    sampletable$addColumnInfo(name = 'priorbound', title = paste0(result[["confidence"]]*100,"% Prior confidence bound"), type = 'string')
+    if(options[["show"]] == "percentage"){
+      row <- list(implicitn = result[["implicitn"]], implicitk = result[["implicitk"]], priorbound = paste0(priorbound * 100, "%"))
+    } else if(options[["show"]] == "proportion"){
+      row <- list(implicitn = result[["implicitn"]], implicitk = result[["implicitk"]], priorbound = priorbound)
+    }
+    sampletable$addRows(row)
+  } else if(options[["statistic"]] == "interval"){
+    priorbound <- round(qbeta(p = c(  (1 - (1-(1-options[["confidence"]])/2)) , (1 - ((1-options[["confidence"]])/2)) ), shape1 = result[["priorA"]], shape2 = result[["priorB"]]), 3)
+    sampletable$addColumnInfo(name = 'ciLow', title = "Lower", type = "string", overtitle = paste0(result[["confidence"]]*100,"% Prior confidence interval"))
+    sampletable$addColumnInfo(name = 'ciHigh', title = "Upper", type = "string", overtitle = paste0(result[["confidence"]]*100,"% Prior confidence interval"))
+    if(options[["show"]] == "percentage"){
+      row <- list(implicitn = result[["implicitn"]], implicitk = result[["implicitk"]], ciLow = paste0(priorbound[1] * 100, "%"), ciHigh = paste0(priorbound[2] * 100, "%"))
+    } else if(options[["show"]] == "proportion"){
+      row <- list(implicitn = result[["implicitn"]], implicitk = result[["implicitk"]], ciLow = priorbound[1], ciHigh = priorbound[2])
+    }
+    sampletable$addRows(row)
+  }
+
+  message <- paste0("Sample sizes shown are implicit sample sizes derived from the risk assessments: IR = ", options[["IR"]], " and CR = ", options[["CR"]], ".")
+  sampletable$addFootnote(message = message, symbol="<i>Note.</i>")
+
+}
+
 .plotPriorAndPosteriorBayesianAttributesBound <- function(options, result, jaspResults){
 
   xseq <- seq(0, options[["limx"]], 0.001)
@@ -38,7 +76,7 @@
     pdata <- data.frame(x = 0, y = 0, l = "1")
     p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 0.25, 1, 0))
     p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior \nconfidence region"))
-    p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 20, shape = 21, fill = rgb(0, 0.25, 1, .5))), order = 2)
+    p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 20, shape = 21, fill = rgb(0, 0.25, 1, .5), stroke = 2, color = "black")), order = 2)
 
     if(options[["statistic"]] == "bound"){
       p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["posteriorA"]], shape2 = result[["posteriorB"]]), xlim = c(0, result[["bound"]]),

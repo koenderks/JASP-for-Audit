@@ -114,6 +114,16 @@ Form {
         }
     }
 
+    GridLayout {
+        columns: 2
+
+        ColumnLayout {
+            GroupBox {
+                title: qsTr("Tables")
+                CheckBox { text: qsTr("Implicit sample") ; name: "implicitsample"}
+             }
+        }
+
         ColumnLayout {
             GroupBox {
                 title: qsTr("Plots")
@@ -122,5 +132,7 @@ Form {
                 CheckBox { text: qsTr("Additional info")     ; name: "plotPriorAndPosteriorAdditionalInfo" ; Layout.leftMargin: 20; checked: true; enabled: plotPriorAndPosterior.checked}
             }
         }
+
+    }
 
 }

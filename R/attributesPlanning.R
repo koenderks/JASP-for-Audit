@@ -11,10 +11,12 @@ attributesPlanning <- function(jaspResults, dataset, options, state=NULL){
 
 .calc.n.binomial <- function(k, materiality, alpha){
     for(n in 1:5000){
-        impk <- ceiling(n * k)
-        x <- choose(n, 0:impk) * materiality^(0:impk) * (1-materiality)^(n - (0:impk))
-        if(sum(x) < alpha)
-            return(n)
+        impk <- n * k
+        if(impk%%1 == 0){
+            x <- choose(n, 0:impk) * materiality^(0:impk) * (1-materiality)^(n - (0:impk))
+            if(sum(x) < alpha)
+                return(n)
+        }
     }
 }
 

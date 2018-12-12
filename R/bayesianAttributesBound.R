@@ -9,6 +9,11 @@ bayesianAttributesBound <- function(jaspResults, dataset, options, state=NULL){
   .bayesianAttributesBound(dataset, options, jaspResults)
   result                                       <- jaspResults[["result"]]$object
   .bayesianAttributesBoundTable(options, result, jaspResults)
+  if (options$implicitsample)
+  {
+    if(is.null(jaspResults[["sampletable"]]))
+      .priorSampleTable(options, result, jaspResults)
+  }
 
   # Create the prior and posterior plot ##
    if(options[['plotPriorAndPosterior']] && options[["correctID"]] != "")
@@ -112,6 +117,8 @@ bayesianAttributesBound <- function(jaspResults, dataset, options, state=NULL){
     resultList <- list()
     resultList[["n"]]           <- n
     resultList[["k"]]           <- k
+    resultList[["implicitn"]]   <- pn
+    resultList[["implicitk"]]   <- pk
     resultList[["IR"]]          <- options[["IR"]]
     resultList[["CR"]]          <- options[["CR"]]
     resultList[["alpha"]]       <- alpha

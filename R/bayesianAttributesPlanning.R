@@ -7,6 +7,11 @@ bayesianAttributesPlanning <- function(jaspResults, dataset, options, state=NULL
   .bayesianAttributesPlanning(options, jaspResults)
   result                      <- jaspResults[["result"]]$object
   .bayesianAttributesPlanningTable(options, result, jaspResults)
+  if (options$implicitsample)
+  {
+    if(is.null(jaspResults[["sampletable"]]))
+      .priorSampleTable(options, result, jaspResults)
+  }
 
   if(options[['plotPriorAndPosterior']])
   {
@@ -14,9 +19,9 @@ bayesianAttributesPlanning <- function(jaspResults, dataset, options, state=NULL
      {
      jaspResults[["priorPlot"]] 		<- .plotPriorBayesianAttributesPlanning(options, result, jaspResults)
      jaspResults[["priorPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence",
-                                                      "materiality", "k", "limx", "plotPriorAndPosterior",
-                                                      "plotPriorAndPosteriorAdditionalInfo", "show"))
-     jaspResults[["priorPlot"]] 		$position <- 2
+                                                      "materiality", "expected.k", "limx", "plotPriorAndPosterior",
+                                                      "plotPriorAndPosteriorAdditionalInfo", "show", "statistic"))
+     jaspResults[["priorPlot"]] 		$position <- 3
      }
   }
 
@@ -32,7 +37,7 @@ bayesianAttributesPlanning <- function(jaspResults, dataset, options, state=NULL
 
     confidence                <- options[["confidence"]]
     p                         <- options[["materiality"]]
-    k                         <- options[["k"]]
+    k                         <- options[["expected.k"]]
 
     if(options[["IR"]] == "Low" && options[["CR"]] == "Low"){
         alpha               <- (1-confidence) / 0.30 / 0.30
@@ -63,17 +68,19 @@ bayesianAttributesPlanning <- function(jaspResults, dataset, options, state=NULL
     priorB           <- 1 + (pn - pk)
 
     resultList <- list()
-    resultList[["n"]] <- n_withprior
-    resultList[["k"]] <- k
-    resultList[["IR"]] <- options[["IR"]]
-    resultList[["CR"]] <- options[["CR"]]
-    resultList[["priorA"]] <- priorA
-    resultList[["priorB"]] <- priorB
-    resultList[["alpha"]] <- alpha
-    resultList[["confidence"]] <- confidence
+    resultList[["n"]]           <- n_withprior
+    resultList[["implicitn"]]   <- pn
+    resultList[["implicitk"]]   <- pk
+    resultList[["k"]]           <- k
+    resultList[["IR"]]          <- options[["IR"]]
+    resultList[["CR"]]          <- options[["CR"]]
+    resultList[["priorA"]]      <- priorA
+    resultList[["priorB"]]      <- priorB
+    resultList[["alpha"]]       <- alpha
+    resultList[["confidence"]]  <- confidence
 
     jaspResults[["result"]] <- createJaspState(resultList)
-    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "k", "materiality"))
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "expected.k", "materiality"))
 
 }
 
@@ -83,7 +90,7 @@ bayesianAttributesPlanning <- function(jaspResults, dataset, options, state=NULL
 
   summaryTable                       <- createJaspTable("Bayesian Planning")
   jaspResults[["summaryTable"]]      <- summaryTable
-  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "k", "materiality", "show"))
+  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "expected.k", "materiality", "show"))
 
   summaryTable$addColumnInfo(name = 'IR', title = "Inherent risk", type = 'string')
   summaryTable$addColumnInfo(name = 'CR', title = "Control risk", type = 'string')
@@ -137,9 +144,16 @@ bayesianAttributesPlanning <- function(jaspResults, dataset, options, state=NULL
     pdata <- data.frame(x = 0, y = 0, l = "1")
     p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 1, 0.5, 0))
     p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Prior confidence region"))
-    p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 20, shape = 21, fill = rgb(0, 1, 0.5, .7))))
-    p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["priorA"]], shape2 = result[["priorB"]]), xlim = c(0, qbeta(options[["confidence"]], result[["priorA"]], result[["priorB"]])),
-                                    geom = "area", fill = rgb(0, 1, 0.5, .7))
+    p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 20, shape = 21, fill = rgb(0, 1, 0.5, .7), stroke = 2, color = "black")))
+    if(options[["statistic"]] == "bound"){
+      p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["priorA"]], shape2 = result[["priorB"]]),
+                                      xlim = c(0, qbeta(options[["confidence"]], result[["priorA"]], result[["priorB"]])),
+                                      geom = "area", fill = rgb(0, 1, 0.5, .7))
+    } else if(options[["statistic"]] == "interval"){
+      p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["priorA"]], shape2 = result[["priorB"]]),
+                                      xlim = c(qbeta((1 - (1-(1-options[["confidence"]])/2)), result[["priorA"]], result[["priorB"]]), qbeta((1 - ((1-options[["confidence"]])/2)), result[["priorA"]], result[["priorB"]])),
+                                      geom = "area", fill = rgb(0, 1, 0.5, .7))
+    }
   }
 
   thm <- ggplot2::theme(

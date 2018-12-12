@@ -75,13 +75,16 @@ Form {
             label.text: qsTr("Expected errors")
             with1Decimal: true
             defaultValue: 2
-            name: "k"
+            name: "expected.k"
         }
 
     }
 
     ExpanderButton {
         text: qsTr("Advanced input options")
+
+        GridLayout {
+            columns: 2
 
             ColumnLayout {
 
@@ -94,15 +97,39 @@ Form {
                 }
             }
 
+            ColumnLayout {
+                ButtonGroup {
+                    title: qsTr("Statistic")
+                    name: "statistic"
+
+                    RadioButton { text: qsTr("Confidence bound")        ; name: "bound" ; checked: true}
+                    RadioButton { text: qsTr("Confidence interval")      ; name: "interval" }
+                }
+            }
+
+        }
+
     }
 
-    ColumnLayout {
-        GroupBox {
-            title: qsTr("Plots")
-            CheckBox { text: qsTr("Implied prior") ; name: "plotPriorAndPosterior"               ; id: plotPriorAndPosterior }
-            TextField { label.text: qsTr("x-axis limit"); text: "0.2"; name: "limx"; inputType: "number"; Layout.leftMargin: 20; validator: DoubleValidator {bottom: 0; top: 1 } }
-            CheckBox { text: qsTr("Additional info")     ; name: "plotPriorAndPosteriorAdditionalInfo" ; Layout.leftMargin: 20; checked: true; enabled: plotPriorAndPosterior.checked}
+    GridLayout {
+        columns: 2
+
+        ColumnLayout {
+            GroupBox {
+                title: qsTr("Tables")
+                CheckBox { text: qsTr("Implicit sample") ; name: "implicitsample"}
+             }
         }
+
+        ColumnLayout {
+            GroupBox {
+                title: qsTr("Plots")
+                CheckBox { text: qsTr("Implied prior") ; name: "plotPriorAndPosterior"               ; id: plotPriorAndPosterior }
+                TextField { label.text: qsTr("x-axis limit"); text: "0.2"; name: "limx"; inputType: "number"; Layout.leftMargin: 20; validator: DoubleValidator {bottom: 0; top: 1 } }
+                CheckBox { text: qsTr("Additional info")     ; name: "plotPriorAndPosteriorAdditionalInfo" ; Layout.leftMargin: 20; checked: true; enabled: plotPriorAndPosterior.checked}
+            }
+        }
+
     }
 
 }

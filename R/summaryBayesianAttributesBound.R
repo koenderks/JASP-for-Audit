@@ -8,6 +8,11 @@ summaryBayesianAttributesBound <- function(jaspResults, dataset, options, state=
   .summaryBayesianAttributesBound(options, jaspResults)
   result                      <- jaspResults[["result"]]$object
   .summaryBayesianAttributesBoundTable(options, result, jaspResults)
+  if (options$implicitsample)
+  {
+    if(is.null(jaspResults[["sampletable"]]))
+      .priorSampleTable(options, result, jaspResults)
+  }
 
   # Create the prior and posterior plot ##
    if(options[['plotPriorAndPosterior']])
@@ -15,7 +20,9 @@ summaryBayesianAttributesBound <- function(jaspResults, dataset, options, state=
       if(is.null(jaspResults[["priorAndPosteriorPlot"]]))
       {
       jaspResults[["priorAndPosteriorPlot"]] 		<- .plotPriorAndPosteriorBayesianAttributesBound(options, result, jaspResults)
-      jaspResults[["priorAndPosteriorPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "limx", "statistic", "plotPriorAndPosterior", "plotPriorAndPosteriorAdditionalInfo", "materiality", "show", "expected.k"))
+      jaspResults[["priorAndPosteriorPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "limx", "statistic",
+                                                                  "plotPriorAndPosterior", "plotPriorAndPosteriorAdditionalInfo",
+                                                                  "materiality", "show", "expected.k"))
 			jaspResults[["priorAndPosteriorPlot"]] 		$position <- 2
 	    }
    }
@@ -92,6 +99,8 @@ summaryBayesianAttributesBound <- function(jaspResults, dataset, options, state=
     resultList <- list()
     resultList[["n"]]           <- n
     resultList[["k"]]           <- k
+    resultList[["implicitn"]]   <- pn
+    resultList[["implicitk"]]   <- pk
     resultList[["IR"]]          <- options[["IR"]]
     resultList[["CR"]]          <- options[["CR"]]
     resultList[["alpha"]]       <- alpha
