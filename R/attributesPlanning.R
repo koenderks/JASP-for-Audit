@@ -51,12 +51,12 @@ attributesPlanning <- function(jaspResults, dataset, options, state=NULL){
     n <- .calc.n.binomial(k, p, alpha)
 
     resultList <- list()
-    resultList[["n"]] <- n
-    resultList[["k"]] <- k
-    resultList[["IR"]] <- options[["IR"]]
-    resultList[["CR"]] <- options[["CR"]]
-    resultList[["alpha"]] <- alpha
-    resultList[["confidence"]] <- confidence
+    resultList[["n"]]             <- n
+    resultList[["k"]]             <- k
+    resultList[["IR"]]            <- options[["IR"]]
+    resultList[["CR"]]            <- options[["CR"]]
+    resultList[["alpha"]]         <- alpha
+    resultList[["confidence"]]    <- confidence
 
     jaspResults[["result"]] <- createJaspState(resultList)
     jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "k", "materiality"))

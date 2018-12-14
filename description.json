@@ -34,20 +34,14 @@
 			]
 		},
 		{
-			"title": 									"Summary Stats",
-			"icon": 									"audit-summary-stats.svg",
+			"title": 									"Stratification",
+			"icon": 									"audit-stratification.svg",
 			"analyses":
 			[
 				{
-					"title":							"Attributes Bound",
-					"qml":								"summaryAttributesBound.qml",
-					"function":						"summaryAttributesBound",
-					"usesJaspResults":		true
-				},
-				{
-					"title":							"Bayesian Attributes Bound",
-					"qml":								"summaryBayesianAttributesBound.qml",
-					"function":						"summaryBayesianAttributesBound",
+					"title":							"Stratification",
+					"qml":								"stratification.qml",
+					"function":						"stratification",
 					"usesJaspResults":		true
 				}
 			]
@@ -67,6 +61,25 @@
 					"title":							"Bayesian Attributes Bound",
 					"qml":								"bayesianAttributesBound.qml",
 					"function":						"bayesianAttributesBound",
+					"usesJaspResults":		true
+				}
+			]
+		},
+		{
+			"title": 									"Summary Stats",
+			"icon": 									"audit-summary-stats.svg",
+			"analyses":
+			[
+				{
+					"title":							"Attributes Bound",
+					"qml":								"summaryAttributesBound.qml",
+					"function":						"summaryAttributesBound",
+					"usesJaspResults":		true
+				},
+				{
+					"title":							"Bayesian Attributes Bound",
+					"qml":								"summaryBayesianAttributesBound.qml",
+					"function":						"summaryBayesianAttributesBound",
 					"usesJaspResults":		true
 				}
 			]

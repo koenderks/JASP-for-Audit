@@ -25,7 +25,13 @@ Form {
     VariablesForm {
         defaultAssignedVariablesList {
             name: "correctID"
-            title: qsTr("Correct")
+            title: qsTr("Error")
+            singleItem: true
+            allowedColumns: ["nominal"]
+        }
+        AssignedVariablesList {
+            name: "stratum"
+            title: qsTr("Stratum (optional)")
             singleItem: true
             allowedColumns: ["nominal"]
         }
@@ -60,6 +66,7 @@ Form {
     }
 
     GroupBox {
+      title: qsTr("Input options")
 
         PercentField {
             label.text: qsTr("Confidence")
@@ -121,6 +128,7 @@ Form {
             GroupBox {
                 title: qsTr("Tables")
                 CheckBox { text: qsTr("Implicit sample") ; name: "implicitsample"}
+                CheckBox { text: qsTr("Stratum information") ; name: "stratuminfo" ; enabled: true }
              }
         }
 

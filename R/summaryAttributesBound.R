@@ -1,7 +1,7 @@
 summaryAttributesBound <- function(jaspResults, dataset, options, state=NULL){
 
   # Set the title
-  jaspResults$title 					<- "Summary Statistics Attributes Bound"
+  jaspResults$title 					<- "Summary Statistics Audit Attributes Bound"
   # Perform the analysis
   .summaryAttributesBound(options, jaspResults)
   result                      <- jaspResults[["result"]]$object
@@ -55,14 +55,14 @@ summaryAttributesBound <- function(jaspResults, dataset, options, state=NULL){
     }
 
     resultList <- list()
-    resultList[["n"]] <- n
-    resultList[["k"]] <- k
-    resultList[["IR"]] <- options[["IR"]]
-    resultList[["CR"]] <- options[["CR"]]
-    resultList[["confidence"]] <- confidence
-    resultList[["bound"]] <- bound
-    resultList[["approve"]] <- approve
-    resultList[["alpha"]] <- alpha
+    resultList[["n"]]               <- n
+    resultList[["k"]]               <- k
+    resultList[["IR"]]              <- options[["IR"]]
+    resultList[["CR"]]              <- options[["CR"]]
+    resultList[["confidence"]]      <- confidence
+    resultList[["bound"]]           <- bound
+    resultList[["approve"]]         <- approve
+    resultList[["alpha"]]           <- alpha
 
     jaspResults[["result"]] <- createJaspState(resultList)
     jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "n", "k"))

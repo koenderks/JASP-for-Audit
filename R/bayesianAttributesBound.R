@@ -4,7 +4,7 @@ bayesianAttributesBound <- function(jaspResults, dataset, options, state=NULL){
       state 							                     <- list()
   dataset                                      <- .readDataBayesianAttributesBound(dataset, options)
   # Set the title
-  jaspResults$title 					                 <- "Bayesian Attributes Bound"
+  jaspResults$title 					                 <- "Bayesian Audit Attributes Bound"
   # Perform the analysis
   .bayesianAttributesBound(dataset, options, jaspResults)
   result                                       <- jaspResults[["result"]]$object
@@ -24,7 +24,7 @@ bayesianAttributesBound <- function(jaspResults, dataset, options, state=NULL){
       jaspResults[["priorAndPosteriorPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "limx", "statistic", "plotPriorAndPosterior",
                                                                     "plotPriorAndPosteriorAdditionalInfo", "materiality", "show", "correctID",
                                                                     "expected.k"))
-      jaspResults[["priorAndPosteriorPlot"]] 		$position <- 2
+      jaspResults[["priorAndPosteriorPlot"]] 		$position <- 3
       }
    }
 

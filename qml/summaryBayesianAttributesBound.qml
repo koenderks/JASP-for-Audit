@@ -56,6 +56,7 @@ Form {
     Divider { }
 
     GroupBox {
+      title: qsTr("Input options")
 
         PercentField {
             label.text: qsTr("Confidence")

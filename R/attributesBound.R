@@ -4,7 +4,7 @@ attributesBound <- function(jaspResults, dataset, options, state=NULL){
       state 							                     <- list()
   dataset                                      <- .readDataBayesianAttributesBound(dataset, options)
   # Set the title
-  jaspResults$title 					                 <- "Attributes Bound"
+  jaspResults$title 					                 <- "Audit Attributes Bound"
   # Perform the analysis
   .attributesBound(dataset, options, jaspResults)
   result                                       <- jaspResults[["result"]]$object
@@ -47,31 +47,31 @@ attributesBound <- function(jaspResults, dataset, options, state=NULL){
     }
 
     if(n == 0){
-      bound <- "."
-      approve <- "."
+      bound                 <- "."
+      approve               <- "."
     } else {
       binomResult <- binom.test(x = k,
                            n = n,
                            p = 0,
                            alternative = "less",
                            conf.level = confidence)
-      bound <- binomResult$conf.int[2]
+      bound                 <- binomResult$conf.int[2]
       if(bound < alpha){
-        approve <- "Yes"
+        approve             <- "Yes"
       } else {
-        approve <- "No"
+        approve             <- "No"
       }
     }
 
     resultList <- list()
-    resultList[["n"]] <- n
-    resultList[["k"]] <- k
-    resultList[["IR"]] <- options[["IR"]]
-    resultList[["CR"]] <- options[["CR"]]
-    resultList[["confidence"]] <- confidence
-    resultList[["bound"]] <- bound
-    resultList[["approve"]] <- approve
-    resultList[["alpha"]] <- alpha
+    resultList[["n"]]           <- n
+    resultList[["k"]]           <- k
+    resultList[["IR"]]          <- options[["IR"]]
+    resultList[["CR"]]          <- options[["CR"]]
+    resultList[["confidence"]]  <- confidence
+    resultList[["bound"]]       <- bound
+    resultList[["approve"]]     <- approve
+    resultList[["alpha"]]       <- alpha
 
     jaspResults[["result"]] <- createJaspState(resultList)
     jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctID"))
