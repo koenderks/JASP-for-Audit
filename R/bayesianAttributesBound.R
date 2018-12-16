@@ -36,11 +36,20 @@ bayesianAttributesBound <- function(jaspResults, dataset, options, state=NULL){
 
 .readDataBayesianAttributesBound <- function(dataset, options){
   correctID <- options[['correctID']]
+  stratum <- options[["stratum"]]
+  variables <- c(correctID, stratum)
+  variables <- variables[variables != ""]
   if (is.null(dataset)) {
-    if(correctID == ""){
+    if(length(variables) == 0){
       dataset   <- NULL
     } else {
-      dataset   <- .readDataSetToEnd(columns.as.numeric = correctID)
+      if(stratum == "" && correctID != ""){
+        dataset   <- .readDataSetToEnd(columns.as.numeric = correctID)
+      } else if(stratum != "" && correctID == ""){
+        dataset   <- .readDataSetToEnd(columns.as.factor = stratum)
+      } else if(stratum != "" && correctID != ""){
+        dataset   <- .readDataSetToEnd(columns.as.numeric = correctID, columns.as.factor = stratum)
+      }
     }
   }
   return(dataset)
@@ -49,15 +58,17 @@ bayesianAttributesBound <- function(jaspResults, dataset, options, state=NULL){
 .bayesianAttributesBound <- function(dataset, options, jaspResults){
 
     confidence              <- options[["confidence"]]
+    correctID               <- options[["correctID"]]
+    exp.k                   <- options[["expected.k"]]
+    materiality             <- options[["materiality"]]
+
     if(is.null(dataset)){
       n                     <- 0
       k                     <- 0
     } else {
       n                     <- nrow(dataset)
-      k                     <- length(which(dataset[,1] == 1))
+      k                     <- length(which(dataset[,.v(correctID)] == 1))
     }
-    exp.k                   <- options[["expected.k"]]
-    materiality             <- options[["materiality"]]
 
     if(options[["IR"]] == "Low" && options[["CR"]] == "Low"){
         alpha               <- (1-confidence) / 0.30 / 0.30

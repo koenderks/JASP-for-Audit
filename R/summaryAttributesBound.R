@@ -1,11 +1,25 @@
 summaryAttributesBound <- function(jaspResults, dataset, options, state=NULL){
 
+  if(is.null(state))
+      state 							                     <- list()
   # Set the title
   jaspResults$title 					<- "Summary Statistics Audit Attributes Bound"
   # Perform the analysis
   .summaryAttributesBound(options, jaspResults)
   result                      <- jaspResults[["result"]]$object
   .summaryAttributesBoundTable(options, result, jaspResults)
+  if(options[['plotBounds']])
+  {
+     if(is.null(jaspResults[["confidenceBoundPlot"]]))
+     {
+     jaspResults[["confidenceBoundPlot"]] 		<- .plotConfidenceBoundsSummary(options, result, jaspResults)
+     jaspResults[["confidenceBoundPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "plotBounds", "materiality", "show"))
+     jaspResults[["confidenceBoundPlot"]] 		$position <- 2
+     }
+  }
+  # Save the state
+  state[["options"]] 					                  <- options
+  return(state)
 
 }
 
@@ -45,7 +59,7 @@ summaryAttributesBound <- function(jaspResults, dataset, options, state=NULL){
                            n = n,
                            p = 0,
                            alternative = "less",
-                           conf.level = confidence)
+                           conf.level = 1 - alpha)
       bound <- binomResult$conf.int[2]
       if(bound < alpha){
         approve <- "Yes"
@@ -113,38 +127,49 @@ summaryAttributesBound <- function(jaspResults, dataset, options, state=NULL){
 
 }
 
-.attributesBoundTable <- function(options, result, jaspResults){
+.plotConfidenceBoundsSummary <- function(options, result, jaspResults){
 
-  if(!is.null(jaspResults[["summaryTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
+  if(options[["n"]] == 0)
+    return(createJaspPlot(error="badData", errorMessage="Plotting is not possible: No analysis has been run."))
 
-  summaryTable                       <- createJaspTable("Evaluation Table")
-  jaspResults[["summaryTable"]]      <- summaryTable
-  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID"))
-  summaryTable$position <- 1
+  plotStat <- data.frame(materiality = options[["materiality"]],
+                          bound = result[["bound"]],
+                          stratum = "Population")
 
-  summaryTable$addColumnInfo(name = 'IR',     title = "Inherent risk",  type = 'string')
-  summaryTable$addColumnInfo(name = 'CR',     title = "Control risk",   type = 'string')
-  summaryTable$addColumnInfo(name = 'SR',     title = "Sampling risk",  type = 'string')
-  summaryTable$addColumnInfo(name = 'n',      title = "Sample size",    type = 'string')
-  summaryTable$addColumnInfo(name = 'k',      title = "Errors",         type = 'string')
-  summaryTable$addColumnInfo(name = 'bound',  title = paste0(result[["confidence"]]*100,"% Confidence bound"), type = 'string')
 
-  if(options[["show"]] == "percentage"){
-    SRtable <- paste0(round(result[["alpha"]],3) * 100, "%")
-    if(result[["bound"]] == "."){
-      boundTable          <- "."
-    } else {
-      boundTable <- paste0(round(result[["bound"]],3) * 100, "%")
-    }
-  } else if(options[["show"]] == "proportion"){
-    SRtable <- round(result[["alpha"]], 3)
-    if(result[["bound"]] == "."){
-      boundTable          <- "."
-    } else {
-      boundTable <- round(result[["bound"]],3)
-    }
+  materialityStat <- data.frame(materiality = options[["materiality"]])
+
+  base_breaks_y <- function(x, options) {
+
+      values <- c(options$materiality, 0, x[, "bound"])
+      ci.pos <- c(min(values), max(values))
+      b <- pretty(ci.pos)
+      d <- data.frame(x = -Inf, xend = -Inf, y = min(b), yend = max(b))
+      yBreaks <- c(min(b),  options$materiality, max(b))
+
+      if(options[["show"]] == "percentage"){
+          yLabels <- paste(yBreaks * 100, "%")
+      } else if(options[["show"]] == "proportion"){
+          yLabels <- yBreaks
+      }
+
+      list(ggplot2::geom_segment(data = d, ggplot2::aes(x = x, y = y, xend = xend,
+                                                        yend = yend), inherit.aes = FALSE, size = 1),
+           ggplot2::scale_y_continuous(breaks = yBreaks, labels = yLabels))
   }
 
-  row <- list(IR = result[["IR"]], CR = result[["CR"]], SR = SRtable, n = result[["n"]], k = result[["k"]], bound = boundTable)
-  summaryTable$addRows(row)
+  pd <- ggplot2::position_dodge(0.2)
+
+  p <- ggplot2::ggplot(plotStat, ggplot2::aes(x = stratum, y = bound, group = stratum)) +
+      ggplot2::geom_errorbar(ggplot2::aes(ymin = 0, ymax = bound), colour = "black", width = 0.2, position = pd) +
+      ggplot2::geom_hline(data = materialityStat, ggplot2::aes(yintercept = materiality), linetype = "dashed") +
+      ggplot2::ylab(NULL) +
+      ggplot2::xlab(NULL) +
+      ggplot2::scale_x_discrete(labels = plotStat[["stratum"]]) +
+      base_breaks_y(plotStat, options)
+
+  p <- JASPgraphs::themeJasp(p, xAxis = FALSE)
+
+  return(createJaspPlot(plot = p, title = "Confidence Bound Plot", width = 600, height = 450))
+
 }

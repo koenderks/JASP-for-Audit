@@ -35,7 +35,7 @@ Form {
     }
 
     GridLayout {
-        columns: 2
+        columns: 1
 
         GroupBox {
             title: qsTr("Input options")

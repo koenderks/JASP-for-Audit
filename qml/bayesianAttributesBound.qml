@@ -18,6 +18,7 @@
 import QtQuick 2.8
 import QtQuick.Layouts 1.3
 import JASP.Controls 1.0
+import JASP.Widgets 1.0
 
 Form {
     id: form
@@ -34,6 +35,16 @@ Form {
             title: qsTr("Stratum (optional)")
             singleItem: true
             allowedColumns: ["nominal"]
+
+            signal modelReset()
+
+            onModelChanged: {
+                model.modelReset.connect(modelReset);
+            }
+
+            onModelReset: {
+                stratumInfo.enabled = (model.rowCount() > 0);
+            }
         }
     }
 
@@ -65,6 +76,8 @@ Form {
         }
     }
 
+    Divider { }
+
     GroupBox {
       title: qsTr("Input options")
 
@@ -94,8 +107,8 @@ Form {
     ExpanderButton {
         text: qsTr("Advanced input options")
 
-        GridLayout {
-            columns: 2
+        Flow {
+            spacing: 70
 
             ColumnLayout {
 
@@ -128,7 +141,7 @@ Form {
             GroupBox {
                 title: qsTr("Tables")
                 CheckBox { text: qsTr("Implicit sample") ; name: "implicitsample"}
-                CheckBox { text: qsTr("Stratum information") ; name: "stratuminfo" ; enabled: true }
+                CheckBox { text: qsTr("Stratum information") ; name: "stratuminfo" ; enabled: false; id: stratumInfo }
              }
         }
 

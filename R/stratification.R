@@ -139,7 +139,7 @@ stratification <- function(jaspResults, dataset, options, state=NULL){
   p  <- ggplot2::ggplot(data = data.frame(x = result[["stratumnames"]], y = result[["ni"]]), ggplot2::aes(x = x, y = y)) +
         ggplot2::geom_bar(stat = "identity", fill = "grey", col = "black", size = .3) +
         ggplot2::xlab("Stratum") +
-        ggplot2::ylab("Counts")
+        ggplot2::ylab("Sample size")
 
   # JASP theme
   p <- JASPgraphs::themeJasp(p)

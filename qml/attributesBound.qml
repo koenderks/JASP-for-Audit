@@ -18,6 +18,7 @@
 import QtQuick 2.8
 import QtQuick.Layouts 1.3
 import JASP.Controls 1.0
+import JASP.Widgets 1.0
 
 Form {
     id: form
@@ -34,6 +35,18 @@ Form {
             title: qsTr("Stratum (optional)")
             singleItem: true
             allowedColumns: ["nominal"]
+
+            signal modelReset()
+
+            onModelChanged: {
+                model.modelReset.connect(modelReset);
+            }
+
+            onModelReset: {
+                aggregationMethod.enabled = (model.rowCount() > 0);
+                stratumInfo.enabled = (model.rowCount() > 0);
+            }
+
         }
     }
 
@@ -65,8 +78,17 @@ Form {
         }
     }
 
+    Divider { }
+
     GroupBox {
       title: qsTr("Input options")
+
+      PercentField {
+          label.text: qsTr("Materiality")
+          with1Decimal: true
+          defaultValue: 5
+          name: "materiality"
+      }
 
         PercentField {
             label.text: qsTr("Confidence")
@@ -80,6 +102,9 @@ Form {
     ExpanderButton {
         text: qsTr("Advanced input options")
 
+        Flow {
+            spacing: 70
+
             ColumnLayout {
 
                 ButtonGroup {
@@ -91,11 +116,36 @@ Form {
                 }
             }
 
+            ColumnLayout {
+
+                ButtonGroup {
+                    id: aggregationMethod
+                    enabled: false
+                    title: qsTr("Aggregation method")
+                    name: "method"
+
+                    RadioButton { text: qsTr("Mean")         ; name: "mean" ; checked: true}
+                    RadioButton { text: qsTr("Normal")         ; name: "normal" }
+                }
+            }
+
+        }
+
     }
 
-    GroupBox {
-        title: qsTr("Tables")
-        CheckBox { text: qsTr("Stratum information") ; name: "stratuminfo" ; enabled: true }
+    GridLayout {
+        columns: 2
+
+        GroupBox {
+            title: qsTr("Tables")
+            CheckBox { text: qsTr("Stratum information") ; name: "stratuminfo" ; enabled: false ; id: stratumInfo }
+        }
+
+        GroupBox {
+            title: qsTr("Plots")
+            CheckBox { text: qsTr("Confidence bounds") ; name: "plotBounds"}
+        }
+
     }
 
 }

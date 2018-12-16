@@ -100,8 +100,8 @@ Form {
     ExpanderButton {
         text: qsTr("Advanced input options")
 
-        GridLayout {
-            columns: 2
+        Flow {
+            spacing: 70
 
             ColumnLayout {
 

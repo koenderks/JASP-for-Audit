@@ -2,7 +2,7 @@
 	"moduleDescription" :
 	{
 		"title" : 									"Audit",
-		"description": 							"JASP for Audit is an officially supported add-on module that is created for auditors. The module includes procedures and analyses that can be used in auditing and eliminates the difficulties that arise from programming statistical analyses and correctly interpreting their results. Currently, the module features methods for planning and evaluating an audit.",
+		"description": 							"JASP for Audit is an officially supported add-on module that is designed specifically with the auditor in mind. The module includes procedures and analyses that apply to daily auditing tasks and eliminates the difficulties that arise from programming statistical analyses and correctly interpreting their results.",
 		"version":									0.1,
 		"author":										"Koen Derks, Ruud Wetzels & Jacques de Swart",
 		"maintainer":								"Koen Derks <k.derks@nyenrode.nl>",

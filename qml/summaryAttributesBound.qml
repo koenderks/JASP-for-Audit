@@ -58,6 +58,13 @@ Form {
     GroupBox {
       title: qsTr("Input options")
 
+      PercentField {
+          label.text: qsTr("Materiality")
+          with1Decimal: true
+          defaultValue: 5
+          name: "materiality"
+      }
+
         PercentField {
             label.text: qsTr("Confidence")
             with1Decimal: true
@@ -96,6 +103,16 @@ Form {
                     RadioButton { text: qsTr("Proportions")         ; name: "proportion" }
                 }
             }
+
+    }
+
+    GridLayout {
+      columns: 1
+
+      GroupBox {
+          title: qsTr("Plots")
+          CheckBox { text: qsTr("Confidence bound") ; name: "plotBounds"}
+      }
 
     }
 
