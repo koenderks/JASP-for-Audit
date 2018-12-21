@@ -151,6 +151,7 @@ Form {
                 CheckBox { text: qsTr("Prior and posterior") ; name: "plotPriorAndPosterior"               ; id: plotPriorAndPosterior }
                 TextField { label.text: qsTr("x-axis limit"); text: "0.2"; name: "limx"; inputType: "number"; Layout.leftMargin: 20; validator: DoubleValidator {bottom: 0; top: 1 } }
                 CheckBox { text: qsTr("Additional info")     ; name: "plotPriorAndPosteriorAdditionalInfo" ; Layout.leftMargin: 20; checked: true; enabled: plotPriorAndPosterior.checked}
+                CheckBox { text: qsTr("Confidence bounds") ; name: "plotBounds"}
             }
         }
 

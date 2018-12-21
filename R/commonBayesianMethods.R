@@ -18,7 +18,7 @@
 
   sampletable$addColumnInfo(name = 'implicitn', title = "Prior sample size", type = 'string')
   sampletable$addColumnInfo(name = 'implicitk', title = "Prior errors", type = 'string')
-  sampletable$position <- 2
+  sampletable$position <- 3
 
   if(options[["statistic"]] == "bound"){
     priorbound <- round(qbeta(p = options[["confidence"]], shape1 = result[["priorA"]], shape2 = result[["priorB"]]), 3)

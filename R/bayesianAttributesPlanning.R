@@ -21,7 +21,7 @@ bayesianAttributesPlanning <- function(jaspResults, dataset, options, state=NULL
      jaspResults[["priorPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence",
                                                       "materiality", "expected.k", "limx", "plotPriorAndPosterior",
                                                       "plotPriorAndPosteriorAdditionalInfo", "show", "statistic"))
-     jaspResults[["priorPlot"]] 		$position <- 3
+     jaspResults[["priorPlot"]] 		$position <- 4
      }
   }
 
