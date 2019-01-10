@@ -3,7 +3,7 @@ bayesianAttributesPlanning <- function(jaspResults, dataset, options, state=NULL
   if(is.null(state))
       state 							    <- list()
 
-  jaspResults$title 					<- "Bayesian Audit Planning"
+  jaspResults$title 					<- "Bayesian Attributes Planning"
   .bayesianAttributesPlanning(options, jaspResults)
   result                      <- jaspResults[["result"]]$object
   .bayesianAttributesPlanningTable(options, result, jaspResults)

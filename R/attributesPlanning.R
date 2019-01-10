@@ -1,7 +1,7 @@
 attributesPlanning <- function(jaspResults, dataset, options, state=NULL){
 
   # Set the title
-  jaspResults$title 					<- "Audit Planning"
+  jaspResults$title 					<- "Attributes Planning"
   # Perform the analysis
   .attributesPlanning(options, jaspResults)
   result                      <- jaspResults[["result"]]$object

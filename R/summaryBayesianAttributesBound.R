@@ -3,7 +3,7 @@ summaryBayesianAttributesBound <- function(jaspResults, dataset, options, state=
   if(is.null(state))
       state 							    <- list()
   # Set the title
-  jaspResults$title 					<- "Summary Statistics Bayesian Audit Attributes Bound"
+  jaspResults$title 					<- "Summary Statistics Bayesian Attributes Bound"
   # Perform the analysis
   .summaryBayesianAttributesBound(options, jaspResults)
   result                      <- jaspResults[["result"]]$object
@@ -23,7 +23,7 @@ summaryBayesianAttributesBound <- function(jaspResults, dataset, options, state=
       jaspResults[["priorAndPosteriorPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "limx", "statistic",
                                                                   "plotPriorAndPosterior", "plotPriorAndPosteriorAdditionalInfo",
                                                                   "materiality", "show", "expected.k"))
-			jaspResults[["priorAndPosteriorPlot"]] 		$position <- 3
+			jaspResults[["priorAndPosteriorPlot"]] 		$position <- 4
 	    }
    }
 

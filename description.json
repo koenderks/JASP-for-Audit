@@ -2,7 +2,7 @@
 	"moduleDescription" :
 	{
 		"title" : 									"Audit",
-		"description": 							"JASP for Audit is an officially supported add-on module that is designed specifically with the auditor in mind. The module includes procedures and analyses that apply to daily auditing tasks and eliminates the difficulties that arise from programming statistical analyses and correctly interpreting their results.",
+		"description": 							"JASP for Audit (JfA) is an officially supported add-on module that is designed specifically with the auditor in mind. The module includes procedures and analyses that apply to daily auditing tasks and eliminates the difficulties that arise from programming statistical analyses and correctly interpreting their results.",
 		"version":									0.1,
 		"author":										"Koen Derks, Ruud Wetzels & Jacques de Swart",
 		"maintainer":								"Koen Derks <k.derks@nyenrode.nl>",
@@ -34,14 +34,26 @@
 			]
 		},
 		{
-			"title": 									"Stratification",
-			"icon": 									"audit-stratification.svg",
+			"title": 									"Sampling",
+			"icon": 									"audit-sampling.svg",
 			"analyses":
 			[
 				{
-					"title":							"Stratification",
-					"qml":								"stratification.qml",
-					"function":						"stratification",
+					"title":							"Attributes Simple Random Sampling",
+					"qml":								"attributesSimpleRandomSampling.qml",
+					"function":						"attributesSimpleRandomSampling",
+					"usesJaspResults":		true
+				},
+				{
+					"title":							"Attributes Systematic Sampling",
+					"qml":								"attributesSystematicSampling.qml",
+					"function":						"attributesSystematicSampling",
+					"usesJaspResults":		true
+				},
+				{
+					"title":							"Attributes Cell Sampling",
+					"qml":								"attributesCellSampling.qml",
+					"function":						"attributesCellSampling",
 					"usesJaspResults":		true
 				}
 			]

@@ -30,24 +30,6 @@ Form {
             singleItem: true
             allowedColumns: ["nominal"]
         }
-        AssignedVariablesList {
-            name: "stratum"
-            title: qsTr("Stratum (optional)")
-            singleItem: true
-            allowedColumns: ["nominal"]
-
-            signal modelReset()
-
-            onModelChanged: {
-                model.modelReset.connect(modelReset);
-            }
-
-            onModelReset: {
-                aggregationMethod.enabled = (model.rowCount() > 0);
-                stratumInfo.enabled = (model.rowCount() > 0);
-            }
-
-        }
     }
 
     Flow {
@@ -116,19 +98,6 @@ Form {
                 }
             }
 
-            ColumnLayout {
-
-                ButtonGroup {
-                    id: aggregationMethod
-                    enabled: false
-                    title: qsTr("Aggregation method")
-                    name: "method"
-
-                    RadioButton { text: qsTr("Mean")         ; name: "mean" ; checked: true}
-                    RadioButton { text: qsTr("Normal")         ; name: "normal" }
-                }
-            }
-
         }
 
     }
@@ -137,13 +106,8 @@ Form {
         columns: 2
 
         GroupBox {
-            title: qsTr("Tables")
-            CheckBox { text: qsTr("Stratum information") ; name: "stratuminfo" ; enabled: false ; id: stratumInfo }
-        }
-
-        GroupBox {
             title: qsTr("Plots")
-            CheckBox { text: qsTr("Confidence bounds") ; name: "plotBounds"}
+            CheckBox { text: qsTr("Confidence bound") ; name: "plotBounds"}
         }
 
     }

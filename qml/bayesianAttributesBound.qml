@@ -30,22 +30,6 @@ Form {
             singleItem: true
             allowedColumns: ["nominal"]
         }
-        AssignedVariablesList {
-            name: "stratum"
-            title: qsTr("Stratum (optional)")
-            singleItem: true
-            allowedColumns: ["nominal"]
-
-            signal modelReset()
-
-            onModelChanged: {
-                model.modelReset.connect(modelReset);
-            }
-
-            onModelReset: {
-                stratumInfo.enabled = (model.rowCount() > 0);
-            }
-        }
     }
 
     Flow {
@@ -141,7 +125,6 @@ Form {
             GroupBox {
                 title: qsTr("Tables")
                 CheckBox { text: qsTr("Implicit sample") ; name: "implicitsample"}
-                CheckBox { text: qsTr("Stratum information") ; name: "stratuminfo" ; enabled: false; id: stratumInfo }
              }
         }
 
@@ -151,7 +134,7 @@ Form {
                 CheckBox { text: qsTr("Prior and posterior") ; name: "plotPriorAndPosterior"               ; id: plotPriorAndPosterior }
                 TextField { label.text: qsTr("x-axis limit"); text: "0.2"; name: "limx"; inputType: "number"; Layout.leftMargin: 20; validator: DoubleValidator {bottom: 0; top: 1 } }
                 CheckBox { text: qsTr("Additional info")     ; name: "plotPriorAndPosteriorAdditionalInfo" ; Layout.leftMargin: 20; checked: true; enabled: plotPriorAndPosterior.checked}
-                CheckBox { text: qsTr("Confidence bounds") ; name: "plotBounds"}
+                CheckBox { text: qsTr("Confidence bound") ; name: "plotBounds"}
             }
         }
 

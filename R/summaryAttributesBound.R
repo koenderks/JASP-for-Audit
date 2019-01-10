@@ -3,7 +3,7 @@ summaryAttributesBound <- function(jaspResults, dataset, options, state=NULL){
   if(is.null(state))
       state 							                     <- list()
   # Set the title
-  jaspResults$title 					<- "Summary Statistics Audit Attributes Bound"
+  jaspResults$title 					<- "Summary Statistics Attributes Bound"
   # Perform the analysis
   .summaryAttributesBound(options, jaspResults)
   result                      <- jaspResults[["result"]]$object
