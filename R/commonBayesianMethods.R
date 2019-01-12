@@ -46,7 +46,59 @@
 
 }
 
-.plotPriorAndPosteriorBayesianAttributesBound <- function(options, result, jaspResults){
+.plotPriorBayesianAttributesPlanning <- function(options, result, jaspResults, plotWidth = 600, plotHeight = 450){
+
+  xseq <- seq(0, options[["limx"]], 0.001)
+  d <- data.frame(
+      x = xseq,
+      y = dbeta(x = xseq, shape1 = result[["priorA"]], shape2 = result[["priorB"]])
+  )
+
+  xBreaks <- JASPgraphs::getPrettyAxisBreaks(xseq, min.n = 4)
+  xLim <- range(xBreaks)
+  yBreaks <- c(0, 1.2*max(d$y))
+  yLim <- range(yBreaks)
+
+  p <- ggplot2::ggplot(d, ggplot2::aes(x = x, y = y)) +
+      ggplot2::geom_line(ggplot2::aes(x = x, y = y), lwd = 1, lty = 2)
+
+  if(options[["show"]] == "percentage"){
+    p <- p + ggplot2::scale_x_continuous(name = "Error percentage", breaks = xBreaks, limits = xLim, labels = paste0(xBreaks * 100, "%"))
+  } else if(options[["show"]] == "proportion"){
+    p <- p + ggplot2::scale_x_continuous(name = "Error proportion", breaks = xBreaks, limits = xLim)
+  }
+
+  if(options[["plotPriorAndPosteriorAdditionalInfo"]]){
+    pdata <- data.frame(x = 0, y = 0, l = "1")
+    p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 1, 0.5, 0))
+    p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Prior confidence region"))
+    p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 20, shape = 21, fill = rgb(0, 1, 0.5, .7), stroke = 2, color = "black")))
+    if(options[["statistic"]] == "bound"){
+      p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["priorA"]], shape2 = result[["priorB"]]),
+                                      xlim = c(0, qbeta(options[["confidence"]], result[["priorA"]], result[["priorB"]])),
+                                      geom = "area", fill = rgb(0, 1, 0.5, .7))
+    } else if(options[["statistic"]] == "interval"){
+      p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["priorA"]], shape2 = result[["priorB"]]),
+                                      xlim = c(qbeta((1 - (1-(1-options[["confidence"]])/2)), result[["priorA"]], result[["priorB"]]), qbeta((1 - ((1-options[["confidence"]])/2)), result[["priorA"]], result[["priorB"]])),
+                                      geom = "area", fill = rgb(0, 1, 0.5, .7))
+    }
+  }
+
+  thm <- ggplot2::theme(
+		axis.ticks.y = ggplot2::element_blank(),
+		axis.title.y = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = -5, b = 0, l = 0))
+	)
+  p <- p +
+  	ggplot2::scale_y_continuous(name = "Density", breaks = yBreaks, labels = c("", ""), limits = yLim) +
+  	ggplot2::theme()
+
+  p <- JASPgraphs::themeJasp(p, legend.position = "top") + thm
+
+  return(createJaspPlot(plot = p, title = "Prior Plot", width = plotWidth, height = plotHeight))
+
+}
+
+.plotPriorAndPosteriorBayesianAttributesBound <- function(options, result, jaspResults, plotWidth = 600, plotHeight = 450){
 
   xseq <- seq(0, options[["limx"]], 0.001)
   d <- data.frame(
@@ -96,6 +148,6 @@
 
   p <- JASPgraphs::themeJasp(p, legend.position = "top") + thm
 
-  return(createJaspPlot(plot = p, title = "Prior and Posterior Plot", width = 600, height = 450))
+  return(createJaspPlot(plot = p, title = "Prior and Posterior Plot", width = plotWidth, height = plotHeight))
 
 }

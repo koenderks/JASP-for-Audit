@@ -95,6 +95,25 @@
 					"usesJaspResults":		true
 				}
 			]
+		},
+		{
+			"title": 									"Report",
+			"icon": 									"audit-report.svg",
+			"analyses":
+			[
+				{
+					"title":							"Frequentist Attributes Report",
+					"qml":								"frequentistAttributesReport.qml",
+					"function":						"frequentistAttributesReport",
+					"usesJaspResults":		true
+				},
+				{
+					"title":							"Bayesian Attributes Report",
+					"qml":								"bayesianAttributesReport.qml",
+					"function":						"bayesianAttributesReport",
+					"usesJaspResults":		true
+				}
+			]
 		}
 	]
 }

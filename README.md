@@ -2,7 +2,7 @@
 
 JASP for Audit is an officially supported add-on module for JASP (www.jasp-stats.org) that is created for auditors. The module includes procedures and analyses that can be used in auditing and eliminates the difficulties that arise from programming statistical analyses and correctly interpreting their results. Currently, the module features methods for planning and evaluating an audit using raw data or summary statistics.
 
-![readme4](https://user-images.githubusercontent.com/25059399/49870480-bdfb5900-fe13-11e8-8251-73d8e6a86b94.png)
+![readme4](https://user-images.githubusercontent.com/25059399/51078718-4d698580-16ba-11e9-82a6-e089b11960ff.PNG)
 
 ## How to install the Audit module
 
