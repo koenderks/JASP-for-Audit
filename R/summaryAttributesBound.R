@@ -13,7 +13,8 @@ summaryAttributesBound <- function(jaspResults, dataset, options, state=NULL){
      if(is.null(jaspResults[["confidenceBoundPlot"]]))
      {
      jaspResults[["confidenceBoundPlot"]] 		<- .plotConfidenceBoundsSummary(options, result, jaspResults)
-     jaspResults[["confidenceBoundPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "plotBounds", "materiality", "show"))
+     jaspResults[["confidenceBoundPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "plotBounds", "materiality",
+                                                                "show", "N", "K"))
      jaspResults[["confidenceBoundPlot"]] 		$position <- 2
      }
   }
@@ -52,20 +53,16 @@ summaryAttributesBound <- function(jaspResults, dataset, options, state=NULL){
     }
 
     if(options[["n"]] == 0){
-      bound <- "."
-      approve <- "."
+      bound         <- "."
     } else {
-      binomResult <- binom.test(x = options[["k"]],
-                           n = n,
-                           p = 0,
-                           alternative = "less",
-                           conf.level = 1 - alpha)
-      bound <- binomResult$conf.int[2]
-      if(bound < alpha){
-        approve <- "Yes"
-      } else {
-        approve <- "No"
-      }
+
+        binomResult <- binom.test(x = options[["k"]],
+                                  n = n,
+                                  p = options[["materiality"]],
+                                  alternative = "less",
+                                  conf.level = 1 - alpha)
+        bound       <- binomResult$conf.int[2]
+
     }
 
     resultList <- list()
@@ -75,11 +72,11 @@ summaryAttributesBound <- function(jaspResults, dataset, options, state=NULL){
     resultList[["CR"]]              <- options[["CR"]]
     resultList[["confidence"]]      <- confidence
     resultList[["bound"]]           <- bound
-    resultList[["approve"]]         <- approve
     resultList[["alpha"]]           <- alpha
 
     jaspResults[["result"]] <- createJaspState(resultList)
-    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "n", "k"))
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "N", "expected.errors",
+                                              "kPercentageNumber", "kNumberNumber"))
 
 }
 
@@ -89,7 +86,7 @@ summaryAttributesBound <- function(jaspResults, dataset, options, state=NULL){
 
   summaryTable                       <- createJaspTable("Classical Evaluation Table")
   jaspResults[["summaryTable"]]      <- summaryTable
-  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "show"))
+  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "show", "N", "K"))
 
   summaryTable$addColumnInfo(name = 'IR', title = "Inherent risk", type = 'string')
   summaryTable$addColumnInfo(name = 'CR', title = "Control risk", type = 'string')
@@ -127,7 +124,7 @@ summaryAttributesBound <- function(jaspResults, dataset, options, state=NULL){
 
 }
 
-.plotConfidenceBoundsSummary <- function(options, result, jaspResults){
+.plotConfidenceBoundsSummary <- function(options, result, jaspResults, plotWidth = 600, plotHeight = 450){
 
   if(options[["n"]] == 0)
     return(createJaspPlot(error="badData", errorMessage="Plotting is not possible: No analysis has been run."))
@@ -163,13 +160,18 @@ summaryAttributesBound <- function(jaspResults, dataset, options, state=NULL){
   p <- ggplot2::ggplot(plotStat, ggplot2::aes(x = stratum, y = bound, group = stratum)) +
       ggplot2::geom_errorbar(ggplot2::aes(ymin = 0, ymax = bound), colour = "black", width = 0.2, position = pd) +
       ggplot2::geom_hline(data = materialityStat, ggplot2::aes(yintercept = materiality), linetype = "dashed") +
-      ggplot2::ylab(NULL) +
       ggplot2::xlab(NULL) +
       ggplot2::scale_x_discrete(labels = plotStat[["stratum"]]) +
       base_breaks_y(plotStat, options)
 
+  if(options[["show"]] == "percentage"){
+    p <- p + ggplot2::ylab("Error percentage")
+  } else if(options[["show"]] == "proportion"){
+    p <- p + ggplot2::ylab("Error proportion")
+  }
+
   p <- JASPgraphs::themeJasp(p, xAxis = FALSE)
 
-  return(createJaspPlot(plot = p, title = "Confidence Bound Plot", width = 600, height = 450))
+  return(createJaspPlot(plot = p, title = "Confidence Bound Plot", width = plotWidth, height = plotHeight))
 
 }

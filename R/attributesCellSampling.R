@@ -47,12 +47,17 @@ attributesCellSampling <- function(jaspResults, dataset, options, state=NULL)
 
     if(options$showDescriptives)    .samplingDescriptivesTable(dataset, options, jaspResults, sample)
 
-    if(options[['sampleLocations']])
+    if(options[['sampleLocations']] && !is.null(recordVariable) && !is.null(sample))
     {
        if(is.null(jaspResults[["sampleLocationsPlot"]]))
        {
-       jaspResults[["sampleLocationsPlot"]] 		  <- .plotSampleLocations(options, 1:nrow(dataset), sample[,1], "Index", jaspResults) # TODO: look at this
-       jaspResults[["sampleLocationsPlot"]]		     $dependOnOptions(c("variables","allowDuplicates", "seed", "sampleSize", "seedNumber", "recordNumberVariable", "sampleLocations", "markSamples"))
+         if(ncol(sample) == 1){
+           jaspResults[["sampleLocationsPlot"]] 		  <- .plotSampleLocations(options, 1:nrow(dataset), sample[, 1], "Index", jaspResults)
+         } else {
+            jaspResults[["sampleLocationsPlot"]] 		  <- .plotSampleLocations(options, 1:nrow(dataset), sample[, .v(recordVariable)], "Index", jaspResults)
+         }
+       jaspResults[["sampleLocationsPlot"]]		     $dependOnOptions(c("variables","allowDuplicates", "seed", "sampleSize", "seedNumber", "recordNumberVariable",
+                                                                        "sampleLocations", "markSamples", "rankingVariable"))
        jaspResults[["sampleLocationsPlot"]] 		  $position <- 4
        }
     }

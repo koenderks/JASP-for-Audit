@@ -97,20 +97,20 @@
 			]
 		},
 		{
-			"title": 									"Report",
-			"icon": 									"audit-report.svg",
+			"title": 									"Interpretation",
+			"icon": 									"audit-interpretation.svg",
 			"analyses":
 			[
 				{
-					"title":							"Frequentist Attributes Report",
-					"qml":								"frequentistAttributesReport.qml",
-					"function":						"frequentistAttributesReport",
+					"title":							"Frequentist Attributes Interpretation",
+					"qml":								"frequentistAttributesInterpretation.qml",
+					"function":						"frequentistAttributesInterpretation",
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Bayesian Attributes Report",
-					"qml":								"bayesianAttributesReport.qml",
-					"function":						"bayesianAttributesReport",
+					"title":							"Bayesian Attributes Interpretation",
+					"qml":								"bayesianAttributesInterpretation.qml",
+					"function":						"bayesianAttributesInterpretation",
 					"usesJaspResults":		true
 				}
 			]

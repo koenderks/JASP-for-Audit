@@ -1,8 +1,8 @@
 # JASP for Audit
 
-JASP for Audit is an officially supported add-on module for JASP (www.jasp-stats.org) that is created for auditors. The module includes procedures and analyses that can be used in auditing and eliminates the difficulties that arise from programming statistical analyses and correctly interpreting their results. Currently, the module features methods for planning and evaluating an audit using raw data or summary statistics.
+JASP for Audit is an officially supported add-on module for JASP (www.jasp-stats.org) that is created for auditors. The module includes procedures and analyses that can be used in auditing and eliminates the difficulties that arise from programming statistical analyses and correctly interpreting their results. Currently, the module features methods for planning, sampling, evaluating and interpreting an audit using raw data or summary statistics.
 
-![readme4](https://user-images.githubusercontent.com/25059399/51078718-4d698580-16ba-11e9-82a6-e089b11960ff.PNG)
+![readme4](https://user-images.githubusercontent.com/25059399/51112948-bce98d00-1800-11e9-8cc4-26d71005ac94.PNG)
 
 ## How to install the Audit module
 
@@ -12,7 +12,7 @@ To install the Audit module in the base version of JASP, simply click the + icon
 
 The Audit module should be visible in the folder where you downloaded it. Simply click the module and after that click "Install". JASP needs to restart after installing the module, so make sure you close and reopen JASP.
 
-![readme2](https://user-images.githubusercontent.com/25059399/49870175-e9317880-fe12-11e8-9242-63cb736ba1a7.png)
+![readme2](https://user-images.githubusercontent.com/25059399/51112955-c2df6e00-1800-11e9-867e-f407dbd2a406.PNG)
 
 Once you reopen JASP, the Audit module can be found under the + icon.
 

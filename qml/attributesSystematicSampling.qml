@@ -50,6 +50,7 @@ Form {
         ColumnLayout {
 
           GroupBox {
+              title: qsTr("<b>Sampling options</b>")
 
           TextField {
               label.text: qsTr("Sample size")
@@ -74,7 +75,7 @@ Form {
         ColumnLayout {
 
             GroupBox {
-                title: qsTr("Tables")
+                title: qsTr("<b>Tables</b>")
 
                 CheckBox { text: qsTr("Descriptives") ; name: "showDescriptives" ; id: descriptives}
                 CheckBox { text: qsTr("Mean") ; name: "mean"; Layout.leftMargin: 20; enabled: descriptives.checked ; checked: true}
@@ -87,7 +88,7 @@ Form {
             }
 
             GroupBox {
-                title: qsTr("Plots")
+                title: qsTr("<b>Plots</b>")
                 CheckBox { text: qsTr("Sampling locations") ; name: "sampleLocations"; id: samplingLocations}
                 CheckBox { text: qsTr("Display record numbers") ; name: "markSamples"; Layout.leftMargin: 20; enabled: samplingLocations.checked}
                 }

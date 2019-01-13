@@ -36,7 +36,7 @@ attributesSimpleRandomSampling <- function(jaspResults, dataset, options, state=
 
     if(options$showDescriptives)  .samplingDescriptivesTable(dataset, options, jaspResults, sample)
 
-    if(options[['sampleLocations']] && !is.null(recordVariable))
+    if(options[['sampleLocations']] && !is.null(recordVariable) && !is.null(sample))
     {
        if(is.null(jaspResults[["sampleLocationsPlot"]]))
        {
@@ -45,7 +45,8 @@ attributesSimpleRandomSampling <- function(jaspResults, dataset, options, state=
          } else {
             jaspResults[["sampleLocationsPlot"]] 		  <- .plotSampleLocations(options, 1:nrow(dataset), sample[, .v(recordVariable)], "Index", jaspResults)
          }
-         jaspResults[["sampleLocationsPlot"]]		     $dependOnOptions(c("variables","allowDuplicates", "seed", "sampleSize", "seedNumber", "recordNumberVariable", "sampleLocations", "markSamples"))
+         jaspResults[["sampleLocationsPlot"]]		     $dependOnOptions(c("variables","allowDuplicates", "seed", "sampleSize", "seedNumber", "recordNumberVariable",
+                                                                        "sampleLocations", "markSamples"))
          jaspResults[["sampleLocationsPlot"]] 		  $position <- 4
        }
     }

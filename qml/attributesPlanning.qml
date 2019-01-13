@@ -26,12 +26,12 @@ Form {
     id: form
 
     Flow {
-        spacing: 70
+        spacing: 90
 
         ColumnLayout {
 
             ButtonGroup {
-                title: qsTr("Inherent risk")
+                title: qsTr("<b>Inherent risk</b>")
                 name: "IR"
 
                 RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
@@ -43,7 +43,7 @@ Form {
         ColumnLayout {
 
             ButtonGroup {
-                title: qsTr("Control risk")
+                title: qsTr("<b>Control risk</b>")
                 name: "CR"
 
                 RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
@@ -55,8 +55,11 @@ Form {
 
     Divider { }
 
+    Flow {
+        spacing: 40
+
     GroupBox {
-      title: qsTr("Input options")
+        title: qsTr("<b>Audit risk</b>")
 
         PercentField {
             label.text: qsTr("Confidence")
@@ -72,29 +75,85 @@ Form {
             name: "materiality"
         }
 
-        PercentField {
-            label.text: qsTr("Expected errors")
-            with1Decimal: true
-            defaultValue: 2
-            name: "k"
-        }
+    }
 
+        GroupBox {
+          title: qsTr("<b>Expected errors</b>")
+
+          ButtonGroup {
+              name: "expected.errors"
+
+              RowLayout {
+
+                  RadioButton { text: qsTr("Percentage")          ; name: "kPercentage" ; checked: true; id: expkPercentage}
+
+                  PercentField {
+                      with1Decimal: true
+                      defaultValue: 2
+                      name: "kPercentageNumber"
+                      enabled: expkPercentage.checked
+                  }
+              }
+              RowLayout {
+
+                  RadioButton { text: qsTr("Number")          ; name: "kNumber" ; id: expkNumber}
+
+                  TextField {
+                      text: "1"
+                      name: "kNumberNumber"
+                      enabled: expkNumber.checked
+                      inputType: "integer"
+                      validator: IntValidator { bottom: 0 }
+                      Layout.leftMargin: 18
+                  }
+              }
+
+          }
+        }
     }
 
     ExpanderButton {
-        text: qsTr("Advanced input options")
+        text: qsTr("<b>Advanced options</b>")
+
+        Flow {
+            spacing: 10
 
             ColumnLayout {
 
                 ButtonGroup {
-                    title: qsTr("Ratio")
+                    title: qsTr("<b>Distribution</b>")
+                    name: "distribution"
+
+                    RadioButton { text: qsTr("Binomial")            ; name: "binomial" ; checked: true}
+                    RadioButton { text: qsTr("Hypergeometric")      ; name: "hypergeometric" ; id: hyperDist}
+                }
+
+                GroupBox {
+                  Layout.leftMargin: 40
+
+                  TextField {
+                      label.text: qsTr("Population size")
+                      text: "100"
+                      name: "N"
+                      inputType: "integer"
+                      validator: IntValidator { bottom: 0 }
+                      enabled: hyperDist.checked
+                  }
+                }
+
+            }
+
+            ColumnLayout {
+
+                ButtonGroup {
+                    title: qsTr("<b>Ratio</b>")
                     name: "show"
 
                     RadioButton { text: qsTr("Percentages")         ; name: "percentage" ; checked: true}
                     RadioButton { text: qsTr("Proportions")         ; name: "proportion" }
                 }
             }
-
+        }
     }
 
 }

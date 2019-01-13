@@ -18,9 +18,9 @@ bayesianAttributesPlanning <- function(jaspResults, dataset, options, state=NULL
      if(is.null(jaspResults[["priorPlot"]]))
      {
      jaspResults[["priorPlot"]] 		<- .plotPriorBayesianAttributesPlanning(options, result, jaspResults)
-     jaspResults[["priorPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence",
-                                                      "materiality", "expected.k", "limx", "plotPriorAndPosterior",
-                                                      "plotPriorAndPosteriorAdditionalInfo", "show", "statistic"))
+     jaspResults[["priorPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors", "limx",
+                                                        "plotPriorAndPosterior", "plotPriorAndPosteriorAdditionalInfo", "show",
+                                                        "statistic", "kPercentageNumber", "kNumberNumber"))
      jaspResults[["priorPlot"]] 		$position <- 4
      }
   }
@@ -35,9 +35,8 @@ bayesianAttributesPlanning <- function(jaspResults, dataset, options, state=NULL
 
     if(!is.null(jaspResults[["result"]])) return()
 
-    confidence                <- options[["confidence"]]
-    p                         <- options[["materiality"]]
-    k                         <- options[["expected.k"]]
+    confidence              <- options[["confidence"]]
+    p                       <- options[["materiality"]]
 
     if(options[["IR"]] == "Low" && options[["CR"]] == "Low"){
         alpha               <- (1-confidence) / 0.30 / 0.30
@@ -59,13 +58,29 @@ bayesianAttributesPlanning <- function(jaspResults, dataset, options, state=NULL
         alpha               <- (1-confidence) / 1 / 1
     }
 
-    n_noprior         <- .calculateBayesianSampleSize(k, p, 1 - confidence)
-    n_withprior       <- .calculateBayesianSampleSize(k, p, alpha)
+    n_noprior               <- .calculateBayesianSampleSize(options, 1 - confidence)
+    n_withprior             <- .calculateBayesianSampleSize(options, alpha)
 
-    pn                <- n_noprior - n_withprior
-    pk                <- pn * k
-    priorA           <- 1 + pk
-    priorB           <- 1 + (pn - pk)
+    pn                      <- n_noprior - n_withprior
+
+    if(pn == 0){
+        pk                  <- 0
+        if(options[["expected.errors"]] == "kPercentage"){
+            k                   <- options[["kPercentageNumber"]]
+        } else if(options[["expected.errors"]] == "kNumber"){
+            k                   <- options[["kNumberNumber"]]
+        }
+    } else {
+        if(options[["expected.errors"]] == "kPercentage"){
+            k                   <- options[["kPercentageNumber"]]
+            pk                  <- pn * options[["kPercentageNumber"]]
+        } else if(options[["expected.errors"]] == "kNumber"){
+            k                   <- options[["kNumberNumber"]]
+            pk                  <- k
+        }
+    }
+    priorA                  <- 1 + pk
+    priorB                  <- 1 + (pn - pk)
 
     resultList <- list()
     resultList[["n"]]           <- n_withprior
@@ -80,7 +95,8 @@ bayesianAttributesPlanning <- function(jaspResults, dataset, options, state=NULL
     resultList[["confidence"]]  <- confidence
 
     jaspResults[["result"]] <- createJaspState(resultList)
-    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "expected.k", "materiality"))
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "kPercentageNumber",
+                                              "kNumberNumber"))
 
 }
 
@@ -90,7 +106,8 @@ bayesianAttributesPlanning <- function(jaspResults, dataset, options, state=NULL
 
   summaryTable                       <- createJaspTable("Bayesian Planning")
   jaspResults[["summaryTable"]]      <- summaryTable
-  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "expected.k", "materiality", "show"))
+  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "show",
+                                  "kPercentageNumber", "kNumberNumber"))
 
   summaryTable$addColumnInfo(name = 'IR', title = "Inherent risk", type = 'string')
   summaryTable$addColumnInfo(name = 'CR', title = "Control risk", type = 'string')
@@ -102,10 +119,18 @@ bayesianAttributesPlanning <- function(jaspResults, dataset, options, state=NULL
 
   if(options[["show"]] == "percentage"){
     SRtable <- paste0(round(result[["alpha"]], 3) * 100, "%")
-    ktable <- paste0(result[["k"]] * 100, "%")
+    if(options[["expected.errors"]] == "kPercentage"){
+      ktable <- paste0(round(result[["k"]] * 100, 2), "%")
+    } else if(options[["expected.errors"]] == "kNumber"){
+      ktable <- options[["kNumberNumber"]]
+    }
   } else if(options[["show"]] == "proportion"){
     SRtable <- round(result[["alpha"]], 3)
-    ktable <- result[["k"]]
+    if(options[["expected.errors"]] == "kPercentage"){
+      ktable <- paste0(round(result[["k"]], 2), "%")
+    } else if(options[["expected.errors"]] == "kNumber"){
+      ktable <- options[["kNumberNumber"]]
+    }
   }
 
   row <- list(IR = result[["IR"]],

@@ -9,14 +9,34 @@ attributesPlanning <- function(jaspResults, dataset, options, state=NULL){
 
 }
 
-.calc.n.binomial <- function(k, materiality, alpha){
+.calc.n.binomial <- function(options, alpha){
     for(n in 1:5000){
-        impk <- n * k
-        if(impk%%1 == 0){
-            x <- choose(n, 0:impk) * materiality^(0:impk) * (1-materiality)^(n - (0:impk))
-            if(sum(x) < alpha)
-                return(n)
+      if(options[["expected.errors"]] == "kPercentage"){
+        impk <- ceiling(n * options[["kPercentageNumber"]])
+      } else if(options[["expected.errors"]] == "kNumber"){
+        impk <- options[["kNumberNumber"]]
+      }
+      if(impk >= n){ next }
+      if(impk%%1 == 0){
+          x <- choose(n, 0:impk) * options[["materiality"]]^(0:impk) * (1-options[["materiality"]])^(n - (0:impk))
+          if(sum(x) < alpha)
+              return(n)
+      }
+    }
+}
+
+.calc.n.hypergeometric <- function(options, alpha){
+    for(n in 1:5000){
+        if(options[["expected.errors"]] == "kPercentage"){
+            k <- ceiling(n * options[["kPercentageNumber"]])
+        } else if(options[["expected.errors"]] == "kNumber"){
+            k <- options[["kNumberNumber"]]
         }
+        K <- floor(options[["N"]] * options[["materiality"]])
+        if(n <= k) { next }
+        x <- choose(K, 0:k) * choose(options[["N"]]-K, n-(0:k)) / choose(options[["N"]], n)
+        if(sum(x) < alpha)
+            return(n)
     }
 }
 
@@ -26,7 +46,6 @@ attributesPlanning <- function(jaspResults, dataset, options, state=NULL){
 
     confidence <- options[["confidence"]]
     p <- options[["materiality"]]
-    k <- options[["k"]]
 
     if(options[["IR"]] == "Low" && options[["CR"]] == "Low"){
         alpha               <- (1-confidence) / 0.30 / 0.30
@@ -48,7 +67,20 @@ attributesPlanning <- function(jaspResults, dataset, options, state=NULL){
         alpha               <- (1-confidence) / 1 / 1
     }
 
-    n <- .calc.n.binomial(k, p, alpha)
+    if(options[["distribution"]] == "binomial"){
+      n <- .calc.n.binomial(options, alpha)
+    } else if(options[["distribution"]] == "hypergeometric"){
+      if(options[["N"]] == 0){
+        # TODO: Error handling
+      }
+      n <- .calc.n.hypergeometric(options, alpha)
+    }
+
+    if(options[["expected.errors"]] == "kPercentage"){
+      k <- options[["kPercentageNumber"]]
+    } else if(options[["expected.errors"]] == "kNumber"){
+      k <- options[["kNumberNumber"]] / n
+    }
 
     resultList <- list()
     resultList[["n"]]             <- n
@@ -59,7 +91,8 @@ attributesPlanning <- function(jaspResults, dataset, options, state=NULL){
     resultList[["confidence"]]    <- confidence
 
     jaspResults[["result"]] <- createJaspState(resultList)
-    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "k", "materiality"))
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "distribution",
+                                                "N", "kPercentageNumber", "kNumberNumber"))
 
 }
 
@@ -69,7 +102,8 @@ attributesPlanning <- function(jaspResults, dataset, options, state=NULL){
 
   summaryTable                              <- createJaspTable("Classical Planning Table")
   jaspResults[["summaryTable"]]             <- summaryTable
-  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "k", "materiality", "show"))
+  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "show", "distribution", "N",
+                                  "expected.errors" , "kPercentageNumber", "kNumberNumber"))
 
   summaryTable$addColumnInfo(name = 'IR',   title = "Inherent risk",        type = 'string')
   summaryTable$addColumnInfo(name = 'CR',   title = "Control risk",         type = 'string')
@@ -81,10 +115,18 @@ attributesPlanning <- function(jaspResults, dataset, options, state=NULL){
 
   if(options[["show"]] == "percentage"){
     SRtable <- paste0(round(result[["alpha"]], 3) * 100, "%")
-    ktable <- paste0(result[["k"]] * 100, "%")
+    if(options[["expected.errors"]] == "kPercentage"){
+      ktable <- paste0(round(result[["k"]] * 100, 2), "%")
+    } else if(options[["expected.errors"]] == "kNumber"){
+      ktable <- options[["kNumberNumber"]]
+    }
   } else if(options[["show"]] == "proportion"){
     SRtable <- round(result[["alpha"]], 3)
-    ktable <- result[["k"]]
+    if(options[["expected.errors"]] == "kPercentage"){
+      ktable <- round(result[["k"]], 2)
+    } else if(options[["expected.errors"]] == "kNumber"){
+      ktable <- options[["kNumberNumber"]]
+    }
   }
 
   row <- list(IR = result[["IR"]],
@@ -94,5 +136,13 @@ attributesPlanning <- function(jaspResults, dataset, options, state=NULL){
               n = result[["n"]])
 
   summaryTable$addRows(row)
+
+  if(options[["distribution"]] == "binomial"){
+          message <- "The sample size is calculated using the <b>binomial</b> distribution."
+          summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
+  } else if(options[["distribution"]] == "hypergeometric"){
+          message <- paste0("The sample size is calculated using the <b>hypergeometric</b> distribution (N = ", options[["N"]] ,").")
+          summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
+  }
 
 }

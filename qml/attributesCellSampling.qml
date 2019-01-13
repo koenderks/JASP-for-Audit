@@ -49,16 +49,20 @@ Form {
 
         ColumnLayout {
 
-            TextField {
-                label.text: qsTr("Sample size")
-                text: ""
-                name: "sampleSize"
-                inputType: "integer"
-                validator: IntValidator { bottom: 0 }
+            GroupBox {
+                title: qsTr("<b>Sampling options</b>")
+
+                TextField {
+                    label.text: qsTr("Sample size")
+                    text: ""
+                    name: "sampleSize"
+                    inputType: "integer"
+                    validator: IntValidator { bottom: 0 }
+                }
             }
 
             ButtonGroup {
-                title: qsTr("Seed")
+                title: qsTr("<b>Seed</b>")
                 name: "seed"
 
                 RadioButton { text: qsTr("Default")         ; name: "seedDefault" ; checked: true}
@@ -81,7 +85,7 @@ Form {
         ColumnLayout {
 
             GroupBox {
-                title: qsTr("Tables")
+                title: qsTr("<b>Tables</b>")
 
                 CheckBox { text: qsTr("Descriptives") ; name: "showDescriptives" ; id: descriptives}
                 CheckBox { text: qsTr("Mean") ; name: "mean"; Layout.leftMargin: 20; enabled: descriptives.checked ; checked: true}
@@ -94,7 +98,7 @@ Form {
             }
 
             GroupBox {
-                title: qsTr("Plots")
+                title: qsTr("<b>Plots<b>")
                 CheckBox { text: qsTr("Sampling locations") ; name: "sampleLocations"; id: samplingLocations}
                 CheckBox { text: qsTr("Display record numbers") ; name: "markSamples"; Layout.leftMargin: 20; enabled: samplingLocations.checked}
                 }

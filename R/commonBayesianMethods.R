@@ -1,8 +1,13 @@
-.calculateBayesianSampleSize <- function(k, materiality, alpha){
+.calculateBayesianSampleSize <- function(options, alpha){
     for(n in 1:5000){
-        impk <- n * k
+        if(options[["expected.errors"]] == "kPercentage"){
+            impk <- n * options[["kPercentageNumber"]]
+        } else if(options[["expected.errors"]] == "kNumber"){
+            impk <- options[["kNumberNumber"]]
+        }
+        if(impk >= n){ next }
         x                     <- qbeta(p = 1 - alpha, shape1 = 1 + impk, shape2 = 1 + (n - impk))
-        if(x < materiality){
+        if(x < options[["materiality"]]){
             return(n)
         }
     }
@@ -14,7 +19,8 @@
 
   sampletable                       <- createJaspTable("Prior Sample Table")
   jaspResults[["sampletable"]]      <- sampletable
-  sampletable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.k", "implicitsample", "statistic", "show"))
+  sampletable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors", "implicitsample", "statistic",
+                                "show", "kPercentageNumber", "kNumberNumber"))
 
   sampletable$addColumnInfo(name = 'implicitn', title = "Prior sample size", type = 'string')
   sampletable$addColumnInfo(name = 'implicitk', title = "Prior errors", type = 'string')
@@ -41,7 +47,7 @@
     sampletable$addRows(row)
   }
 
-  message <- paste0("Sample sizes shown are implicit sample sizes derived from the risk assessments: IR = ", options[["IR"]], " and CR = ", options[["CR"]], ".")
+  message <- paste0("Sample sizes shown are implicit sample sizes derived from the ARM risk assessments: IR = <b>", options[["IR"]], "</b> and CR = <b>", options[["CR"]], "</b>.")
   sampletable$addFootnote(message = message, symbol="<i>Note.</i>")
 
 }

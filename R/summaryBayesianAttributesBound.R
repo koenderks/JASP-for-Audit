@@ -22,10 +22,25 @@ summaryBayesianAttributesBound <- function(jaspResults, dataset, options, state=
       jaspResults[["priorAndPosteriorPlot"]] 		<- .plotPriorAndPosteriorBayesianAttributesBound(options, result, jaspResults)
       jaspResults[["priorAndPosteriorPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "limx", "statistic",
                                                                   "plotPriorAndPosterior", "plotPriorAndPosteriorAdditionalInfo",
-                                                                  "materiality", "show", "expected.k"))
+                                                                  "materiality", "show", "expected.errors", "kPercentageNumber",
+                                                                  "kNumberNumber"))
 			jaspResults[["priorAndPosteriorPlot"]] 		$position <- 4
 	    }
    }
+
+   # Create the prior and posterior plot ##
+    if(options[['plotBounds']])
+    {
+       if(is.null(jaspResults[["confidenceBoundPlot"]]))
+       {
+       jaspResults[["confidenceBoundPlot"]] 		<- .plotConfidenceBoundsSummary(options, result, jaspResults)
+       jaspResults[["confidenceBoundPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "statistic",
+                                                                   "plotBounds", "materiality", "show", "expected.errors",
+                                                                   "kPercentageNumber", "kNumberNumber"))
+ 			jaspResults[["confidenceBoundPlot"]] 		$position <- 5
+ 	    }
+    }
+
 
   # Save the state
   state[["options"]] 					<- options
@@ -37,9 +52,8 @@ summaryBayesianAttributesBound <- function(jaspResults, dataset, options, state=
 
     confidence              <- options[["confidence"]]
     n                       <- options[["n"]]
-    k                       <- options[["k"]]
-    exp.k                   <- options[["expected.k"]]
     materiality             <- options[["materiality"]]
+    k                       <- options[["k"]]
 
     if(options[["IR"]] == "Low" && options[["CR"]] == "Low"){
         alpha               <- (1-confidence) / 0.30 / 0.30
@@ -61,11 +75,28 @@ summaryBayesianAttributesBound <- function(jaspResults, dataset, options, state=
         alpha               <- (1-confidence) / 1 / 1
     }
 
-    n_noprior               <- .calculateBayesianSampleSize(exp.k, materiality, 1 - confidence)
-    n_withprior             <- .calculateBayesianSampleSize(exp.k, materiality, alpha)
+    n_noprior               <- .calculateBayesianSampleSize(options, 1 - confidence)
+    n_withprior             <- .calculateBayesianSampleSize(options, alpha)
 
     pn                      <- n_noprior - n_withprior
-    pk                      <- pn * exp.k
+
+    if(pn == 0){
+        pk                  <- 0
+        if(options[["expected.errors"]] == "kPercentage"){
+            exp.k                   <- options[["kPercentageNumber"]]
+        } else if(options[["expected.errors"]] == "kNumber"){
+            exp.k                   <- options[["kNumberNumber"]]
+        }
+    } else {
+        if(options[["expected.errors"]] == "kPercentage"){
+            exp.k               <- options[["kPercentageNumber"]]
+            pk                  <- pn * options[["kPercentageNumber"]]
+        } else if(options[["expected.errors"]] == "kNumber"){
+            exp.k               <- options[["kNumberNumber"]]
+            pk                  <- exp.k
+        }
+    }
+
     priorA                  <- 1 + pk
     priorB                  <- 1 + (pn - pk)
 
@@ -113,7 +144,8 @@ summaryBayesianAttributesBound <- function(jaspResults, dataset, options, state=
     resultList[["approve"]]     <- approve
 
     jaspResults[["result"]]     <- createJaspState(resultList)
-    jaspResults[["result"]]     $dependOnOptions(c("IR", "CR", "confidence", "n", "k", "statistic", "materiality", "expected.k"))
+    jaspResults[["result"]]     $dependOnOptions(c("IR", "CR", "confidence", "n", "k", "statistic", "materiality",
+                                                    "expected.errors", "kPercentageNumber", "kNumberNumber"))
 
 }
 
@@ -123,7 +155,8 @@ summaryBayesianAttributesBound <- function(jaspResults, dataset, options, state=
 
   summaryTable                       <- createJaspTable("Bayesian Evaluation Table")
   jaspResults[["summaryTable"]]      <- summaryTable
-  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "statistic", "materiality", "show", "expected.k"))
+  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "statistic", "materiality", "show",
+                                  "expected.errors", "kPercentageNumber", "kNumberNumber"))
   summaryTable$position <- 1
 
   summaryTable$addColumnInfo(name = 'IR',   title = "Inherent risk",  type = 'string')

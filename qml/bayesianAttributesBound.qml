@@ -33,12 +33,12 @@ Form {
     }
 
     Flow {
-        spacing: 70
+        spacing: 90
 
         ColumnLayout {
 
             ButtonGroup {
-                title: qsTr("Inherent risk")
+                title: qsTr("<b>Inherent risk</b>")
                 name: "IR"
 
                 RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
@@ -50,7 +50,7 @@ Form {
         ColumnLayout {
 
             ButtonGroup {
-                title: qsTr("Control risk")
+                title: qsTr("<b>Control risk</b>")
                 name: "CR"
 
                 RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
@@ -62,8 +62,11 @@ Form {
 
     Divider { }
 
+    Flow {
+        spacing: 40
+
     GroupBox {
-      title: qsTr("Input options")
+        title: qsTr("<b>Audit risk</b>")
 
         PercentField {
             label.text: qsTr("Confidence")
@@ -79,17 +82,46 @@ Form {
             name: "materiality"
         }
 
-        PercentField {
-            label.text: qsTr("Expected errors")
-            with1Decimal: true
-            defaultValue: 2
-            name: "expected.k"
-        }
-
     }
 
+    GroupBox {
+      title: qsTr("<b>Expected errors</b>")
+
+      ButtonGroup {
+          name: "expected.errors"
+
+          RowLayout {
+
+              RadioButton { text: qsTr("Percentage")          ; name: "kPercentage" ; checked: true; id: expkPercentage}
+
+              PercentField {
+                  with1Decimal: true
+                  defaultValue: 2
+                  name: "kPercentageNumber"
+                  enabled: expkPercentage.checked
+              }
+          }
+          RowLayout {
+
+              RadioButton { text: qsTr("Number")          ; name: "kNumber" ; id: expkNumber}
+
+              TextField {
+                  text: "1"
+                  name: "kNumberNumber"
+                  enabled: expkNumber.checked
+                  inputType: "integer"
+                  validator: IntValidator { bottom: 0 }
+                  Layout.leftMargin: 18
+              }
+          }
+
+      }
+    }
+
+}
+
     ExpanderButton {
-        text: qsTr("Advanced input options")
+        text: qsTr("<b>Advanced options</b>")
 
         Flow {
             spacing: 70
@@ -97,7 +129,7 @@ Form {
             ColumnLayout {
 
                 ButtonGroup {
-                    title: qsTr("Ratio")
+                    title: qsTr("<b>Ratio</b>")
                     name: "show"
 
                     RadioButton { text: qsTr("Percentages")         ; name: "percentage" ; checked: true}
@@ -107,7 +139,7 @@ Form {
 
             ColumnLayout {
                 ButtonGroup {
-                    title: qsTr("Statistic")
+                    title: qsTr("<b>Statistic</b>")
                     name: "statistic"
 
                     RadioButton { text: qsTr("Confidence bound")        ; name: "bound" ; checked: true}
@@ -118,19 +150,19 @@ Form {
         }
     }
 
-    GridLayout {
-        columns: 2
+    Flow {
+        spacing: 50
 
         ColumnLayout {
             GroupBox {
-                title: qsTr("Tables")
+                title: qsTr("<b>Tables</b>")
                 CheckBox { text: qsTr("Implicit sample") ; name: "implicitsample"}
              }
         }
 
         ColumnLayout {
             GroupBox {
-                title: qsTr("Plots")
+                title: qsTr("<b>Plots</b>")
                 CheckBox { text: qsTr("Prior and posterior") ; name: "plotPriorAndPosterior"               ; id: plotPriorAndPosterior }
                 TextField { label.text: qsTr("x-axis limit"); text: "0.2"; name: "limx"; inputType: "number"; Layout.leftMargin: 20; validator: DoubleValidator {bottom: 0; top: 1 } }
                 CheckBox { text: qsTr("Additional info")     ; name: "plotPriorAndPosteriorAdditionalInfo" ; Layout.leftMargin: 20; checked: true; enabled: plotPriorAndPosterior.checked}

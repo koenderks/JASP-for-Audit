@@ -26,12 +26,12 @@ Form {
     id: form
 
     Flow {
-        spacing: 70
+        spacing: 90
 
         ColumnLayout {
 
             ButtonGroup {
-                title: qsTr("Inherent risk")
+                title: qsTr("<b>Inherent risk</b>")
                 name: "IR"
 
                 RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
@@ -43,7 +43,7 @@ Form {
         ColumnLayout {
 
             ButtonGroup {
-                title: qsTr("Control risk")
+                title: qsTr("<b>Control risk</b>")
                 name: "CR"
 
                 RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
@@ -55,8 +55,11 @@ Form {
 
     Divider { }
 
+    Flow {
+        spacing: 40
+
     GroupBox {
-      title: qsTr("Input options")
+        title: qsTr("<b>Audit risk</b>")
 
       PercentField {
           label.text: qsTr("Materiality")
@@ -71,6 +74,10 @@ Form {
             defaultValue: 95
             name: "confidence"
         }
+    }
+
+    GroupBox {
+        title: qsTr("<b>Observations</b>")
 
         TextField {
             label.text: qsTr("Sample size")
@@ -90,13 +97,18 @@ Form {
 
     }
 
+    }
+
     ExpanderButton {
-        text: qsTr("Advanced input options")
+        text: qsTr("<b>Advanced options</b>")
+
+        Flow {
+            spacing: 20
 
             ColumnLayout {
 
                 ButtonGroup {
-                    title: qsTr("Ratio")
+                    title: qsTr("<b>Ratio</b>")
                     name: "show"
 
                     RadioButton { text: qsTr("Percentages")         ; name: "percentage" ; checked: true}
@@ -104,13 +116,15 @@ Form {
                 }
             }
 
+        }
+
     }
 
     GridLayout {
       columns: 1
 
       GroupBox {
-          title: qsTr("Plots")
+          title: qsTr("<b>Plots</b>")
           CheckBox { text: qsTr("Confidence bound") ; name: "plotBounds"}
       }
 
