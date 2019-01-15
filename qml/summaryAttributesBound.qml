@@ -30,7 +30,7 @@ Form {
 
         ColumnLayout {
 
-            ButtonGroup {
+            RadioButtonGroup {
                 title: qsTr("<b>Inherent risk</b>")
                 name: "IR"
 
@@ -42,7 +42,7 @@ Form {
 
         ColumnLayout {
 
-            ButtonGroup {
+            RadioButtonGroup {
                 title: qsTr("<b>Control risk</b>")
                 name: "CR"
 
@@ -80,16 +80,16 @@ Form {
         title: qsTr("<b>Observations</b>")
 
         TextField {
-            label.text: qsTr("Sample size")
-            text: ""
+            text: qsTr("Sample size")
+            value: "0"
             name: "n"
             inputType: "integer"
             validator: IntValidator { bottom: 0 }
         }
 
         TextField {
-            label.text: qsTr("Found errors")
-            text: ""
+            text: qsTr("Found errors")
+            value: "0"
             name: "k"
             inputType: "integer"
             validator: IntValidator { bottom: 0 }
@@ -107,7 +107,7 @@ Form {
 
             ColumnLayout {
 
-                ButtonGroup {
+                RadioButtonGroup {
                     title: qsTr("<b>Ratio</b>")
                     name: "show"
 

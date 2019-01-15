@@ -83,13 +83,13 @@
 			"analyses":
 			[
 				{
-					"title":							"Attributes Bound",
+					"title":							"Summary Attributes Bound",
 					"qml":								"summaryAttributesBound.qml",
 					"function":						"summaryAttributesBound",
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Bayesian Attributes Bound",
+					"title":							"Summary Bayesian Attributes Bound",
 					"qml":								"summaryBayesianAttributesBound.qml",
 					"function":						"summaryBayesianAttributesBound",
 					"usesJaspResults":		true

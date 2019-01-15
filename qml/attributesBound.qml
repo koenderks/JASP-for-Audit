@@ -24,7 +24,7 @@ Form {
     id: form
 
     VariablesForm {
-        defaultAssignedVariablesList {
+        AssignedVariablesList {
             name: "correctID"
             title: qsTr("Error variable")
             singleItem: true
@@ -37,7 +37,7 @@ Form {
 
         ColumnLayout {
 
-            ButtonGroup {
+            RadioButtonGroup {
                 title: qsTr("<b>Inherent risk</b>")
                 name: "IR"
 
@@ -49,7 +49,7 @@ Form {
 
         ColumnLayout {
 
-            ButtonGroup {
+            RadioButtonGroup {
                 title: qsTr("<b>Control risk</b>")
                 name: "CR"
 
@@ -89,7 +89,7 @@ Form {
 
             ColumnLayout {
 
-                ButtonGroup {
+                RadioButtonGroup {
                     title: qsTr("<b>Ratio</b>")
                     name: "show"
 

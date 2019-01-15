@@ -24,7 +24,7 @@ Form {
     id: form
 
     VariablesForm {
-        defaultAssignedVariablesList {
+        AssignedVariablesList {
             name: "recordNumberVariable"
             title: qsTr("Record numbers")
             singleItem: true
@@ -53,16 +53,16 @@ Form {
               title: qsTr("<b>Sampling options</b>")
 
           TextField {
-              label.text: qsTr("Sample size")
-              text: ""
+              text: qsTr("Sample size")
+              value: "0"
               name: "sampleSize"
               inputType: "integer"
               validator: IntValidator { bottom: 0 }
           }
 
             TextField {
-                label.text: qsTr("Interval starting point")
-                text: "1"
+                text: qsTr("Interval starting point")
+                value: "1"
                 name: "startingPoint"
                 inputType: "integer"
                 validator: IntValidator { bottom: 1 }

@@ -30,7 +30,7 @@ Form {
 
         ColumnLayout {
 
-            ButtonGroup {
+            RadioButtonGroup {
                 title: qsTr("<b>Inherent risk</b>")
                 name: "IR"
 
@@ -42,7 +42,7 @@ Form {
 
         ColumnLayout {
 
-            ButtonGroup {
+            RadioButtonGroup {
                 title: qsTr("<b>Control risk</b>")
                 name: "CR"
 
@@ -81,7 +81,7 @@ Form {
                 GroupBox {
                           title: qsTr("<b>Expected errors</b>")
 
-                          ButtonGroup {
+                          RadioButtonGroup {
                               name: "expected.errors"
 
                               RowLayout {
@@ -100,7 +100,7 @@ Form {
                                   RadioButton { text: qsTr("Number")          ; name: "kNumber" ; id: expkNumber}
 
                                   TextField {
-                                      text: "1"
+                                      value: "1"
                                       name: "kNumberNumber"
                                       enabled: expkNumber.checked
                                       inputType: "integer"
@@ -138,16 +138,16 @@ Form {
         title: qsTr("<b>Observations</b>")
 
         TextField {
-            label.text: qsTr("Sample size")
-            text: "0"
+            text: qsTr("Sample size")
+            value: "0"
             name: "n"
             inputType: "integer"
             validator: IntValidator { bottom: 0 }
         }
 
         TextField {
-          label.text: qsTr("Found errors")
-          text: "0"
+          text: qsTr("Found errors")
+          value: "0"
           name: "k"
           inputType: "integer"
           validator: IntValidator { bottom: 0 }

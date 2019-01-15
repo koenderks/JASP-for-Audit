@@ -24,7 +24,7 @@ Form {
     id: form
 
     VariablesForm {
-        defaultAssignedVariablesList {
+        AssignedVariablesList {
             name: "recordNumberVariable"
             title: qsTr("Record numbers")
             singleItem: true
@@ -47,8 +47,8 @@ Form {
                 title: qsTr("<b>Sampling options</b>")
 
               TextField {
-                  label.text: qsTr("Sample size")
-                  text: ""
+                  text: qsTr("Sample size")
+                  value: "0"
                   name: "sampleSize"
                   inputType: "integer"
                   validator: IntValidator { bottom: 0 }
@@ -57,7 +57,7 @@ Form {
 
             }
 
-            ButtonGroup {
+            RadioButtonGroup {
                 title: qsTr("<b>Seed</b>")
                 name: "seed"
 
@@ -67,7 +67,7 @@ Form {
                     RadioButton { text: qsTr("Manual")          ; name: "seedManual" ; id: manualSeed}
 
                     TextField {
-                        text: "1"
+                        value: "1"
                         name: "seedNumber"
                         enabled: manualSeed.checked
                         validator: IntValidator { bottom: 0 }
