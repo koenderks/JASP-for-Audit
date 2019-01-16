@@ -92,26 +92,26 @@ attributesPlanning <- function(jaspResults, dataset, options, state=NULL){
 
     jaspResults[["result"]] <- createJaspState(resultList)
     jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "distribution",
-                                                "N", "kPercentageNumber", "kNumberNumber"))
+                                                "N", "kPercentageNumber", "kNumberNumber", "inference"))
 
 }
 
-.attributesPlanningTable <- function(options, result, jaspResults){
+.attributesPlanningTable <- function(options, result, jaspResults, position = 1){
 
   if(!is.null(jaspResults[["summaryTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-  summaryTable                              <- createJaspTable("Classical Planning Table")
+  summaryTable                              <- createJaspTable("Classical Attributes Planning Table")
   jaspResults[["summaryTable"]]             <- summaryTable
   summaryTable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "show", "distribution", "N",
-                                  "expected.errors" , "kPercentageNumber", "kNumberNumber"))
+                                  "expected.errors" , "kPercentageNumber", "kNumberNumber", "inference"))
 
   summaryTable$addColumnInfo(name = 'IR',   title = "Inherent risk",        type = 'string')
   summaryTable$addColumnInfo(name = 'CR',   title = "Control risk",         type = 'string')
-  summaryTable$addColumnInfo(name = 'SR',   title = "Sampling risk",        type = 'string')
+  summaryTable$addColumnInfo(name = 'SR',   title = "Detection risk",        type = 'string')
   summaryTable$addColumnInfo(name = 'k',    title = "Expected errors",      type = 'string')
   summaryTable$addColumnInfo(name = 'n',    title = "Required sample size", type = 'string')
 
-  summaryTable$position                     <- 1
+  summaryTable$position                     <- position
 
   if(options[["show"]] == "percentage"){
     SRtable <- paste0(round(result[["alpha"]], 3) * 100, "%")

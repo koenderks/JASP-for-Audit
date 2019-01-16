@@ -13,7 +13,7 @@
     }
 }
 
-.priorSampleTable <- function(options, result, jaspResults){
+.priorSampleTable <- function(options, result, jaspResults, position = 3){
 
   if(!is.null(jaspResults[["sampletable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
@@ -24,7 +24,7 @@
 
   sampletable$addColumnInfo(name = 'implicitn', title = "Prior sample size", type = 'string')
   sampletable$addColumnInfo(name = 'implicitk', title = "Prior errors", type = 'string')
-  sampletable$position <- 3
+  sampletable$position <- position
 
   if(options[["statistic"]] == "bound"){
     priorbound <- round(qbeta(p = options[["confidence"]], shape1 = result[["priorA"]], shape2 = result[["priorB"]]), 3)

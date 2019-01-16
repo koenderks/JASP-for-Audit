@@ -15,8 +15,21 @@
 	"ribbonEntries":
 	[
 		{
-			"title": 									"Planning",
+			"title": 									"Audit",
 			"icon": 									"audit-planning.svg",
+			"analyses":
+			[
+				{
+					"title":							"Audit",
+					"qml":								"audit.qml",
+					"function":						"audit",
+					"usesJaspResults":		true
+				}
+			]
+		},
+		{
+			"title": 									"Explore",
+			"icon": 									"audit-sampling.svg",
 			"analyses":
 			[
 				{
@@ -25,19 +38,6 @@
 					"function":						"attributesPlanning",
 					"usesJaspResults":		true
 				},
-				{
-					"title":							"Bayesian Attributes Planning",
-					"qml":								"bayesianAttributesPlanning.qml",
-					"function":						"bayesianAttributesPlanning",
-					"usesJaspResults":		true
-				}
-			]
-		},
-		{
-			"title": 									"Sampling",
-			"icon": 									"audit-sampling.svg",
-			"analyses":
-			[
 				{
 					"title":							"Attributes Simple Random Sampling",
 					"qml":								"attributesSimpleRandomSampling.qml",
@@ -55,14 +55,7 @@
 					"qml":								"attributesCellSampling.qml",
 					"function":						"attributesCellSampling",
 					"usesJaspResults":		true
-				}
-			]
-		},
-		{
-			"title": 									"Evaluation",
-			"icon": 									"audit-evaluation.svg",
-			"analyses":
-			[
+				},
 				{
 					"title":							"Attributes Bound",
 					"qml":								"attributesBound.qml",
@@ -70,41 +63,33 @@
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Bayesian Attributes Bound",
-					"qml":								"bayesianAttributesBound.qml",
-					"function":						"bayesianAttributesBound",
-					"usesJaspResults":		true
-				}
-			]
-		},
-		{
-			"title": 									"Summary Stats",
-			"icon": 									"audit-summary-stats.svg",
-			"analyses":
-			[
-				{
 					"title":							"Summary Attributes Bound",
 					"qml":								"summaryAttributesBound.qml",
 					"function":						"summaryAttributesBound",
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Summary Bayesian Attributes Bound",
-					"qml":								"summaryBayesianAttributesBound.qml",
-					"function":						"summaryBayesianAttributesBound",
-					"usesJaspResults":		true
-				}
-			]
-		},
-		{
-			"title": 									"Interpretation",
-			"icon": 									"audit-interpretation.svg",
-			"analyses":
-			[
-				{
 					"title":							"Frequentist Attributes Interpretation",
 					"qml":								"frequentistAttributesInterpretation.qml",
 					"function":						"frequentistAttributesInterpretation",
+					"usesJaspResults":		true
+				},
+				{
+					"title":							"Bayesian Attributes Planning",
+					"qml":								"bayesianAttributesPlanning.qml",
+					"function":						"bayesianAttributesPlanning",
+					"usesJaspResults":		true
+				},
+				{
+					"title":							"Bayesian Attributes Bound",
+					"qml":								"bayesianAttributesBound.qml",
+					"function":						"bayesianAttributesBound",
+					"usesJaspResults":		true
+				},
+				{
+					"title":							"Summary Bayesian Attributes Bound",
+					"qml":								"summaryBayesianAttributesBound.qml",
+					"function":						"summaryBayesianAttributesBound",
 					"usesJaspResults":		true
 				},
 				{
