@@ -67,7 +67,7 @@ attributesCellSampling <- function(jaspResults, dataset, options, state=NULL)
     return(state)
 }
 
-.cellSamplingTable            <- function(dataset, options, jaspResults, interval)
+.cellSamplingTable            <- function(dataset, options, jaspResults, interval, position = 2)
 {
 
     if(!is.null(jaspResults[["table"]])) return() #The options for this table didn't change so we don't need to rebuild it
@@ -83,14 +83,14 @@ attributesCellSampling <- function(jaspResults, dataset, options, state=NULL)
     sampleSize                      <- options$sampleSize
     table                           <- createJaspTable("Resulting sample")
     jaspResults[["table"]]          <- table
-    table$position                  <- 2
+    table$position                  <- position
 
     if(seed == "seedDefault")
         set.seed(1)
     if(seed == "seedManual")
         set.seed(manualSeed)
 
-    table$dependOnOptions(c("variables", "seed", "sampleSize", "seedNumber", "recordNumberVariable", "rankingVariable"))
+    table$dependOnOptions(c("variables", "seed", "sampleSize", "seedNumber", "recordNumberVariable", "rankingVariable", "samplingType"))
 
     table$addColumnInfo(name="number", title ="", type = "string")
     table$addColumnInfo(name="recordNumber", title ="Record Number", type = "string")

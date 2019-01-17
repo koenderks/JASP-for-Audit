@@ -70,10 +70,11 @@ attributesPlanning <- function(jaspResults, dataset, options, state=NULL){
     if(options[["distribution"]] == "binomial"){
       n <- .calc.n.binomial(options, alpha)
     } else if(options[["distribution"]] == "hypergeometric"){
-      if(options[["N"]] == 0){
-        # TODO: Error handling
+      if(options[["N"]] != 0){
+        n <- .calc.n.hypergeometric(options, alpha)
+      } else {
+        n <- 1
       }
-      n <- .calc.n.hypergeometric(options, alpha)
     }
 
     if(options[["expected.errors"]] == "kPercentage"){
@@ -108,10 +109,17 @@ attributesPlanning <- function(jaspResults, dataset, options, state=NULL){
   summaryTable$addColumnInfo(name = 'IR',   title = "Inherent risk",        type = 'string')
   summaryTable$addColumnInfo(name = 'CR',   title = "Control risk",         type = 'string')
   summaryTable$addColumnInfo(name = 'SR',   title = "Detection risk",        type = 'string')
-  summaryTable$addColumnInfo(name = 'k',    title = "Expected errors",      type = 'string')
+  summaryTable$addColumnInfo(name = 'k',    title = "Allowed errors",      type = 'string')
   summaryTable$addColumnInfo(name = 'n',    title = "Required sample size", type = 'string')
 
   summaryTable$position                     <- position
+
+  if(options[["N"]] == 0 && options[["distribution"]] == "hypergeometric"){
+    message <- "The population size is specified to be 0. Please enter your population size."
+    summaryTable$errorMessage <- message
+    summaryTable$error <- "badData"
+    return()
+  }
 
   if(options[["show"]] == "percentage"){
     SRtable <- paste0(round(result[["alpha"]], 3) * 100, "%")

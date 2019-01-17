@@ -56,7 +56,7 @@ attributesSimpleRandomSampling <- function(jaspResults, dataset, options, state=
     return(state)
 }
 
-.SimpleRandomSamplingTable          <- function(dataset, options, jaspResults, sample)
+.SimpleRandomSamplingTable          <- function(dataset, options, jaspResults, sample, position = 1)
 {
 
     if(!is.null(jaspResults[["table"]])) return() #The options for this table didn't change so we don't need to rebuild it
@@ -70,11 +70,11 @@ attributesSimpleRandomSampling <- function(jaspResults, dataset, options, state=
     sampleSize                      <- options$sampleSize
     seed                            <- options$seed
     manualSeed                      <- options$seedNumber
-    table                           <- createJaspTable("Rsulting sample")
+    table                           <- createJaspTable("Resulting sample")
     jaspResults[["table"]]          <- table
-    table$position                  <- 1
+    table$position                  <- position
 
-    table$dependOnOptions(c("variables","allowDuplicates", "seed", "sampleSize", "seedNumber", "recordNumberVariable"))
+    table$dependOnOptions(c("variables","allowDuplicates", "seed", "sampleSize", "seedNumber", "recordNumberVariable", "samplingType"))
 
     table$addColumnInfo(name="number", title ="", type = "string")
     table$addColumnInfo(name="recordNumber", title ="Record Number", type = "string")

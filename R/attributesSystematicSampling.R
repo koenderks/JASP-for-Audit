@@ -67,7 +67,7 @@ attributesSystematicSampling <- function(jaspResults, dataset, options, state=NU
     return(state)
 }
 
-.SystematicSamplingTable            <- function(dataset, options, jaspResults, interval)
+.SystematicSamplingTable            <- function(dataset, options, jaspResults, interval, position = 2)
 {
 
     if(!is.null(jaspResults[["table"]])) return() #The options for this table didn't change so we don't need to rebuild it
@@ -82,9 +82,9 @@ attributesSystematicSampling <- function(jaspResults, dataset, options, state=NU
     sampleSize                      <- options$sampleSize
     table                           <- createJaspTable("Resulting sample")
     jaspResults[["table"]]          <- table
-    table$position                  <- 2
+    table$position                  <- position
 
-    table$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable"))
+    table$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType"))
 
     table$addColumnInfo(name="number", title ="", type = "string")
     table$addColumnInfo(name="recordNumber", title ="Record Number", type = "string")

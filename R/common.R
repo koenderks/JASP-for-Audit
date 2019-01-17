@@ -94,7 +94,7 @@
 
 }
 
-.samplingDescriptivesTable <- function(dataset, options, jaspResults, sample)
+.samplingDescriptivesTable <- function(dataset, options, jaspResults, sample, position = 3)
 {
 
     if(!is.null(jaspResults[["descriptives"]])) return()
@@ -103,7 +103,7 @@
     descriptives                    <- createJaspTable("Sample Descriptives")
     jaspResults[["descriptives"]]   <- descriptives
     descriptives$transpose          <- TRUE
-    descriptives$position           <- 3
+    descriptives$position           <- position
 
     descriptives$dependOnOptions(c("variables", "allowDuplicates", "seed", "sampleSize", "seedNumber",
                                     "showDescriptives", "mean", "sd", "var", "range", "min", "max", "median", "recordVariable"))
@@ -146,14 +146,14 @@
 
 }
 
-.intervalTable <- function(dataset, options, jaspResults, interval)
+.intervalTable <- function(dataset, options, jaspResults, interval, position = 1)
 {
 
     if(!is.null(jaspResults[["intervalTable"]])) return()
 
     intervalTable                           <- createJaspTable("Interval information")
     jaspResults[["intervalTable"]]          <- intervalTable
-    intervalTable$position                  <- 1
+    intervalTable$position                  <- position
 
     intervalTable$addColumnInfo(name="N", title ="Population size", type = "integer")
     intervalTable$addColumnInfo(name="n", title ="Sample size", type = "integer")
@@ -161,7 +161,7 @@
 
     sampleSize                              <- options$sampleSize
 
-    row <- list("N" = nrow(dataset), "n" = sampleSize, "I" = interval)
+    row <- list("N" = nrow(dataset), "n" = sampleSize, "I" = round(interval, 0))
     intervalTable$addRows(row)
 
 }

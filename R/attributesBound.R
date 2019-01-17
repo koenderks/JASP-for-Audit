@@ -92,22 +92,22 @@ attributesBound <- function(jaspResults, dataset, options, state=NULL){
   resultList[["alpha"]]       <- alpha
 
   jaspResults[["result"]] <- createJaspState(resultList)
-  jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctID"))
+  jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctID", "sampleFilter", "inference"))
 
 }
 
-.attributesBoundTable <- function(options, result, jaspResults){
+.attributesBoundTable <- function(options, result, jaspResults, position = 1){
 
   if(!is.null(jaspResults[["summaryTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
   summaryTable                       <- createJaspTable("Classical Evaluation Table")
   jaspResults[["summaryTable"]]      <- summaryTable
   summaryTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID"))
-  summaryTable$position <- 1
+  summaryTable$position <- position
 
   summaryTable$addColumnInfo(name = 'IR',     title = "Inherent risk",  type = 'string')
   summaryTable$addColumnInfo(name = 'CR',     title = "Control risk",   type = 'string')
-  summaryTable$addColumnInfo(name = 'SR',     title = "Sampling risk",  type = 'string')
+  summaryTable$addColumnInfo(name = 'SR',     title = "Detection risk",  type = 'string')
   summaryTable$addColumnInfo(name = 'n',      title = "Sample size",    type = 'string')
   summaryTable$addColumnInfo(name = 'k',      title = "Errors",         type = 'string')
 

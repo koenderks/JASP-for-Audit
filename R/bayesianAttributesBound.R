@@ -162,7 +162,7 @@ bayesianAttributesBound <- function(jaspResults, dataset, options, state=NULL){
 
     jaspResults[["result"]]     <- createJaspState(resultList)
     jaspResults[["result"]]     $dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality",
-                                                    "correctID", "expected.errors", "kPercentageNumber", "kNumberNumber"))
+                                                    "correctID", "expected.errors", "kPercentageNumber", "kNumberNumber", "sampleFilter", "inference"))
 
 }
 
