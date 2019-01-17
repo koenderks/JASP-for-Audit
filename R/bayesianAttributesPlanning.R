@@ -112,7 +112,7 @@ bayesianAttributesPlanning <- function(jaspResults, dataset, options, state=NULL
   summaryTable$addColumnInfo(name = 'IR', title = "Inherent risk", type = 'string')
   summaryTable$addColumnInfo(name = 'CR', title = "Control risk", type = 'string')
   summaryTable$addColumnInfo(name = 'SR', title = "Detection risk", type = 'string')
-  summaryTable$addColumnInfo(name = 'k', title = "Expected errors", type = 'string')
+  summaryTable$addColumnInfo(name = 'k', title = "Allowed errors", type = 'string')
   summaryTable$addColumnInfo(name = 'n', title = "Required sample size", type = 'string')
 
   summaryTable$position <- position

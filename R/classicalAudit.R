@@ -1,4 +1,4 @@
-audit <- function(jaspResults, dataset, options, state=NULL){
+classicalAudit <- function(jaspResults, dataset, options, state=NULL){
 
     options[["statistic"]] <- "bound" # Temporary
 
@@ -34,7 +34,7 @@ audit <- function(jaspResults, dataset, options, state=NULL){
 
         .attributesPlanning(options, jaspResults)
         result              <- jaspResults[["result"]]$object
-        .attributesPlanningTable(options, result, jaspResults, position = 8)
+        .attributesPlanningTableFullAudit(options, result, jaspResults, position = 8)
 
         if(options[["interpretation"]]){
 
@@ -56,7 +56,7 @@ audit <- function(jaspResults, dataset, options, state=NULL){
 
         .bayesianAttributesPlanning(options, jaspResults)
         result              <- jaspResults[["result"]]$object
-        .bayesianAttributesPlanningTable(options, result, jaspResults, position = 8)
+        .bayesianAttributesPlanningTableFullAudit(options, result, jaspResults, position = 8)
 
         if(options[["interpretation"]]){
 
@@ -129,7 +129,7 @@ audit <- function(jaspResults, dataset, options, state=NULL){
                 technique <- "cell sampling"
             }
 
-            jaspResults[["samplingParagraph"]] <- createJaspHtml(paste0("From the population of ", options[["N"]], " observations, ", result[["n"]], " samples were drawn using a <b>", technique, "</b> method."), "p")
+            jaspResults[["samplingParagraph"]] <- createJaspHtml(paste0("From the population of <b>", options[["N"]], "</b> observations, <b>", result[["n"]], "</b> samples were drawn using a <b>", technique, "</b> method."), "p")
             jaspResults[["samplingParagraph"]]$position <- 12
 
         }
@@ -173,12 +173,23 @@ audit <- function(jaspResults, dataset, options, state=NULL){
 
             if(options[["interpretation"]]){
 
-                jaspResults[["resultParagraph"]] <- createJaspHtml(paste0("The sample consisted of <b>",options$n, "</b> observations, <b>", result[["k"]] , "</b> of which were found to contain a full error. The knowledge from these data, com-
+                jaspResults[["resultParagraph"]] <- createJaspHtml(paste0("The sample consisted of <b>",options[["sampleSize"]], "</b> observations, <b>", result[["k"]] , "</b> of which were found to contain a full error. The knowledge from these data, com-
                                                                       bined with the prior knowledge results in an <b>",round((1 - result[["alpha"]]) * 100, 2), "%</b> upper confidence bound of <b>",round(result[["bound"]]*100, 2),"%</b>. The cumulative knowledge states that there
                                                                       is a <b>",options$confidence*100, "%</b> probability that, when one would repeaditly sample from this population, the maximum error is calculated to be lower
                                                                       than <b>",round(result[["bound"]]*100, 2),"%</b>."), "p")
                 jaspResults[["resultParagraph"]]$position <- 17
 
+            }
+
+            if(options[['plotBound']] && options[["correctID"]] != "")
+            {
+                if(is.null(jaspResults[["confidenceBoundPlot"]]))
+                {
+                    jaspResults[["confidenceBoundPlot"]] 		<- .plotConfidenceBounds(options, result, jaspResults)
+                    jaspResults[["confidenceBoundPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "correctID",
+                                                                             "show", "plotBound", "materiality", "method", "inference"))
+                    jaspResults[["confidenceBoundPlot"]] 		$position <- 19
+                }
             }
 
         } else if(options[["inference"]] == "bayesian"){
@@ -191,7 +202,7 @@ audit <- function(jaspResults, dataset, options, state=NULL){
 
             if(options[["interpretation"]]){
 
-                jaspResults[["resultParagraph"]] <- createJaspHtml(paste0("The sample consisted of <b>",options$n, "</b> observations, <b>",result[["k"]], "</b> of which were found to contain a full error. The knowledge from these data, com-
+                jaspResults[["resultParagraph"]] <- createJaspHtml(paste0("The sample consisted of <b>",options[["sampleSize"]], "</b> observations, <b>",result[["k"]], "</b> of which were found to contain a full error. The knowledge from these data, com-
                                                                       bined with the prior knowledge results in an <b>",options$confidence*100, "%</b> upper confidence bound of <b>",round(result[["bound"]]*100, 2),"%</b>. The cumulative knowledge states that there
                                                                       is a <b>",options$confidence*100, "%</b> probability that the true error proportion in the population is lower than <b>",round(result[["bound"]]*100, 2),"%</b>."), "p")
                 jaspResults[["resultParagraph"]]$position <- 17
@@ -202,7 +213,7 @@ audit <- function(jaspResults, dataset, options, state=NULL){
             {
                 if(is.null(jaspResults[["priorAndPosteriorPlot"]]))
                 {
-                    jaspResults[["priorAndPosteriorPlot"]] 		<- .plotPriorAndPosteriorBayesianAttributesBound(options, result, jaspResults)
+                    jaspResults[["priorAndPosteriorPlot"]] 		<- .plotPriorAndPosteriorBayesianAttributesBoundFullAudit(options, result, jaspResults)
                     jaspResults[["priorAndPosteriorPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "limx_backup", "statistic", "plotPriorAndPosterior",
                                                                                "plotPriorAndPosteriorAdditionalInfo", "materiality", "show", "correctID",
                                                                                "expected.errors", "kPercentageNumber", "kNumberNumber", "inference", "sampleFilter"))
@@ -226,7 +237,7 @@ audit <- function(jaspResults, dataset, options, state=NULL){
             }
 
             jaspResults[["conclusionParagraph"]] <- createJaspHtml(paste0("To approve these data, a <b>", options$confidence*100 ,"%</b> upper confidence bound on the population proportion of full errors should be determined to be
-                                                                        lower than materiality, in this case <b>", options$materiality*100 ,"%</b>. For the current data, the confidence bound is ", above_below ," than materiality. The conclusion for
+                                                                        lower than materiality, in this case <b>", options$materiality*100 ,"%</b>. For the current data, the confidence bound is <b>", above_below ,"</b> than materiality. The conclusion for
                                                                         these data is that the data contain ", approve ,"."), "p")
             jaspResults[["conclusionParagraph"]]$position <- 21
 
@@ -292,6 +303,64 @@ audit <- function(jaspResults, dataset, options, state=NULL){
 
 }
 
+.attributesPlanningTableFullAudit <- function(options, result, jaspResults, position = 1){
+
+  if(!is.null(jaspResults[["summaryTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
+
+  summaryTable                              <- createJaspTable("Classical Attributes Planning Table")
+  jaspResults[["summaryTable"]]             <- summaryTable
+  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "show", "distribution", "N",
+                                  "expected.errors" , "kPercentageNumber", "kNumberNumber", "inference"))
+
+  summaryTable$addColumnInfo(name = 'IR',   title = "Inherent risk",        type = 'string')
+  summaryTable$addColumnInfo(name = 'CR',   title = "Control risk",         type = 'string')
+  summaryTable$addColumnInfo(name = 'SR',   title = "Detection risk",       type = 'string')
+  summaryTable$addColumnInfo(name = 'k',    title = "Allowed errors",       type = 'string')
+  summaryTable$addColumnInfo(name = 'n',    title = "Required sample size", type = 'string')
+
+  summaryTable$position                     <- position
+
+  if(options[["N"]] == 0 && options[["distribution"]] == "hypergeometric"){
+    message <- "The population size is specified to be 0. Please enter your population size."
+    summaryTable$errorMessage <- message
+    summaryTable$error <- "badData"
+    return()
+  }
+
+  if(options[["show"]] == "percentage"){
+    SRtable <- paste0(round(result[["alpha"]], 3) * 100, "%")
+    if(options[["expected.errors"]] == "kPercentage"){
+      ktable <- ceiling(result[["k"]] * result[["n"]])
+    } else if(options[["expected.errors"]] == "kNumber"){
+      ktable <- options[["kNumberNumber"]]
+    }
+  } else if(options[["show"]] == "proportion"){
+    SRtable <- round(result[["alpha"]], 3)
+    if(options[["expected.errors"]] == "kPercentage"){
+      ktable <- ceiling(result[["k"]] * result[["n"]])
+    } else if(options[["expected.errors"]] == "kNumber"){
+      ktable <- options[["kNumberNumber"]]
+    }
+  }
+
+  row <- list(IR = result[["IR"]],
+              CR = result[["CR"]],
+              SR = SRtable,
+              k = ktable,
+              n = result[["n"]])
+
+  summaryTable$addRows(row)
+
+  if(options[["distribution"]] == "binomial"){
+          message <- "The sample size is calculated using the <b>binomial</b> distribution."
+          summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
+  } else if(options[["distribution"]] == "hypergeometric"){
+          message <- paste0("The sample size is calculated using the <b>hypergeometric</b> distribution (N = ", options[["N"]] ,").")
+          summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
+  }
+
+}
+
 .attributesBoundTableFullAudit <- function(options, result, jaspResults, position = 1){
 
     if(!is.null(jaspResults[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
@@ -327,59 +396,5 @@ audit <- function(jaspResults, dataset, options, state=NULL){
 
     row <- list(IR = result[["IR"]], CR = result[["CR"]], SR = SRtable, n = result[["n"]], k = result[["k"]], bound = boundTable)
     evaluationTable$addRows(row)
-
-}
-
-.bayesianAttributesBoundTableFullAudit <- function(options, result, jaspResults, position = 1){
-
-    if(!is.null(jaspResults[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
-
-    evaluationTable                       <- createJaspTable("Bayesian Evaluation Table")
-    jaspResults[["evaluationTable"]]      <- evaluationTable
-    evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
-                                      "expected.errors", "kPercentageNumber", "kNumberNumber", "sampleFilter", "inference"))
-    evaluationTable$position <- position
-
-    evaluationTable$addColumnInfo(name = 'IR',   title = "Inherent risk",  type = 'string')
-    evaluationTable$addColumnInfo(name = 'CR',   title = "Control risk",   type = 'string')
-    evaluationTable$addColumnInfo(name = 'SR',   title = "Detection risk",  type = 'string')
-    evaluationTable$addColumnInfo(name = 'n',    title = "Sample size",    type = 'string')
-    evaluationTable$addColumnInfo(name = 'k',    title = "Errors",         type = 'string')
-
-
-    if(options[["show"]] == "percentage"){
-        SRtable <- paste0(round(result[["alpha"]],3) * 100, "%")
-        if(result[["bound"]] == "."){
-            if(options[["statistic"]] == "bound"){
-                boundTable          <- "."
-            } else if(options[["statistic"]] == "interval"){
-                boundTable          <- c(".", ".")
-            }
-        } else {
-            boundTable <- paste0(round(result[["bound"]],3) * 100, "%")
-        }
-    } else if(options[["show"]] == "proportion"){
-        SRtable <- round(result[["alpha"]], 3)
-        if(result[["bound"]] == "."){
-            if(options[["statistic"]] == "bound"){
-                boundTable          <- "."
-            } else if(options[["statistic"]] == "interval"){
-                boundTable          <- c(".", ".")
-            }
-        } else {
-            boundTable <- round(result[["bound"]],3)
-        }
-    }
-
-    if(options[["statistic"]] == "bound"){
-        evaluationTable$addColumnInfo(name = 'bound', title = paste0(result[["confidence"]]*100,"% Confidence bound"), type = 'string')
-        row <- list(IR = result[["IR"]], CR = result[["CR"]], SR = SRtable, n = result[["n"]], k = result[["k"]], bound = boundTable)
-        evaluationTable$addRows(row)
-    } else {
-        evaluationTable$addColumnInfo(name = 'ciLow', title = "Lower", type = "string", overtitle = paste0(result[["confidence"]]*100,"% Confidence interval"))
-        evaluationTable$addColumnInfo(name = 'ciHigh', title = "Upper", type = "string", overtitle = paste0(result[["confidence"]]*100,"% Confidence interval"))
-        row <- list(IR = result[["IR"]], CR = result[["CR"]], SR = SRtable, n = result[["n"]], k = result[["k"]], ciLow = boundTable[1], ciHigh = boundTable[2])
-        evaluationTable$addRows(row)
-    }
 
 }

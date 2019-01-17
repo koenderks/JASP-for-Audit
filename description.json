@@ -3,7 +3,7 @@
 	{
 		"title" : 									"Audit",
 		"description": 							"JASP for Audit (JfA) is an officially supported add-on module that is designed specifically with the auditor in mind. The module includes procedures and analyses that apply to daily auditing tasks and eliminates the difficulties that arise from programming statistical analyses and correctly interpreting their results.",
-		"version":									0.1,
+		"version":									1.0,
 		"author":										"Koen Derks, Ruud Wetzels & Jacques de Swart",
 		"maintainer":								"Koen Derks <k.derks@nyenrode.nl>",
 		"website":									"www.github.com/koenderks/JASP-for-Audit",
@@ -15,14 +15,20 @@
 	"ribbonEntries":
 	[
 		{
-			"title": 									"Audit",
+			"title": 									"Full Audit",
 			"icon": 									"audit-fullaudit.svg",
 			"analyses":
 			[
 				{
-					"title":							"Audit",
-					"qml":								"audit.qml",
-					"function":						"audit",
+					"title":							"Classical Audit",
+					"qml":								"classicalAudit.qml",
+					"function":						"classicalAudit",
+					"usesJaspResults":		true
+				},
+				{
+					"title":							"Bayesian Audit",
+					"qml":								"bayesianAudit.qml",
+					"function":						"bayesianAudit",
 					"usesJaspResults":		true
 				}
 			]
@@ -39,39 +45,21 @@
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Attributes Simple Random Sampling",
+					"title":							"Attributes Sampling",
 					"qml":								"attributesSimpleRandomSampling.qml",
 					"function":						"attributesSimpleRandomSampling",
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Attributes Systematic Sampling",
-					"qml":								"attributesSystematicSampling.qml",
-					"function":						"attributesSystematicSampling",
-					"usesJaspResults":		true
-				},
-				{
-					"title":							"Attributes Cell Sampling",
-					"qml":								"attributesCellSampling.qml",
-					"function":						"attributesCellSampling",
-					"usesJaspResults":		true
-				},
-				{
-					"title":							"Attributes Bound",
+					"title":							"Attributes Evaluation",
 					"qml":								"attributesBound.qml",
 					"function":						"attributesBound",
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Summary Attributes Bound",
+					"title":							"Summary Attributes Evaluation",
 					"qml":								"summaryAttributesBound.qml",
 					"function":						"summaryAttributesBound",
-					"usesJaspResults":		true
-				},
-				{
-					"title":							"Frequentist Attributes Interpretation",
-					"qml":								"frequentistAttributesInterpretation.qml",
-					"function":						"frequentistAttributesInterpretation",
 					"usesJaspResults":		true
 				},
 				{
@@ -81,21 +69,15 @@
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Bayesian Attributes Bound",
+					"title":							"Bayesian Attributes Evaluation",
 					"qml":								"bayesianAttributesBound.qml",
 					"function":						"bayesianAttributesBound",
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Summary Bayesian Attributes Bound",
+					"title":							"Summary Bayesian Attributes Evaluation",
 					"qml":								"summaryBayesianAttributesBound.qml",
 					"function":						"summaryBayesianAttributesBound",
-					"usesJaspResults":		true
-				},
-				{
-					"title":							"Bayesian Attributes Interpretation",
-					"qml":								"bayesianAttributesInterpretation.qml",
-					"function":						"bayesianAttributesInterpretation",
 					"usesJaspResults":		true
 				}
 			]
