@@ -4,42 +4,40 @@ summaryBayesianAttributesBound <- function(jaspResults, dataset, options, state=
       state 							    <- list()
   # Set the title
   jaspResults$title 					<- "Summary Statistics Bayesian Attributes Bound"
+
+  .ARMformula(options, jaspResults, position = 3)   # Show the Audit Risk Model formula and quantify detection risk
+  DR              <- jaspResults[["DR"]]$object
+
+  # Interpretation for the Planning phase
+  if(options[["interpretation"]]){
+      jaspResults[["AuditRiskModelHeader"]] <- createJaspHtml("<u>Audit Risk Model</u>", "h2")
+      jaspResults[["AuditRiskModelHeader"]]$position <- 1
+      jaspResults[["AuditRiskModelParagraph"]] <- createJaspHtml(paste0("Prior to the substantive testing phase, the inherent risk was determined to be <b>",options$IR,"</b>. The internal control risk was determined
+                                                                      to be <b>", options$CR,"</b>. According to the Audit Risk Model, the required detection risk to then maintain an audit risk of <b>", (1 - options$confidence) * 100, "%</b> should be <b>",round(DR*100, 2), "%</b>."), "p")
+      jaspResults[["AuditRiskModelParagraph"]]$position <- 2
+
+      jaspResults[["evaluationHeader"]] <- createJaspHtml("<u>Evaluation</u>", "h2")
+      jaspResults[["evaluationHeader"]]$position <- 4
+  }
+
   # Perform the analysis
   .summaryBayesianAttributesBound(options, jaspResults)
   result                      <- jaspResults[["result"]]$object
-  .summaryBayesianAttributesBoundTable(options, result, jaspResults)
-  if (options$implicitsample)
-  {
-    if(is.null(jaspResults[["sampletable"]]))
-      .priorSampleTable(options, result, jaspResults)
-  }
+  .bayesianAttributesBoundTableFullAudit(options, result, jaspResults, position = 5)
 
   # Create the prior and posterior plot ##
    if(options[['plotPriorAndPosterior']])
    {
       if(is.null(jaspResults[["priorAndPosteriorPlot"]]))
       {
-      jaspResults[["priorAndPosteriorPlot"]] 		<- .plotPriorAndPosteriorBayesianAttributesBound(options, result, jaspResults)
-      jaspResults[["priorAndPosteriorPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "limx", "statistic",
+      jaspResults[["priorAndPosteriorPlot"]] 		<- .plotPriorAndPosteriorBayesianAttributesBoundFullAudit(options, result, jaspResults)
+      jaspResults[["priorAndPosteriorPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "limx_backup", "statistic",
                                                                   "plotPriorAndPosterior", "plotPriorAndPosteriorAdditionalInfo",
                                                                   "materiality", "show", "expected.errors", "kPercentageNumber",
-                                                                  "kNumberNumber"))
-			jaspResults[["priorAndPosteriorPlot"]] 		$position <- 4
+                                                                  "kNumberNumber", "prior"))
+			jaspResults[["priorAndPosteriorPlot"]] 		$position <- 6
 	    }
    }
-
-   # Create the prior and posterior plot ##
-    if(options[['plotBounds']])
-    {
-       if(is.null(jaspResults[["confidenceBoundPlot"]]))
-       {
-       jaspResults[["confidenceBoundPlot"]] 		<- .plotConfidenceBoundsSummary(options, result, jaspResults)
-       jaspResults[["confidenceBoundPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "statistic",
-                                                                   "plotBounds", "materiality", "show", "expected.errors",
-                                                                   "kPercentageNumber", "kNumberNumber"))
- 			jaspResults[["confidenceBoundPlot"]] 		$position <- 5
- 	    }
-    }
 
 
   # Save the state
@@ -100,6 +98,13 @@ summaryBayesianAttributesBound <- function(jaspResults, dataset, options, state=
     priorA                  <- 1 + pk
     priorB                  <- 1 + (pn - pk)
 
+    if(options[["prior"]] == "5050"){
+
+      priorA <- 1
+      priorB <- 1/((3/2) * options[["materiality"]]) - (1/3)
+
+    }
+
     if(options[["n"]] == 0 || options[["k"]] > options[["n"]]){
       bound                 <- "."
       approve               <- "."
@@ -145,7 +150,7 @@ summaryBayesianAttributesBound <- function(jaspResults, dataset, options, state=
 
     jaspResults[["result"]]     <- createJaspState(resultList)
     jaspResults[["result"]]     $dependOnOptions(c("IR", "CR", "confidence", "n", "k", "statistic", "materiality",
-                                                    "expected.errors", "kPercentageNumber", "kNumberNumber"))
+                                                    "expected.errors", "kPercentageNumber", "kNumberNumber", "prior"))
 
 }
 
@@ -156,7 +161,7 @@ summaryBayesianAttributesBound <- function(jaspResults, dataset, options, state=
   summaryTable                       <- createJaspTable("Bayesian Evaluation Table")
   jaspResults[["summaryTable"]]      <- summaryTable
   summaryTable$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "statistic", "materiality", "show",
-                                  "expected.errors", "kPercentageNumber", "kNumberNumber"))
+                                  "expected.errors", "kPercentageNumber", "kNumberNumber", "prior"))
   summaryTable$position <- 1
 
   summaryTable$addColumnInfo(name = 'IR',   title = "Inherent risk",  type = 'string')

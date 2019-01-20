@@ -39,25 +39,25 @@
 			"analyses":
 			[
 				{
-					"title":							"Attributes Planning",
+					"title":							"Classical Attributes Planning",
 					"qml":								"attributesPlanning.qml",
 					"function":						"attributesPlanning",
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Attributes Sampling",
+					"title":							"Classical Attributes Sampling",
 					"qml":								"attributesSimpleRandomSampling.qml",
 					"function":						"attributesSimpleRandomSampling",
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Attributes Evaluation",
+					"title":							"Classical Attributes Evaluation",
 					"qml":								"attributesBound.qml",
 					"function":						"attributesBound",
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Summary Attributes Evaluation",
+					"title":							"Classical Summary Attributes Evaluation",
 					"qml":								"summaryAttributesBound.qml",
 					"function":						"summaryAttributesBound",
 					"usesJaspResults":		true

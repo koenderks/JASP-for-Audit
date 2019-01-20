@@ -26,7 +26,7 @@ Form {
     id: form
 
     ExpanderButton {
-        text: optionPhase.enabled ? qsTr("<b>1. Global options</b>") : qsTr("1. Global options")
+        text: optionPhase.expanded ? qsTr("<b>1. Global options</b>") : qsTr("1. Global options")
         expanded: toPlanning.checked ? false : true
         enabled: toPlanning.checked ? false : true
         id: optionPhase
@@ -46,8 +46,8 @@ Form {
               title: qsTr("<b>Units</b>")
               name: "show"
 
-              RadioButton { text: qsTr("Percentages")         ; name: "percentage" ; checked: true}
-              RadioButton { text: qsTr("Proportions")         ; name: "proportion" }
+              RadioButton { text: qsTr("Percentages")         ; name: "percentage" ; checked: true; id: percentages}
+              RadioButton { text: qsTr("Proportions")         ; name: "proportion"; id: proportions}
           }
 
           GroupBox {
@@ -59,13 +59,13 @@ Form {
 
         Button {
           Layout.leftMargin: 450
-          text: qsTr("<b>Confirm</b>")
+          text: qsTr("<b>To planning</b>")
         }
 
         CheckBox {
           name: "toPlanning"
           Layout.leftMargin: 450
-          text: qsTr("<b>Confirm</b>")
+          text: qsTr("<b>To planning</b>")
           id: toPlanning
         }
 
@@ -114,6 +114,7 @@ Form {
             RadioButtonGroup {
                 title: qsTr("<b>Inherent risk</b>")
                 name: "IR"
+                enabled: populationSize.value == "0" ? false : true
 
                 RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
                 RadioButton { text: qsTr("Medium")      ; name: "Medium" }
@@ -126,6 +127,7 @@ Form {
             RadioButtonGroup {
                 title: qsTr("<b>Control risk</b>")
                 name: "CR"
+                enabled: populationSize.value == "0" ? false : true
 
                 RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
                 RadioButton { text: qsTr("Medium")      ; name: "Medium" }
@@ -142,6 +144,7 @@ Form {
         RadioButtonGroup {
             title: qsTr("<b>Sampling model</b>")
             name: "distribution"
+            enabled: populationSize.value == "0" ? false : true
 
             RadioButton { text: qsTr("With replacement")            ; name: "binomial" ; checked: true}
             RadioButton { text: qsTr("Without replacement")         ; name: "hypergeometric" ; id: hyperDist}
@@ -152,6 +155,7 @@ Form {
 
           RadioButtonGroup {
               name: "expected.errors"
+              enabled: populationSize.value == "0" ? false : true
 
               RowLayout {
                   RadioButton { text: qsTr("Percentage")            ; name: "kPercentage" ; checked: true; id: expkPercentage}
@@ -179,191 +183,188 @@ Form {
         }
     }
 
-    ExpanderButton {
-        text: qsTr("Advanced options")
-        implicitWidth: 350
+    Divider { }
 
-        Flow {
-            spacing: 40
+    Flow {
+      spacing: 90
 
-            ColumnLayout {
-              RadioButtonGroup {
-                  title: qsTr("<b>Inference</b>")
-                  name: "inference"
+       GroupBox {
+           title: qsTr("<b>Plots</b>")
+           enabled: populationSize.value == "0" ? false : true
 
-                  RadioButton { text: qsTr("Classical")             ; name: "frequentist" ; checked: true; id: frequentistType}
-                  RadioButton { text: qsTr("Bayesian")              ; name: "bayesian"    ; id: bayesianType}
-                  ExpanderButton {
-                    text:"Options"
-                    enabled: bayesianType.checked
-                    implicitWidth: 180
+           CheckBox {      text: qsTr("Decision plot")   ; name: "plotCriticalErrors"; checked: true }
 
-                    GroupBox {
-                        CheckBox {      text: qsTr("Implicit sample") ; name: "implicitsample"; Layout.leftMargin: 20; enabled: bayesianType.checked}
-                        CheckBox {      text: qsTr("Implied prior")   ; name: "plotPrior" ; id: plotPrior; enabled: bayesianType.checked; Layout.leftMargin: 20}
-                        PercentField {  text: qsTr("x-axis limit")    ; name: "limx"; defaultValue: 20; Layout.leftMargin: 40; enabled: bayesianType.checked}
-                        CheckBox {      text: qsTr("Additional info") ; name: "plotPriorAdditionalInfo" ; Layout.leftMargin: 40; checked: true; enabled: plotPrior.checked}
-                     }
-                  }
-                }
-            }
         }
+
     }
 
     Button {
       Layout.leftMargin: 450
-      text: qsTr("<b>Confirm</b>")
+      text: qsTr("<b>To sampling</b>")
       enabled: populationSize.value == "0" ? false : true
     }
 
     CheckBox {
       name: "toSampling"
       Layout.leftMargin: 450
-      text: qsTr("<b>Confirm</b>")
+      text: qsTr("<b>To sampling</b>")
       id: toSampling
       enabled: populationSize.value == "0" ? false : true
     }
   }
 
-    ExpanderButton {
-        text: samplingPhase.enabled ? qsTr("<b>3. Sampling</b>") : qsTr("3. Sampling")
-        expanded: toSampling.checked ? (toEvaluation.checked ? false : true) : false
-        enabled: toSampling.checked ? (toEvaluation.checked ? false : true) : false
-        id: samplingPhase
+  ExpanderButton {
+      text: samplingPhase.expanded ? qsTr("<b>3. Sampling</b>") : qsTr("3. Sampling")
+      expanded: toSampling.checked ? (toEvaluation.checked ? false : true) : false
+      enabled: toSampling.checked ? (toEvaluation.checked ? false : true) : false
+      id: samplingPhase
 
-        ExpanderButton {
-            expanded: pickSamplingMethod.checked ? false : true
-            enabled: pickSamplingMethod.checked ? false : true
-            title: samplingMethod.enabled ? qsTr("<b>Sampling method</b>") : qsTr("Sampling method")
-            //implicitWidth: 230
-            id: samplingMethod
+      ExpanderButton {
+          expanded: pickSamplingMethod.checked ? false : true
+          //enabled: pickSamplingMethod.checked ? false : true
+          title: samplingMethod.expanded ? qsTr("<b>3.1 Sampling method</b>") : qsTr("3.1 Sampling method")
+          implicitWidth: 560
+          id: samplingMethod
+          Layout.leftMargin: 20
+
+          RowLayout {
+            Label {
+              text: qsTr("<b>Random</b>")
+              }
+            Divider {
+              implicitWidth: 420
+            }
+            Label {
+              text: qsTr("<b>Systematic</b>")
+              }
+          }
+
+          RadioButtonGroup {
+            name: "samplingType"
             Layout.leftMargin: 20
 
-            RadioButtonGroup {
-              name: "samplingType"
+            Flow {
+              spacing: 20
 
-              Flow {
-                spacing: 20
+                ColumnLayout {
+                  spacing: 5
+                  RadioButton { text: qsTr("Simple random sampling")                 ; name: "simplerandomsampling" ; id: simplerandomsampling; checked: true}
+                  CheckBox { text: qsTr("Allow duplicate records")                   ; name: "allowDuplicates"; Layout.leftMargin: 20; enabled: simplerandomsampling.checked }
+                }
+                ColumnLayout {
+                  RadioButton { text: qsTr("Cell sampling")                   ; name: "cellsampling" ; id: cellsampling}
+                }
+                ColumnLayout {
+                  spacing: 5
+                  RadioButton { text: qsTr("Systematic sampling")             ; name: "systematicsampling" ; id: systematicsampling}
+                  TextField {
+                      text: qsTr("Interval starting point")
+                      value: "1"
+                      name: "startingPoint"
+                      inputType: "integer"
+                      validator: IntValidator { bottom: 1 }
+                      Layout.leftMargin: 20
+                      enabled: systematicsampling.checked
+                  }
+                }
+            }
+          }
 
-                  ColumnLayout {
-                    spacing: 5
-                    RadioButton { text: qsTr("Simple random sampling")          ; name: "simplerandomsampling" ; id: simplerandomsampling; checked: true}
-                    CheckBox { text: qsTr("Allow duplicate records")            ; name: "allowDuplicates"; Layout.leftMargin: 20; enabled: simplerandomsampling.checked }
-                  }
-                  ColumnLayout {
-                    spacing: 5
-                    RadioButton { text: qsTr("Systematic sampling")             ; name: "systematicsampling" ; id: systematicsampling}
-                    TextField {
-                        text: qsTr("Interval starting point")
-                        value: "1"
-                        name: "startingPoint"
-                        inputType: "integer"
-                        validator: IntValidator { bottom: 1 }
-                        Layout.leftMargin: 20
-                        enabled: systematicsampling.checked
-                    }
-                  }
-                  ColumnLayout {
-                    RadioButton { text: qsTr("Cell sampling")                   ; name: "cellsampling" ; id: cellsampling}
+          Button {
+            Layout.leftMargin: 450
+            text: qsTr("<b>Confirm</b>")
+          }
+
+          CheckBox {
+            name: "pickSamplingMethod"
+            Layout.leftMargin: 450
+            text: qsTr("<b>Confirm</b>")
+            id: pickSamplingMethod
+          }
+
+      }
+
+      VariablesForm {
+          availableVariablesList.name: "allAvailableVariables2"
+          enabled: pickSamplingMethod.checked ? true : false
+
+          AssignedVariablesList {
+              name: "recordNumberVariable"
+              title: qsTr("Record numbers")
+              singleItem: true
+              allowedColumns: ["nominal"]
+              enabled: pickSamplingMethod.checked ? true : false
+          }
+          AssignedVariablesList {
+              name: "rankingVariable"
+              title: qsTr("Ranking variable (optional)")
+              singleItem: true
+              allowedColumns: ["scale"]
+              }
+          AssignedVariablesList {
+              name: "variables"
+              title: qsTr("Sampling variables")
+              singleItem: false
+              allowedColumns: ["scale", "ordinal", "nominal"]
+          }
+      }
+
+      Flow {
+          spacing: 220
+
+          ColumnLayout {
+
+              RadioButtonGroup {
+                  title: qsTr("<b>Seed</b>")
+                  name: "seed"
+                  enabled: pickSamplingMethod.checked ? true : false
+
+                  RadioButton { text: qsTr("Default")         ; name: "seedDefault" ; checked: true}
+                  RowLayout {
+                      RadioButton { text: qsTr("Manual")      ; name: "seedManual"  ; id: manualSeed}
+                      TextField {
+                          value: "1"
+                          name: "seedNumber"
+                          enabled: manualSeed.checked
+                          validator: IntValidator { bottom: 0 }
+                      }
                   }
               }
-            }
+          }
 
-            Button {
-              Layout.leftMargin: 450
-              text: qsTr("<b>Confirm</b>")
-            }
+          ColumnLayout {
 
-            CheckBox {
-              name: "pickSamplingMethod"
-              Layout.leftMargin: 450
-              text: qsTr("<b>Confirm</b>")
-              id: pickSamplingMethod
-            }
+              GroupBox {
+                  title: qsTr("<b>Tables</b>")
+                  enabled: pickSamplingMethod.checked ? true : false
 
-        }
+                  CheckBox { text: qsTr("Sample descriptives")  ; name: "showDescriptives" ; id: descriptives}
+                  CheckBox { text: qsTr("Mean")                 ; name: "mean"; Layout.leftMargin: 20; enabled: descriptives.checked ; checked: true}
+                  CheckBox { text: qsTr("Median")               ; name: "median"; Layout.leftMargin: 20; enabled: descriptives.checked ; checked: true}
+                  CheckBox { text: qsTr("Std. deviation")       ; name: "sd"; Layout.leftMargin: 20; enabled: descriptives.checked ; checked: true}
+                  CheckBox { text: qsTr("Variance")             ; name: "var"; Layout.leftMargin: 20; enabled: descriptives.checked}
+                  CheckBox { text: qsTr("Minimum")              ; name: "min"; Layout.leftMargin: 20; enabled: descriptives.checked}
+                  CheckBox { text: qsTr("Maximum")              ; name: "max"; Layout.leftMargin: 20; enabled: descriptives.checked}
+                  CheckBox { text: qsTr("Range")                ; name: "range"; Layout.leftMargin: 20; enabled: descriptives.checked}
+              }
 
-        VariablesForm {
-            availableVariablesList.name: "allAvailableVariables2"
-            enabled: pickSamplingMethod.checked ? true : false
+          }
 
-            AssignedVariablesList {
-                name: "recordNumberVariable"
-                title: qsTr("Record numbers")
-                singleItem: true
-                allowedColumns: ["nominal"]
-                enabled: pickSamplingMethod.checked ? true : false
-            }
-            AssignedVariablesList {
-                name: "rankingVariable"
-                title: qsTr("Ranking variable (optional)")
-                singleItem: true
-                allowedColumns: ["scale"]
-                }
-            AssignedVariablesList {
-                name: "variables"
-                title: qsTr("Sampling variables")
-                singleItem: false
-                allowedColumns: ["scale", "ordinal", "nominal"]
-            }
-        }
+      }
 
-        Flow {
-            spacing: 120
+      Button {
+        Layout.leftMargin: 450
+        text: qsTr("<b>To evaluation</b>")
+      }
 
-            ColumnLayout {
+      CheckBox {
+        name: "toEvaluation"
+        Layout.leftMargin: 450
+        text: qsTr("<b>To evaluation</b>")
+        id: toEvaluation
+      }
 
-                RadioButtonGroup {
-                    title: qsTr("<b>Seed</b>")
-                    name: "seed"
-                    enabled: pickSamplingMethod.checked ? true : false
-
-                    RadioButton { text: qsTr("Default")         ; name: "seedDefault" ; checked: true}
-                    RowLayout {
-                        RadioButton { text: qsTr("Manual")      ; name: "seedManual"  ; id: manualSeed}
-                        TextField {
-                            value: "1"
-                            name: "seedNumber"
-                            enabled: manualSeed.checked
-                            validator: IntValidator { bottom: 0 }
-                        }
-                    }
-                }
-            }
-
-            ColumnLayout {
-
-                GroupBox {
-                    title: qsTr("<b>Tables</b>")
-                    enabled: pickSamplingMethod.checked ? true : false
-
-                    CheckBox { text: qsTr("Sample descriptives")  ; name: "showDescriptives" ; id: descriptives}
-                    CheckBox { text: qsTr("Mean")                 ; name: "mean"; Layout.leftMargin: 20; enabled: descriptives.checked ; checked: true}
-                    CheckBox { text: qsTr("Median")               ; name: "median"; Layout.leftMargin: 20; enabled: descriptives.checked ; checked: true}
-                    CheckBox { text: qsTr("Std. deviation")       ; name: "sd"; Layout.leftMargin: 20; enabled: descriptives.checked ; checked: true}
-                    CheckBox { text: qsTr("Variance")             ; name: "var"; Layout.leftMargin: 20; enabled: descriptives.checked}
-                    CheckBox { text: qsTr("Minimum")              ; name: "min"; Layout.leftMargin: 20; enabled: descriptives.checked}
-                    CheckBox { text: qsTr("Maximum")              ; name: "max"; Layout.leftMargin: 20; enabled: descriptives.checked}
-                    CheckBox { text: qsTr("Range")                ; name: "range"; Layout.leftMargin: 20; enabled: descriptives.checked}
-                }
-
-            }
-
-        }
-
-        Button {
-          Layout.leftMargin: 450
-          text: qsTr("<b>Confirm</b>")
-        }
-
-        CheckBox {
-          name: "toEvaluation"
-          Layout.leftMargin: 450
-          text: qsTr("<b>Confirm</b>")
-          id: toEvaluation
-        }
-
-    }
+  }
 
     ExpanderButton {
         text: evaluationPhase.enabled ? qsTr("<b>4. Evaluation</b>") : qsTr("4. Evaluation")
@@ -387,63 +388,47 @@ Form {
         }
 
         Flow{
-          spacing: 70
+          spacing: 100
+
+          GroupBox {
+            title: qsTr("<b>Tables</b>")
+
+            CheckBox {
+                text: qsTr("Most likely error")
+                name: "mostLikelyError"
+                checked: true
+            }
+
+          }
 
           ColumnLayout {
               GroupBox {
-                  title: qsTr("<b>Classical plots</b>")
+                  title: qsTr("<b>Plots</b>")
                     CheckBox {
                         text: qsTr("Confidence bound")
                         name: "plotBound"
                         enabled: frequentistType.checked
                     }
                 }
-        }
-
-          ColumnLayout {
-              GroupBox {
-                  title: qsTr("<b>Bayesian plots</b>")
-                    CheckBox {
-                        text: qsTr("Prior and posterior")
-                        name: "plotPriorAndPosterior"
-                        id: plotPriorAndPosterior
-                        enabled: bayesianType.checked
-                    }
-                    PercentField {
-                      text: qsTr("x-axis limit")
-                      defaultValue: 20
-                      name: "limx_backup"
-                      Layout.leftMargin: 20
-                      enabled: bayesianType.checked
-                    }
-                  CheckBox {
-                    text: qsTr("Additional info")
-                    name: "plotPriorAndPosteriorAdditionalInfo"
-                    Layout.leftMargin: 20
-                    checked: true
-                    enabled: plotPriorAndPosterior.checked
-                  }
-              }
-          }
-
+            }
         }
 
         Button {
           Layout.leftMargin: 450
-          text: qsTr("<b>Confirm</b>")
+          text: qsTr("<b>To report</b>")
         }
 
         CheckBox {
           name: "toInterpretation"
           Layout.leftMargin: 450
-          text: qsTr("<b>Confirm</b>")
+          text: qsTr("<b>To report</b>")
           id: toInterpretation
         }
 
     }
 
     ExpanderButton {
-        text: interpretationPhase.enabled ? qsTr("<b>5. Report</b>") : qsTr("5. Report")
+        text: interpretationPhase.expanded ? qsTr("<b>5. Report</b>") : qsTr("5. Report")
         expanded: toSampling.checked ? (toEvaluation.checked ? (toInterpretation.checked ? true : false) : false) : false
         enabled: toSampling.checked ? (toEvaluation.checked ? (toInterpretation.checked ? true : false) : false) : false
         id: interpretationPhase
