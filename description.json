@@ -40,26 +40,26 @@
 			[
 				{
 					"title":							"Classical Attributes Planning",
-					"qml":								"attributesPlanning.qml",
-					"function":						"attributesPlanning",
+					"qml":								"classicalAttributesPlanning.qml",
+					"function":						"classicalAttributesPlanning",
 					"usesJaspResults":		true
 				},
 				{
 					"title":							"Classical Attributes Sampling",
-					"qml":								"attributesSimpleRandomSampling.qml",
-					"function":						"attributesSimpleRandomSampling",
+					"qml":								"classicalAttributesSampling.qml",
+					"function":						"classicalAttributesSampling",
 					"usesJaspResults":		true
 				},
 				{
 					"title":							"Classical Attributes Evaluation",
-					"qml":								"attributesBound.qml",
-					"function":						"attributesBound",
+					"qml":								"classicalAttributesEvaluation.qml",
+					"function":						"classicalAttributesEvaluation",
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Classical Summary Attributes Evaluation",
-					"qml":								"summaryAttributesBound.qml",
-					"function":						"summaryAttributesBound",
+					"title":							"Summary Classical Attributes Evaluation",
+					"qml":								"summaryClassicalAttributesEvaluation.qml",
+					"function":						"summaryClassicalAttributesEvaluation",
 					"usesJaspResults":		true
 				},
 				{
@@ -70,14 +70,14 @@
 				},
 				{
 					"title":							"Bayesian Attributes Evaluation",
-					"qml":								"bayesianAttributesBound.qml",
-					"function":						"bayesianAttributesBound",
+					"qml":								"bayesianAttributesEvaluation.qml",
+					"function":						"bayesianAttributesEvaluation",
 					"usesJaspResults":		true
 				},
 				{
 					"title":							"Summary Bayesian Attributes Evaluation",
-					"qml":								"summaryBayesianAttributesBound.qml",
-					"function":						"summaryBayesianAttributesBound",
+					"qml":								"summaryBayesianAttributesEvaluation.qml",
+					"function":						"summaryBayesianAttributesEvaluation",
 					"usesJaspResults":		true
 				}
 			]

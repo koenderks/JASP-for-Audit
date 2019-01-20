@@ -42,19 +42,20 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
       jaspResults[["priorKnowledgeHeader"]] <- createJaspHtml("<u>Planning</u>", "h2")
       jaspResults[["priorKnowledgeHeader"]]$position <- 6
 
-      .attributesPlanning(options, jaspResults)
+      .attributesPlanningFullAudit(options, jaspResults)
       result              <- jaspResults[["result"]]$object
       .attributesPlanningTableFullAudit(options, result, jaspResults, position = 8)
 
+      if(options[["expected.errors"]] == "kPercentage"){
+          expected.errors <- paste0(round(options[["kPercentageNumber"]] * 100, 2), "%")
+          max.errors <- ceiling(options[["kPercentageNumber"]] * result[["n"]])
+      } else {
+          expected.errors <- options[["kNumberNumber"]]
+          max.errors <- options[["kNumberNumber"]]
+      }
+
       if(options[["interpretation"]]){
 
-          if(options[["expected.errors"]] == "kPercentage"){
-              expected.errors <- paste0(round(options[["kPercentageNumber"]] * 100, 2), "%")
-              max.errors <- ceiling(options[["kPercentageNumber"]] * result[["n"]])
-          } else {
-              expected.errors <- options[["kNumberNumber"]]
-              max.errors <- options[["kNumberNumber"]]
-          }
           jaspResults[["priorKnowledgeParagraph"]] <- createJaspHtml(paste0("As prior knowledge, the most likely error in the data was specified to be <b>", expected.errors ,"</b>. The sample size that is required to prove an <b>",options$materiality*100,"%</b>
                                                                           upper confidence bound, assuming the sample contains <b>", expected.errors ,"</b> full errors, is <b>", result[["n"]] ,"</b>. The sample size is calculated with the <b>", options[["distribution"]] , "</b>
                                                                           distribution. Consequently, if <b>", max.errors ,"</b> or more full errors are found in the sample, the population cannot be approved."), "p")
@@ -196,101 +197,5 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
     # Save the state
     state[["options"]] 					<- options
     return(state)
-
-}
-
-.attributesPlanningTableFullAudit <- function(options, result, jaspResults, position = 1){
-
-  if(!is.null(jaspResults[["summaryTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
-
-  summaryTable                              <- createJaspTable("Classical Attributes Planning Table")
-  jaspResults[["summaryTable"]]             <- summaryTable
-  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "show", "distribution", "N",
-                                  "expected.errors" , "kPercentageNumber", "kNumberNumber", "inference"))
-
-  summaryTable$addColumnInfo(name = 'IR',   title = "Inherent risk",        type = 'string')
-  summaryTable$addColumnInfo(name = 'CR',   title = "Control risk",         type = 'string')
-  summaryTable$addColumnInfo(name = 'SR',   title = "Detection risk",       type = 'string')
-  summaryTable$addColumnInfo(name = 'k',    title = "Allowed errors",       type = 'string')
-  summaryTable$addColumnInfo(name = 'n',    title = "Required sample size", type = 'string')
-
-  summaryTable$position                     <- position
-
-  if(options[["N"]] == 0 && options[["distribution"]] == "hypergeometric"){
-    message <- "The population size is specified to be 0. Please enter your population size."
-    summaryTable$errorMessage <- message
-    summaryTable$error <- "badData"
-    return()
-  }
-
-  if(options[["show"]] == "percentage"){
-    SRtable <- paste0(round(result[["alpha"]], 3) * 100, "%")
-    if(options[["expected.errors"]] == "kPercentage"){
-      ktable <- ceiling(result[["k"]] * result[["n"]])
-    } else if(options[["expected.errors"]] == "kNumber"){
-      ktable <- options[["kNumberNumber"]]
-    }
-  } else if(options[["show"]] == "proportion"){
-    SRtable <- round(result[["alpha"]], 3)
-    if(options[["expected.errors"]] == "kPercentage"){
-      ktable <- ceiling(result[["k"]] * result[["n"]])
-    } else if(options[["expected.errors"]] == "kNumber"){
-      ktable <- options[["kNumberNumber"]]
-    }
-  }
-
-  row <- list(IR = result[["IR"]],
-              CR = result[["CR"]],
-              SR = SRtable,
-              k = ktable,
-              n = result[["n"]])
-
-  summaryTable$addRows(row)
-
-  if(options[["distribution"]] == "binomial"){
-          message <- "The sample size is calculated using the <b>binomial</b> distribution."
-          summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
-  } else if(options[["distribution"]] == "hypergeometric"){
-          message <- paste0("The sample size is calculated using the <b>hypergeometric</b> distribution (N = ", options[["N"]] ,").")
-          summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
-  }
-
-}
-
-.attributesBoundTableFullAudit <- function(options, result, jaspResults, position = 1){
-
-    if(!is.null(jaspResults[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
-
-    evaluationTable                       <- createJaspTable("Classical Evaluation Table")
-    jaspResults[["evaluationTable"]]      <- evaluationTable
-    evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID", "sampleFilter", "inference"))
-    evaluationTable$position <- position
-
-    evaluationTable$addColumnInfo(name = 'IR',     title = "Inherent risk",  type = 'string')
-    evaluationTable$addColumnInfo(name = 'CR',     title = "Control risk",   type = 'string')
-    evaluationTable$addColumnInfo(name = 'SR',     title = "Detection risk",  type = 'string')
-    evaluationTable$addColumnInfo(name = 'n',      title = "Sample size",    type = 'string')
-    evaluationTable$addColumnInfo(name = 'k',      title = "Errors",         type = 'string')
-
-    evaluationTable$addColumnInfo(name = 'bound',  title = paste0(result[["confidence"]]*100,"% Confidence bound"), type = 'string')
-
-    if(options[["show"]] == "percentage"){
-        SRtable <- paste0(round(result[["alpha"]],3) * 100, "%")
-        if(result[["bound"]] == "."){
-            boundTable          <- "."
-        } else {
-            boundTable <- paste0(round(result[["bound"]],3) * 100, "%")
-        }
-    } else if(options[["show"]] == "proportion"){
-        SRtable <- round(result[["alpha"]], 3)
-        if(result[["bound"]] == "."){
-            boundTable          <- "."
-        } else {
-            boundTable <- round(result[["bound"]],3)
-        }
-    }
-
-    row <- list(IR = result[["IR"]], CR = result[["CR"]], SR = SRtable, n = result[["n"]], k = result[["k"]], bound = boundTable)
-    evaluationTable$addRows(row)
 
 }

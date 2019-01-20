@@ -33,7 +33,25 @@ Form {
     }
 
     Flow {
-        spacing: 90
+        spacing: 60
+
+          GroupBox {
+              title: qsTr("<b>Audit risk</b>")
+
+              PercentField {
+                  label.text: qsTr("Confidence")
+                  with1Decimal: true
+                  defaultValue: 95
+                  name: "confidence"
+              }
+
+              PercentField {
+                  label.text: qsTr("Materiality")
+                  with1Decimal: true
+                  defaultValue: 5
+                  name: "materiality"
+              }
+          }
 
         ColumnLayout {
 
@@ -60,29 +78,8 @@ Form {
         }
     }
 
-    Divider { }
-
-    GroupBox {
-        title: qsTr("<b>Audit risk</b>")
-
-      PercentField {
-          label.text: qsTr("Materiality")
-          with1Decimal: true
-          defaultValue: 5
-          name: "materiality"
-      }
-
-        PercentField {
-            label.text: qsTr("Confidence")
-            with1Decimal: true
-            defaultValue: 95
-            name: "confidence"
-        }
-
-    }
-
     ExpanderButton {
-        text: qsTr("<b>Advanced options</b>")
+        text: qsTr("Advanced output options")
 
         Flow {
             spacing: 70
@@ -90,7 +87,7 @@ Form {
             ColumnLayout {
 
                 RadioButtonGroup {
-                    title: qsTr("<b>Ratio</b>")
+                    title: qsTr("<b>Units</b>")
                     name: "show"
 
                     RadioButton { text: qsTr("Percentages")         ; name: "percentage" ; checked: true}
@@ -98,17 +95,36 @@ Form {
                 }
             }
 
+            GroupBox {
+              title: qsTr("<b>Interpretation</b>")
+              CheckBox { text: qsTr("Toggle interpretation"); name: "interpretation"; checked: false }
+            }
+
         }
+
 
     }
 
-    Flow {
-        spacing: 50
+    Flow{
+      spacing: 100
 
-        GroupBox {
-            title: qsTr("<b>Plots</b>")
-            CheckBox { text: qsTr("Confidence bound") ; name: "plotBounds"}
+      GroupBox {
+        title: qsTr("<b>Tables</b>")
+
+        CheckBox {
+            text: qsTr("Most likely error")
+            name: "mostLikelyError"
+            checked: true
         }
+
+      }
+
+      ColumnLayout {
+          GroupBox {
+              title: qsTr("<b>Plots</b>")
+                CheckBox { text: qsTr("Confidence bound") ; name: "plotBounds"}
+          }
+      }
 
     }
 

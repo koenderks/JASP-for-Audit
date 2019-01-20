@@ -319,7 +319,7 @@ Form {
                 name: "recordNumberVariable"
                 title: qsTr("Record numbers")
                 singleItem: true
-                allowedColumns: ["nominal"]
+                allowedColumns: ["nominal", "ordinal", "scale"]
                 enabled: pickSamplingMethod.checked ? true : false
             }
             AssignedVariablesList {

@@ -1,13 +1,27 @@
-summaryAttributesBound <- function(jaspResults, dataset, options, state=NULL){
+summaryClassicalAttributesEvaluation <- function(jaspResults, dataset, options, state=NULL){
 
   if(is.null(state))
       state 							                     <- list()
   # Set the title
   jaspResults$title 					<- "Summary Statistics Attributes Bound"
+
+  .ARMformula(options, jaspResults, position = 1)   # Show the Audit Risk Model formula and quantify detection risk
+  DR              <- jaspResults[["DR"]]$object
   # Perform the analysis
   .summaryAttributesBound(options, jaspResults)
   result                      <- jaspResults[["result"]]$object
-  .summaryAttributesBoundTable(options, result, jaspResults)
+  .summaryAttributesBoundTable(options, result, jaspResults, position = 3)
+
+  if(options[["interpretation"]]){
+
+      jaspResults[["resultParagraph"]] <- createJaspHtml(paste0("The sample consisted of <b>",options[["n"]], "</b> observations, <b>", result[["k"]] , "</b> of which were found to contain a full error. The knowledge from these data, com-
+                                                            bined with the prior knowledge results in an <b>",round((1 - result[["alpha"]]) * 100, 2), "%</b> upper confidence bound of <b>",round(result[["bound"]]*100, 2),"%</b>. The cumulative knowledge states that there
+                                                            is a <b>",options$confidence*100, "%</b> probability that, when one would repeaditly sample from this population, the maximum error is calculated to be lower
+                                                            than <b>",round(result[["bound"]]*100, 2),"%</b>."), "p")
+      jaspResults[["resultParagraph"]]$position <- 2
+
+  }
+
   if(options[['plotBounds']])
   {
      if(is.null(jaspResults[["confidenceBoundPlot"]]))
@@ -15,8 +29,28 @@ summaryAttributesBound <- function(jaspResults, dataset, options, state=NULL){
      jaspResults[["confidenceBoundPlot"]] 		<- .plotConfidenceBoundsSummary(options, result, jaspResults)
      jaspResults[["confidenceBoundPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "plotBounds", "materiality",
                                                                 "show", "N", "K"))
-     jaspResults[["confidenceBoundPlot"]] 		$position <- 2
+     jaspResults[["confidenceBoundPlot"]] 		$position <- 4
      }
+  }
+
+  if(options[["interpretation"]]){
+
+      jaspResults[["conclusionTitle"]] <- createJaspHtml("<u>Conclusion</u>", "h2")
+      jaspResults[["conclusionTitle"]]$position <- 5
+
+      if(result[["bound"]] < options[["materiality"]]){
+          above_below <- "lower"
+          approve <- "<b>no material misstatement</b>"
+      } else if(result[["bound"]] >= options[["materiality"]]){
+          above_below <- "higher"
+          approve <- "<b>material misstatement, or more information has to be seen.</b>"
+      }
+
+      jaspResults[["conclusionParagraph"]] <- createJaspHtml(paste0("To approve these data, a <b>", options$confidence*100 ,"%</b> upper confidence bound on the population proportion of full errors should be determined to be
+                                                                  lower than materiality, in this case <b>", options$materiality*100 ,"%</b>. For the current data, the confidence bound is <b>", above_below ,"</b> than materiality. The conclusion for
+                                                                  these data is that the data contain ", approve ,"."), "p")
+      jaspResults[["conclusionParagraph"]]$position <- 6
+
   }
   # Save the state
   state[["options"]] 					                  <- options
@@ -80,7 +114,7 @@ summaryAttributesBound <- function(jaspResults, dataset, options, state=NULL){
 
 }
 
-.summaryAttributesBoundTable <- function(options, result, jaspResults){
+.summaryAttributesBoundTable <- function(options, result, jaspResults, position = 1){
 
   if(!is.null(jaspResults[["summaryTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
@@ -95,7 +129,7 @@ summaryAttributesBound <- function(jaspResults, dataset, options, state=NULL){
   summaryTable$addColumnInfo(name = 'k', title = "Errors", type = 'string')
   summaryTable$addColumnInfo(name = 'bound', title = paste0(result[["confidence"]]*100,"% Confidence bound"), type = 'string')
 
-  summaryTable$position <- 1
+  summaryTable$position <- position
 
   if(options[["show"]] == "percentage"){
     SRtable <- paste0(round(result[["alpha"]],3) * 100, "%")

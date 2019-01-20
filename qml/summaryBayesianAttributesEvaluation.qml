@@ -163,42 +163,7 @@ Form {
 
     }
 
-    ExpanderButton {
-        text: qsTr("Advanced output options")
-
-        Flow {
-            spacing: 70
-
-            ColumnLayout {
-
-                RadioButtonGroup {
-                    title: qsTr("<b>Units</b>")
-                    name: "show"
-
-                    RadioButton { text: qsTr("Percentages")         ; name: "percentage" ; checked: true}
-                    RadioButton { text: qsTr("Proportions")         ; name: "proportion" }
-                }
-            }
-
-            ColumnLayout {
-                RadioButtonGroup {
-                    title: qsTr("<b>Statistic</b>")
-                    name: "statistic"
-
-                    RadioButton { text: qsTr("Confidence bound")        ; name: "bound" ; checked: true}
-                    RadioButton { text: qsTr("Confidence interval")      ; name: "interval" }
-                }
-            }
-
-            GroupBox {
-              title: qsTr("<b>Interpretation</b>")
-              CheckBox { text: qsTr("Toggle interpretation"); name: "interpretation"; checked: false }
-            }
-
-        }
-
-
-    }
+    Divider { }
 
     Flow{
       spacing: 100
@@ -241,6 +206,43 @@ Form {
               }
           }
       }
+
+    }
+
+    ExpanderButton {
+        text: qsTr("Advanced output options")
+
+        Flow {
+            spacing: 70
+
+            ColumnLayout {
+
+                RadioButtonGroup {
+                    title: qsTr("<b>Units</b>")
+                    name: "show"
+
+                    RadioButton { text: qsTr("Percentages")         ; name: "percentage" ; checked: true}
+                    RadioButton { text: qsTr("Proportions")         ; name: "proportion" }
+                }
+            }
+
+            ColumnLayout {
+                RadioButtonGroup {
+                    title: qsTr("<b>Statistic</b>")
+                    name: "statistic"
+
+                    RadioButton { text: qsTr("Confidence bound")        ; name: "bound" ; checked: true}
+                    RadioButton { text: qsTr("Confidence interval")      ; name: "interval" }
+                }
+            }
+
+            GroupBox {
+              title: qsTr("<b>Interpretation</b>")
+              CheckBox { text: qsTr("Toggle interpretation"); name: "interpretation"; checked: false }
+            }
+
+        }
+
 
     }
 

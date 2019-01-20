@@ -13,6 +13,40 @@
     }
 }
 
+dBetaBinom <- function (x, N, u, v, log = FALSE)
+{
+    logval <- lbeta(x + u, N - x + v) - lbeta(u, v) + lchoose(N,
+                                                              x)
+    if (log) {
+        ret <- logval
+    }
+    else {
+        ret <- exp(logval)
+    }
+    ret
+}
+
+qBetaBinom <- function (p, N, u, v)
+{
+    pp <- cumsum(dbb(0:N, N, u, v))
+    sapply(p, function(x) sum(pp < x))
+}
+
+.calculateBayesianSampleSizeBetaBinom <- function(options, alpha, N){
+    for(n in 1:5000){
+        if(options[["expected.errors"]] == "kPercentage"){
+            impk <- n * options[["kPercentageNumber"]]
+        } else if(options[["expected.errors"]] == "kNumber"){
+            impk <- options[["kNumberNumber"]]
+        }
+        if(impk >= n){ next }
+        x                     <- qBetaBinom(p = 1 - alpha, N = N, u = 1 + impk, v = 1 + (n - impk))
+        if((x / N) < options[["materiality"]]){
+            return(n)
+        }
+    }
+}
+
 .bayesianAttributesPlanningFullAudit <- function(options, jaspResults){
 
     if(!is.null(jaspResults[["result"]])) return()
@@ -42,23 +76,21 @@
 
     n_noprior               <- .calculateBayesianSampleSize(options, 1 - confidence)
     n_withprior             <- .calculateBayesianSampleSize(options, alpha)
-
     pn                      <- n_noprior - n_withprior
-
     if(pn == 0){
         pk                  <- 0
         if(options[["expected.errors"]] == "kPercentage"){
-            k                   <- options[["kPercentageNumber"]]
+            k               <- options[["kPercentageNumber"]]
         } else if(options[["expected.errors"]] == "kNumber"){
-            k                   <- options[["kNumberNumber"]]
+            k               <- options[["kNumberNumber"]]
         }
     } else {
         if(options[["expected.errors"]] == "kPercentage"){
-            k                   <- options[["kPercentageNumber"]]
-            pk                  <- pn * options[["kPercentageNumber"]]
+            k               <- options[["kPercentageNumber"]]
+            pk              <- pn * options[["kPercentageNumber"]]
         } else if(options[["expected.errors"]] == "kNumber"){
-            k                   <- options[["kNumberNumber"]]
-            pk                  <- k
+            k               <- options[["kNumberNumber"]]
+            pk              <- k
         }
     }
     priorA                  <- 1 + pk
@@ -66,8 +98,8 @@
 
     if(options[["prior"]] == "5050"){
 
-      priorA <- 1
-      priorB <- 1/((3/2) * options[["materiality"]]) - (1/3)
+      priorA                <- 1
+      priorB                <- 1/((3/2) * options[["materiality"]]) - (1/3)
 
     }
 

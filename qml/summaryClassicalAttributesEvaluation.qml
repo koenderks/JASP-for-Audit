@@ -26,7 +26,27 @@ Form {
     id: form
 
     Flow {
-        spacing: 90
+        spacing: 60
+
+        ColumnLayout {
+          GroupBox {
+              title: qsTr("<b>Audit risk</b>")
+
+              PercentField {
+                  label.text: qsTr("Confidence")
+                  with1Decimal: true
+                  defaultValue: 95
+                  name: "confidence"
+              }
+
+              PercentField {
+                  label.text: qsTr("Materiality")
+                  with1Decimal: true
+                  defaultValue: 5
+                  name: "materiality"
+              }
+          }
+        }
 
         ColumnLayout {
 
@@ -56,59 +76,40 @@ Form {
     Divider { }
 
     Flow {
-        spacing: 40
+        spacing: 60
 
-    GroupBox {
-        title: qsTr("<b>Audit risk</b>")
+        GroupBox {
+            title: qsTr("<b>Observations</b>")
 
-      PercentField {
-          label.text: qsTr("Materiality")
-          with1Decimal: true
-          defaultValue: 5
-          name: "materiality"
-      }
+            TextField {
+                text: qsTr("Sample size")
+                value: "0"
+                name: "n"
+                inputType: "integer"
+                validator: IntValidator { bottom: 0 }
+            }
 
-        PercentField {
-            label.text: qsTr("Confidence")
-            with1Decimal: true
-            defaultValue: 95
-            name: "confidence"
+            TextField {
+                text: qsTr("Found errors")
+                value: "0"
+                name: "k"
+                inputType: "integer"
+                validator: IntValidator { bottom: 0 }
+            }
         }
-    }
-
-    GroupBox {
-        title: qsTr("<b>Observations</b>")
-
-        TextField {
-            text: qsTr("Sample size")
-            value: "0"
-            name: "n"
-            inputType: "integer"
-            validator: IntValidator { bottom: 0 }
-        }
-
-        TextField {
-            text: qsTr("Found errors")
-            value: "0"
-            name: "k"
-            inputType: "integer"
-            validator: IntValidator { bottom: 0 }
-        }
-
-    }
 
     }
 
     ExpanderButton {
-        text: qsTr("<b>Advanced options</b>")
+        text: qsTr("Advanced output options")
 
         Flow {
-            spacing: 20
+            spacing: 70
 
             ColumnLayout {
 
                 RadioButtonGroup {
-                    title: qsTr("<b>Ratio</b>")
+                    title: qsTr("<b>Units</b>")
                     name: "show"
 
                     RadioButton { text: qsTr("Percentages")         ; name: "percentage" ; checked: true}
@@ -116,16 +117,35 @@ Form {
                 }
             }
 
+            GroupBox {
+              title: qsTr("<b>Interpretation</b>")
+              CheckBox { text: qsTr("Toggle interpretation"); name: "interpretation"; checked: false }
+            }
+
         }
+
 
     }
 
-    GridLayout {
-      columns: 1
+    Flow{
+      spacing: 100
 
       GroupBox {
-          title: qsTr("<b>Plots</b>")
-          CheckBox { text: qsTr("Confidence bound") ; name: "plotBounds"}
+        title: qsTr("<b>Tables</b>")
+
+        CheckBox {
+            text: qsTr("Most likely error")
+            name: "mostLikelyError"
+            checked: true
+        }
+
+      }
+
+      ColumnLayout {
+          GroupBox {
+              title: qsTr("<b>Plots</b>")
+                CheckBox { text: qsTr("Confidence bound") ; name: "plotBounds"}
+          }
       }
 
     }
