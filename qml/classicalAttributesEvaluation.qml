@@ -129,7 +129,7 @@ Form {
         CheckBox {
             text: qsTr("Most likely error")
             name: "mostLikelyError"
-            checked: true
+            checked: false
         }
 
       }

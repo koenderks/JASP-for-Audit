@@ -23,7 +23,7 @@ summaryBayesianAttributesEvaluation <- function(jaspResults, dataset, options, s
   # Perform the analysis
   .summaryBayesianAttributesBound(options, jaspResults)
   result                      <- jaspResults[["result"]]$object
-  .bayesianAttributesBoundTableFullAudit(options, result, jaspResults, position = 5)
+  .summaryBayesianAttributesBoundTable(options, result, jaspResults, position = 5)
 
   # Create the prior and posterior plot ##
    if(options[['plotPriorAndPosterior']])
@@ -154,21 +154,34 @@ summaryBayesianAttributesEvaluation <- function(jaspResults, dataset, options, s
 
 }
 
-.summaryBayesianAttributesBoundTable <- function(options, result, jaspResults){
+.summaryBayesianAttributesBoundTable <- function(options, result, jaspResults, position = 1){
 
   if(!is.null(jaspResults[["summaryTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
   summaryTable                       <- createJaspTable("Bayesian Evaluation Table")
   jaspResults[["summaryTable"]]      <- summaryTable
   summaryTable$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "statistic", "materiality", "show",
-                                  "expected.errors", "kPercentageNumber", "kNumberNumber", "prior"))
-  summaryTable$position <- 1
+                                  "expected.errors", "kPercentageNumber", "kNumberNumber", "prior",
+                                  "mostLikelyError", "bayesFactor"))
+  summaryTable$position <- position
 
   summaryTable$addColumnInfo(name = 'IR',   title = "Inherent risk",  type = 'string')
   summaryTable$addColumnInfo(name = 'CR',   title = "Control risk",   type = 'string')
   summaryTable$addColumnInfo(name = 'SR',   title = "Sampling risk",  type = 'string')
   summaryTable$addColumnInfo(name = 'n',    title = "Sample size",    type = 'string')
   summaryTable$addColumnInfo(name = 'k',    title = "Errors",         type = 'string')
+  if(options[["statistic"]] == "bound"){
+    summaryTable$addColumnInfo(name = 'bound', title = paste0(result[["confidence"]]*100,"% Confidence bound"), type = 'string')
+  } else {
+    summaryTable$addColumnInfo(name = 'ciLow', title = "Lower", type = "string", overtitle = paste0(result[["confidence"]]*100,"% Confidence interval"))
+    summaryTable$addColumnInfo(name = 'ciHigh', title = "Upper", type = "string", overtitle = paste0(result[["confidence"]]*100,"% Confidence interval"))
+  }
+  if(options[["mostLikelyError"]])
+    summaryTable$addColumnInfo(name = 'mle',  title = "Most Likely Error", type = 'string')
+  if(options[["bayesFactor"]])
+    summaryTable$addColumnInfo(name = 'bf',     title = "Bayes factor",         type = 'string')
+
+  mle <- floor(qbeta(p = 0.5, result[["posteriorA"]], result[["posteriorB"]]) * options[["N"]])
 
   if(options[["show"]] == "percentage"){
     SRtable <- paste0(round(result[["alpha"]],3) * 100, "%")
@@ -195,13 +208,34 @@ summaryBayesianAttributesEvaluation <- function(jaspResults, dataset, options, s
   }
 
   if(options[["statistic"]] == "bound"){
-      summaryTable$addColumnInfo(name = 'bound', title = paste0(result[["confidence"]]*100,"% Confidence bound"), type = 'string')
-      row <- list(IR = result[["IR"]], CR = result[["CR"]], SR = SRtable, n = result[["n"]], k = result[["k"]], bound = boundTable)
-      summaryTable$addRows(row)
+    if(options[["mostLikelyError"]]){
+      if(options[["bayesFactor"]]){
+        row <- list(IR = result[["IR"]], CR = result[["CR"]], SR = SRtable, n = result[["n"]], k = result[["k"]], bound = boundTable, mle = mle, bf = .BF(options, result))
+      } else {
+        row <- list(IR = result[["IR"]], CR = result[["CR"]], SR = SRtable, n = result[["n"]], k = result[["k"]], bound = boundTable, mle = mle)
+      }
+    } else {
+        if(options[["bayesFactor"]]){
+          row <- list(IR = result[["IR"]], CR = result[["CR"]], SR = SRtable, n = result[["n"]], k = result[["k"]], bound = boundTable, bf = .BF(options, result))
+        } else {
+          row <- list(IR = result[["IR"]], CR = result[["CR"]], SR = SRtable, n = result[["n"]], k = result[["k"]], bound = boundTable)
+        }
+    }
+    summaryTable$addRows(row)
   } else {
-    summaryTable$addColumnInfo(name = 'ciLow', title = "Lower", type = "string", overtitle = paste0(result[["confidence"]]*100,"% Confidence interval"))
-    summaryTable$addColumnInfo(name = 'ciHigh', title = "Upper", type = "string", overtitle = paste0(result[["confidence"]]*100,"% Confidence interval"))
-      row <- list(IR = result[["IR"]], CR = result[["CR"]], SR = SRtable, n = result[["n"]], k = result[["k"]], ciLow = boundTable[1], ciHigh = boundTable[2])
-      summaryTable$addRows(row)
+    if(options[["mostLikelyError"]]){
+      if(options[["bayesFactor"]]){
+        row <- list(IR = result[["IR"]], CR = result[["CR"]], SR = SRtable, n = result[["n"]], k = result[["k"]], ciLow = boundTable[1], ciHigh = boundTable[2], mle = mle, bf = .BF(options, result))
+      } else {
+        row <- list(IR = result[["IR"]], CR = result[["CR"]], SR = SRtable, n = result[["n"]], k = result[["k"]], ciLow = boundTable[1], ciHigh = boundTable[2], mle = mle)
+      }
+    } else {
+        if(options[["bayesFactor"]]){
+          row <- list(IR = result[["IR"]], CR = result[["CR"]], SR = SRtable, n = result[["n"]], k = result[["k"]], ciLow = boundTable[1], ciHigh = boundTable[2], bf = .BF(options, result))
+        } else {
+          row <- list(IR = result[["IR"]], CR = result[["CR"]], SR = SRtable, n = result[["n"]], k = result[["k"]], ciLow = boundTable[1], ciHigh = boundTable[2])
+        }
+    }
+    summaryTable$addRows(row)
   }
 }

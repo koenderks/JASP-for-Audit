@@ -174,7 +174,7 @@ Form {
         CheckBox {
             text: qsTr("Most likely error")
             name: "mostLikelyError"
-            checked: true
+            checked: false
         }
         CheckBox {
             text: qsTr("Bayes factor")

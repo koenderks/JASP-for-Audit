@@ -120,7 +120,7 @@ summaryClassicalAttributesEvaluation <- function(jaspResults, dataset, options, 
 
   summaryTable                       <- createJaspTable("Classical Evaluation Table")
   jaspResults[["summaryTable"]]      <- summaryTable
-  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "show", "N", "K"))
+  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "show", "N", "K", "mostLikelyError"))
 
   summaryTable$addColumnInfo(name = 'IR', title = "Inherent risk", type = 'string')
   summaryTable$addColumnInfo(name = 'CR', title = "Control risk", type = 'string')
@@ -128,6 +128,8 @@ summaryClassicalAttributesEvaluation <- function(jaspResults, dataset, options, 
   summaryTable$addColumnInfo(name = 'n', title = "Sample size", type = 'string')
   summaryTable$addColumnInfo(name = 'k', title = "Errors", type = 'string')
   summaryTable$addColumnInfo(name = 'bound', title = paste0(result[["confidence"]]*100,"% Confidence bound"), type = 'string')
+  if(options[["mostLikelyError"]])
+    summaryTable$addColumnInfo(name = 'mle',  title = "Most Likely Error", type = 'string')
 
   summaryTable$position <- position
 
@@ -147,12 +149,27 @@ summaryClassicalAttributesEvaluation <- function(jaspResults, dataset, options, 
     }
   }
 
-  row <- list(IR = result[["IR"]],
-              CR = result[["CR"]],
-              SR = SRtable,
-              n = result[["n"]],
-              k = result[["k"]],
-              bound = boundTable)
+  if(options[["N"]] == 0){
+      mle <- 0
+  } else {
+      mle <- floor(options[["k"]] / options[["n"]] * options[["N"]])
+  }
+
+  if(options[["mostLikelyError"]]){
+    row <- list(IR = result[["IR"]],
+                CR = result[["CR"]],
+                SR = SRtable,
+                n = result[["n"]],
+                k = result[["k"]],
+                bound = boundTable, mle = mle)
+  } else {
+    row <- list(IR = result[["IR"]],
+                CR = result[["CR"]],
+                SR = SRtable,
+                n = result[["n"]],
+                k = result[["k"]],
+                bound = boundTable)
+  }
 
   summaryTable$addRows(row)
 

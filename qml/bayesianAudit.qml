@@ -25,6 +25,7 @@ import JASP.Widgets 1.0
 Form {
     id: form
 
+    // Expander button for the Global options phase
     ExpanderButton {
         text: optionPhase.expanded ? qsTr("<b>1. Global options</b>") : qsTr("1. Global options")
         expanded: toPlanning.checked ? false : true
@@ -71,6 +72,7 @@ Form {
 
     }
 
+    // Expander button for the Planning phase
     ExpanderButton {
         text: planningPhase.expanded ? qsTr("<b>2. Planning</b>") : qsTr("2. Planning")
         expanded: toSampling.checked ? false : (toPlanning.checked ? true : false)
@@ -139,7 +141,7 @@ Form {
     ExpanderButton {
         text: qsTr("Advanced prior options")
         Layout.leftMargin: 20
-        implicitWidth: 560
+        implicitWidth: 570
         enabled: populationSize.value == "0" ? false : true
 
         RadioButtonGroup {
@@ -166,12 +168,10 @@ Form {
             RadioButton { text: qsTr("Without replacement")         ; name: "hypergeometric" ; id: hyperDist}
         }
 
-        GroupBox {
-          title: qsTr("<b>Allowed errors</b>")
-          enabled: populationSize.value == "0" ? false : true
-
           RadioButtonGroup {
               name: "expected.errors"
+              title: qsTr("<b>Allowed errors</b>")
+              enabled: populationSize.value == "0" ? false : true
 
               RowLayout {
                   RadioButton { text: qsTr("Percentage")            ; name: "kPercentage" ; checked: true; id: expkPercentage}
@@ -194,10 +194,8 @@ Form {
                       Layout.leftMargin: 18
                   }
               }
-
           }
         }
-    }
 
     Divider { }
 
@@ -240,6 +238,7 @@ Form {
     }
   }
 
+  // Expander button for the Sampling phase
     ExpanderButton {
         text: samplingPhase.expanded ? qsTr("<b>3. Sampling</b>") : qsTr("3. Sampling")
         expanded: toSampling.checked ? (toEvaluation.checked ? false : true) : false
@@ -250,7 +249,7 @@ Form {
             expanded: pickSamplingMethod.checked ? false : true
             //enabled: pickSamplingMethod.checked ? false : true
             title: samplingMethod.expanded ? qsTr("<b>3.1 Sampling method</b>") : qsTr("3.1 Sampling method")
-            implicitWidth: 560
+            implicitWidth: 570
             id: samplingMethod
             Layout.leftMargin: 20
 
@@ -311,9 +310,11 @@ Form {
 
         }
 
+        // Variables form for attributes sampling
         VariablesForm {
             availableVariablesList.name: "allAvailableVariables2"
             enabled: pickSamplingMethod.checked ? true : false
+            visible: attributes.checked ? true : false
 
             AssignedVariablesList {
                 name: "recordNumberVariable"
@@ -330,6 +331,39 @@ Form {
                 }
             AssignedVariablesList {
                 name: "variables"
+                title: qsTr("Sampling variables")
+                singleItem: false
+                allowedColumns: ["scale", "ordinal", "nominal"]
+            }
+        }
+
+        // Variables form for MUS sampling
+        VariablesForm {
+            availableVariablesList.name: "allAvailableVariables3"
+            enabled: pickSamplingMethodMUS.checked ? true : false
+            visible: attributes.checked ? false : true
+
+            AssignedVariablesList {
+                name: "recordNumberVariableMUS"
+                title: qsTr("Record numbers")
+                singleItem: true
+                allowedColumns: ["nominal", "ordinal", "scale"]
+                enabled: pickSamplingMethodMUS.checked ? true : false
+            }
+            AssignedVariablesList {
+                name: "monetaryVariableMUS"
+                title: qsTr("Monetary values")
+                singleItem: true
+                allowedColumns: ["scale"]
+                }
+            AssignedVariablesList {
+                name: "rankingVariableMUS"
+                title: qsTr("Ranking variable (optional)")
+                singleItem: true
+                allowedColumns: ["scale"]
+                }
+            AssignedVariablesList {
+                name: "variablesMUS"
                 title: qsTr("Sampling variables")
                 singleItem: false
                 allowedColumns: ["scale", "ordinal", "nominal"]
@@ -393,13 +427,18 @@ Form {
 
     }
 
+    // Expander button for the Evaluation phase
     ExpanderButton {
         text: evaluationPhase.expanded ? qsTr("<b>4. Evaluation</b>") : qsTr("4. Evaluation")
         expanded: toSampling.checked ? (toEvaluation.checked ? (toInterpretation.checked ? false : true) : false) : false
         enabled: toSampling.checked ? (toEvaluation.checked ? (toInterpretation.checked ? false : true) : false) : false
         id: evaluationPhase
 
+        // Variables form for attributes evaluation
         VariablesForm {
+        visible: attributes.checked ? true : false
+        availableVariablesList.name: "allAvailableVariables4"
+
             AssignedVariablesList {
                 name: "correctID"
                 title: qsTr("Error variable")
@@ -408,6 +447,25 @@ Form {
             }
             AssignedVariablesList {
                 name: "sampleFilter"
+                title: qsTr("Sample filter variable")
+                singleItem: true
+                allowedColumns: ["nominal"]
+            }
+        }
+
+        // Variables form for attributes evaluation
+        VariablesForm {
+        visible: attributes.checked ? false : true
+        availableVariablesList.name: "allAvailableVariables5"
+
+            AssignedVariablesList {
+                name: "correctMUS"
+                title: qsTr("True monetary values")
+                singleItem: true
+                allowedColumns: ["scale"]
+            }
+            AssignedVariablesList {
+                name: "sampleFilterMUS"
                 title: qsTr("Sample filter variable")
                 singleItem: true
                 allowedColumns: ["nominal"]
@@ -423,7 +481,7 @@ Form {
             CheckBox {
                 text: qsTr("Most likely error")
                 name: "mostLikelyError"
-                checked: true
+                checked: false
             }
             CheckBox {
                 text: qsTr("Bayes factor")
@@ -455,7 +513,25 @@ Form {
                   }
               }
           }
+        }
 
+        // Expander button for the various bounds in MUS procedure
+        ExpanderButton {
+          visible: attributes.checked ? false : true
+          Layout.leftMargin: 20
+          title: qsTr("Advanced output options")
+          implicitWidth: 570
+
+          RadioButtonGroup {
+            title: qsTr("<b>Confidence bound method</b>")
+            name: "boundMethodMUS"
+
+            RadioButton {
+              name: "coxAndSnellBound"
+              text: qsTr("Cox and Snell bound")
+              checked: true
+            }
+          }
         }
 
         Button {
@@ -472,6 +548,7 @@ Form {
 
     }
 
+    // Expander button for the report phase
     ExpanderButton {
         text: interpretationPhase.expanded ? qsTr("<b>5. Report</b>") : qsTr("5. Report")
         expanded: toSampling.checked ? (toEvaluation.checked ? (toInterpretation.checked ? true : false) : false) : false

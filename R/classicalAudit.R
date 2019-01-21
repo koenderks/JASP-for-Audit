@@ -72,7 +72,8 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
               reject.errors <- max.errors : (max.errors + 2)
               jaspResults[["criticalErrorPlot"]] 		<- .plotCriticalErrorsPrior(allowed.errors, reject.errors, jaspResults)
               jaspResults[["criticalErrorPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors",
-                                                                          "show", "statistic", "kPercentageNumber", "kNumberNumber", "plotCriticalErrors"))
+                                                                          "show", "statistic", "kPercentageNumber", "kNumberNumber", "plotCriticalErrors",
+                                                                          "distribution", "N"))
               jaspResults[["criticalErrorPlot"]] 		$position <- 9
           }
       }

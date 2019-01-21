@@ -45,6 +45,13 @@ Form {
                   defaultValue: 5
                   name: "materiality"
               }
+              TextField {
+                  text: qsTr("Population size")
+                  value: "0"
+                  name: "N"
+                  inputType: "integer"
+                  validator: IntValidator { bottom: 0 }
+              }
           }
         }
 
@@ -136,7 +143,7 @@ Form {
         CheckBox {
             text: qsTr("Most likely error")
             name: "mostLikelyError"
-            checked: true
+            checked: false
         }
 
       }
