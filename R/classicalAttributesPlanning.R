@@ -36,10 +36,10 @@ classicalAttributesPlanning <- function(jaspResults, dataset, options, state=NUL
 
   if(options[["expected.errors"]] == "kPercentage"){
       expected.errors <- paste0(round(options[["kPercentageNumber"]] * 100, 2), "%")
-      max.errors <- ceiling(options[["kPercentageNumber"]] * result[["n"]])
+      max.errors <- ceiling(options[["kPercentageNumber"]] * result[["n"]]) + 1
   } else {
       expected.errors <- options[["kNumberNumber"]]
-      max.errors <- options[["kNumberNumber"]]
+      max.errors <- options[["kNumberNumber"]] + 1
   }
 
   if(options[["interpretation"]]){

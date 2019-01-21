@@ -577,13 +577,15 @@ qBetaBinom <- function (p, N, u, v)
 }
 
 .expectedBF <- function(options, result, ktable){
-  BF <- diff(pbeta(c(0, options[["materiality"]]), result[["priorA"]] + ktable, result[["priorB"]] + (result[["n"]] - ktable))) /
-  diff(pbeta(c(options[["materiality"]], 1), result[["priorA"]] + ktable, result[["priorB"]] +(result[["n"]] - ktable)))
-  return(round(BF,2))
+    priorOdds     <- diff(pbeta(c(0, options[["materiality"]]), result[["priorA"]], result[["priorB"]])) / diff(pbeta(c(options[["materiality"]], 1), result[["priorA"]], result[["priorB"]]))
+    posteriorOdds <- diff(pbeta(c(0, options[["materiality"]]), result[["priorA"]] + ktable, result[["priorB"]] + (result[["n"]] + ktable))) / diff(pbeta(c(options[["materiality"]], 1), result[["priorA"]] + ktable, result[["priorB"]] + (result[["n"]] + ktable)))
+    BF            <- round(posteriorOdds / priorOdds, 2)
+    return(BF)
 }
 
 .BF <- function(options, result){
-  BF <- diff(pbeta(c(0, options[["materiality"]]), result[["posteriorA"]], result[["posteriorB"]])) /
-  diff(pbeta(c(options[["materiality"]], 1), result[["posteriorA"]], result[["posteriorB"]]))
-  return(round(BF, 2))
+  priorOdds     <- diff(pbeta(c(0, options[["materiality"]]), result[["priorA"]], result[["priorB"]])) / diff(pbeta(c(options[["materiality"]], 1), result[["priorA"]], result[["priorB"]]))
+  posteriorOdds <- diff(pbeta(c(0, options[["materiality"]]), result[["posteriorA"]], result[["posteriorB"]])) / diff(pbeta(c(options[["materiality"]], 1), result[["posteriorA"]], result[["posteriorB"]]))
+  BF            <- round(posteriorOdds / priorOdds, 2)
+  return(BF)
 }

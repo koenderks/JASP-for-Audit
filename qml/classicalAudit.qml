@@ -28,23 +28,24 @@ Form {
     // Expander button for the Global options
     ExpanderButton {
         text: optionPhase.expanded ? qsTr("<b>1. Global options</b>") : qsTr("1. Global options")
-        expanded: toPlanning.checked ? false : true
-        enabled: toPlanning.checked ? false : true
         id: optionPhase
+        expanded: true
+        enabled: true
 
         Flow {
           spacing: 40
 
           RadioButtonGroup{
             name: "auditType"
-            title: qsTr("<b>Audit type</b>")
+            title: qsTr("<b>Audit procedure</b>")
+            id: auditProcedure
 
             RadioButton { text: qsTr("Attributes sampling")           ; name: "attributes" ; checked: true; id: attributes}
             RadioButton { text: qsTr("Monetary unit sampling")        ; name: "mus"; id: mus}
           }
 
           RadioButtonGroup {
-              title: qsTr("<b>Units</b>")
+              title: qsTr("<b>Display units</b>")
               name: "show"
 
               RadioButton { text: qsTr("Percentages")         ; name: "percentage" ; checked: true; id: percentages}
@@ -59,24 +60,21 @@ Form {
         }
 
         Button {
-          Layout.leftMargin: 450
+          Layout.leftMargin: 480
           text: qsTr("<b>To planning</b>")
+          onClicked: {
+            optionPhase.expanded = false
+            planningPhase.expanded = true
+            planningPhase.enabled = true
+          }
         }
-
-        CheckBox {
-          name: "toPlanning"
-          Layout.leftMargin: 450
-          text: qsTr("<b>To planning</b>")
-          id: toPlanning
-        }
-
     }
 
     // Expander button for the Planning phase
     ExpanderButton {
-        text: planningPhase.enabled ? qsTr("<b>2. Planning</b>") : qsTr("2. Planning")
-        expanded: toSampling.checked ? false : (toPlanning.checked ? true : false)
-        enabled: toSampling.checked ? false : (toPlanning.checked ? true : false)
+        text: planningPhase.expanded ? qsTr("<b>2. Planning</b>") : qsTr("2. Planning")
+        expanded: false
+        enabled: false
         id: planningPhase
 
     Flow {
@@ -85,6 +83,7 @@ Form {
         ColumnLayout {
           GroupBox {
               title: qsTr("<b>Audit risk</b>")
+              id: auditRisk
 
               PercentField {
                   label.text: qsTr("Confidence")
@@ -116,6 +115,7 @@ Form {
             RadioButtonGroup {
                 title: qsTr("<b>Inherent risk</b>")
                 name: "IR"
+                id: ir
                 enabled: populationSize.value == "0" ? false : true
 
                 RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
@@ -129,6 +129,7 @@ Form {
             RadioButtonGroup {
                 title: qsTr("<b>Control risk</b>")
                 name: "CR"
+                id: cr
                 enabled: populationSize.value == "0" ? false : true
 
                 RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
@@ -146,6 +147,7 @@ Form {
         RadioButtonGroup {
             title: qsTr("<b>Sampling model</b>")
             name: "distribution"
+            id: distribution
             enabled: populationSize.value == "0" ? false : true
 
             RadioButton { text: qsTr("With replacement")            ; name: "binomial" ; checked: true}
@@ -154,6 +156,7 @@ Form {
 
           RadioButtonGroup {
               title: qsTr("<b>Allowed errors</b>")
+              id: expectedErrors
               name: "expected.errors"
               enabled: populationSize.value == "0" ? false : true
 
@@ -192,36 +195,31 @@ Form {
            enabled: populationSize.value == "0" ? false : true
 
            CheckBox {      text: qsTr("Decision plot")   ; name: "plotCriticalErrors"; checked: true }
-
         }
 
     }
 
     Button {
-      Layout.leftMargin: 450
+      Layout.leftMargin: 480
       text: qsTr("<b>To sampling</b>")
       enabled: populationSize.value == "0" ? false : true
-    }
-
-    CheckBox {
-      name: "toSampling"
-      Layout.leftMargin: 450
-      text: qsTr("<b>To sampling</b>")
-      id: toSampling
-      enabled: populationSize.value == "0" ? false : true
+      onClicked: {
+        planningPhase.expanded = false
+        samplingPhase.expanded = true
+        samplingPhase.enabled = true
+      }
     }
   }
 
   // Expander button for the sampling phase
   ExpanderButton {
       text: samplingPhase.expanded ? qsTr("<b>3. Sampling</b>") : qsTr("3. Sampling")
-      expanded: toSampling.checked ? (toEvaluation.checked ? false : true) : false
-      enabled: toSampling.checked ? (toEvaluation.checked ? false : true) : false
       id: samplingPhase
+      enabled: false
+      expanded: false
 
       ExpanderButton {
-          expanded: pickSamplingMethod.checked ? false : true
-          //enabled: pickSamplingMethod.checked ? false : true
+          expanded: true
           title: samplingMethod.expanded ? qsTr("<b>3.1 Sampling method</b>") : qsTr("3.1 Sampling method")
           implicitWidth: 570
           id: samplingMethod
@@ -242,6 +240,7 @@ Form {
           RadioButtonGroup {
             name: "samplingType"
             Layout.leftMargin: 20
+            id: samplingType
 
             Flow {
               spacing: 20
@@ -271,31 +270,30 @@ Form {
           }
 
           Button {
-            Layout.leftMargin: 450
+            Layout.leftMargin: 480
             text: qsTr("<b>Confirm</b>")
+            onClicked: {
+              samplingMethod.expanded = false
+              variablesFormAttributesSampling.enabled = true
+              variablesFormMUSSampling.enabled = true
+              seed.enabled = true
+              samplingTables.enabled = true
+            }
           }
-
-          CheckBox {
-            name: "pickSamplingMethod"
-            Layout.leftMargin: 450
-            text: qsTr("<b>Confirm</b>")
-            id: pickSamplingMethod
-          }
-
       }
 
       // Variables form for attributes sampling
       VariablesForm {
-          availableVariablesList.name: "allAvailableVariables2"
-          enabled: pickSamplingMethod.checked ? true : false
+          availableVariablesList.name: "allAvailableVariablesAttributesSampling"
+          id: variablesFormAttributesSampling
           visible: attributes.checked ? true : false
+          enabled: false
 
           AssignedVariablesList {
               name: "recordNumberVariable"
               title: qsTr("Record numbers")
               singleItem: true
               allowedColumns: ["nominal", "ordinal", "scale"]
-              enabled: pickSamplingMethod.checked ? true : false
           }
           AssignedVariablesList {
               name: "rankingVariable"
@@ -313,16 +311,16 @@ Form {
 
       // Variables form for MUS sampling
       VariablesForm {
-          availableVariablesList.name: "allAvailableVariables3"
-          enabled: pickSamplingMethodMUS.checked ? true : false
+          availableVariablesList.name: "allAvailableVariablesMUSSampling"
+          id: variablesFormMUSSampling
           visible: attributes.checked ? false : true
+          enabled: false
 
           AssignedVariablesList {
               name: "recordNumberVariableMUS"
               title: qsTr("Record numbers")
               singleItem: true
               allowedColumns: ["nominal", "ordinal", "scale"]
-              enabled: pickSamplingMethodMUS.checked ? true : false
           }
           AssignedVariablesList {
               name: "monetaryVariableMUS"
@@ -352,7 +350,8 @@ Form {
               RadioButtonGroup {
                   title: qsTr("<b>Seed</b>")
                   name: "seed"
-                  enabled: pickSamplingMethod.checked ? true : false
+                  id: seed
+                  enabled: false
 
                   RadioButton { text: qsTr("Default")         ; name: "seedDefault" ; checked: true}
                   RowLayout {
@@ -371,7 +370,8 @@ Form {
 
               GroupBox {
                   title: qsTr("<b>Tables</b>")
-                  enabled: pickSamplingMethod.checked ? true : false
+                  id: samplingTables
+                  enabled: false
 
                   CheckBox { text: qsTr("Sample descriptives")  ; name: "showDescriptives" ; id: descriptives}
                   CheckBox { text: qsTr("Mean")                 ; name: "mean"; Layout.leftMargin: 20; enabled: descriptives.checked ; checked: true}
@@ -388,30 +388,38 @@ Form {
       }
 
       Button {
-        Layout.leftMargin: 450
+        Layout.leftMargin: 480
         text: qsTr("<b>To evaluation</b>")
+        onClicked: {
+          samplingPhase.expanded = false
+          evaluationPhase.expanded = true
+          evaluationPhase.enabled = true
+          optionPhase.expanded = false
+          auditProcedure.enabled = false
+          auditRisk.enabled = false
+          ir.enabled = false
+          cr.enabled = false
+          distribution.enabled = false
+          expectedErrors.enabled = false
+          variablesFormAttributesSampling.enabled = false
+          variablesFormMUSSampling.enabled = false
+          seed.enabled = false
+          samplingType.enabled = false
+        }
       }
-
-      CheckBox {
-        name: "toEvaluation"
-        Layout.leftMargin: 450
-        text: qsTr("<b>To evaluation</b>")
-        id: toEvaluation
-      }
-
   }
 
   // Expander button for the evaluation phase
     ExpanderButton {
-        text: evaluationPhase.enabled ? qsTr("<b>4. Evaluation</b>") : qsTr("4. Evaluation")
-        expanded: toSampling.checked ? (toEvaluation.checked ? (toInterpretation.checked ? false : true) : false) : false
-        enabled: toSampling.checked ? (toEvaluation.checked ? (toInterpretation.checked ? false : true) : false) : false
+        text: evaluationPhase.expanded ? qsTr("<b>4. Evaluation</b>") : qsTr("4. Evaluation")
+        expanded: false
+        enabled: false
         id: evaluationPhase
 
         // Variables form for attributes evaluation
         VariablesForm {
         visible: attributes.checked ? true : false
-        availableVariablesList.name: "allAvailableVariables4"
+        availableVariablesList.name: "evaluationVariablesAttributes"
 
             AssignedVariablesList {
                 name: "correctID"
@@ -430,7 +438,7 @@ Form {
         // Variables form for attributes evaluation
         VariablesForm {
         visible: attributes.checked ? false : true
-        availableVariablesList.name: "allAvailableVariables5"
+        availableVariablesList.name: "evaluationVariablesMUS"
 
             AssignedVariablesList {
                 name: "correctMUS"
@@ -453,7 +461,7 @@ Form {
             title: qsTr("<b>Tables</b>")
 
             CheckBox {
-                text: qsTr("Most likely error")
+                text: qsTr("Most Likely Error")
                 name: "mostLikelyError"
                 checked: false
             }
@@ -466,7 +474,6 @@ Form {
                     CheckBox {
                         text: qsTr("Confidence bound")
                         name: "plotBound"
-                        enabled: frequentistType.checked
                     }
                 }
             }
@@ -492,24 +499,21 @@ Form {
         }
 
         Button {
-          Layout.leftMargin: 450
+          Layout.leftMargin: 480
           text: qsTr("<b>To report</b>")
+          onClicked: {
+            evaluationPhase.expanded = false
+            interpretationPhase.expanded = true
+            interpretationPhase.enabled = true
+          }
         }
-
-        CheckBox {
-          name: "toInterpretation"
-          Layout.leftMargin: 450
-          text: qsTr("<b>To report</b>")
-          id: toInterpretation
-        }
-
     }
 
     // Expander button for the report phase
     ExpanderButton {
         text: interpretationPhase.expanded ? qsTr("<b>5. Report</b>") : qsTr("5. Report")
-        expanded: toSampling.checked ? (toEvaluation.checked ? (toInterpretation.checked ? true : false) : false) : false
-        enabled: toSampling.checked ? (toEvaluation.checked ? (toInterpretation.checked ? true : false) : false) : false
+        expanded: false
+        enabled: false
         id: interpretationPhase
 
         Button {
