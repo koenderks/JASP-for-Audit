@@ -30,6 +30,12 @@ Form {
             singleItem: true
             allowedColumns: ["nominal"]
         }
+        AssignedVariablesList {
+            name: "sampleFilter"
+            title: qsTr("Sample filter variable (Optional)")
+            singleItem: true
+            allowedColumns: ["nominal"]
+        }
     }
 
     Flow {
@@ -50,6 +56,15 @@ Form {
                   with1Decimal: true
                   defaultValue: 5
                   name: "materiality"
+              }
+
+              TextField {
+                  text: qsTr("Population size")
+                  value: "0"
+                  name: "N"
+                  inputType: "integer"
+                  validator: IntValidator { bottom: 0 }
+                  id: populationSize
               }
           }
 

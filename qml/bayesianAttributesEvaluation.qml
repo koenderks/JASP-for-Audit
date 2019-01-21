@@ -30,6 +30,12 @@ Form {
             singleItem: true
             allowedColumns: ["nominal"]
         }
+        AssignedVariablesList {
+            name: "sampleFilter"
+            title: qsTr("Sample filter variable (Optional)")
+            singleItem: true
+            allowedColumns: ["nominal"]
+        }
     }
 
     Flow {

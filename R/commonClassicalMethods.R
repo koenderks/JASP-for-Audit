@@ -198,34 +198,123 @@
 
     evaluationTable                       <- createJaspTable("Classical Evaluation Table")
     jaspResults[["evaluationTable"]]      <- evaluationTable
-    evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID", "sampleFilter", "inference"))
+    evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
+                                      "sampleFilter", "distribution", "mostLikelyError", "N"))
     evaluationTable$position <- position
 
-    evaluationTable$addColumnInfo(name = 'IR',     title = "Inherent risk",  type = 'string')
-    evaluationTable$addColumnInfo(name = 'CR',     title = "Control risk",   type = 'string')
-    evaluationTable$addColumnInfo(name = 'SR',     title = "Detection risk",  type = 'string')
+    evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",  type = 'string')
     evaluationTable$addColumnInfo(name = 'n',      title = "Sample size",    type = 'string')
     evaluationTable$addColumnInfo(name = 'k',      title = "Errors",         type = 'string')
 
     evaluationTable$addColumnInfo(name = 'bound',  title = paste0(result[["confidence"]]*100,"% Confidence bound"), type = 'string')
+    if(options[["mostLikelyError"]])
+      evaluationTable$addColumnInfo(name = 'mle',  title = "Most Likely Error", type = 'string')
 
-    if(options[["show"]] == "percentage"){
-        SRtable <- paste0(round(result[["alpha"]],3) * 100, "%")
-        if(result[["bound"]] == "."){
-            boundTable          <- "."
-        } else {
-            boundTable <- paste0(round(result[["bound"]],3) * 100, "%")
-        }
-    } else if(options[["show"]] == "proportion"){
-        SRtable <- round(result[["alpha"]], 3)
-        if(result[["bound"]] == "."){
-            boundTable          <- "."
-        } else {
-            boundTable <- round(result[["bound"]],3)
-        }
+    if(options[["correctID"]] != ""){
+      if(options[["mostLikelyError"]]){
+        row <- list(materiality = ".", n = ".", k = ".", bound = ".", mle = ".")
+      } else {
+        row <- list(materiality = ".", n = ".", k = ".", bound = ".")
+      }
     }
 
-    row <- list(IR = result[["IR"]], CR = result[["CR"]], SR = SRtable, n = result[["n"]], k = result[["k"]], bound = boundTable)
+    if(options[["N"]] == 0){
+        mle <- 0
+    } else {
+        mle <- floor(result[["k"]] / result[["n"]] * options[["N"]])
+    }
+
+      if(options[["show"]] == "percentage"){
+          materialityTable <- paste0(round(options[["materiality"]],2) * 100, "%")
+          if(result[["bound"]] == "."){
+              boundTable          <- "."
+          } else {
+              boundTable <- paste0(round(result[["bound"]],3) * 100, "%")
+          }
+      } else if(options[["show"]] == "proportion"){
+          materialityTable <- round(options[["materiality"]], 2)
+          if(result[["bound"]] == "."){
+              boundTable          <- "."
+          } else {
+              boundTable <- round(result[["bound"]],3)
+          }
+      }
+
+    if(options[["mostLikelyError"]]){
+      row <- list(materiality = materialityTable, n = result[["n"]], k = result[["k"]], bound = boundTable, mle = mle)
+    } else {
+      row <- list(materiality = materialityTable, n = result[["n"]], k = result[["k"]], bound = boundTable)
+    }
     evaluationTable$addRows(row)
+
+}
+
+.attributesBoundFullAudit <- function(dataset, options, jaspResults){
+
+  confidence              <- options[["confidence"]]
+  correctID               <- options[["correctID"]]
+
+  if(options[["IR"]] == "Low" && options[["CR"]] == "Low"){
+      alpha               <- (1-confidence) / 0.30 / 0.30
+  } else if (options[["IR"]] == "Low" && options[["CR"]] == "Medium"){
+      alpha               <- (1-confidence) / 0.30 / 0.60
+  } else if (options[["IR"]] == "Low" && options[["CR"]] == "High"){
+      alpha               <- (1-confidence) / 0.30 / 1
+  } else if (options[["IR"]] == "Medium" && options[["CR"]] == "High"){
+      alpha               <- (1-confidence) / 0.60 / 1
+  } else if (options[["IR"]] == "Medium" && options[["CR"]] == "Medium"){
+      alpha               <- (1-confidence) / 0.60 / 0.60
+  } else if (options[["IR"]] == "Medium" && options[["CR"]] == "Low"){
+      alpha               <- (1-confidence) / 0.60 / 0.30
+  } else if (options[["IR"]] == "High" && options[["CR"]] == "Low"){
+      alpha               <- (1-confidence) / 1 / 0.30
+  } else if (options[["IR"]] == "High" && options[["CR"]] == "Medium"){
+      alpha               <- (1-confidence) / 0.60 / 1
+  } else if (options[["IR"]] == "High" && options[["CR"]] == "High"){
+      alpha               <- (1-confidence) / 1 / 1
+  }
+
+  if(is.null(dataset)){
+    n                     <- 0
+    k                     <- 0
+  } else {
+    n                       <- nrow(dataset)
+    if(options[["correctID"]] != ""){
+      k                     <- length(which(dataset[,.v(correctID)] == 1))
+    } else {
+      k                     <- "."
+    }
+  }
+
+
+  if(n == 0){
+    bound                 <- "."
+    approve               <- "."
+  } else {
+    binomResult <- binom.test(x = k,
+                              n = n,
+                              p = options[["materiality"]],
+                              alternative = "less",
+                              conf.level = 1 - alpha)
+    bound                 <- binomResult$conf.int[2]
+    if(bound <= alpha){
+      approve             <- "Yes"
+    } else {
+      approve             <- "No"
+    }
+  }
+
+  resultList <- list()
+  resultList[["n"]]           <- n
+  resultList[["k"]]           <- k
+  resultList[["IR"]]          <- options[["IR"]]
+  resultList[["CR"]]          <- options[["CR"]]
+  resultList[["confidence"]]  <- confidence
+  resultList[["bound"]]       <- bound
+  resultList[["approve"]]     <- approve
+  resultList[["alpha"]]       <- alpha
+
+  jaspResults[["result"]] <- createJaspState(resultList)
+  jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctID", "sampleFilter", "inference"))
 
 }

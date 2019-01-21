@@ -28,7 +28,7 @@ dBetaBinom <- function (x, N, u, v, log = FALSE)
 
 qBetaBinom <- function (p, N, u, v)
 {
-    pp <- cumsum(dbb(0:N, N, u, v))
+    pp <- cumsum(dBetaBinom(0:N, N, u, v))
     sapply(p, function(x) sum(pp < x))
 }
 
@@ -74,8 +74,13 @@ qBetaBinom <- function (p, N, u, v)
         alpha               <- (1-confidence) / 1 / 1
     }
 
-    n_noprior               <- .calculateBayesianSampleSize(options, 1 - confidence)
-    n_withprior             <- .calculateBayesianSampleSize(options, alpha)
+    if(options[["distribution"]] == "binomial"){
+      n_noprior               <- .calculateBayesianSampleSize(options, 1 - confidence)
+      n_withprior             <- .calculateBayesianSampleSize(options, alpha)
+    } else if(options[["distribution"]] == "hypergeometric"){
+      n_noprior               <- .calculateBayesianSampleSizeBetaBinom(options, 1 - confidence, options[["N"]])
+      n_withprior             <- .calculateBayesianSampleSizeBetaBinom(options, alpha, options[["N"]])
+    }
     pn                      <- n_noprior - n_withprior
     if(pn == 0){
         pk                  <- 0
@@ -117,7 +122,7 @@ qBetaBinom <- function (p, N, u, v)
 
     jaspResults[["result"]] <- createJaspState(resultList)
     jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "kPercentageNumber",
-                                              "kNumberNumber", "inference", "prior"))
+                                              "kNumberNumber", "inference", "prior", "distribution", "N"))
 
 }
 
@@ -127,8 +132,8 @@ qBetaBinom <- function (p, N, u, v)
 
   summaryTable                       <- createJaspTable("Bayesian Attributes Planning Table")
   jaspResults[["summaryTable"]]      <- summaryTable
-  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "show",
-                                  "kPercentageNumber", "kNumberNumber", "expectedBF", "prior"))
+  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "show", "N",
+                                  "kPercentageNumber", "kNumberNumber", "expectedBF", "prior", "distribution"))
 
   summaryTable$addColumnInfo(name = 'IR', title = "Inherent risk", type = 'string')
   summaryTable$addColumnInfo(name = 'CR', title = "Control risk", type = 'string')
@@ -173,8 +178,13 @@ qBetaBinom <- function (p, N, u, v)
 
   summaryTable$addRows(row)
 
-  message <- "The sample size is calculated using the <b>beta</b> distribution."
-  summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
+  if(options[["distribution"]] == "binomial"){
+          message <- "The sample size is calculated using the <b>beta</b> distribution."
+          summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
+  } else if(options[["distribution"]] == "hypergeometric"){
+          message <- paste0("The sample size is calculated using the <b>beta-binomial</b> distribution (N = ", options[["N"]] ,").")
+          summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
+  }
 
 }
 
@@ -185,11 +195,14 @@ qBetaBinom <- function (p, N, u, v)
   sampletable                       <- createJaspTable("Prior Sample Table")
   jaspResults[["sampletable"]]      <- sampletable
   sampletable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors", "implicitsample", "statistic",
-                                "show", "kPercentageNumber", "kNumberNumber"))
+                                "show", "kPercentageNumber", "kNumberNumber", "distribution", "prior", "N"))
 
   sampletable$addColumnInfo(name = 'implicitn', title = "Prior sample size", type = 'string')
   sampletable$addColumnInfo(name = 'implicitk', title = "Prior errors", type = 'string')
   sampletable$position <- position
+
+  result[["implicitn"]] <- round(result[["implicitn"]], 2)
+  result[["implicitk"]] <- round(result[["implicitk"]], 2)
 
   if(options[["statistic"]] == "bound"){
     priorbound <- round(qbeta(p = options[["confidence"]], shape1 = result[["priorA"]], shape2 = result[["priorB"]]), 3)
@@ -305,7 +318,7 @@ qBetaBinom <- function (p, N, u, v)
         alpha               <- (1-confidence) / 1 / 1
     }
 
-    if(is.null(dataset)){
+    if(is.null(dataset) || options[["correctID"]] == ""){
       n                     <- 0
       k                     <- 0
     } else {
@@ -391,7 +404,8 @@ qBetaBinom <- function (p, N, u, v)
     jaspResults[["result"]]     <- createJaspState(resultList)
     jaspResults[["result"]]     $dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality",
                                                     "correctID", "expected.errors", "kPercentageNumber",
-                                                    "kNumberNumber", "sampleFilter", "prior", "k", "n"))
+                                                    "kNumberNumber", "sampleFilter", "prior", "k", "n",
+                                                    "distribution", "N"))
 
 }
 
@@ -404,7 +418,7 @@ qBetaBinom <- function (p, N, u, v)
     jaspResults[["evaluationTable"]]      <- evaluationTable
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
                                       "expected.errors", "kPercentageNumber", "kNumberNumber", "sampleFilter",
-                                      "mostLikelyError", "bayesFactor", "N", "n", "k", "prior"))
+                                      "mostLikelyError", "bayesFactor", "N", "n", "k", "prior", "distribution", "prior"))
     evaluationTable$position <- position
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",  type = 'string')
@@ -418,6 +432,13 @@ qBetaBinom <- function (p, N, u, v)
 
     mle <- floor(qbeta(p = 0.5, result[["posteriorA"]], result[["posteriorB"]]) * options[["N"]])
 
+    if(options[["correctID"]] != ""){
+      if(options[["mostLikelyError"]]){
+        row <- list(materiality = ".", n = ".", k = ".", bound = ".", mle = ".")
+      } else {
+        row <- list(materiality = ".", n = ".", k = ".", bound = ".")
+      }
+    }
 
     if(options[["show"]] == "percentage"){
         materialityTable <- paste0(round(options[["materiality"]],2) * 100, "%")

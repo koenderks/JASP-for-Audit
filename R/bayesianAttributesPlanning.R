@@ -59,7 +59,7 @@ bayesianAttributesPlanning <- function(jaspResults, dataset, options, state=NULL
           allowed.errors <- 0:(max.errors-1)
           reject.errors <- max.errors : (max.errors + 2)
           jaspResults[["criticalErrorPlot"]] 		<- .plotCriticalErrorsPrior(allowed.errors, reject.errors, jaspResults)
-          jaspResults[["criticalErrorPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors",
+          jaspResults[["criticalErrorPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors", "distribution", "N",
                                                                       "show", "statistic", "kPercentageNumber", "kNumberNumber", "plotCriticalErrors"))
           jaspResults[["criticalErrorPlot"]] 		$position <- 8
       }
@@ -72,7 +72,7 @@ bayesianAttributesPlanning <- function(jaspResults, dataset, options, state=NULL
       {
           jaspResults[["priorPlot"]] 		<- .plotPriorBayesianAttributesPlanningFullAudit(options, result, jaspResults)
           jaspResults[["priorPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors", "limx",
-                                                           "plotPrior", "plotPrior", "show", "prior",
+                                                           "plotPrior", "plotPrior", "show", "prior", "distribution", "N",
                                                            "statistic", "kPercentageNumber", "kNumberNumber"))
           jaspResults[["priorPlot"]] 		$position <- 9
       }

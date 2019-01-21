@@ -3,7 +3,19 @@ bayesianAttributesEvaluation <- function(jaspResults, dataset, options, state=NU
   if(is.null(state))
       state 							                     <- list()
   # Read the data
-  dataset                                      <- .readDataBayesianAttributesBound(dataset, options)
+  correctID                       <- unlist(options$correctID)
+  if(correctID == "")             correctID <- NULL
+  sampleFilter                    <- unlist(options$sampleFilter)
+  if(sampleFilter == "")          sampleFilter <- NULL
+  variables.to.read               <- c(correctID, sampleFilter)
+
+  if (is.null(dataset))
+      dataset                     <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
+
+  if(options[["sampleFilter"]] != ""){
+      dataset <- subset(dataset, dataset[, .v(sampleFilter)] == 1)
+  }
+
   # Set the title
   jaspResults$title 					                 <- "Bayesian Attributes Bound"
 
@@ -47,11 +59,14 @@ bayesianAttributesEvaluation <- function(jaspResults, dataset, options, state=NU
 
 .readDataBayesianAttributesBound <- function(dataset, options){
   correctID <- options[['correctID']]
+  sampleFilter <- options[["sampleFilter"]]
+  variables <- c(correctID, sampleFilter)
+  variables <- variables[variables != ""]
   if (is.null(dataset)) {
-    if(correctID == ""){
+    if(variables == ""){
       dataset   <- NULL
     } else {
-      dataset   <- .readDataSetToEnd(columns.as.numeric = correctID)
+      dataset   <- .readDataSetToEnd(columns.as.numeric = variables)
     }
   }
   return(dataset)

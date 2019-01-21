@@ -147,7 +147,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
         jaspResults[["evaluationHeader"]] <- createJaspHtml("<u>Evaluation</u>", "h2")
         jaspResults[["evaluationHeader"]]$position <- 16
 
-        .attributesBound(dataset, options, jaspResults)
+        .attributesBoundFullAudit(dataset, options, jaspResults)
         result                                       <- jaspResults[["result"]]$object
         .attributesBoundTableFullAudit(options, result, jaspResults, position = 18)
 

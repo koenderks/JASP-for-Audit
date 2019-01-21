@@ -401,14 +401,14 @@ Form {
 
         VariablesForm {
             AssignedVariablesList {
-                name: "sampleFilter"
-                title: qsTr("Sample filter variable")
+                name: "correctID"
+                title: qsTr("Error variable")
                 singleItem: true
                 allowedColumns: ["nominal"]
             }
             AssignedVariablesList {
-                name: "correctID"
-                title: qsTr("Error variable")
+                name: "sampleFilter"
+                title: qsTr("Sample filter variable")
                 singleItem: true
                 allowedColumns: ["nominal"]
             }

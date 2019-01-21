@@ -85,7 +85,8 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
               reject.errors <- max.errors : (max.errors + 2)
               jaspResults[["criticalErrorPlot"]] 		<- .plotCriticalErrorsPrior(allowed.errors, reject.errors, jaspResults)
               jaspResults[["criticalErrorPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors",
-                                                                          "show", "statistic", "kPercentageNumber", "kNumberNumber", "plotCriticalErrors"))
+                                                                          "show", "statistic", "kPercentageNumber", "kNumberNumber",
+                                                                          "plotCriticalErrors", "prior", "distribution", "N"))
               jaspResults[["criticalErrorPlot"]] 		$position <- 10
           }
       }
@@ -97,8 +98,8 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
           {
               jaspResults[["priorPlot"]] 		<- .plotPriorBayesianAttributesPlanningFullAudit(options, result, jaspResults)
               jaspResults[["priorPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors", "limx",
-                                                               "plotPrior", "plotPrior", "show", "prior",
-                                                               "statistic", "kPercentageNumber", "kNumberNumber"))
+                                                               "plotPrior", "plotPrior", "show", "prior", "distribution",
+                                                               "statistic", "kPercentageNumber", "kNumberNumber", "N"))
               jaspResults[["priorPlot"]] 		$position <- 11
           }
       }
@@ -198,7 +199,8 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
                 jaspResults[["priorAndPosteriorPlot"]] 		<- .plotPriorAndPosteriorBayesianAttributesBoundFullAudit(options, result, jaspResults)
                 jaspResults[["priorAndPosteriorPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "limx_backup", "statistic", "plotPriorAndPosterior",
                                                                            "plotPriorAndPosteriorAdditionalInfo", "materiality", "show", "correctID",
-                                                                           "expected.errors", "kPercentageNumber", "kNumberNumber", "prior", "sampleFilter"))
+                                                                           "expected.errors", "kPercentageNumber", "kNumberNumber", "prior", "sampleFilter",
+                                                                           "distribution", "N"))
                 jaspResults[["priorAndPosteriorPlot"]] 		$position <- 20
             }
         }
