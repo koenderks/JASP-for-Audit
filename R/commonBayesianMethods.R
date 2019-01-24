@@ -13,23 +13,22 @@
     }
 }
 
-dBetaBinom <- function (x, N, u, v, log = FALSE)
+.dBetaBinom <- function (x, N, u, v, log = FALSE)
 {
-    logval <- lbeta(x + u, N - x + v) - lbeta(u, v) + lchoose(N,
-                                                              x)
+    logval <- lbeta(x + u, N - x + v) - lbeta(u, v) + lchoose(N, x)
     if (log) {
         ret <- logval
     }
     else {
         ret <- exp(logval)
     }
-    ret
+    return(ret)
 }
 
-qBetaBinom <- function (p, N, u, v)
+.qBetaBinom <- function (p, N, u, v)
 {
-    pp <- cumsum(dBetaBinom(0:N, N, u, v))
-    sapply(p, function(x) sum(pp < x))
+    pp <- cumsum(.dBetaBinom(0:N, N, u, v))
+    return(sapply(p, function(x) sum(pp < x)))
 }
 
 .calculateBayesianSampleSizeBetaBinom <- function(options, alpha, N){
@@ -40,7 +39,7 @@ qBetaBinom <- function (p, N, u, v)
             impk <- options[["kNumberNumber"]]
         }
         if(impk >= n){ next }
-        x                     <- qBetaBinom(p = 1 - alpha, N = N, u = 1 + impk, v = 1 + (n - impk))
+        x                     <- .qBetaBinom(p = 1 - alpha, N = N, u = 1 + impk, v = 1 + (n - impk))
         if((x / N) < options[["materiality"]]){
             return(n)
         }
@@ -409,7 +408,6 @@ qBetaBinom <- function (p, N, u, v)
 
 }
 
-
 .bayesianAttributesBoundTableFullAudit <- function(options, result, jaspResults, position = 1){
 
     if(!is.null(jaspResults[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
@@ -430,7 +428,7 @@ qBetaBinom <- function (p, N, u, v)
     if(options[["bayesFactor"]])
       evaluationTable$addColumnInfo(name = 'bf',     title = "Bayes factor",         type = 'string')
 
-    mle <- floor(qbeta(p = 0.5, result[["posteriorA"]], result[["posteriorB"]]) * options[["N"]])
+    mle <- ceiling( (result[["posteriorA"]] - 1) / (result[["posteriorA"]] + result[["posteriorB"]] - 2) * options[["N"]] )
 
     if(options[["correctID"]] != ""){
       if(options[["mostLikelyError"]]){

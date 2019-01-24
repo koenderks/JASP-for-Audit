@@ -53,9 +53,9 @@ Form {
           }
 
           GroupBox {
-              title: qsTr("<b>Interpretation</b>")
+              title: qsTr("<b>Explanatory text</b>")
 
-              CheckBox { text: qsTr("Toggle interpretation")     ; name: "interpretation"; checked: true}
+              CheckBox { text: qsTr("Turn on")     ; name: "interpretation"; checked: true}
           }
         }
 
@@ -142,7 +142,7 @@ Form {
     ExpanderButton {
         text: qsTr("Advanced prior options")
         Layout.leftMargin: 20
-        implicitWidth: 570
+        implicitWidth: 560
         enabled: populationSize.value == "0" ? false : true
 
         RadioButtonGroup {
@@ -248,7 +248,7 @@ Form {
         ExpanderButton {
             expanded: true
             title: samplingMethod.expanded ? qsTr("<b>3.1 Sampling method</b>") : qsTr("3.1 Sampling method")
-            implicitWidth: 570
+            implicitWidth: 560
             id: samplingMethod
             Layout.leftMargin: 20
 
@@ -417,7 +417,7 @@ Form {
         }
 
         Button {
-          Layout.leftMargin: 480
+          Layout.leftMargin: 460
           text: qsTr("<b>To evaluation</b>")
           onClicked: {
             samplingPhase.expanded = false
@@ -532,7 +532,7 @@ Form {
           visible: attributes.checked ? false : true
           Layout.leftMargin: 20
           title: qsTr("Advanced output options")
-          implicitWidth: 570
+          implicitWidth: 560
 
           RadioButtonGroup {
             title: qsTr("<b>Confidence bound method</b>")

@@ -121,7 +121,7 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
           {
               jaspResults[["priorPlot"]] 		<- .plotPriorBayesianAttributesPlanningFullAudit(options, result, jaspResults)
               jaspResults[["priorPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors", "limx",
-                                                               "plotPrior", "plotPrior", "show", "prior", "distribution",
+                                                               "plotPrior", "plotPriorAdditionalInfo", "show", "prior", "distribution",
                                                                "statistic", "kPercentageNumber", "kNumberNumber", "N"))
               jaspResults[["priorPlot"]] 		$position <- 11
           }
@@ -129,26 +129,39 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
   }
 
     # Sampling phase
+
+
+    # Read in variables for sampling TODO: Make this a function
+    if(options[["auditType"]] == "attributes"){
+      recordVariable                  <- unlist(options$recordNumberVariable)
+      if(recordVariable == "")        recordVariable <- NULL
+      rankingVariable                 <- unlist(options$rankingVariable)
+      if(rankingVariable == "")       rankingVariable <- NULL
+      monetaryVariable                <- NULL
+      variables                       <- unlist(options$variables)
+    } else {
+      recordVariable                  <- unlist(options$recordNumberVariableMUS)
+      if(recordVariable == "")        recordVariable <- NULL
+      monetaryVariable                <- unlist(options$monetaryVariableMUS)
+      if(monetaryVariable == "")      monetaryVariable <- NULL
+      rankingVariable                 <- unlist(options$rankingVariableMUS)
+      if(rankingVariable == "")       rankingVariable <- NULL
+      variables                       <- unlist(options$variablesMUS)
+    }
+    correctID                       <- unlist(options$correctID)
+    if(correctID == "")             correctID <- NULL
+    sampleFilter                    <- unlist(options$sampleFilter)
+    if(sampleFilter == "")          sampleFilter <- NULL
+    variables.to.read               <- c(recordVariable, variables, rankingVariable, correctID, sampleFilter, monetaryVariable)
+
+    if (is.null(dataset))
+        dataset                     <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
+
     # Only runs when a record variable has been specified
-    if(options[["recordNumberVariable"]] != ""){
+    if(!is.null(recordVariable)){
 
         # Keep the resulting sample size as an option
         options[["sampleSize"]] <- result[["n"]]
-
-        # Read in variables for sampling TODO: Make this a function
-        variables                       <- unlist(options$variables)
-        recordVariable                  <- unlist(options$recordNumberVariable)
-        if(recordVariable == "")        recordVariable <- NULL
-        rankingVariable                 <- unlist(options$rankingVariable)
-        if(rankingVariable == "")       rankingVariable <- NULL
-        correctID                       <- unlist(options$correctID)
-        if(correctID == "")             correctID <- NULL
-        sampleFilter                    <- unlist(options$sampleFilter)
-        if(sampleFilter == "")          sampleFilter <- NULL
-        variables.to.read               <- c(recordVariable, variables, rankingVariable, correctID, sampleFilter)
-
-        if (is.null(dataset))
-            dataset                     <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
 
         jaspResults[["samplingHeader"]] <- createJaspHtml("<u>Sampling</u>", "h2")
         jaspResults[["samplingHeader"]]$position <- 12
@@ -157,19 +170,30 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
         if(options[["interpretation"]]){
             # Adjust the technique TODO: Use switch function
             if(options[["samplingType"]] == "simplerandomsampling"){
-                technique <- "simple random sampling"
+                technique <- "simple random"
             } else if(options[["samplingType"]] == "systematicsampling"){
-                technique <- "systematic sampling"
+                technique <- "systematic"
             } else if(options[["samplingType"]] == "cellsampling"){
-                technique <- "cell sampling"
+                technique <- "cell"
+            }
+            if(options[["auditType"]] == "attributes"){
+              technique <- paste(technique, "attributes sampling")
+            } else {
+              technique <- paste(technique, "MUS sampling")
             }
             jaspResults[["samplingParagraph"]] <- createJaspHtml(paste0("From the population of <b>", options[["N"]], "</b> observations, <b>", result[["n"]], "</b> samples were drawn using a <b>", technique, "</b> method."), "p")
             jaspResults[["samplingParagraph"]]$position <- 13
         }
 
+        if(options[["auditType"]] == "attributes"){
+          type <- "attributes"
+        } else {
+          type <- "mus"
+        }
+
         # Perform the sampling and draw the outcome tables
         if(options[["samplingType"]] == "simplerandomsampling"){
-            .SimpleRandomSamplingTable(dataset, options, jaspResults, position = 14)
+            .SimpleRandomSamplingTable(dataset, options, jaspResults, type = type, position = 14)
         } else if(options[["samplingType"]] == "systematicsampling"){
             interval <- ceiling(nrow(dataset) / options[["sampleSize"]])
             .intervalTable(dataset, options, jaspResults, interval, position = 14)

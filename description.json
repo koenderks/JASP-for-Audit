@@ -20,7 +20,7 @@
 			"analyses":
 			[
 				{
-					"title":							"Classical Audit",
+					"title":							"Audit",
 					"qml":								"classicalAudit.qml",
 					"function":						"classicalAudit",
 					"usesJaspResults":		true
@@ -39,43 +39,43 @@
 			"analyses":
 			[
 				{
-					"title":							"Classical Attributes Planning",
+					"title":							"Planning",
 					"qml":								"classicalAttributesPlanning.qml",
 					"function":						"classicalAttributesPlanning",
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Classical Attributes Sampling",
+					"title":							"Sampling",
 					"qml":								"classicalAttributesSampling.qml",
 					"function":						"classicalAttributesSampling",
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Classical Attributes Evaluation",
+					"title":							"Evaluation",
 					"qml":								"classicalAttributesEvaluation.qml",
 					"function":						"classicalAttributesEvaluation",
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Summary Classical Attributes Evaluation",
+					"title":							"Summary Evaluation",
 					"qml":								"summaryClassicalAttributesEvaluation.qml",
 					"function":						"summaryClassicalAttributesEvaluation",
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Bayesian Attributes Planning",
+					"title":							"Bayesian Planning",
 					"qml":								"bayesianAttributesPlanning.qml",
 					"function":						"bayesianAttributesPlanning",
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Bayesian Attributes Evaluation",
+					"title":							"Bayesian Evaluation",
 					"qml":								"bayesianAttributesEvaluation.qml",
 					"function":						"bayesianAttributesEvaluation",
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Summary Bayesian Attributes Evaluation",
+					"title":							"Bayesian Summary Evaluation",
 					"qml":								"summaryBayesianAttributesEvaluation.qml",
 					"function":						"summaryBayesianAttributesEvaluation",
 					"usesJaspResults":		true

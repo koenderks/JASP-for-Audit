@@ -72,7 +72,7 @@ bayesianAttributesPlanning <- function(jaspResults, dataset, options, state=NULL
       {
           jaspResults[["priorPlot"]] 		<- .plotPriorBayesianAttributesPlanningFullAudit(options, result, jaspResults)
           jaspResults[["priorPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors", "limx",
-                                                           "plotPrior", "plotPrior", "show", "prior", "distribution", "N",
+                                                           "plotPrior", "plotPriorAdditionalInfo", "show", "prior", "distribution", "N",
                                                            "statistic", "kPercentageNumber", "kNumberNumber"))
           jaspResults[["priorPlot"]] 		$position <- 9
       }

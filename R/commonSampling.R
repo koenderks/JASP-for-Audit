@@ -1,13 +1,21 @@
-.SimpleRandomSamplingTable          <- function(dataset, options, jaspResults, sample, position = 1)
+.SimpleRandomSamplingTable          <- function(dataset, options, jaspResults, sample, type, position = 1)
 {
 
     if(!is.null(jaspResults[["table"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-    recordVariable                  <- unlist(options$recordNumberVariable)
-    if(recordVariable == "")
-        recordVariable <- NULL
+    if(type == "attributes"){
+        recordVariable                  <- unlist(options$recordNumberVariable)
+        if(recordVariable == "")        recordVariable <- NULL
+        variables                       <- unlist(options$variables)
+        monetaryVariable                <- NULL
+    } else {
+        recordVariable                  <- unlist(options$recordNumberVariableMUS)
+        if(recordVariable == "")        recordVariable <- NULL
+        monetaryVariable                <- unlist(options$monetaryVariableMUS)
+        if(monetaryVariable == "")      monetaryVariable <- NULL
+        variables                       <- unlist(options$variablesMUS)
+    }
 
-    variables                       <- unlist(options$variables)
     duplicates                      <- options$allowDuplicates
     sampleSize                      <- options$sampleSize
     seed                            <- options$seed
@@ -16,22 +24,28 @@
     jaspResults[["table"]]          <- table
     table$position                  <- position
 
-    table$dependOnOptions(c("variables","allowDuplicates", "seed", "sampleSize", "seedNumber", "recordNumberVariable", "samplingType"))
+    table$dependOnOptions(c("variables", "allowDuplicates", "seed", "sampleSize", "seedNumber", "recordNumberVariable",
+                            "samplingType", "auditType", "recordNumberVariableMUS", "monetaryVariableMUS", "variablesMUS"))
 
     table$addColumnInfo(name="number", title ="", type = "string")
     table$addColumnInfo(name="recordNumber", title ="Record Number", type = "string")
     for(i in variables){
-            table$addColumnInfo(name=i,     type="string")
+        table$addColumnInfo(name=i,     type="string")
     }
 
-    if(is.null(recordVariable) || sampleSize == 0)
-        return()
+    if(type == "attributes"){
+      if(is.null(recordVariable) || sampleSize == 0)
+          return()
+    } else {
+      if(is.null(recordVariable) || is.null(monetaryVariable) || sampleSize == 0)
+          return()
+    }
 
     if(sampleSize > nrow(dataset) && duplicates == FALSE){
-            message <- "The required sample size is larger than the number of records in the dataset. Please re-specify the sample size."
-            table$errorMessage <- message
-            table$error <- "badData"
-            return()
+        message <- "The required sample size is larger than the number of records in the dataset. Please re-specify the sample size or allow duplicates."
+        table$errorMessage <- message
+        table$error <- "badData"
+        return()
     }
 
     if(seed == "seedDefault")
@@ -40,16 +54,24 @@
         set.seed(manualSeed)
 
     recordColumnIndex <- which(colnames(dataset) == .v(recordVariable))
-    recordColumn <- rank(dataset[, .v(recordVariable)])
+    recordColumn <- dataset[, recordColumnIndex]
 
-    samp <- base::sample(x = recordColumn, size = sampleSize, replace = duplicates)
-    sample <- as.data.frame(dataset[samp, ])
+    if(type == "attributes"){
+        recordColumn <- rank(dataset[, .v(recordVariable)])
+        samp <- base::sample(x = recordColumn, size = sampleSize, replace = duplicates)
+        sample <- as.data.frame(dataset[samp, ])
+    } else {
+        monetaryColumn <- dataset[, which(colnames(dataset) == .v(monetaryVariable))]
+        monetaryColumn <- ceiling(monetaryColumn)
+        sampleVector <- base::sample(recordColumn, size = sampleSize, replace = duplicates, prob = monetaryColumn)
+        sample <- as.data.frame(dataset[sampleVector, ])
+    }
 
     for(i in 1:nrow(sample)){
         row <- list()
         row[["number"]] <- i
         row[["recordNumber"]] <- sample[i, recordColumnIndex]
-        for(j in variables){
+        for(j in c(variables, monetaryVariable)){
             row[[j]] <- as.character(sample[i, .v(j)])
         }
         table$addRows(row)
@@ -129,33 +151,50 @@
 
 }
 
-.SystematicSamplingTable            <- function(dataset, options, jaspResults, interval, position = 2)
+.SystematicSamplingTable            <- function(dataset, options, jaspResults, interval, type, position = 2)
 {
 
     if(!is.null(jaspResults[["table"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-    recordVariable                  <- unlist(options$recordNumberVariable)
-    if(recordVariable == "")        recordVariable <- NULL
-    rankingVariable                 <- unlist(options$rankingVariable)
-    if(rankingVariable == "")       rankingVariable <- NULL
-
-    variables                       <- unlist(options$variables)
-    startingPoint                   <- options$startingPoint
-    sampleSize                      <- options$sampleSize
-    table                           <- createJaspTable("Resulting sample")
-    jaspResults[["table"]]          <- table
-    table$position                  <- position
-
-    table$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType"))
-
-    table$addColumnInfo(name="number", title ="", type = "string")
-    table$addColumnInfo(name="recordNumber", title ="Record Number", type = "string")
-    for(i in variables){
-        table$addColumnInfo(name=i,     type="string")
+    if(type == "attributes"){
+        recordVariable                  <- unlist(options$recordNumberVariable)
+        if(recordVariable == "")        recordVariable <- NULL
+        rankingVariable                 <- unlist(options$rankingVariable)
+        if(rankingVariable == "")        rankingVariable <- NULL
+        variables                       <- unlist(options$variables)
+        monetaryVariable                <- NULL
+    } else {
+        recordVariable                  <- unlist(options$recordNumberVariableMUS)
+        if(recordVariable == "")        recordVariable <- NULL
+        monetaryVariable                <- unlist(options$monetaryVariableMUS)
+        if(monetaryVariable == "")      monetaryVariable <- NULL
+        rankingVariable                 <- unlist(options$rankingVariableMUS)
+        if(rankingVariable == "")        rankingVariable <- NULL
+        variables                       <- unlist(options$variablesMUS)
     }
 
-    if(is.null(recordVariable) || sampleSize == 0)
-        return()
+    startingPoint                       <- options$startingPoint
+    sampleSize                          <- options$sampleSize
+    table                               <- createJaspTable("Resulting sample")
+    jaspResults[["table"]]              <- table
+    table$position                      <- position
+
+    table$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
+                            "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS"))
+
+    table$addColumnInfo(name="number",          title ="", type = "string")
+    table$addColumnInfo(name="recordNumber",    title ="Record Number", type = "string")
+    for(i in variables){
+        table$addColumnInfo(name=i,             type="string")
+    }
+
+    if(type == "attributes"){
+        if(is.null(recordVariable) || sampleSize == 0)
+            return()
+    } else {
+        if(is.null(recordVariable) || is.null(monetaryVariable) || sampleSize == 0)
+            return()
+    }
 
     if(sampleSize > nrow(dataset)){
         message <- "The required sample size is larger than the number of records in the dataset. Please respecify the sample size."
@@ -171,23 +210,39 @@
         return()
     }
 
-    recordColumnIndex <- which(colnames(dataset) == .v(recordVariable))
 
     if(!is.null(rankingVariable)){
-      rankingColumn       <- dataset[, .v(rankingVariable)]
-      dataset             <- dataset[order(rankingColumn), ]
+        rankingColumn       <- dataset[, .v(rankingVariable)]
+        dataset             <- dataset[order(rankingColumn), ]
     }
 
-    interval.mat <- matrix(dataset[, .v(recordVariable)], ncol = interval, byrow = TRUE, nrow = sampleSize)
-    sample.rows <- interval.mat[1:nrow(interval.mat), startingPoint]
-    sample <- as.data.frame(dataset[sample.rows, ])
+    if(type == "attributes"){
+        recordColumnIndex   <- which(colnames(dataset) == .v(recordVariable))
+        interval.mat        <- matrix(dataset[, .v(recordVariable)], ncol = interval, byrow = TRUE, nrow = sampleSize)
+        sample.rows         <- interval.mat[1:nrow(interval.mat), startingPoint]
+    } else {
+        recordColumnIndex   <- which(colnames(dataset) == .v(recordVariable))
+        recordColumn        <- dataset[, .v(recordVariable)]
+        monetaryColumn      <- dataset[, .v(monetaryVariable)]
+        musList             <- rep(recordColumn, times = monetaryColumn)
+        interval.mat        <- matrix(musList, nrow = sampleSize, byrow = TRUE, ncol = interval)
+
+        sample.rows <- numeric()
+        for(i in 1:sampleSize){
+            sample.rows[i]  <- interval.mat[i, startingPoint]
+            musList         <- musList[!musList %in% sample.rows[i]]
+            interval.mat    <- matrix(musList, nrow = sampleSize, byrow = TRUE, ncol = interval) # Redraw interval matrix
+        }
+    }
+
+    sample                  <- as.data.frame(dataset[sample.rows, ])
 
     for(i in 1:nrow(sample)){
-        row <- list()
-        row[["number"]] <- i
+        row                 <- list()
+        row[["number"]]     <- i
         row[["recordNumber"]] <- sample[i, recordColumnIndex]
-        for(j in variables){
-            row[[j]] <- as.character(sample[i, .v(j)])
+        for(j in c(variables, monetaryVariable)){
+            row[[j]]        <- as.character(sample[i, .v(j)])
         }
         table$addRows(row)
     }
@@ -258,13 +313,20 @@
     jaspResults[["intervalTable"]]          <- intervalTable
     intervalTable$position                  <- position
 
-    intervalTable$addColumnInfo(name="N", title ="Population size", type = "integer")
-    intervalTable$addColumnInfo(name="n", title ="Sample size", type = "integer")
-    intervalTable$addColumnInfo(name="I", title ="Interval width", type = "number", format="sf:4")
+    intervalTable$addColumnInfo(name="N", title ="Population size", type = "string")
+    intervalTable$addColumnInfo(name="n", title ="Sample size", type = "string")
+    if(options[["auditType"]] == "mus"){
+      intervalTable$addColumnInfo(name="T", title ="Total value", type = "string")
+    }
+    intervalTable$addColumnInfo(name="I", title ="Interval width", type = "string")
 
     sampleSize                              <- options$sampleSize
 
-    row <- list("N" = nrow(dataset), "n" = sampleSize, "I" = round(interval, 0))
+    if(options[["auditType"]] == "mus"){
+        row <- list("N" = nrow(dataset), "n" = sampleSize, "T" = round(sum(dataset[, .v(options[["monetaryVariableMUS"]])]), 2),"I" = round(interval, 0))
+    } else {
+        row <- list("N" = nrow(dataset), "n" = sampleSize, "I" = round(interval, 0))
+    }
     intervalTable$addRows(row)
 
 }
