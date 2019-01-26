@@ -257,7 +257,7 @@ Form {
                 text: qsTr("<b>Random</b>")
                 }
               Divider {
-                implicitWidth: 420
+                implicitWidth: 400
               }
               Label {
                 text: qsTr("<b>Systematic</b>")
@@ -270,7 +270,7 @@ Form {
               id: samplingType
 
               Flow {
-                spacing: 20
+                spacing: 15
 
                   ColumnLayout {
                     spacing: 5
@@ -402,6 +402,7 @@ Form {
                     id: samplingTables
                     enabled: false
 
+                    CheckBox { text: qsTr("Show Sample")          ; name: "showSample"}
                     CheckBox { text: qsTr("Sample descriptives")  ; name: "showDescriptives" ; id: descriptives}
                     CheckBox { text: qsTr("Mean")                 ; name: "mean"; Layout.leftMargin: 20; enabled: descriptives.checked ; checked: true}
                     CheckBox { text: qsTr("Median")               ; name: "median"; Layout.leftMargin: 20; enabled: descriptives.checked ; checked: true}
@@ -535,12 +536,12 @@ Form {
           implicitWidth: 560
 
           RadioButtonGroup {
-            title: qsTr("<b>Confidence bound method</b>")
+            title: qsTr("<b>Confidence bound</b>")
             name: "boundMethodMUS"
 
             RadioButton {
               name: "coxAndSnellBound"
-              text: qsTr("Cox and Snell bound")
+              text: qsTr("Cox and Snell")
               checked: true
             }
           }

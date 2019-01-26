@@ -193,15 +193,31 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
 
         # Perform the sampling and draw the outcome tables
         if(options[["samplingType"]] == "simplerandomsampling"){
-            .SimpleRandomSamplingTable(dataset, options, jaspResults, type = type, position = 14)
+            .SimpleRandomSamplingTable(dataset, options, jaspResults, type = type, sample = jaspResults[["sample"]]$object, position = 13)
         } else if(options[["samplingType"]] == "systematicsampling"){
+          if(type == "attributes"){
             interval <- ceiling(nrow(dataset) / options[["sampleSize"]])
-            .intervalTable(dataset, options, jaspResults, interval, position = 14)
-            .SystematicSamplingTable(dataset, options, jaspResults, interval, position = 15)
+            .intervalTable(dataset, options, jaspResults, interval, position = 13)
+            .SystematicSamplingTable(dataset, options, jaspResults, interval, type = "attributes", sample = jaspResults[["sample"]]$object, position = 14)
+          } else {
+            if(!is.null(monetaryVariable)){
+              interval <- ceiling(sum(dataset[, .v(monetaryVariable)]) / options[["sampleSize"]])
+              .intervalTable(dataset, options, jaspResults, interval, position = 13)
+              .SystematicSamplingTable(dataset, options, jaspResults, interval, type = "mus", sample = jaspResults[["sample"]]$object, position = 14)
+            }
+          }
         } else if(options[["samplingType"]] == "cellsampling"){
+          if(type == "attributes"){
             interval <- ceiling(nrow(dataset) / options[["sampleSize"]])
-            .intervalTable(dataset, options, jaspResults, interval, position = 14)
-            .cellSamplingTable(dataset, options, jaspResults, interval, position = 15)
+            .intervalTable(dataset, options, jaspResults, interval, position = 13)
+            .cellSamplingTable(dataset, options, jaspResults, interval, type = "attributes", sample = jaspResults[["sample"]]$object, position = 14)
+          } else {
+            if(!is.null(monetaryVariable)){
+              interval <- ceiling(sum(dataset[, .v(monetaryVariable)]) / options[["sampleSize"]])
+              .intervalTable(dataset, options, jaspResults, interval, position = 13)
+              .cellSamplingTable(dataset, options, jaspResults, interval, type = "mus", sample = jaspResults[["sample"]]$object, position = 14)
+            }
+          }
         }
         # Store the sample
         sample                          <- jaspResults[["sample"]]$object

@@ -29,11 +29,11 @@
     }
 }
 
-.plotConfidenceBounds <- function(options, result, jaspResults){
+.plotConfidenceBounds <- function(options, result, jaspResults, plotWidth = 600, plotHeight = 450){
 
   plotStat <- data.frame(materiality = options[["materiality"]],
                           bound = result[["bound"]],
-                          xlab = "Population")
+                          xlab = "")
 
   materialityStat <- data.frame(materiality = options[["materiality"]])
 
@@ -46,7 +46,7 @@
       yBreaks <- c(min(b),  options$materiality, max(b))
 
       if(options[["show"]] == "percentage"){
-          yLabels <- paste(yBreaks * 100, "%")
+          yLabels <- paste0(yBreaks * 100, "%")
       } else if(options[["show"]] == "proportion"){
           yLabels <- yBreaks
       }
@@ -61,7 +61,8 @@
       ggplot2::geom_errorbar(ggplot2::aes(ymin = 0, ymax = bound), colour = "black", width = 0.2, position = pd) +
       ggplot2::geom_hline(data = materialityStat, ggplot2::aes(yintercept = materiality), linetype = "dashed") +
       ggplot2::scale_x_discrete(labels = plotStat[["xlab"]]) +
-      base_breaks_y(plotStat, options)
+      base_breaks_y(plotStat, options) +
+      ggplot2::theme(axis.ticks.x = ggplot2::element_blank())
 
   if(options[["show"]] == "percentage"){
     p <- p + ggplot2::ylab("Error percentage")
@@ -73,7 +74,7 @@
 
   p <- JASPgraphs::themeJasp(p, xAxis = FALSE)
 
-  return(createJaspPlot(plot = p, title = "Confidence Bound Plot", width = 600, height = 450))
+  return(createJaspPlot(plot = p, title = "Confidence Bound Plot", width = plotWidth, height = plotHeight))
 
 }
 

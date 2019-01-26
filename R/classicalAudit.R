@@ -4,7 +4,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
         state 							    <- list()
 
     # Specify the title of the analysis
-    jaspResults$title   <- "Full Classical Audit"
+    jaspResults$title   <- "Full Audit"
 
     # Headers for the sub-analyses
     if(options[["auditType"]] == "attributes"){
@@ -167,27 +167,31 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
 
         # Perform the sampling and draw the outcome tables
         if(options[["samplingType"]] == "simplerandomsampling"){
-            .SimpleRandomSamplingTable(dataset, options, jaspResults, type = type, position = 13)
+            .SimpleRandomSamplingTable(dataset, options, jaspResults, type = type, sample = jaspResults[["sample"]]$object, position = 13)
         } else if(options[["samplingType"]] == "systematicsampling"){
           if(type == "attributes"){
             interval <- ceiling(nrow(dataset) / options[["sampleSize"]])
             .intervalTable(dataset, options, jaspResults, interval, position = 13)
-            .SystematicSamplingTable(dataset, options, jaspResults, interval, type = "attributes", position = 14)
+            .SystematicSamplingTable(dataset, options, jaspResults, interval, type = "attributes", sample = jaspResults[["sample"]]$object, position = 14)
           } else {
             if(!is.null(monetaryVariable)){
               interval <- ceiling(sum(dataset[, .v(monetaryVariable)]) / options[["sampleSize"]])
               .intervalTable(dataset, options, jaspResults, interval, position = 13)
-              .SystematicSamplingTable(dataset, options, jaspResults, interval, type = "mus", position = 14)
+              .SystematicSamplingTable(dataset, options, jaspResults, interval, type = "mus", sample = jaspResults[["sample"]]$object, position = 14)
             }
           }
         } else if(options[["samplingType"]] == "cellsampling"){
           if(type == "attributes"){
             interval <- ceiling(nrow(dataset) / options[["sampleSize"]])
+            .intervalTable(dataset, options, jaspResults, interval, position = 13)
+            .cellSamplingTable(dataset, options, jaspResults, interval, type = "attributes", sample = jaspResults[["sample"]]$object, position = 14)
           } else {
-            interval <- ceiling(sum(dataset[, .v(monetaryVariable)]) / options[["sampleSize"]])
+            if(!is.null(monetaryVariable)){
+              interval <- ceiling(sum(dataset[, .v(monetaryVariable)]) / options[["sampleSize"]])
+              .intervalTable(dataset, options, jaspResults, interval, position = 13)
+              .cellSamplingTable(dataset, options, jaspResults, interval, type = "mus", sample = jaspResults[["sample"]]$object, position = 14)
+            }
           }
-          .intervalTable(dataset, options, jaspResults, interval, position = 13)
-          .cellSamplingTable(dataset, options, jaspResults, interval, position = 14)
         }
         # Store the sample
         sample                          <- jaspResults[["sample"]]$object
@@ -234,7 +238,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
         {
             if(is.null(jaspResults[["confidenceBoundPlot"]]))
             {
-                jaspResults[["confidenceBoundPlot"]] 		<- .plotConfidenceBounds(options, result, jaspResults)
+                jaspResults[["confidenceBoundPlot"]] 		<- .plotConfidenceBounds(options, result, jaspResults, plotWidth = 400, plotHeight = 400)
                 jaspResults[["confidenceBoundPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "correctID",
                                                                          "show", "plotBound", "materiality", "method", "inference"))
                 jaspResults[["confidenceBoundPlot"]] 		$position <- 19
