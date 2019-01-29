@@ -305,14 +305,32 @@
 
     if(!is.null(jaspResults[["descriptives"]])) return()
 
-    all.variables                   <- unlist(options$variables)
+    if(options[["auditType"]] == "attributes"){
+      recordVariable                  <- unlist(options$recordNumberVariable)
+      if(recordVariable == "")        recordVariable <- NULL
+      rankingVariable                 <- unlist(options$rankingVariable)
+      if(rankingVariable == "")       rankingVariable <- NULL
+      monetaryVariable                <- NULL
+      variables                       <- unlist(options$variables)
+    } else {
+      recordVariable                  <- unlist(options$recordNumberVariableMUS)
+      if(recordVariable == "")        recordVariable <- NULL
+      monetaryVariable                <- unlist(options$monetaryVariableMUS)
+      if(monetaryVariable == "")      monetaryVariable <- NULL
+      rankingVariable                 <- unlist(options$rankingVariableMUS)
+      if(rankingVariable == "")       rankingVariable <- NULL
+      variables                       <- unlist(options$variablesMUS)
+    }
+
+    all.variables                   <- c(rankingVariable, monetaryVariable, variables)
     descriptives                    <- createJaspTable("Sample Descriptives")
     jaspResults[["descriptives"]]   <- descriptives
     descriptives$transpose          <- TRUE
     descriptives$position           <- position
 
     descriptives$dependOnOptions(c("variables", "allowDuplicates", "seed", "sampleSize", "seedNumber",
-                                    "showDescriptives", "mean", "sd", "var", "range", "min", "max", "median", "recordVariable"))
+                                    "showDescriptives", "mean", "sd", "var", "range", "min", "max", "median", "recordVariable", "rankingVariable",
+                                   "variablesMUS", "recordNumberVariableMUS", "rankingVariableMUS", "monetaryVariableMUS"))
 
                                     descriptives$addColumnInfo(name="name",                        type="string", format="sf:4", title = "")
                                     descriptives$addColumnInfo(name="Valid cases",                 type="integer")
@@ -357,7 +375,7 @@
 
     if(!is.null(jaspResults[["intervalTable"]])) return()
 
-    intervalTable                           <- createJaspTable("Interval information")
+    intervalTable                           <- createJaspTable("Sampling information")
     jaspResults[["intervalTable"]]          <- intervalTable
     intervalTable$position                  <- position
     intervalTable$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
@@ -409,5 +427,32 @@
                           axis.text.y = ggplot2::element_blank())
 
   return(createJaspPlot(plot = p, title = "Sampling locations", width = 1000, height = 200))
+
+}
+
+.simpleRandomSamplingInfoTable <- function(dataset, options, jaspResults, position = 1){
+
+  if(!is.null(jaspResults[["simpleRandomSamplingInfoTable"]])) return()
+
+  simpleRandomSamplingInfoTable                           <- createJaspTable("Sampling information")
+  jaspResults[["simpleRandomSamplingInfoTable"]]          <- simpleRandomSamplingInfoTable
+  simpleRandomSamplingInfoTable$position                  <- position
+  simpleRandomSamplingInfoTable$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
+                                                  "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "N"))
+
+  simpleRandomSamplingInfoTable$addColumnInfo(name="N", title ="Population size", type = "string")
+  simpleRandomSamplingInfoTable$addColumnInfo(name="n", title ="Sample size", type = "string")
+  if(options[["auditType"]] == "mus"){
+    simpleRandomSamplingInfoTable$addColumnInfo(name="T", title ="Total value", type = "string")
+  }
+
+  sampleSize                              <- options$sampleSize
+
+  if(options[["auditType"]] == "mus"){
+      row <- list("N" = nrow(dataset), "n" = sampleSize, "T" = round(sum(dataset[, .v(options[["monetaryVariableMUS"]])]), 2))
+  } else {
+      row <- list("N" = nrow(dataset), "n" = sampleSize)
+  }
+  simpleRandomSamplingInfoTable$addRows(row)
 
 }
