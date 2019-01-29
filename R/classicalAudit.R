@@ -113,6 +113,10 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
       if(rankingVariable == "")       rankingVariable <- NULL
       monetaryVariable                <- NULL
       variables                       <- unlist(options$variables)
+      correctID                       <- unlist(options$correctID)
+      if(correctID == "")             correctID <- NULL
+      sampleFilter                    <- unlist(options$sampleFilter)
+      if(sampleFilter == "")          sampleFilter <- NULL
     } else {
       recordVariable                  <- unlist(options$recordNumberVariableMUS)
       if(recordVariable == "")        recordVariable <- NULL
@@ -121,11 +125,11 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
       rankingVariable                 <- unlist(options$rankingVariableMUS)
       if(rankingVariable == "")       rankingVariable <- NULL
       variables                       <- unlist(options$variablesMUS)
+      correctID                       <- unlist(options$correctMUS)
+      if(correctID == "")             correctID <- NULL
+      sampleFilter                    <- unlist(options$sampleFilterMUS)
+      if(sampleFilter == "")          sampleFilter <- NULL
     }
-    correctID                       <- unlist(options$correctID)
-    if(correctID == "")             correctID <- NULL
-    sampleFilter                    <- unlist(options$sampleFilter)
-    if(sampleFilter == "")          sampleFilter <- NULL
     variables.to.read               <- c(recordVariable, variables, rankingVariable, correctID, sampleFilter, monetaryVariable)
 
     if (is.null(dataset))
@@ -212,7 +216,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
 
     # Evaluation phase
     # only runs when an error variable has been selected
-    if(options[["correctID"]] != ""){
+    if(!is.null(correctID)){
 
       jaspResults[["evaluationHeader"]] <- createJaspHtml("<u>Evaluation</u>", "h2")
       jaspResults[["evaluationHeader"]]$position <- 16
@@ -222,10 +226,19 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
           dataset <- subset(dataset, dataset[, .v(sampleFilter)] == 1)
       }
 
-      # Perform the evaluation
-      .attributesBoundFullAudit(dataset, options, jaspResults)
-      result                                       <- jaspResults[["result"]]$object
-      .attributesBoundTableFullAudit(options, result, jaspResults, position = 18)
+      if(type == "attributes"){
+        # Perform the attributes evaluation
+        .attributesBoundFullAudit(dataset, options, jaspResults)
+        result                                       <- jaspResults[["result"]]$object
+        .attributesBoundTableFullAudit(options, result, jaspResults, position = 18)
+      } else {
+        # Perform the MUS evaluaton
+        if(options[["boundMethodMUS"]] == "stringerBound"){
+          .stringerBound(dataset, options, jaspResults)
+        }
+        result                                       <- jaspResults[["result"]]$object
+        .musBoundTableFullAudit(options, result, jaspResults, position = 18)
+      }
 
       # Interpretation before the evalution table
       if(options[["interpretation"]]){
@@ -242,7 +255,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
       }
 
       # Confidence bound plot TODO: Adjust width and height of plot
-      if(options[['plotBound']] && options[["correctID"]] != "")
+      if(options[['plotBound']] && !is.null(correctID))
       {
           if(is.null(jaspResults[["confidenceBoundPlot"]]))
           {

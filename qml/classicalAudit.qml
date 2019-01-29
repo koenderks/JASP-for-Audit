@@ -488,7 +488,7 @@ Form {
           implicitWidth: 560
 
           RadioButtonGroup {
-            title: qsTr("<b>Confidence bound</b>")
+            title: qsTr("<b>Method</b>")
             name: "boundMethodMUS"
 
             RadioButton {

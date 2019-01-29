@@ -1,4 +1,4 @@
-Independent Samples T-Test
+-Independent Samples T-Test
 ==========================
 
 The independent samples t-test allows you to test the null hypothesis that the population means of two independent groups are equal
