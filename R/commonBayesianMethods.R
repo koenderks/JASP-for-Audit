@@ -421,7 +421,7 @@
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",  type = 'string')
     evaluationTable$addColumnInfo(name = 'n',    title = "Sample size",    type = 'string')
-    evaluationTable$addColumnInfo(name = 'k',    title = "Errors",         type = 'string')
+    evaluationTable$addColumnInfo(name = 'k',    title = "Full errors",         type = 'string')
     evaluationTable$addColumnInfo(name = 'bound', title = paste0(result[["confidence"]]*100,"% Confidence bound"), type = 'string')
     if(options[["mostLikelyError"]])
       evaluationTable$addColumnInfo(name = 'mle',    title = "Most Likely Error",         type = 'string')
@@ -537,43 +537,6 @@
 
 }
 
-.plotCriticalErrorsPrior <- function(allowed.errors, reject.errors, jaspResults){
-
-    errorrange <- 0:max(reject.errors)
-    errors <- c(allowed.errors, reject.errors)
-    fill <- c(rep(rgb(0,1,0,.25), length(allowed.errors)),
-              rep(rgb(1,0,0,.25), length(reject.errors)))
-
-    rectdata <- data.frame(xmin = errors - 0.5, xmax = errors + 0.5, ymin = 0, ymax = 0.5,
-                           fill = fill)
-
-    df <- data.frame()
-    p <- ggplot2::ggplot(df) +
-        ggplot2::geom_point() +
-        ggplot2::ylim(0, 1) +
-        ggplot2::ylab(NULL) +
-        ggplot2::xlab("Sample errors")
-
-    p <- p + ggplot2::geom_rect(ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
-                                data = rectdata, fill = rectdata$fill, color = "black")
-
-    pdata <- data.frame(x = c(0,0), y = c(0,0), l = c("1","2"))
-    p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = c(rgb(0,1,0,0), rgb(1,0,0,0)))
-    p <- p + ggplot2::scale_shape_manual(name = "", values = c(22,22), labels = c("Accept population", "Reject population"))
-    p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 9, shape = 22, fill = c(rgb(0,1,0,.25),rgb(1,0,0,.25)), stroke = 2, color = "black")), order = 1)
-
-    p <- p + ggplot2::scale_x_continuous(breaks = errorrange)
-
-
-    p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE, legend.position = "top")
-    p <- p + ggplot2::theme(axis.ticks = ggplot2::element_blank(),
-                            axis.text.y = ggplot2::element_blank(),
-                            axis.text.x = ggplot2::element_text(size = 17))
-
-    return(createJaspPlot(plot = p, title = "Decision Plot", width = 500, height = 300))
-
-}
-
 .expectedBF <- function(options, result, ktable){
     priorOdds     <- diff(pbeta(c(0, options[["materiality"]]), result[["priorA"]], result[["priorB"]])) / diff(pbeta(c(options[["materiality"]], 1), result[["priorA"]], result[["priorB"]]))
     posteriorOdds <- diff(pbeta(c(0, options[["materiality"]]), result[["priorA"]] + ktable, result[["priorB"]] + (result[["n"]] + ktable))) / diff(pbeta(c(options[["materiality"]], 1), result[["priorA"]] + ktable, result[["priorB"]] + (result[["n"]] + ktable)))
@@ -586,4 +549,185 @@
   posteriorOdds <- diff(pbeta(c(0, options[["materiality"]]), result[["posteriorA"]], result[["posteriorB"]])) / diff(pbeta(c(options[["materiality"]], 1), result[["posteriorA"]], result[["posteriorB"]]))
   BF            <- round(posteriorOdds / priorOdds, 2)
   return(BF)
+}
+
+.coxAndSnellBound <- function(dataset, options, jaspResults, priorPi = 0.10, priorMu = 0.40, priorA = 1, priorB = 6){
+
+    # Based on the paper:
+    # Cox, D. R., & Snell, E. J. (1979). On sampling and the estimation of rare errors. Biometrika, 66(1), 125-132.
+    # Default options are recommendations from the paper
+
+    n                       <- nrow(dataset)
+    alpha                   <- 1 - options[["confidence"]]
+    sample                  <- dataset[, c(.v(options[["monetaryVariableMUS"]]), .v(options[["correctMUS"]]))]
+
+    t                       <- sample[, 1] - sample[, 2]
+    z                       <- t / sample[, 1]
+    z                       <- subset(z, z > 0)
+    M                       <- length(z)
+
+    z_bar                   <- mean(z)
+    if(M == 0)
+        z_bar               <- 0
+
+    prior_part_1            <- (0 + priorA) / (0 + priorB)
+    prior_part_2            <- ((priorMu * (priorB - 1)) + (0 * 0)) / (0 + (priorA / priorPi))
+    prior                   <- prior_part_1 * prior_part_2 * stats::rf(n = 10000, df1 = (2 * (0 + priorA)), df2 = ( 2 *(0 + priorB)))
+
+    posterior_part_1        <- (M + priorA) / (M + priorB)
+    posterior_part_2        <- ((priorMu * (priorB - 1)) + (M * z_bar)) / (n + (priorA / priorPi))
+    posterior               <- posterior_part_1 * posterior_part_2 * stats::rf(n = 10000, df1 = (2 * (M + priorA)), df2 = ( 2 *(M + priorB)))
+
+    bound                   <- as.numeric(quantile(posterior, probs = (1 - alpha), na.rm = TRUE))
+
+    resultList <- list()
+    resultList[["n"]]           <- n
+    resultList[["k"]]           <- M
+    resultList[["z"]]           <- z
+    resultList[["IR"]]          <- options[["IR"]]
+    resultList[["CR"]]          <- options[["CR"]]
+    resultList[["confidence"]]  <- options[["confidence"]]
+    resultList[["bound"]]       <- bound
+    resultList[["alpha"]]       <- alpha
+    resultList[["priorA"]]      <- priorA
+    resultList[["priorB"]]      <- priorB
+    resultList[["priorPi"]]     <- priorPi
+    resultList[["priorMu"]]     <- priorMu
+    resultList[["posteriorA"]]  <- priorA + sum(z)
+    resultList[["posteriorB"]]  <- priorB + (n - (sum(z)))
+    resultList[["prior"]]       <- prior
+    resultList[["posterior"]]   <- posterior
+
+    jaspResults[["result"]] <- createJaspState(resultList)
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilterMUS", "auditType", "boundMethodMUS"))
+
+}
+
+.bayesianMusBoundTableFullAudit <- function(options, result, jaspResults, position = 1){
+
+    if(!is.null(jaspResults[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
+
+    evaluationTable                       <- createJaspTable("Bayesian Evaluation Table")
+    jaspResults[["evaluationTable"]]      <- evaluationTable
+    evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
+                                      "sampleFilter", "distribution", "mostLikelyError", "N", "correctMUS", "sampleFilterMUS",
+                                      "boundMethodMUS"))
+    evaluationTable$position <- position
+
+    evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",  type = 'string')
+    evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",    type = 'string')
+    evaluationTable$addColumnInfo(name = 'fk',            title = "Errors",    type = 'string')
+    evaluationTable$addColumnInfo(name = 'k',             title = "Sum of fractional errors",         type = 'string')
+
+    evaluationTable$addColumnInfo(name = 'bound',  title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
+    if(options[["mostLikelyError"]])
+      evaluationTable$addColumnInfo(name = 'mle',  title = "Most Likely Error", type = 'string')
+
+    if(options[["correctMUS"]] == "" || options[["sampleFilterMUS"]] == ""){
+      if(options[["mostLikelyError"]]){
+        row <- list(materiality = ".", n = ".", k = ".", bound = ".", mle = ".")
+      } else {
+        row <- list(materiality = ".", n = ".", k = ".", bound = ".")
+      }
+      evaluationTable$addRows(row)
+      return()
+    }
+
+    if(options[["N"]] == 0){
+        mle <- 0
+    } else {
+        mle <- floor( sum(result[["z"]]) / result[["n"]] * options[["N"]] )
+    }
+
+      if(options[["show"]] == "percentage"){
+          materialityTable <- paste0(round(options[["materiality"]],2) * 100, "%")
+          if(result[["bound"]] == "."){
+              boundTable          <- "."
+          } else {
+              boundTable <- paste0(round(result[["bound"]],3) * 100, "%")
+          }
+      } else if(options[["show"]] == "proportion"){
+          materialityTable <- round(options[["materiality"]], 2)
+          if(result[["bound"]] == "."){
+              boundTable          <- "."
+          } else {
+              boundTable <- round(result[["bound"]],3)
+          }
+      }
+
+    errors <- round(sum(result[["z"]]), 2)
+
+    if(options[["mostLikelyError"]]){
+      row <- list(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable, mle = mle)
+    } else {
+      row <- list(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable)
+    }
+    evaluationTable$addRows(row)
+
+    if(options[["boundMethodMUS"]] == "coxAndSnellBound"){
+      message <- "The confidence bound is calculated according to the <b>Cox and Snell</b> method."
+      evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
+    }
+}
+
+.plotPriorAndPosteriorBayesianMUSBoundFullAudit <- function(options, result, jaspResults, plotWidth = 600, plotHeight = 450){
+
+  prior <- density(result[["prior"]], from = 0, to = options[["limx_backup"]])
+  posterior <- density(result[["posterior"]], from = 0, to = options[["limx_backup"]])
+
+  d <- data.frame(
+      x = c(prior$x, posterior$x),
+      y = c(prior$y, posterior$y),
+      type = c(rep("Prior", length(prior$x)), rep("Posterior", length(posterior$x)))
+  )
+  # Reorder factor levels to display in legend
+  d$type = factor(d$type,levels(d$type)[c(2,1)])
+
+  xBreaks <- JASPgraphs::getPrettyAxisBreaks(posterior$x, min.n = 4)
+  xLim <- range(xBreaks)
+  yBreaks <- c(0, 1.2*max(d$y))
+  yLim <- range(yBreaks)
+
+  posteriorPointData <- subset(d, d$type == "Posterior")
+  posteriorPointDataY <- posteriorPointData$y[which.min(abs(posteriorPointData$x - options[["materiality"]]))]
+
+  pointdata <- data.frame(x = options[["materiality"]], y = posteriorPointDataY)
+
+  p <- ggplot2::ggplot(d, ggplot2::aes(x = x, y = y)) +
+      ggplot2::geom_line(ggplot2::aes(x = x, y = y, linetype = type), lwd = 1) +
+      ggplot2::scale_linetype_manual(values=c("dashed", "solid"), guide = ggplot2::guide_legend(nrow = 1, byrow = FALSE, title = "", order = 1))
+
+  if(options[["show"]] == "percentage"){
+    p <- p + ggplot2::scale_x_continuous(name = "Error percentage", breaks = xBreaks, limits = xLim, labels = paste0(xBreaks * 100, "%"))
+  } else if(options[["show"]] == "proportion"){
+    p <- p + ggplot2::scale_x_continuous(name = "Error proportion", breaks = xBreaks, limits = xLim)
+  }
+
+  if(options[["plotPriorAndPosteriorAdditionalInfo"]]){
+    pdata <- data.frame(x = 0, y = 0, l = "1")
+    p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 0.25, 1, 0))
+    p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior \nconfidence region"))
+    p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 20, shape = 21, fill = rgb(0, 0.25, 1, .5), stroke = 2, color = "black")), order = 2)
+
+    if(options[["statistic"]] == "bound"){
+      p <- p + ggplot2::geom_area(mapping = ggplot2::aes(x = x, y = y), data = subset(subset(d, d$type == "Posterior"), subset(d, d$type == "Posterior")$x <= result[["bound"]]), fill = rgb(0, 0.25, 1, .5))
+    } else if(options[["statistic"]] == "interval") {
+      # p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["posteriorA"]], shape2 = result[["posteriorB"]]), xlim = c(result[["bound"]][1], result[["bound"]][2]),
+      #                                 geom = "area", fill = rgb(0, 0.25, 1, .5))
+    }
+  }
+
+  p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = pointdata, size = 3, shape = 21, stroke = 2, color = "black", fill = "red")
+
+  thm <- ggplot2::theme(
+		axis.ticks.y = ggplot2::element_blank(),
+		axis.title.y = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = -5, b = 0, l = 0))
+	)
+  p <- p + ggplot2::scale_y_continuous(name = "Density", breaks = yBreaks, labels = c("", ""), limits = yLim) +
+  	       ggplot2::theme()
+
+  p <- JASPgraphs::themeJasp(p, legend.position = "top") + thm
+
+  return(createJaspPlot(plot = p, title = "Prior and Posterior", width = plotWidth, height = plotHeight))
+
 }

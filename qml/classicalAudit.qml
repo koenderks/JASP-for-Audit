@@ -493,7 +493,7 @@ Form {
 
             RadioButton {
               name: "stringerBound"
-              text: qsTr("Stringer bound")
+              text: qsTr("Stringer")
               checked: true
             }
           }

@@ -536,7 +536,7 @@ Form {
           implicitWidth: 560
 
           RadioButtonGroup {
-            title: qsTr("<b>Confidence bound</b>")
+            title: qsTr("<b>Method</b>")
             name: "boundMethodMUS"
 
             RadioButton {
@@ -561,8 +561,8 @@ Form {
     // Expander button for the report phase
     ExpanderButton {
         text: interpretationPhase.expanded ? qsTr("<b>5. Report</b>") : qsTr("5. Report")
-        expanded: toSampling.checked ? (toEvaluation.checked ? (toInterpretation.checked ? true : false) : false) : false
-        enabled: toSampling.checked ? (toEvaluation.checked ? (toInterpretation.checked ? true : false) : false) : false
+        expanded: false
+        enabled: false
         id: interpretationPhase
 
         Button {

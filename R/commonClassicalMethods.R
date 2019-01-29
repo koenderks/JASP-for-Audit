@@ -325,7 +325,7 @@
     # Based on the paper:
     # Stringer, K. W. (1963). Practical aspects of statistical sampling in auditing. In Proceedings of the Business and Economic Statistics Section (pp. 405-411). American Statistical Association.
 
-    n                       <- options[["sampleSize"]]
+    n                       <- nrow(dataset)
     alpha                   <- 1 - options[["confidence"]]
     sample                  <- dataset[, c(.v(options[["monetaryVariableMUS"]]), .v(options[["correctMUS"]]))]
 
@@ -422,7 +422,7 @@
     evaluationTable$addRows(row)
 
     if(options[["boundMethodMUS"]] == "stringerBound"){
-      message <- "The confidence bound is calculated using the <b>Stringer bound</b>."
+      message <- "The confidence bound is calculated according to the <b>Stringer</b> method."
       evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
     }
 }

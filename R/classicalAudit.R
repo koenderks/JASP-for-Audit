@@ -222,7 +222,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
       jaspResults[["evaluationHeader"]]$position <- 16
 
       # Apply the sample filter
-      if(options[["sampleFilter"]] != ""){
+      if(!is.null(sampleFilter)){
           dataset <- subset(dataset, dataset[, .v(sampleFilter)] == 1)
       }
 

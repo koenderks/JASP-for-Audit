@@ -139,6 +139,10 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
       if(rankingVariable == "")       rankingVariable <- NULL
       monetaryVariable                <- NULL
       variables                       <- unlist(options$variables)
+      correctID                       <- unlist(options$correctID)
+      if(correctID == "")             correctID <- NULL
+      sampleFilter                    <- unlist(options$sampleFilter)
+      if(sampleFilter == "")          sampleFilter <- NULL
     } else {
       recordVariable                  <- unlist(options$recordNumberVariableMUS)
       if(recordVariable == "")        recordVariable <- NULL
@@ -147,11 +151,11 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
       rankingVariable                 <- unlist(options$rankingVariableMUS)
       if(rankingVariable == "")       rankingVariable <- NULL
       variables                       <- unlist(options$variablesMUS)
+      correctID                       <- unlist(options$correctMUS)
+      if(correctID == "")             correctID <- NULL
+      sampleFilter                    <- unlist(options$sampleFilterMUS)
+      if(sampleFilter == "")          sampleFilter <- NULL
     }
-    correctID                       <- unlist(options$correctID)
-    if(correctID == "")             correctID <- NULL
-    sampleFilter                    <- unlist(options$sampleFilter)
-    if(sampleFilter == "")          sampleFilter <- NULL
     variables.to.read               <- c(recordVariable, variables, rankingVariable, correctID, sampleFilter, monetaryVariable)
 
     if (is.null(dataset))
@@ -238,20 +242,34 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
 
     # Evaluation phase
     # only runs when an error variable has been selected
-    if(options[["correctID"]] != ""){
+    if(!is.null(correctID)){
 
       jaspResults[["evaluationHeader"]] <- createJaspHtml("<u>Evaluation</u>", "h2")
       jaspResults[["evaluationHeader"]]$position <- 17
 
       # Apply the sample filter
-      if(options[["sampleFilter"]] != ""){
+      if(!is.null(sampleFilter)){
           dataset <- subset(dataset, dataset[, .v(sampleFilter)] == 1)
       }
 
-      # Perform the evaluation
-      .bayesianAttributesBoundFullAudit(dataset, options, jaspResults)
-      result                                       <- jaspResults[["result"]]$object
-      .bayesianAttributesBoundTableFullAudit(options, result, jaspResults, position = 19)
+      if(type == "attributes"){
+        # Perform the attributes evaluation
+        .bayesianAttributesBoundFullAudit(dataset, options, jaspResults)
+        result                                       <- jaspResults[["result"]]$object
+        .bayesianAttributesBoundTableFullAudit(options, result, jaspResults, position = 19)
+      } else {
+        # Perform the mus evaluation
+        if(options[["boundMethodMUS"]] == "coxAndSnellBound"){
+          if(options[["expected.errors"]] == "kPercentage"){
+            priorPi <- options[["kPercentageNumber"]]
+          } else {
+            priorPi <- options[["kNumberNumber"]] / options[["sampleSize"]]
+          }
+          .coxAndSnellBound(dataset, options, jaspResults, priorPi = priorPi, priorMu = 1, priorA = result[["priorA"]], priorB = result[["priorB"]])
+        }
+        result                                       <- jaspResults[["result"]]$object
+        .bayesianMusBoundTableFullAudit(options, result, jaspResults, position = 19)
+      }
 
       # Interpretation before the evalution table
       if(options[["interpretation"]]){
@@ -267,16 +285,20 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
       }
 
       # Prior and Posterior plot
-      if(options[['plotPriorAndPosterior']] && options[["correctID"]] != "")
+      if(options[['plotPriorAndPosterior']] && !is.null(correctID))
       {
           if(is.null(jaspResults[["priorAndPosteriorPlot"]]))
           {
+            if(type == "attributes"){
               jaspResults[["priorAndPosteriorPlot"]] 		<- .plotPriorAndPosteriorBayesianAttributesBoundFullAudit(options, result, jaspResults)
-              jaspResults[["priorAndPosteriorPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "limx_backup", "statistic", "plotPriorAndPosterior",
-                                                                         "plotPriorAndPosteriorAdditionalInfo", "materiality", "show", "correctID",
-                                                                         "expected.errors", "kPercentageNumber", "kNumberNumber", "prior", "sampleFilter",
-                                                                         "distribution", "N"))
-              jaspResults[["priorAndPosteriorPlot"]] 		$position <- 20
+            } else {
+              jaspResults[["priorAndPosteriorPlot"]] 		<- .plotPriorAndPosteriorBayesianMUSBoundFullAudit(options, result, jaspResults)
+            }
+            jaspResults[["priorAndPosteriorPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "limx_backup", "statistic", "plotPriorAndPosterior",
+                                                                       "plotPriorAndPosteriorAdditionalInfo", "materiality", "show", "correctID",
+                                                                       "expected.errors", "kPercentageNumber", "kNumberNumber", "prior", "sampleFilter",
+                                                                       "distribution", "N"))
+            jaspResults[["priorAndPosteriorPlot"]] 		$position <- 20
           }
       }
 
