@@ -1,10 +1,10 @@
-classicalAttributesPlanning <- function(jaspResults, dataset, options, state=NULL){
+classicalPlanning <- function(jaspResults, dataset, options, state=NULL){
 
   if(is.null(state))
       state 							    <- list()
 
   # Set the title
-  jaspResults$title 					<- "Attributes Planning"
+  jaspResults$title 					<- "Planning"
 
   if(options[["interpretation"]]){
       jaspResults[["procedureHeader"]] <- createJaspHtml("<u>Attributes Procedure</u>", "h2")

@@ -82,21 +82,6 @@ Form {
         }
     }
 
-    ExpanderButton {
-        text: qsTr("Advanced prior options")
-        Layout.leftMargin: 20
-        implicitWidth: 560
-
-        RadioButtonGroup {
-            title: qsTr("<b>Prior</b>")
-            name: "prior"
-
-            RadioButton { text: qsTr("Audit Risk Model")        ; name: "ARM" ; checked: true}
-            RadioButton { text: qsTr("50-50")                   ; name: "5050" }
-        }
-
-    }
-
     Divider { }
 
     Flow {
@@ -147,20 +132,10 @@ Form {
     Flow {
       spacing: 90
 
-      GroupBox {
-          title: qsTr("<b>Tables</b>")
-
-          CheckBox {      text: qsTr("Implicit sample") ; name: "implicitsample"}
-          CheckBox {      text: qsTr("Expected Bayes factor") ; name: "expectedBF"}
-       }
-
        GroupBox {
            title: qsTr("<b>Plots</b>")
 
            CheckBox {      text: qsTr("Decision plot")   ; name: "plotCriticalErrors"; checked: true }
-           CheckBox {      text: qsTr("Implied prior and posterior")   ; name: "plotPrior" ; id: plotPrior}
-           PercentField {  text: qsTr("x-axis limit")    ; name: "limx"; defaultValue: 20; Layout.leftMargin: 20}
-           CheckBox {      text: qsTr("Additional info") ; name: "plotPriorAdditionalInfo" ; Layout.leftMargin: 20; checked: true; enabled: plotPrior.checked}
         }
 
     }
@@ -179,17 +154,9 @@ Form {
           RadioButton {text: qsTr("Proportions")              ; name: "proportion"}
         }
 
-        RadioButtonGroup{
-          title: qsTr("<b>Statistic</b>")
-          name: "statistic"
-
-          RadioButton {text: qsTr("Confidence Bound")                 ; name: "bound"; checked: true}
-          RadioButton {text: qsTr("Confidence Interval")              ; name: "interval"}
-        }
-
         GroupBox {
-          title: qsTr("<b>Interpretation</b>")
-          CheckBox { text: qsTr("Toggle interpretation"); name: "interpretation"; checked: false }
+          title: qsTr("<b>Explanatory text</b>")
+          CheckBox { text: qsTr("Turn on"); name: "interpretation"; checked: false }
         }
 
       }

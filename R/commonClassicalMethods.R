@@ -296,7 +296,7 @@
                               n = n,
                               p = options[["materiality"]],
                               alternative = "less",
-                              conf.level = 1 - alpha)
+                              conf.level = options[["confidence"]])
     bound                 <- binomResult$conf.int[2]
     if(bound <= alpha){
       approve             <- "Yes"

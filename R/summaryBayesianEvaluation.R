@@ -1,4 +1,4 @@
-summaryBayesianAttributesEvaluation <- function(jaspResults, dataset, options, state=NULL){
+summaryBayesianEvaluation <- function(jaspResults, dataset, options, state=NULL){
 
   if(is.null(state))
       state 							    <- list()

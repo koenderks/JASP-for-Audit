@@ -1,9 +1,9 @@
-bayesianAttributesPlanning <- function(jaspResults, dataset, options, state=NULL){
+bayesianPlanning <- function(jaspResults, dataset, options, state=NULL){
 
   if(is.null(state))
       state 							    <- list()
 
-  jaspResults$title 					<- "Bayesian Attributes Planning"
+  jaspResults$title 					<- "Bayesian Planning"
 
   .ARMformula(options, jaspResults, position = 3)   # Show the Audit Risk Model formula and quantify detection risk
   DR              <- jaspResults[["DR"]]$object

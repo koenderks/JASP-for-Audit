@@ -158,7 +158,11 @@
       if(type == "attributes"){
           recordColumnIndex   <- which(colnames(dataset) == .v(recordVariable))
           interval.mat        <- matrix(dataset[, .v(recordVariable)], ncol = interval, byrow = TRUE, nrow = sampleSize)
-          sample.rows         <- interval.mat[1:nrow(interval.mat), startingPoint]
+
+          sample.rows <- numeric()
+          for(i in 1:sampleSize){
+            sample.rows[i]    <- interval.mat[i, base::sample(1:ncol(interval.mat), size = 1)]
+          }
       } else {
           recordColumnIndex   <- which(colnames(dataset) == .v(recordVariable))
           recordColumn        <- dataset[, .v(recordVariable)]

@@ -60,7 +60,7 @@ Form {
         }
 
         Button {
-          Layout.leftMargin: 480
+          anchors.right: parent.right
           text: qsTr("<b>To planning</b>")
           onClicked: {
             optionPhase.expanded = false
@@ -227,7 +227,7 @@ Form {
     }
 
     Button {
-      Layout.leftMargin: 480
+      anchors.right: parent.right
       text: qsTr("<b>To sampling</b>")
       enabled: populationSize.value == "0" ? false : true
       onClicked: {
@@ -297,7 +297,7 @@ Form {
             }
 
             Button {
-              Layout.leftMargin: 480
+              anchors.right: parent.right
               text: qsTr("<b>Confirm</b>")
               onClicked: {
                 samplingMethod.expanded = false
@@ -402,7 +402,7 @@ Form {
                     id: samplingTables
                     enabled: false
 
-                    CheckBox { text: qsTr("Show Sample")          ; name: "showSample"}
+                    CheckBox { text: qsTr("Display sample")       ; name: "showSample"}
                     CheckBox { text: qsTr("Sample descriptives")  ; name: "showDescriptives" ; id: descriptives}
                     CheckBox { text: qsTr("Mean")                 ; name: "mean"; Layout.leftMargin: 20; enabled: descriptives.checked ; checked: true}
                     CheckBox { text: qsTr("Median")               ; name: "median"; Layout.leftMargin: 20; enabled: descriptives.checked ; checked: true}
@@ -418,7 +418,7 @@ Form {
         }
 
         Button {
-          Layout.leftMargin: 460
+          anchors.right: parent.right
           text: qsTr("<b>To evaluation</b>")
           onClicked: {
             samplingPhase.expanded = false
@@ -453,35 +453,35 @@ Form {
         availableVariablesList.name: "evaluationVariablesAttributes"
 
             AssignedVariablesList {
-                name: "correctID"
-                title: qsTr("Error variable")
-                singleItem: true
-                allowedColumns: ["nominal"]
-            }
-            AssignedVariablesList {
                 name: "sampleFilter"
                 title: qsTr("Sample filter variable")
                 singleItem: true
                 allowedColumns: ["nominal"]
             }
+            AssignedVariablesList {
+                name: "correctID"
+                title: qsTr("Error variable")
+                singleItem: true
+                allowedColumns: ["nominal"]
+            }
         }
 
-        // Variables form for attributes evaluation
+        // Variables form for mus evaluation
         VariablesForm {
         visible: attributes.checked ? false : true
         availableVariablesList.name: "evaluationVariablesMUS"
 
             AssignedVariablesList {
-                name: "correctMUS"
-                title: qsTr("True monetary values")
-                singleItem: true
-                allowedColumns: ["scale"]
-            }
-            AssignedVariablesList {
                 name: "sampleFilterMUS"
                 title: qsTr("Sample filter variable")
                 singleItem: true
                 allowedColumns: ["nominal"]
+            }
+            AssignedVariablesList {
+                name: "correctMUS"
+                title: qsTr("True monetary values")
+                singleItem: true
+                allowedColumns: ["scale"]
             }
         }
 
@@ -548,7 +548,7 @@ Form {
         }
 
         Button {
-          Layout.leftMargin: 480
+          anchors.right: parent.right
           text: qsTr("<b>To report</b>")
           onClicked: {
             evaluationPhase.expanded = false

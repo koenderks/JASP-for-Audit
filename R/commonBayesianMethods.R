@@ -551,7 +551,7 @@
   return(BF)
 }
 
-.coxAndSnellBound <- function(dataset, options, jaspResults, priorPi = 0.10, priorMu = 0.40, priorA = 1, priorB = 6){
+.coxAndSnellBound <- function(dataset, options, jaspResults, priorPi = 0.50, priorMu = 0.50, priorA = 1, priorB = 6){
 
     # Based on the paper:
     # Cox, D. R., & Snell, E. J. (1979). On sampling and the estimation of rare errors. Biometrika, 66(1), 125-132.
@@ -572,13 +572,17 @@
 
     prior_part_1            <- (0 + priorA) / (0 + priorB)
     prior_part_2            <- ((priorMu * (priorB - 1)) + (0 * 0)) / (0 + (priorA / priorPi))
-    prior                   <- prior_part_1 * prior_part_2 * stats::rf(n = 10000, df1 = (2 * (0 + priorA)), df2 = ( 2 *(0 + priorB)))
+    prior                   <- prior_part_1 * prior_part_2 * stats::rf(n = 1e5, df1 = (2 * (0 + priorA)), df2 = ( 2 *(0 + priorB)))
 
     posterior_part_1        <- (M + priorA) / (M + priorB)
     posterior_part_2        <- ((priorMu * (priorB - 1)) + (M * z_bar)) / (n + (priorA / priorPi))
-    posterior               <- posterior_part_1 * posterior_part_2 * stats::rf(n = 10000, df1 = (2 * (M + priorA)), df2 = ( 2 *(M + priorB)))
+    posterior               <- posterior_part_1 * posterior_part_2 * stats::rf(n = 1e5, df1 = (2 * (M + priorA)), df2 = ( 2 *(M + priorB)))
 
-    bound                   <- as.numeric(quantile(posterior, probs = (1 - alpha), na.rm = TRUE))
+    if(options[["statistic"]] == "bound"){
+        bound                   <- as.numeric(quantile(posterior, probs = (1 - alpha), na.rm = TRUE))
+    } else {
+      bound                     <- as.numeric(quantile(posterior, probs = c(  (1 - (1-(1-alpha)/2)) , (1 - ((1-alpha)/2)) ), na.rm = TRUE))
+    }
 
     resultList <- list()
     resultList[["n"]]           <- n
@@ -611,7 +615,7 @@
     jaspResults[["evaluationTable"]]      <- evaluationTable
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
                                       "sampleFilter", "distribution", "mostLikelyError", "N", "correctMUS", "sampleFilterMUS",
-                                      "boundMethodMUS"))
+                                      "boundMethodMUS", "bayesFactor"))
     evaluationTable$position <- position
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",  type = 'string')
@@ -622,12 +626,22 @@
     evaluationTable$addColumnInfo(name = 'bound',  title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
     if(options[["mostLikelyError"]])
       evaluationTable$addColumnInfo(name = 'mle',  title = "Most Likely Error", type = 'string')
+    if(options[["bayesFactor"]])
+      evaluationTable$addColumnInfo(name = 'bf',  title = "Bayes factor", type = 'string')
 
     if(options[["correctMUS"]] == "" || options[["sampleFilterMUS"]] == ""){
-      if(options[["mostLikelyError"]]){
-        row <- list(materiality = ".", n = ".", k = ".", bound = ".", mle = ".")
+      if(options[["bayesFactor"]]){
+        if(options[["mostLikelyError"]]){
+          row <- list(materiality = ".", n = ".", fk = ".", k = ".", bound = ".", mle = ".", bf = ".")
+        } else {
+          row <- list(materiality = ".", n = ".", fk = ".", k = ".", bound = ".", bf = ".")
+        }
       } else {
-        row <- list(materiality = ".", n = ".", k = ".", bound = ".")
+        if(options[["mostLikelyError"]]){
+          row <- list(materiality = ".", n = ".", fk = ".", k = ".", bound = ".", mle = ".")
+        } else {
+          row <- list(materiality = ".", n = ".", fk = ".", k = ".", bound = ".")
+        }
       }
       evaluationTable$addRows(row)
       return()
@@ -657,10 +671,18 @@
 
     errors <- round(sum(result[["z"]]), 2)
 
-    if(options[["mostLikelyError"]]){
-      row <- list(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable, mle = mle)
+    if(options[["bayesFactor"]]){
+      if(options[["mostLikelyError"]]){
+        row <- list(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable, mle = mle, bf = .BFsamples(options, result))
+      } else {
+        row <- list(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable, bf = .BFsamples(options, result))
+      }
     } else {
-      row <- list(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable)
+      if(options[["mostLikelyError"]]){
+        row <- list(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable, mle = mle)
+      } else {
+        row <- list(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable)
+      }
     }
     evaluationTable$addRows(row)
 
@@ -712,8 +734,7 @@
     if(options[["statistic"]] == "bound"){
       p <- p + ggplot2::geom_area(mapping = ggplot2::aes(x = x, y = y), data = subset(subset(d, d$type == "Posterior"), subset(d, d$type == "Posterior")$x <= result[["bound"]]), fill = rgb(0, 0.25, 1, .5))
     } else if(options[["statistic"]] == "interval") {
-      # p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["posteriorA"]], shape2 = result[["posteriorB"]]), xlim = c(result[["bound"]][1], result[["bound"]][2]),
-      #                                 geom = "area", fill = rgb(0, 0.25, 1, .5))
+      p <- p + ggplot2::geom_area(mapping = ggplot2::aes(x = x, y = y), data = subset(subset(d, d$type == "Posterior"), subset(d, d$type == "Posterior")$x >= result[["bound"]][1] && subset(d, d$type == "Posterior")$x <= result[["bound"]][2]), fill = rgb(0, 0.25, 1, .5))
     }
   }
 
@@ -730,4 +751,19 @@
 
   return(createJaspPlot(plot = p, title = "Prior and Posterior", width = plotWidth, height = plotHeight))
 
+}
+
+.BFsamples <- function(options, result){
+  densprior         <- density(result[["prior"]])
+  priorCDF          <- approxfun(densprior$x, densprior$y, yleft=0, yright=0)
+  priorLeft         <-integrate(priorCDF, lower = 0, upper = options[["materiality"]])$value
+  priorRight        <-integrate(priorCDF, lower = options[["materiality"]], upper = 1)$value
+  priorOdds         <- priorLeft / priorRight
+  densposterior     <- density(result[["posterior"]])
+  posteriorCDF      <- approxfun(densposterior$x, densposterior$y, yleft=0, yright=0)
+  posteriorLeft     <-integrate(posteriorCDF, lower = 0, upper = options[["materiality"]])$value
+  posteriorRight    <-integrate(posteriorCDF, lower = options[["materiality"]], upper = 1)$value
+  posteriorOdds     <- posteriorLeft / posteriorRight
+  BF                <- round(posteriorOdds / priorOdds, 2)
+  return(BF)
 }

@@ -40,44 +40,44 @@
 			[
 				{
 					"title":							"Planning",
-					"qml":								"classicalAttributesPlanning.qml",
-					"function":						"classicalAttributesPlanning",
+					"qml":								"classicalPlanning.qml",
+					"function":						"classicalPlanning",
 					"usesJaspResults":		true
 				},
 				{
 					"title":							"Sampling",
-					"qml":								"classicalAttributesSampling.qml",
-					"function":						"classicalAttributesSampling",
+					"qml":								"classicalSampling.qml",
+					"function":						"classicalSampling",
 					"usesJaspResults":		true
 				},
 				{
 					"title":							"Evaluation",
-					"qml":								"classicalAttributesEvaluation.qml",
-					"function":						"classicalAttributesEvaluation",
+					"qml":								"classicalEvaluation.qml",
+					"function":						"classicalEvaluation",
 					"usesJaspResults":		true
 				},
 				{
 					"title":							"Summary Evaluation",
-					"qml":								"summaryClassicalAttributesEvaluation.qml",
-					"function":						"summaryClassicalAttributesEvaluation",
+					"qml":								"summaryClassicalEvaluation.qml",
+					"function":						"summaryClassicalEvaluation",
 					"usesJaspResults":		true
 				},
 				{
 					"title":							"Bayesian Planning",
-					"qml":								"bayesianAttributesPlanning.qml",
-					"function":						"bayesianAttributesPlanning",
+					"qml":								"bayesianPlanning.qml",
+					"function":						"bayesianPlanning",
 					"usesJaspResults":		true
 				},
 				{
 					"title":							"Bayesian Evaluation",
-					"qml":								"bayesianAttributesEvaluation.qml",
-					"function":						"bayesianAttributesEvaluation",
+					"qml":								"bayesianEvaluation.qml",
+					"function":						"bayesianEvaluation",
 					"usesJaspResults":		true
 				},
 				{
 					"title":							"Bayesian Summary Evaluation",
-					"qml":								"summaryBayesianAttributesEvaluation.qml",
-					"function":						"summaryBayesianAttributesEvaluation",
+					"qml":								"summaryBayesianEvaluation.qml",
+					"function":						"summaryBayesianEvaluation",
 					"usesJaspResults":		true
 				}
 			]

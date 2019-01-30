@@ -146,28 +146,18 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
 
         # Interpretation for the sampling phase
         if(options[["interpretation"]]){
-            # Adjust the technique TODO: Use switch function
-            if(options[["samplingType"]] == "simplerandomsampling"){
-                technique <- "simple random"
-            } else if(options[["samplingType"]] == "systematicsampling"){
-                technique <- "systematic"
-            } else if(options[["samplingType"]] == "cellsampling"){
-                technique <- "cell"
-            }
-            if(options[["auditType"]] == "attributes"){
-              technique <- paste(technique, "attributes sampling")
-            } else {
-              technique <- paste(technique, "MUS sampling")
-            }
+            technique <- base::switch(options[["samplingType"]],
+                                        "simplerandomsampling" = "simple random",
+                                        "systematicsampling" = "systematic",
+                                        "cellsampling" = "cell")
+            technique <- base::switch(options[["auditType"]],
+                                        "attributes" = paste(technique, "attributes sampling"),
+                                        "mus" = paste(technique, "MUS sampling"))
             jaspResults[["samplingParagraph"]] <- createJaspHtml(paste0("From the population of <b>", options[["N"]], "</b> observations, <b>", result[["n"]], "</b> samples were drawn using a <b>", technique, "</b> method."), "p")
             jaspResults[["samplingParagraph"]]$position <- 12
         }
 
-        if(options[["auditType"]] == "attributes"){
-          type <- "attributes"
-        } else {
-          type <- "mus"
-        }
+        type <- options[["auditType"]]
 
         # Perform the sampling and draw the outcome tables
         if(options[["samplingType"]] == "simplerandomsampling"){

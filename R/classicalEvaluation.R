@@ -1,4 +1,4 @@
-classicalAttributesEvaluation <- function(jaspResults, dataset, options, state=NULL){
+classicalEvaluation <- function(jaspResults, dataset, options, state=NULL){
 
   if(is.null(state))
       state 							                     <- list()
