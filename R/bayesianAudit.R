@@ -283,7 +283,7 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
             jaspResults[["priorAndPosteriorPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "limx_backup", "statistic", "plotPriorAndPosterior",
                                                                        "plotPriorAndPosteriorAdditionalInfo", "materiality", "show", "correctID",
                                                                        "expected.errors", "kPercentageNumber", "kNumberNumber", "prior", "sampleFilter",
-                                                                       "distribution", "N"))
+                                                                       "distribution", "N", "correctMUS", "sampleFilterMUS"))
             jaspResults[["priorAndPosteriorPlot"]] 		$position <- 20
           }
       }

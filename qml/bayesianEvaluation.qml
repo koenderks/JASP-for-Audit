@@ -23,27 +23,95 @@ import JASP.Widgets 1.0
 Form {
     id: form
 
+    ExpanderButton {
+        expanded: true
+        title: auditType.expanded ? qsTr("<b>Audit Type</b>") : qsTr("Audit Type")
+        id: auditType
+
+        RadioButtonGroup{
+          name: "auditType"
+          title: qsTr("<b>Audit procedure</b>")
+          id: auditProcedure
+
+          RadioButton { text: qsTr("Attributes procedure")           ; name: "attributes" ; checked: true; id: attributes}
+          RadioButton { text: qsTr("Monetary Unit procedure")          ; name: "mus"; id: mus}
+        }
+
+        Button {
+          anchors.right: parent.right
+          text: qsTr("<b>Confirm</b>")
+          onClicked: {
+            auditType.expanded = false
+            evaluationVariablesAttributes.enabled = true
+            evaluationVariablesMUS.enabled = true
+            auditOptions.enabled = true
+            advancedPriorOptions.enabled = true
+            ir.enabled = true
+            cr.enabled = true
+            tables.enabled = true
+            plots.enabled = true
+            expectedErrors.enabled = true
+            distribution.enabled = true
+            advancedOutputOptions.enabled = true
+          }
+        }
+    }
+
+    // Variables form for attributes evaluation
     VariablesForm {
+      visible: attributes.checked ? true : false
+      availableVariablesList.name: "evaluationVariablesAttributes"
+      id: evaluationVariablesAttributes
+      enabled: false
+
+        AssignedVariablesList {
+            name: "sampleFilter"
+            title: qsTr("Sample filter variable")
+            singleItem: true
+            allowedColumns: ["nominal"]
+        }
         AssignedVariablesList {
             name: "correctID"
             title: qsTr("Error variable")
             singleItem: true
             allowedColumns: ["nominal"]
         }
+    }
+
+    // Variables form for mus evaluation
+    VariablesForm {
+    visible: attributes.checked ? false : true
+    availableVariablesList.name: "evaluationVariablesMUS"
+    id: evaluationVariablesMUS
+    enabled: false
+
         AssignedVariablesList {
-            name: "sampleFilter"
-            title: qsTr("Sample filter variable (Optional)")
+            name: "sampleFilterMUS"
+            title: qsTr("Sample filter variable")
             singleItem: true
             allowedColumns: ["nominal"]
+        }
+        AssignedVariablesList {
+            name: "monetaryVariableMUS"
+            title: qsTr("Book values")
+            singleItem: true
+            allowedColumns: ["scale"]
+        }
+        AssignedVariablesList {
+            name: "correctMUS"
+            title: qsTr("True values")
+            singleItem: true
+            allowedColumns: ["scale"]
         }
     }
 
     Flow {
         spacing: 60
 
-        ColumnLayout {
           GroupBox {
               title: qsTr("<b>Audit risk</b>")
+              id: auditOptions
+              enabled: false
 
               PercentField {
                   label.text: qsTr("Confidence")
@@ -59,22 +127,23 @@ Form {
                   name: "materiality"
               }
 
-            TextField {
-                text: qsTr("Population size")
-                value: "0"
-                name: "N"
-                inputType: "integer"
-                validator: IntValidator { bottom: 0 }
-                id: populationSize
-            }
+              TextField {
+                  text: qsTr("Population size")
+                  value: "0"
+                  name: "N"
+                  inputType: "integer"
+                  validator: IntValidator { bottom: 0 }
+                  id: populationSize
+              }
           }
-        }
 
         ColumnLayout {
 
             RadioButtonGroup {
                 title: qsTr("<b>Inherent risk</b>")
                 name: "IR"
+                id: ir
+                enabled: false
 
                 RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
                 RadioButton { text: qsTr("Medium")      ; name: "Medium" }
@@ -87,6 +156,8 @@ Form {
             RadioButtonGroup {
                 title: qsTr("<b>Control risk</b>")
                 name: "CR"
+                id: cr
+                enabled: false
 
                 RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
                 RadioButton { text: qsTr("Medium")      ; name: "Medium" }
@@ -97,8 +168,8 @@ Form {
 
     ExpanderButton {
         text: qsTr("Advanced prior options")
-        Layout.leftMargin: 20
-        implicitWidth: 560
+        id: advancedPriorOptions
+        enabled: false
 
         RadioButtonGroup {
             title: qsTr("<b>Prior</b>")
@@ -118,6 +189,8 @@ Form {
         RadioButtonGroup {
             title: qsTr("<b>Sampling model</b>")
             name: "distribution"
+            id: distribution
+            enabled: false
 
             RadioButton { text: qsTr("With replacement")            ; name: "binomial" ; checked: true}
             RadioButton { text: qsTr("Without replacement")         ; name: "hypergeometric" ; id: hyperDist}
@@ -125,6 +198,8 @@ Form {
 
         GroupBox {
           title: qsTr("<b>Allowed errors</b>")
+          id: expectedErrors
+          enabled: false
 
           RadioButtonGroup {
               name: "expected.errors"
@@ -150,10 +225,8 @@ Form {
                       Layout.leftMargin: 18
                   }
               }
-
-          }
+            }
         }
-
     }
 
     Divider { }
@@ -163,6 +236,8 @@ Form {
 
       GroupBox {
         title: qsTr("<b>Tables</b>")
+        id: tables
+        enabled: false
 
         CheckBox {
             text: qsTr("Most likely error")
@@ -179,6 +254,8 @@ Form {
       ColumnLayout {
           GroupBox {
               title: qsTr("<b>Plots</b>")
+              id: plots
+              enabled: false
                 CheckBox {
                     text: qsTr("Prior and posterior")
                     name: "plotPriorAndPosterior"
@@ -199,11 +276,12 @@ Form {
               }
           }
       }
-
     }
 
     ExpanderButton {
         text: qsTr("Advanced output options")
+        enabled: false
+        id: advancedOutputOptions
 
         Flow {
             spacing: 70
@@ -230,10 +308,20 @@ Form {
             }
 
             GroupBox {
-              title: qsTr("<b>Interpretation</b>")
-              CheckBox { text: qsTr("Toggle interpretation"); name: "interpretation"; checked: false }
+              title: qsTr("<b>Explanatory text</b>")
+              CheckBox { text: qsTr("Turn on"); name: "interpretation"; checked: false }
             }
         }
-    }
+        RadioButtonGroup {
+          visible: attributes.checked ? false : true
+          title: qsTr("<b>Method</b>")
+          name: "boundMethodMUS"
 
+          RadioButton {
+            name: "coxAndSnellBound"
+            text: qsTr("Cox and Snell")
+            checked: true
+          }
+        }
+    }
 }

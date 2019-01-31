@@ -26,9 +26,7 @@ Form {
         ExpanderButton {
             expanded: true
             title: samplingMethod.expanded ? qsTr("<b>Sampling method</b>") : qsTr("Sampling method")
-            implicitWidth: 560
             id: samplingMethod
-            Layout.leftMargin: 20
 
             RadioButtonGroup{
               name: "auditType"

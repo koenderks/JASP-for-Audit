@@ -327,23 +327,30 @@
 
     n                       <- nrow(dataset)
     alpha                   <- 1 - options[["confidence"]]
-    sample                  <- dataset[, c(.v(options[["monetaryVariableMUS"]]), .v(options[["correctMUS"]]))]
 
-    t                       <- sample[, 1] - sample[, 2]
-    z                       <- t / sample[, 1]
-    z                       <- sort(subset(z, z > 0), decreasing = TRUE)
-    M                       <- length(z)
-    # Use the attributes method for zero errors p(0; 1-alpha) = 1 - alpha^(1/n)
-    bound                   <- 1 - alpha^(1/n)
-    # Calculate the proportional sum
-    if(M > 0){
-        prop.sum            <- 0
-        for(i in 1:M){
-            # p(i, 1 - alpha) - p(i-1, 1-alpha) * z_i
-            prop.sum        <- prop.sum + ((qbeta(1 - alpha, i + 1, n - i) - qbeta(1 - alpha, (i-1) + 1, n - (i-1) ))  * z[i])
-        }
-        # Add the sum to p(0; 1-alpha)
-        bound               <- bound + prop.sum
+    if(options[["correctMUS"]] == "" || options[["sampleFilterMUS"]] == "" || options[["monetaryVariableMUS"]] == ""){
+      bound <- "."
+      M <- 0
+      z <- 0
+    } else {
+      sample                  <- dataset[, c(.v(options[["monetaryVariableMUS"]]), .v(options[["correctMUS"]]))]
+
+      t                       <- sample[, 1] - sample[, 2]
+      z                       <- t / sample[, 1]
+      z                       <- sort(subset(z, z > 0), decreasing = TRUE)
+      M                       <- length(z)
+      # Use the attributes method for zero errors p(0; 1-alpha) = 1 - alpha^(1/n)
+      bound                   <- 1 - alpha^(1/n)
+      # Calculate the proportional sum
+      if(M > 0){
+          prop.sum            <- 0
+          for(i in 1:M){
+              # p(i, 1 - alpha) - p(i-1, 1-alpha) * z_i
+              prop.sum        <- prop.sum + ((qbeta(1 - alpha, i + 1, n - i) - qbeta(1 - alpha, (i-1) + 1, n - (i-1) ))  * z[i])
+          }
+          # Add the sum to p(0; 1-alpha)
+          bound               <- bound + prop.sum
+      }
     }
 
     resultList <- list()
@@ -357,7 +364,8 @@
     resultList[["alpha"]]       <- alpha
 
     jaspResults[["result"]] <- createJaspState(resultList)
-    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilterMUS", "auditType", "boundMethodMUS"))
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilterMUS",
+                                              "auditType", "boundMethodMUS", "monetaryVariableMUS"))
 }
 
 .musBoundTableFullAudit <- function(options, result, jaspResults, position = 1){
@@ -368,23 +376,27 @@
     jaspResults[["evaluationTable"]]      <- evaluationTable
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
                                       "sampleFilter", "distribution", "mostLikelyError", "N", "correctMUS", "sampleFilterMUS",
-                                      "boundMethodMUS"))
+                                      "boundMethodMUS","monetaryVariableMUS"))
     evaluationTable$position <- position
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",  type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",    type = 'string')
     evaluationTable$addColumnInfo(name = 'fk',            title = "Errors",    type = 'string')
     evaluationTable$addColumnInfo(name = 'k',             title = "Sum of fractional errors",         type = 'string')
-
     evaluationTable$addColumnInfo(name = 'bound',  title = paste0(result[["confidence"]]*100,"% Confidence bound"), type = 'string')
     if(options[["mostLikelyError"]])
       evaluationTable$addColumnInfo(name = 'mle',  title = "Most Likely Error", type = 'string')
 
-    if(options[["correctMUS"]] == "" || options[["sampleFilterMUS"]] == ""){
+    if(options[["boundMethodMUS"]] == "stringerBound"){
+      message <- "The confidence bound is calculated according to the <b>Stringer</b> method."
+      evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
+    }
+
+    if(options[["correctMUS"]] == "" || options[["sampleFilterMUS"]] == "" || options[["monetaryVariableMUS"]] == ""){
       if(options[["mostLikelyError"]]){
-        row <- list(materiality = ".", n = ".", k = ".", bound = ".", mle = ".")
+        row <- list(materiality = ".", n = ".", fk = ".", k = ".", bound = ".", mle = ".")
       } else {
-        row <- list(materiality = ".", n = ".", k = ".", bound = ".")
+        row <- list(materiality = ".", n = ".", fk = ".", k = ".", bound = ".")
       }
       evaluationTable$addRows(row)
       return()
@@ -420,9 +432,4 @@
       row <- list(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable)
     }
     evaluationTable$addRows(row)
-
-    if(options[["boundMethodMUS"]] == "stringerBound"){
-      message <- "The confidence bound is calculated according to the <b>Stringer</b> method."
-      evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
-    }
 }
