@@ -322,6 +322,7 @@ Form {
                 singleItem: true
                 allowedColumns: ["nominal", "ordinal", "scale"]
                 enabled: pickSamplingMethod.checked ? true : false
+                id: recordNumberVariable
             }
             AssignedVariablesList {
                 name: "rankingVariable"
@@ -350,12 +351,14 @@ Form {
                 singleItem: true
                 allowedColumns: ["nominal", "ordinal", "scale"]
                 enabled: pickSamplingMethod.checked ? true : false
+                id: recordNumberVariableMUS
             }
             AssignedVariablesList {
                 name: "monetaryVariableMUS"
                 title: qsTr("Monetary values")
                 singleItem: true
                 allowedColumns: ["scale"]
+                id: monetaryVariableMUS
                 }
             AssignedVariablesList {
                 name: "rankingVariableMUS"
@@ -419,6 +422,7 @@ Form {
 
         Button {
           anchors.right: parent.right
+          enabled: attributes.checked ? (recordNumberVariable.count > 0) : (recordNumberVariableMUS.count > 0 && monetaryVariableMUS.count > 0)
           text: qsTr("<b>To evaluation</b>")
           onClicked: {
             samplingPhase.expanded = false
@@ -457,12 +461,14 @@ Form {
                 title: qsTr("Sample filter variable")
                 singleItem: true
                 allowedColumns: ["nominal"]
+                id: sampleFilter
             }
             AssignedVariablesList {
                 name: "correctID"
                 title: qsTr("Error variable")
                 singleItem: true
                 allowedColumns: ["nominal"]
+                id: correctID
             }
         }
 
@@ -476,12 +482,14 @@ Form {
                 title: qsTr("Sample filter variable")
                 singleItem: true
                 allowedColumns: ["nominal"]
+                id: sampleFilterMUS
             }
             AssignedVariablesList {
                 name: "correctMUS"
                 title: qsTr("True monetary values")
                 singleItem: true
                 allowedColumns: ["scale"]
+                id: correctMUS
             }
         }
 
@@ -549,6 +557,7 @@ Form {
 
         Button {
           anchors.right: parent.right
+          enabled: attributes.checked ? (sampleFilter.count > 0 && correctID.count > 0) : (sampleFilterMUS.count > 0 && correctMUS.count > 0)
           text: qsTr("<b>To report</b>")
           onClicked: {
             evaluationPhase.expanded = false
@@ -566,7 +575,7 @@ Form {
         id: interpretationPhase
 
         Button {
-          Layout.leftMargin: 450
+          anchors.right: parent.right
           text: qsTr("<b>Download report</b>")
         }
     }
