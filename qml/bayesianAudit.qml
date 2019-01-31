@@ -37,15 +37,15 @@ Form {
 
           RadioButtonGroup{
             name: "auditType"
-            title: qsTr("<b>Audit procedure</b>")
+            title: qsTr("<b>Statement level</b>")
             id: auditProcedure
 
-            RadioButton { text: qsTr("Attributes sampling")           ; name: "attributes" ; checked: true; id: attributes}
-            RadioButton { text: qsTr("Monetary unit sampling")        ; name: "mus"; id: mus}
+            RadioButton { text: qsTr("Percentages")           ; name: "attributes" ; checked: true; id: attributes}
+            RadioButton { text: qsTr("Monetary Units")        ; name: "mus"; id: mus}
           }
 
           RadioButtonGroup {
-              title: qsTr("<b>Display units</b>")
+              title: qsTr("<b>Units</b>")
               name: "show"
 
               RadioButton { text: qsTr("Percentages")         ; name: "percentage" ; checked: true; id: percentages}
@@ -80,7 +80,6 @@ Form {
     Flow {
         spacing: 60
 
-        ColumnLayout {
           GroupBox {
               title: qsTr("<b>Audit risk</b>")
               id: auditRisk
@@ -108,36 +107,29 @@ Form {
                 id: populationSize
             }
           }
-        }
 
-        ColumnLayout {
+          RadioButtonGroup {
+              title: qsTr("<b>Inherent risk</b>")
+              name: "IR"
+              id: ir
+              enabled: populationSize.value == "0" ? false : true
 
-            RadioButtonGroup {
-                title: qsTr("<b>Inherent risk</b>")
-                name: "IR"
-                id: ir
-                enabled: populationSize.value == "0" ? false : true
+              RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
+              RadioButton { text: qsTr("Medium")      ; name: "Medium" }
+              RadioButton { text: qsTr("Low")         ; name: "Low" }
+          }
 
-                RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
-                RadioButton { text: qsTr("Medium")      ; name: "Medium" }
-                RadioButton { text: qsTr("Low")         ; name: "Low" }
-            }
-        }
+          RadioButtonGroup {
+              title: qsTr("<b>Control risk</b>")
+              name: "CR"
+              id: cr
+              enabled: populationSize.value == "0" ? false : true
 
-        ColumnLayout {
-
-            RadioButtonGroup {
-                title: qsTr("<b>Control risk</b>")
-                name: "CR"
-                id: cr
-                enabled: populationSize.value == "0" ? false : true
-
-                RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
-                RadioButton { text: qsTr("Medium")      ; name: "Medium" }
-                RadioButton { text: qsTr("Low")         ; name: "Low" }
-            }
-        }
-    }
+              RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
+              RadioButton { text: qsTr("Medium")      ; name: "Medium" }
+              RadioButton { text: qsTr("Low")         ; name: "Low" }
+          }
+      }
 
     ExpanderButton {
         text: qsTr("Advanced prior options")
@@ -153,7 +145,6 @@ Form {
             RadioButton { text: qsTr("Audit Risk Model")        ; name: "ARM" ; checked: true}
             RadioButton { text: qsTr("50-50")                   ; name: "5050" }
         }
-
     }
 
     Divider { }
@@ -204,24 +195,32 @@ Form {
     Divider { }
 
     Flow {
-      spacing: 90
+      spacing: 60
 
-      GroupBox {
-          title: qsTr("<b>Tables</b>")
-          enabled: populationSize.value == "0" ? false : true
+      ColumnLayout {
+         GroupBox {
+           title: qsTr("<b>Statistics</b>")
+           enabled: populationSize.value == "0" ? false : true
 
-          CheckBox {      text: qsTr("Implicit sample") ; name: "implicitsample"}
-          CheckBox {      text: qsTr("Expected Bayes factor") ; name: "expectedBF"}
-       }
+           CheckBox {      text: qsTr("Expected Bayes factor\u208B\u208A") ; name: "expectedBF"}
+         }
+
+         GroupBox {
+             title: qsTr("<b>Tables</b>")
+             enabled: populationSize.value == "0" ? false : true
+
+             CheckBox {      text: qsTr("Implicit sample") ; name: "implicitsample"}
+          }
+      }
 
        GroupBox {
            title: qsTr("<b>Plots</b>")
            enabled: populationSize.value == "0" ? false : true
 
-           CheckBox {      text: qsTr("Decision plot")   ; name: "plotCriticalErrors"; checked: true }
-           CheckBox {      text: qsTr("Implied prior and posterior")   ; name: "plotPrior" ; id: plotPrior}
-           PercentField {  text: qsTr("x-axis limit")    ; name: "limx"; defaultValue: 20; Layout.leftMargin: 20}
-           CheckBox {      text: qsTr("Additional info") ; name: "plotPriorAdditionalInfo" ; Layout.leftMargin: 20; checked: true; enabled: plotPrior.checked}
+           CheckBox {      text: qsTr("Decision plot")                  ; name: "plotCriticalErrors"; checked: true }
+           CheckBox {      text: qsTr("Implied prior and posterior")    ; name: "plotPrior" ; id: plotPrior}
+           PercentField {  text: qsTr("x-axis limit")                   ; name: "limx" ; defaultValue: 20; Layout.leftMargin: 20}
+           CheckBox {      text: qsTr("Additional info")                ; name: "plotPriorAdditionalInfo" ; Layout.leftMargin: 20; checked: true; enabled: plotPrior.checked}
         }
 
     }
@@ -332,7 +331,7 @@ Form {
                 }
             AssignedVariablesList {
                 name: "variables"
-                title: qsTr("Sampling variables")
+                title: qsTr("Sampling variables (optional)")
                 singleItem: false
                 allowedColumns: ["scale", "ordinal", "nominal"]
             }
@@ -355,7 +354,7 @@ Form {
             }
             AssignedVariablesList {
                 name: "monetaryVariableMUS"
-                title: qsTr("Monetary values")
+                title: qsTr("Book values")
                 singleItem: true
                 allowedColumns: ["scale"]
                 id: monetaryVariableMUS
@@ -368,7 +367,7 @@ Form {
                 }
             AssignedVariablesList {
                 name: "variablesMUS"
-                title: qsTr("Sampling variables")
+                title: qsTr("Sampling variables (optional)")
                 singleItem: false
                 allowedColumns: ["scale", "ordinal", "nominal"]
             }
@@ -458,7 +457,7 @@ Form {
 
             AssignedVariablesList {
                 name: "sampleFilter"
-                title: qsTr("Sample filter variable")
+                title: qsTr("Sample filter")
                 singleItem: true
                 allowedColumns: ["nominal"]
                 id: sampleFilter
@@ -479,14 +478,14 @@ Form {
 
             AssignedVariablesList {
                 name: "sampleFilterMUS"
-                title: qsTr("Sample filter variable")
+                title: qsTr("Sample filter")
                 singleItem: true
                 allowedColumns: ["nominal"]
                 id: sampleFilterMUS
             }
             AssignedVariablesList {
                 name: "correctMUS"
-                title: qsTr("True monetary values")
+                title: qsTr("True values")
                 singleItem: true
                 allowedColumns: ["scale"]
                 id: correctMUS
@@ -497,15 +496,15 @@ Form {
           spacing: 100
 
           GroupBox {
-            title: qsTr("<b>Tables</b>")
+            title: qsTr("<b>Statistics</b>")
 
             CheckBox {
-                text: qsTr("Most Likely Error")
+                text: qsTr("Most Likely Error (MLE)")
                 name: "mostLikelyError"
                 checked: false
             }
             CheckBox {
-                text: qsTr("Bayes factor")
+                text: qsTr("Bayes factor\u208B\u208A")
                 name: "bayesFactor"
             }
 
@@ -544,7 +543,7 @@ Form {
           implicitWidth: 560
 
           RadioButtonGroup {
-            title: qsTr("<b>Method</b>")
+            title: qsTr("<b>Bound method</b>")
             name: "boundMethodMUS"
 
             RadioButton {

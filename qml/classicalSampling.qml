@@ -30,11 +30,11 @@ Form {
 
             RadioButtonGroup{
               name: "auditType"
-              title: qsTr("<b>Audit procedure</b>")
+              title: qsTr("<b>Statement level</b>")
               id: auditProcedure
 
-              RadioButton { text: qsTr("Attributes sampling")           ; name: "attributes" ; checked: true; id: attributes}
-              RadioButton { text: qsTr("Monetary unit sampling")        ; name: "mus"; id: mus}
+              RadioButton { text: qsTr("Percentages")           ; name: "attributes" ; checked: true; id: attributes}
+              RadioButton { text: qsTr("Monetary Units")        ; name: "mus"; id: mus}
             }
 
             RowLayout {

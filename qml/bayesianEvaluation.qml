@@ -23,46 +23,10 @@ import JASP.Widgets 1.0
 Form {
     id: form
 
-    ExpanderButton {
-        expanded: true
-        title: auditType.expanded ? qsTr("<b>Audit Type</b>") : qsTr("Audit Type")
-        id: auditType
-
-        RadioButtonGroup{
-          name: "auditType"
-          title: qsTr("<b>Audit procedure</b>")
-          id: auditProcedure
-
-          RadioButton { text: qsTr("Attributes procedure")           ; name: "attributes" ; checked: true; id: attributes}
-          RadioButton { text: qsTr("Monetary Unit procedure")          ; name: "mus"; id: mus}
-        }
-
-        Button {
-          anchors.right: parent.right
-          text: qsTr("<b>Confirm</b>")
-          onClicked: {
-            auditType.expanded = false
-            evaluationVariablesAttributes.enabled = true
-            evaluationVariablesMUS.enabled = true
-            auditOptions.enabled = true
-            advancedPriorOptions.enabled = true
-            ir.enabled = true
-            cr.enabled = true
-            tables.enabled = true
-            plots.enabled = true
-            expectedErrors.enabled = true
-            distribution.enabled = true
-            advancedOutputOptions.enabled = true
-          }
-        }
-    }
-
     // Variables form for attributes evaluation
     VariablesForm {
       visible: attributes.checked ? true : false
       availableVariablesList.name: "evaluationVariablesAttributes"
-      id: evaluationVariablesAttributes
-      enabled: false
 
         AssignedVariablesList {
             name: "sampleFilter"
@@ -82,8 +46,6 @@ Form {
     VariablesForm {
     visible: attributes.checked ? false : true
     availableVariablesList.name: "evaluationVariablesMUS"
-    id: evaluationVariablesMUS
-    enabled: false
 
         AssignedVariablesList {
             name: "sampleFilterMUS"
@@ -110,8 +72,6 @@ Form {
 
           GroupBox {
               title: qsTr("<b>Audit risk</b>")
-              id: auditOptions
-              enabled: false
 
               PercentField {
                   label.text: qsTr("Confidence")
@@ -142,8 +102,6 @@ Form {
             RadioButtonGroup {
                 title: qsTr("<b>Inherent risk</b>")
                 name: "IR"
-                id: ir
-                enabled: false
 
                 RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
                 RadioButton { text: qsTr("Medium")      ; name: "Medium" }
@@ -156,8 +114,6 @@ Form {
             RadioButtonGroup {
                 title: qsTr("<b>Control risk</b>")
                 name: "CR"
-                id: cr
-                enabled: false
 
                 RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
                 RadioButton { text: qsTr("Medium")      ; name: "Medium" }
@@ -168,8 +124,6 @@ Form {
 
     ExpanderButton {
         text: qsTr("Advanced prior options")
-        id: advancedPriorOptions
-        enabled: false
 
         RadioButtonGroup {
             title: qsTr("<b>Prior</b>")
@@ -184,13 +138,20 @@ Form {
     Divider { }
 
     Flow {
-        spacing: 60
+        spacing: 10
+
+        RadioButtonGroup{
+          name: "auditType"
+          title: qsTr("<b>Statement level</b>")
+          id: auditProcedure
+
+          RadioButton { text: qsTr("Attributes procedure")           ; name: "attributes" ; checked: true; id: attributes}
+          RadioButton { text: qsTr("Monetary Unit procedure")          ; name: "mus"; id: mus}
+        }
 
         RadioButtonGroup {
             title: qsTr("<b>Sampling model</b>")
             name: "distribution"
-            id: distribution
-            enabled: false
 
             RadioButton { text: qsTr("With replacement")            ; name: "binomial" ; checked: true}
             RadioButton { text: qsTr("Without replacement")         ; name: "hypergeometric" ; id: hyperDist}
@@ -198,8 +159,6 @@ Form {
 
         GroupBox {
           title: qsTr("<b>Allowed errors</b>")
-          id: expectedErrors
-          enabled: false
 
           RadioButtonGroup {
               name: "expected.errors"
@@ -232,20 +191,18 @@ Form {
     Divider { }
 
     Flow{
-      spacing: 100
+      spacing: 60
 
       GroupBox {
-        title: qsTr("<b>Tables</b>")
-        id: tables
-        enabled: false
+        title: qsTr("<b>Statistics</b>")
 
         CheckBox {
-            text: qsTr("Most likely error")
+            text: qsTr("Most Likely Error (MLE)")
             name: "mostLikelyError"
             checked: false
         }
         CheckBox {
-            text: qsTr("Bayes factor")
+            text: qsTr("Bayes factor\u208B\u208A")
             name: "bayesFactor"
         }
 
@@ -254,8 +211,7 @@ Form {
       ColumnLayout {
           GroupBox {
               title: qsTr("<b>Plots</b>")
-              id: plots
-              enabled: false
+
                 CheckBox {
                     text: qsTr("Prior and posterior")
                     name: "plotPriorAndPosterior"
@@ -280,8 +236,6 @@ Form {
 
     ExpanderButton {
         text: qsTr("Advanced output options")
-        enabled: false
-        id: advancedOutputOptions
 
         Flow {
             spacing: 70
@@ -289,7 +243,7 @@ Form {
             ColumnLayout {
 
                 RadioButtonGroup {
-                    title: qsTr("<b>Display units</b>")
+                    title: qsTr("<b>Units</b>")
                     name: "show"
 
                     RadioButton { text: qsTr("Percentages")         ; name: "percentage" ; checked: true}
@@ -299,11 +253,11 @@ Form {
 
             ColumnLayout {
                 RadioButtonGroup {
-                    title: qsTr("<b>Statistic</b>")
+                    title: qsTr("<b>Confidence interval</b>")
                     name: "statistic"
 
-                    RadioButton { text: qsTr("Confidence bound")        ; name: "bound" ; checked: true}
-                    RadioButton { text: qsTr("Confidence interval")      ; name: "interval" }
+                    RadioButton { text: qsTr("One-sided")         ; name: "bound" ; checked: true}
+                    RadioButton { text: qsTr("Two-sided")         ; name: "interval" }
                 }
             }
 

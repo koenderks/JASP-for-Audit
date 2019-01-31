@@ -218,7 +218,7 @@ Form {
             ColumnLayout {
 
                 RadioButtonGroup {
-                    title: qsTr("<b>Display units</b>")
+                    title: qsTr("<b>Units</b>")
                     name: "show"
 
                     RadioButton { text: qsTr("Percentages")         ; name: "percentage" ; checked: true}

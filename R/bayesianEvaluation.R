@@ -42,11 +42,11 @@ bayesianEvaluation <- function(jaspResults, dataset, options, state=NULL){
   } else {
     # Perform planning to get prior parameters
     .bayesianAttributesPlanningFullAudit(options, jaspResults)
-    result              <- jaspResults[["result"]]$object
+    planningResult              <- jaspResults[["planningResult"]]$object
     # Perform the mus evaluation
     if(options[["boundMethodMUS"]] == "coxAndSnellBound"){
       # Prior parameters for pi and mu are recommendations from the paper
-      .coxAndSnellBound(dataset, options, jaspResults, priorPi = 0.1, priorMu = 0.4, priorA = result[["priorA"]], priorB = result[["priorB"]])
+      .coxAndSnellBound(dataset, options, jaspResults, priorPi = 0.10, priorMu = 0.40, priorA = planningResult[["priorA"]], priorB = planningResult[["priorB"]])
     }
     result                                       <- jaspResults[["result"]]$object
     .bayesianMusBoundTableFullAudit(options, result, jaspResults, position = 3)
@@ -56,11 +56,11 @@ bayesianEvaluation <- function(jaspResults, dataset, options, state=NULL){
     if(options[["show"]] == "percentage"){
       confidenceLevelLabel            <- paste0(round(options[["confidence"]] * 100, 2), "%")
       materialityLevelLabel           <- paste0(round(options[["materiality"]] * 100, 2), "%")
-      boundLabel <- paste0(round(result[["bound"]] * 100, 2), "%")
+      boundLabel                      <- paste0(round(result[["bound"]] * 100, 2), "%")
     } else {
       confidenceLevelLabel            <- round(options[["confidence"]], 2)
       materialityLevelLabel           <- round(options[["materiality"]], 2)
-      boundLabel <- round(result[["bound"]], 2)
+      boundLabel                      <- round(result[["bound"]], 2)
     }
     jaspResults[["resultParagraph"]] <- createJaspHtml(paste0("The sample consisted of <b>", nrow(dataset) , "</b> observations, <b>",result[["k"]], "</b> of which were found to contain a full error. The knowledge from these data, com-
                                                           bined with the prior knowledge results in an <b>", confidenceLevelLabel , "</b> upper confidence bound of <b>", boundLabel ,"</b>. The cumulative knowledge states that there

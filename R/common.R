@@ -1,6 +1,6 @@
 .ARMformula <- function(options, jaspResults, position = 2){
 
-    if(!is.null(jaspResults[["ARMformula"]])) return()
+    if(!is.null(jaspResults[["DR"]])) return()
 
     AR <- 1 - options[["confidence"]]
 

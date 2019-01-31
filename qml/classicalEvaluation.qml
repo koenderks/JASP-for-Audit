@@ -23,66 +23,22 @@ import JASP.Widgets 1.0
 Form {
     id: form
 
-    ExpanderButton {
-        expanded: true
-        title: auditType.expanded ? qsTr("<b>Audit Type</b>") : qsTr("Audit Type")
-        id: auditType
-
-        RadioButtonGroup{
-          name: "auditType"
-          title: qsTr("<b>Audit procedure</b>")
-          id: auditProcedure
-
-          RadioButton { text: qsTr("Attributes procedure")           ; name: "attributes" ; checked: true; id: attributes}
-          RadioButton { text: qsTr("Monetary Unit procedure")        ; name: "mus"; id: mus}
-        }
-
-        Button {
-          anchors.right: parent.right
-          text: qsTr("<b>Confirm</b>")
-          onClicked: {
-            auditType.expanded = false
-            sampleFilter.enabled = true
-            correctID.enabled = true
-            sampleFilterMUS.enabled = true
-            correctMUS.enabled = true
-            auditOptions.enabled = true
-            ir.enabled = true
-            cr.enabled = true
-            tables.enabled = true
-            plots.enabled = true
-            boundMethodMUS.enabled = true
-            interpretation.enabled = true
-            show.enabled = true
-            evaluationVariablesAttributes.enabled = true
-            evaluationVariablesMUS.enabled = true
-            monetaryVariableMUS.enabled = true
-          }
-        }
-    }
-
     // Variables form for attributes evaluation
     VariablesForm {
       visible: attributes.checked ? true : false
       availableVariablesList.name: "evaluationVariablesAttributes"
-      id: evaluationVariablesAttributes
-      enabled: false
 
         AssignedVariablesList {
             name: "sampleFilter"
             title: qsTr("Sample filter variable")
             singleItem: true
             allowedColumns: ["nominal"]
-            id: sampleFilter
-            enabled: false
         }
         AssignedVariablesList {
             name: "correctID"
             title: qsTr("Error variable")
             singleItem: true
             allowedColumns: ["nominal"]
-            id: correctID
-            enabled: false
         }
     }
 
@@ -90,32 +46,24 @@ Form {
     VariablesForm {
     visible: attributes.checked ? false : true
     availableVariablesList.name: "evaluationVariablesMUS"
-    id: evaluationVariablesMUS
-    enabled: false
 
         AssignedVariablesList {
             name: "sampleFilterMUS"
             title: qsTr("Sample filter variable")
             singleItem: true
             allowedColumns: ["nominal"]
-            id: sampleFilterMUS
-            enabled: false
         }
         AssignedVariablesList {
             name: "monetaryVariableMUS"
             title: qsTr("Book values")
             singleItem: true
             allowedColumns: ["scale"]
-            id: monetaryVariableMUS
-            enabled: false
         }
         AssignedVariablesList {
             name: "correctMUS"
             title: qsTr("True values")
             singleItem: true
             allowedColumns: ["scale"]
-            id: correctMUS
-            enabled: false
         }
     }
 
@@ -124,8 +72,6 @@ Form {
 
           GroupBox {
               title: qsTr("<b>Audit risk</b>")
-              id: auditOptions
-              enabled: false
 
               PercentField {
                   label.text: qsTr("Confidence")
@@ -156,8 +102,6 @@ Form {
             RadioButtonGroup {
                 title: qsTr("<b>Inherent risk</b>")
                 name: "IR"
-                id: ir
-                enabled: false
 
                 RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
                 RadioButton { text: qsTr("Medium")      ; name: "Medium" }
@@ -170,14 +114,21 @@ Form {
             RadioButtonGroup {
                 title: qsTr("<b>Control risk</b>")
                 name: "CR"
-                id: cr
-                enabled: false
 
                 RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
                 RadioButton { text: qsTr("Medium")      ; name: "Medium" }
                 RadioButton { text: qsTr("Low")         ; name: "Low" }
             }
         }
+    }
+
+    RadioButtonGroup{
+      name: "auditType"
+      title: qsTr("<b>Statement level</b>")
+      id: auditProcedure
+
+      RadioButton { text: qsTr("Attributes procedure")           ; name: "attributes" ; checked: true; id: attributes}
+      RadioButton { text: qsTr("Monetary Unit procedure")        ; name: "mus"; id: mus}
     }
 
     ExpanderButton {
@@ -189,10 +140,8 @@ Form {
             ColumnLayout {
 
                 RadioButtonGroup {
-                    title: qsTr("<b>Display units</b>")
+                    title: qsTr("<b>Units</b>")
                     name: "show"
-                    id: show
-                    enabled: false
 
                     RadioButton { text: qsTr("Percentages")         ; name: "percentage" ; checked: true}
                     RadioButton { text: qsTr("Proportions")         ; name: "proportion" }
@@ -201,8 +150,7 @@ Form {
 
             GroupBox {
               title: qsTr("<b>Explanatory text</b>")
-              id: interpretation
-              enabled: false
+
               CheckBox { text: qsTr("Turn on"); name: "interpretation"; checked: false }
             }
 
@@ -210,8 +158,6 @@ Form {
               visible: attributes.checked ? false : true
               title: qsTr("<b>Method</b>")
               name: "boundMethodMUS"
-              id: boundMethodMUS
-              enabled: false
 
               RadioButton {
                 name: "stringerBound"
@@ -226,12 +172,10 @@ Form {
       spacing: 100
 
       GroupBox {
-        title: qsTr("<b>Tables</b>")
-        id: tables
-        enabled: false
+        title: qsTr("<b>Statistics</b>")
 
         CheckBox {
-            text: qsTr("Most likely error")
+            text: qsTr("Most Likely Error (MLE)")
             name: "mostLikelyError"
             checked: false
         }
@@ -239,8 +183,6 @@ Form {
 
       ColumnLayout {
           GroupBox {
-          id: plots
-          enabled: false
 
           title: qsTr("<b>Plots</b>")
                 CheckBox { text: qsTr("Confidence bound") ; name: "plotBound"}

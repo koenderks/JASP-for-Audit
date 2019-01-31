@@ -17,25 +17,23 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
 
     # Interpretation for the Global Options phase
     if(options[["interpretation"]]){
+      confidenceLevelLabel            <- round(options[["confidence"]], 2)
+      materialityLevelLabel           <- round(options[["materiality"]], 2)
       if(options[["show"]] == "percentage"){
-        confidenceLevelLabel            <- paste0(round(options[["confidence"]] * 100, 2), "%")
-        materialityLevelLabel           <- paste0(round(options[["materiality"]] * 100, 2), "%")
-      } else {
-        confidenceLevelLabel            <- round(options[["confidence"]], 2)
-        materialityLevelLabel           <- round(options[["materiality"]], 2)
+        confidenceLevelLabel            <- paste0(confidenceLevelLabel * 100, "%")
+        materialityLevelLabel           <- paste0(materialityLevelLabel * 100, "%")
       }
       if(options[["auditType"]] == "attributes"){
         jaspResults[["procedureParagraph"]] <- createJaspHtml(paste0("The objective of an attributes sampling procedure is to determine with a specified <b>", confidenceLevelLabel ,"</b> confidence whether the percentage
                                                                   of errors in the target population is lower than the specified materiality of <b>", materialityLevelLabel ,"</b>. An attributes bound procedure considers
                                                                   the observations in the population to be of one of two categories: 1) the observation is fully correct or 2) the observation is
                                                                   fully incorrect."), "p")
-        jaspResults[["procedureParagraph"]]$position <- 2
       } else if(options[["auditType"]] == "mus"){
         jaspResults[["procedureParagraph"]] <- createJaspHtml(paste0("The objective of a monetary unit sampling (MUS) procedure is to determine with a specified <b>", confidenceLevelLabel ,"</b> confidence whether the percentage
                                                                   of errors in the target population is lower than the specified materiality of <b>", materialityLevelLabel ,"</b>. A monetary unit sampling procedure considers the
                                                                   errors <i>(taintings)</i> in the population to be proportional to the size of the observation, so that the taintings lie between 0 and 1."), "p")
-        jaspResults[["procedureParagraph"]]$position <- 2
       }
+      jaspResults[["procedureParagraph"]]$position <- 2
     }
 
     # Planning phase
@@ -67,12 +65,12 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
 
       # Perform the planning
       .attributesPlanningFullAudit(options, jaspResults)
-      result              <- jaspResults[["result"]]$object
-      .attributesPlanningTableFullAudit(options, result, jaspResults, position = 8)
+      planningResult              <- jaspResults[["planningResult"]]$object
+      .attributesPlanningTableFullAudit(options, planningResult, jaspResults, position = 8)
 
       if(options[["expected.errors"]] == "kPercentage"){
           expected.errors <- paste0(round(options[["kPercentageNumber"]] * 100, 2), "%")
-          max.errors <- ceiling(options[["kPercentageNumber"]] * result[["n"]]) + 1
+          max.errors <- ceiling(options[["kPercentageNumber"]] * planningResult[["n"]]) + 1
       } else {
           expected.errors <- options[["kNumberNumber"]]
           max.errors <- options[["kNumberNumber"]] + 1
@@ -82,7 +80,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
       if(options[["interpretation"]]){
 
           jaspResults[["priorKnowledgeParagraph"]] <- createJaspHtml(paste0("As prior knowledge, the most likely error in the data was specified to be <b>", expected.errors ,"</b>. The sample size that is required to prove an <b>", materialityLevelLabel ,"</b>
-                                                                          upper confidence bound, assuming the sample contains <b>", expected.errors ,"</b> full errors, is <b>", result[["n"]] ,"</b>. This sample size is calculated with the <b>", options[["distribution"]] , "</b>
+                                                                          upper confidence bound, assuming the sample contains <b>", expected.errors ,"</b> full errors, is <b>", planningResult[["n"]] ,"</b>. This sample size is calculated with the <b>", options[["distribution"]] , "</b>
                                                                           distribution. Consequently, if <b>", max.errors ,"</b> or more full errors are found in the sample, the population cannot be approved."), "p")
           jaspResults[["priorKnowledgeParagraph"]]$position <- 7
       }
@@ -139,7 +137,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
       if(!is.null(recordVariable)){
 
         # Keep the resulting sample size as an option
-        options[["sampleSize"]] <- result[["n"]]
+        options[["sampleSize"]] <- planningResult[["n"]]
 
         jaspResults[["samplingHeader"]] <- createJaspHtml("<u>Sampling</u>", "h2")
         jaspResults[["samplingHeader"]]$position <- 11
@@ -153,7 +151,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
             technique <- base::switch(options[["auditType"]],
                                         "attributes" = paste(technique, "attributes sampling"),
                                         "mus" = paste(technique, "MUS sampling"))
-            jaspResults[["samplingParagraph"]] <- createJaspHtml(paste0("From the population of <b>", options[["N"]], "</b> observations, <b>", result[["n"]], "</b> samples were drawn using a <b>", technique, "</b> method."), "p")
+            jaspResults[["samplingParagraph"]] <- createJaspHtml(paste0("From the population of <b>", options[["N"]], "</b> observations, <b>", planningResult[["n"]], "</b> samples were drawn using a <b>", technique, "</b> method."), "p")
             jaspResults[["samplingParagraph"]]$position <- 12
         }
 

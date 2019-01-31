@@ -37,15 +37,15 @@ Form {
 
           RadioButtonGroup{
             name: "auditType"
-            title: qsTr("<b>Audit procedure</b>")
+            title: qsTr("<b>Statement level</b>")
             id: auditProcedure
 
-            RadioButton { text: qsTr("Attributes sampling")           ; name: "attributes" ; checked: true; id: attributes}
-            RadioButton { text: qsTr("Monetary unit sampling")        ; name: "mus"; id: mus}
+            RadioButton { text: qsTr("Percentages")           ; name: "attributes" ; checked: true; id: attributes}
+            RadioButton { text: qsTr("Monetary Units")        ; name: "mus"; id: mus}
           }
 
           RadioButtonGroup {
-              title: qsTr("<b>Display units</b>")
+              title: qsTr("<b>Units</b>")
               name: "show"
 
               RadioButton { text: qsTr("Percentages")         ; name: "percentage" ; checked: true; id: percentages}
@@ -304,7 +304,7 @@ Form {
               }
           AssignedVariablesList {
               name: "variables"
-              title: qsTr("Sampling variables")
+              title: qsTr("Sampling variables (optional)")
               singleItem: false
               allowedColumns: ["scale", "ordinal", "nominal"]
           }
@@ -326,7 +326,7 @@ Form {
           }
           AssignedVariablesList {
               name: "monetaryVariableMUS"
-              title: qsTr("Monetary values")
+              title: qsTr("Book values")
               singleItem: true
               allowedColumns: ["scale"]
               id: monetaryVariableMUS
@@ -428,7 +428,7 @@ Form {
 
             AssignedVariablesList {
                 name: "sampleFilter"
-                title: qsTr("Sample filter variable")
+                title: qsTr("Sample filter")
                 singleItem: true
                 allowedColumns: ["nominal"]
                 id: sampleFilter
@@ -449,14 +449,14 @@ Form {
 
             AssignedVariablesList {
                 name: "sampleFilterMUS"
-                title: qsTr("Sample filter variable")
+                title: qsTr("Sample filter")
                 singleItem: true
                 allowedColumns: ["nominal"]
                 id: sampleFilterMUS
             }
             AssignedVariablesList {
                 name: "correctMUS"
-                title: qsTr("True monetary values")
+                title: qsTr("True values")
                 singleItem: true
                 allowedColumns: ["scale"]
                 id: correctMUS
@@ -467,10 +467,10 @@ Form {
           spacing: 100
 
           GroupBox {
-            title: qsTr("<b>Tables</b>")
+            title: qsTr("<b>Statistics</b>")
 
             CheckBox {
-                text: qsTr("Most Likely Error")
+                text: qsTr("Most Likely Error (MLE)")
                 name: "mostLikelyError"
                 checked: false
             }
@@ -496,7 +496,7 @@ Form {
           implicitWidth: 560
 
           RadioButtonGroup {
-            title: qsTr("<b>Method</b>")
+            title: qsTr("<b>Bound method</b>")
             name: "boundMethodMUS"
 
             RadioButton {

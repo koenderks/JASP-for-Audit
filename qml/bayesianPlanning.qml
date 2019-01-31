@@ -145,14 +145,21 @@ Form {
     Divider { }
 
     Flow {
-      spacing: 90
+      spacing: 60
 
-      GroupBox {
-          title: qsTr("<b>Tables</b>")
+      ColumnLayout {
+        GroupBox {
+          title: qsTr("<b>Statistics</b>")
 
-          CheckBox {      text: qsTr("Implicit sample") ; name: "implicitsample"}
-          CheckBox {      text: qsTr("Expected Bayes factor") ; name: "expectedBF"}
-       }
+          CheckBox {      text: qsTr("Expected Bayes factor\u208B\u208A") ; name: "expectedBF"}
+        }
+
+        GroupBox {
+            title: qsTr("<b>Tables</b>")
+
+            CheckBox {      text: qsTr("Implicit sample") ; name: "implicitsample"}
+         }
+      }
 
        GroupBox {
            title: qsTr("<b>Plots</b>")
@@ -172,28 +179,25 @@ Form {
         spacing: 50
 
         RadioButtonGroup{
-          title: qsTr("<b>Display units</b>")
+          title: qsTr("<b>Units</b>")
           name: "show"
 
           RadioButton {text: qsTr("Percentages")              ; name: "percentage"; checked: true}
           RadioButton {text: qsTr("Proportions")              ; name: "proportion"}
         }
 
-        RadioButtonGroup{
-          title: qsTr("<b>Statistic</b>")
-          name: "statistic"
+        RadioButtonGroup {
+            title: qsTr("<b>Confidence interval</b>")
+            name: "statistic"
 
-          RadioButton {text: qsTr("Confidence Bound")                 ; name: "bound"; checked: true}
-          RadioButton {text: qsTr("Confidence Interval")              ; name: "interval"}
+            RadioButton { text: qsTr("One-sided")         ; name: "bound" ; checked: true}
+            RadioButton { text: qsTr("Two-sided")         ; name: "interval" }
         }
 
         GroupBox {
           title: qsTr("<b>Explanatory text</b>")
           CheckBox { text: qsTr("Turn on"); name: "interpretation"; checked: false }
         }
-
       }
-
     }
-
 }

@@ -21,12 +21,12 @@ bayesianPlanning <- function(jaspResults, dataset, options, state=NULL){
   }
 
   .bayesianAttributesPlanningFullAudit(options, jaspResults)
-  result              <- jaspResults[["result"]]$object
-  .bayesianAttributesPlanningTableFullAudit(options, result, jaspResults, position = 5)
+  planningResult              <- jaspResults[["planningResult"]]$object
+  .bayesianAttributesPlanningTableFullAudit(options, planningResult, jaspResults, position = 5)
 
   if(options[["expected.errors"]] == "kPercentage"){
       expected.errors <- paste0(round(options[["kPercentageNumber"]] * 100, 2), "%")
-      max.errors <- floor(options[["kPercentageNumber"]] * result[["n"]]) + 1
+      max.errors <- floor(options[["kPercentageNumber"]] * planningResult[["n"]]) + 1
   } else {
       expected.errors <- options[["kNumberNumber"]]
       max.errors <- options[["kNumberNumber"]] + 1
@@ -36,10 +36,10 @@ bayesianPlanning <- function(jaspResults, dataset, options, state=NULL){
   if(options[["interpretation"]]){
 
       jaspResults[["priorKnowledgeParagraph"]] <- createJaspHtml(paste0("As prior knowledge, the most likely error in the data was specified to be <b>", expected.errors ,"</b>. The probability distribution that corresponds with
-                                                                    this prior knowledge is the <b>Beta(",round(result[["priorA"]],2), ",", round(result[["priorB"]],2),")</b> distribution. This probability distribution states that there is a <b>",
-                                                                        round(pbeta(options[["materiality"]], result[["priorA"]],result[["priorB"]])*100, 2) ,"%</b> prior probability that the
+                                                                    this prior knowledge is the <b>Beta(",round(planningResult[["priorA"]],2), ",", round(planningResult[["priorB"]],2),")</b> distribution. This probability distribution states that there is a <b>",
+                                                                        round(pbeta(options[["materiality"]], planningResult[["priorA"]],planningResult[["priorB"]])*100, 2) ,"%</b> prior probability that the
                                                                     population error is lower than materiality. The sample size that is required to prove an <b>",options$materiality*100,"%</b> upper confidence bound, assuming
-                                                                    the sample contains <b>", expected.errors ,"</b> full errors, is <b>", result[["n"]] ,"</b>. Consequently, if <b>", max.errors ,"</b> or more full errors are found, the population cannot be approved."), "p")
+                                                                    the sample contains <b>", expected.errors ,"</b> full errors, is <b>", planningResult[["n"]] ,"</b>. Consequently, if <b>", max.errors ,"</b> or more full errors are found, the population cannot be approved."), "p")
       jaspResults[["priorKnowledgeParagraph"]]$position <- 6
 
   }
@@ -48,7 +48,7 @@ bayesianPlanning <- function(jaspResults, dataset, options, state=NULL){
   if (options[["implicitsample"]])
   {
       if(is.null(jaspResults[["sampletable"]]))
-          .priorSampleTable(options, result, jaspResults, position = 7)
+          .priorSampleTable(options, planningResult, jaspResults, position = 7)
   }
 
   # Decision plot
@@ -70,7 +70,7 @@ bayesianPlanning <- function(jaspResults, dataset, options, state=NULL){
   {
       if(is.null(jaspResults[["priorPlot"]]))
       {
-          jaspResults[["priorPlot"]] 		<- .plotPriorBayesianAttributesPlanningFullAudit(options, result, jaspResults)
+          jaspResults[["priorPlot"]] 		<- .plotPriorBayesianAttributesPlanningFullAudit(options, planningResult, jaspResults)
           jaspResults[["priorPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors", "limx",
                                                            "plotPrior", "plotPriorAdditionalInfo", "show", "prior", "distribution", "N",
                                                            "statistic", "kPercentageNumber", "kNumberNumber"))

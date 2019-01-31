@@ -1,10 +1,8 @@
 .calculateBayesianSampleSize <- function(options, alpha){
     for(n in 1:5000){
-        if(options[["expected.errors"]] == "kPercentage"){
-            impk <- n * options[["kPercentageNumber"]]
-        } else if(options[["expected.errors"]] == "kNumber"){
-            impk <- options[["kNumberNumber"]]
-        }
+      impk <- base::switch(options[["expected.errors"]],
+                            "kPercentage" = n * options[["kPercentageNumber"]],
+                            "kNumber" = options[["kNumberNumber"]])
         if(impk >= n){ next }
         x                     <- qbeta(p = 1 - alpha, shape1 = 1 + impk, shape2 = 1 + (n - impk))
         if(x < options[["materiality"]]){
@@ -33,11 +31,9 @@
 
 .calculateBayesianSampleSizeBetaBinom <- function(options, alpha, N){
     for(n in 1:5000){
-        if(options[["expected.errors"]] == "kPercentage"){
-            impk <- n * options[["kPercentageNumber"]]
-        } else if(options[["expected.errors"]] == "kNumber"){
-            impk <- options[["kNumberNumber"]]
-        }
+      impk <- base::switch(options[["expected.errors"]],
+                            "kPercentage" = n * options[["kPercentageNumber"]],
+                            "kNumber" = options[["kNumberNumber"]])
         if(impk >= n){ next }
         x                     <- .qBetaBinom(p = 1 - alpha, N = N, u = 1 + impk, v = 1 + (n - impk))
         if((x / N) < options[["materiality"]]){
@@ -48,47 +44,27 @@
 
 .bayesianAttributesPlanningFullAudit <- function(options, jaspResults){
 
-    if(!is.null(jaspResults[["result"]])) return()
+    if(!is.null(jaspResults[["planningResult"]])) return()
 
-    confidence              <- options[["confidence"]]
-    p                       <- options[["materiality"]]
-
-    if(options[["IR"]] == "Low" && options[["CR"]] == "Low"){
-        alpha               <- (1-confidence) / 0.30 / 0.30
-    } else if (options[["IR"]] == "Low" && options[["CR"]] == "Medium"){
-        alpha               <- (1-confidence) / 0.30 / 0.60
-    } else if (options[["IR"]] == "Low" && options[["CR"]] == "High"){
-        alpha               <- (1-confidence) / 0.30 / 1
-    } else if (options[["IR"]] == "Medium" && options[["CR"]] == "High"){
-        alpha               <- (1-confidence) / 0.60 / 1
-    } else if (options[["IR"]] == "Medium" && options[["CR"]] == "Medium"){
-        alpha               <- (1-confidence) / 0.60 / 0.60
-    } else if (options[["IR"]] == "Medium" && options[["CR"]] == "Low"){
-        alpha               <- (1-confidence) / 0.60 / 0.30
-    } else if (options[["IR"]] == "High" && options[["CR"]] == "Low"){
-        alpha               <- (1-confidence) / 1 / 0.30
-    } else if (options[["IR"]] == "High" && options[["CR"]] == "Medium"){
-        alpha               <- (1-confidence) / 0.60 / 1
-    } else if (options[["IR"]] == "High" && options[["CR"]] == "High"){
-        alpha               <- (1-confidence) / 1 / 1
-    }
+    ar                      <- 1 - options[["confidence"]]
+    ir                      <- base::switch(options[["IR"]], "Low" = 0.30, "Medium" = 0.60, "High" = 1)
+    cr                      <- base::switch(options[["CR"]], "Low" = 0.30, "Medium" = 0.60, "High" = 1)
+    alpha                   <- ar / ir / cr
 
     if(options[["distribution"]] == "binomial"){
-      n_noprior               <- .calculateBayesianSampleSize(options, 1 - confidence)
+      n_noprior               <- .calculateBayesianSampleSize(options, 1 - options[["confidence"]])
       n_withprior             <- .calculateBayesianSampleSize(options, alpha)
     } else if(options[["distribution"]] == "hypergeometric"){
-      n_noprior               <- .calculateBayesianSampleSizeBetaBinom(options, 1 - confidence, options[["N"]])
+      n_noprior               <- .calculateBayesianSampleSizeBetaBinom(options, 1 - options[["confidence"]], options[["N"]])
       n_withprior             <- .calculateBayesianSampleSizeBetaBinom(options, alpha, options[["N"]])
     }
+
+    pk                      <- 0
     pn                      <- n_noprior - n_withprior
-    if(pn == 0){
-        pk                  <- 0
-        if(options[["expected.errors"]] == "kPercentage"){
-            k               <- options[["kPercentageNumber"]]
-        } else if(options[["expected.errors"]] == "kNumber"){
-            k               <- options[["kNumberNumber"]]
-        }
-    } else {
+    k                       <- base::switch(options[["expected.errors"]],
+                                            "kPercentage" = options[["kPercentageNumber"]],
+                                            "kNumber" = options[["kNumberNumber"]])
+    if(pn != 0){
         if(options[["expected.errors"]] == "kPercentage"){
             k               <- options[["kPercentageNumber"]]
             pk              <- pn * options[["kPercentageNumber"]]
@@ -97,14 +73,13 @@
             pk              <- k
         }
     }
-    priorA                  <- 1 + pk
-    priorB                  <- 1 + (pn - pk)
 
-    if(options[["prior"]] == "5050"){
-
+    if(options[["prior"]] == "ARM"){
+      priorA                  <- 1 + pk
+      priorB                  <- 1 + (pn - pk)
+    } else if(options[["prior"]] == "5050"){
       priorA                <- 1
       priorB                <- 1/((3/2) * options[["materiality"]]) - (1/3)
-
     }
 
     resultList <- list()
@@ -117,11 +92,11 @@
     resultList[["priorA"]]      <- priorA
     resultList[["priorB"]]      <- priorB
     resultList[["alpha"]]       <- alpha
-    resultList[["confidence"]]  <- confidence
+    resultList[["confidence"]]  <- options[["confidence"]]
 
-    jaspResults[["result"]] <- createJaspState(resultList)
-    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "kPercentageNumber",
-                                              "kNumberNumber", "inference", "prior", "distribution", "N"))
+    jaspResults[["planningResult"]] <- createJaspState(resultList)
+    jaspResults[["planningResult"]]$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "kPercentageNumber",
+                                                      "kNumberNumber", "prior", "distribution", "N"))
 
 }
 
@@ -129,62 +104,36 @@
 
   if(!is.null(jaspResults[["summaryTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-  summaryTable                       <- createJaspTable("Bayesian Attributes Planning Table")
-  jaspResults[["summaryTable"]]      <- summaryTable
+  summaryTable                        <- createJaspTable("Bayesian Attributes Planning Table")
+  jaspResults[["summaryTable"]]       <- summaryTable
+  summaryTable$position               <- position
   summaryTable$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "show", "N",
                                   "kPercentageNumber", "kNumberNumber", "expectedBF", "prior", "distribution"))
 
-  summaryTable$addColumnInfo(name = 'IR', title = "Inherent risk", type = 'string')
-  summaryTable$addColumnInfo(name = 'CR', title = "Control risk", type = 'string')
-  summaryTable$addColumnInfo(name = 'SR', title = "Detection risk", type = 'string')
-  summaryTable$addColumnInfo(name = 'k', title = "Allowed errors", type = 'string')
-  summaryTable$addColumnInfo(name = 'n', title = "Required sample size", type = 'string')
+  summaryTable$addColumnInfo(name = 'IR',     title = "Inherent risk",        type = 'string')
+  summaryTable$addColumnInfo(name = 'CR',     title = "Control risk",         type = 'string')
+  summaryTable$addColumnInfo(name = 'SR',     title = "Detection risk",       type = 'string')
+  summaryTable$addColumnInfo(name = 'k',      title = "Allowed errors",        type = 'string')
+  summaryTable$addColumnInfo(name = 'n',      title = "Required sample size",  type = 'string')
   if(options[["expectedBF"]])
-    summaryTable$addColumnInfo(name = 'expBF', title = "Expected Bayes factor", type = 'string')
+    summaryTable$addColumnInfo(name = 'expBF', title = "Expected BF\u208B\u208A", type = 'string')
 
-  summaryTable$position <- position
+  message <- base::switch(options[["distribution"]],
+                            "binomial" = "The sample size is calculated using the <b>beta</b> distribution.",
+                            "hypergeometric" = paste0("The sample size is calculated using the <b>beta-binomial</b> distribution (N = ", options[["N"]] ,")."))
+  summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
-  if(options[["show"]] == "percentage"){
-    SRtable <- paste0(round(result[["alpha"]], 3) * 100, "%")
-    if(options[["expected.errors"]] == "kPercentage"){
-      ktable <- floor(result[["k"]] * result[["n"]])
-    } else if(options[["expected.errors"]] == "kNumber"){
-      ktable <- options[["kNumberNumber"]]
-    }
-  } else if(options[["show"]] == "proportion"){
-    SRtable <- round(result[["alpha"]], 3)
-    if(options[["expected.errors"]] == "kPercentage"){
-      ktable <- floor(result[["k"]] * result[["n"]])
-    } else if(options[["expected.errors"]] == "kNumber"){
-      ktable <- options[["kNumberNumber"]]
-    }
-  }
+  ktable <- base::switch(options[["expected.errors"]],
+                          "kPercentage" = floor(result[["k"]] * result[["n"]]),
+                          "kNumber" = options[["kNumberNumber"]])
+  SRtable <- base::switch(options[["show"]],
+                            "percentage" = paste0(round(result[["alpha"]], 3) * 100, "%"),
+                            "proportion" = round(result[["alpha"]], 3))
 
-  if(options[["expectedBF"]]){
-    row <- list(IR = result[["IR"]],
-                CR = result[["CR"]],
-                SR = SRtable,
-                k = ktable,
-                n = result[["n"]],
-                expBF = .expectedBF(options, result, ktable))
-  } else {
-    row <- list(IR = result[["IR"]],
-                CR = result[["CR"]],
-                SR = SRtable,
-                k = ktable,
-                n = result[["n"]])
-  }
-
+  row <- data.frame(IR = result[["IR"]], CR = result[["CR"]], SR = SRtable, k = ktable, n = result[["n"]])
+  if(options[["expectedBF"]])
+    row <- cbind(row, expBF = .expectedBF(options, result, ktable))
   summaryTable$addRows(row)
-
-  if(options[["distribution"]] == "binomial"){
-          message <- "The sample size is calculated using the <b>beta</b> distribution."
-          summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
-  } else if(options[["distribution"]] == "hypergeometric"){
-          message <- paste0("The sample size is calculated using the <b>beta-binomial</b> distribution (N = ", options[["N"]] ,").")
-          summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
-  }
-
 }
 
 .priorSampleTable <- function(options, result, jaspResults, position = 3){
@@ -193,40 +142,36 @@
 
   sampletable                       <- createJaspTable("Prior Sample Table")
   jaspResults[["sampletable"]]      <- sampletable
+  sampletable$position              <- position
   sampletable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors", "implicitsample", "statistic",
                                 "show", "kPercentageNumber", "kNumberNumber", "distribution", "prior", "N"))
 
   sampletable$addColumnInfo(name = 'implicitn', title = "Prior sample size", type = 'string')
   sampletable$addColumnInfo(name = 'implicitk', title = "Prior errors", type = 'string')
-  sampletable$position <- position
-
-  result[["implicitn"]] <- round(result[["implicitn"]], 2)
-  result[["implicitk"]] <- round(result[["implicitk"]], 2)
-
   if(options[["statistic"]] == "bound"){
-    priorbound <- round(qbeta(p = options[["confidence"]], shape1 = result[["priorA"]], shape2 = result[["priorB"]]), 3)
     sampletable$addColumnInfo(name = 'priorbound', title = paste0(result[["confidence"]]*100,"% Prior confidence bound"), type = 'string')
-    if(options[["show"]] == "percentage"){
-      row <- list(implicitn = result[["implicitn"]], implicitk = result[["implicitk"]], priorbound = paste0(priorbound * 100, "%"))
-    } else if(options[["show"]] == "proportion"){
-      row <- list(implicitn = result[["implicitn"]], implicitk = result[["implicitk"]], priorbound = priorbound)
-    }
-    sampletable$addRows(row)
-  } else if(options[["statistic"]] == "interval"){
-    priorbound <- round(qbeta(p = c(  (1 - (1-(1-options[["confidence"]])/2)) , (1 - ((1-options[["confidence"]])/2)) ), shape1 = result[["priorA"]], shape2 = result[["priorB"]]), 3)
+  } else {
     sampletable$addColumnInfo(name = 'ciLow', title = "Lower", type = "string", overtitle = paste0(result[["confidence"]]*100,"% Prior confidence interval"))
     sampletable$addColumnInfo(name = 'ciHigh', title = "Upper", type = "string", overtitle = paste0(result[["confidence"]]*100,"% Prior confidence interval"))
-    if(options[["show"]] == "percentage"){
-      row <- list(implicitn = result[["implicitn"]], implicitk = result[["implicitk"]], ciLow = paste0(priorbound[1] * 100, "%"), ciHigh = paste0(priorbound[2] * 100, "%"))
-    } else if(options[["show"]] == "proportion"){
-      row <- list(implicitn = result[["implicitn"]], implicitk = result[["implicitk"]], ciLow = priorbound[1], ciHigh = priorbound[2])
-    }
-    sampletable$addRows(row)
   }
 
   message <- paste0("Sample sizes shown are implicit sample sizes derived from the ARM risk assessments: IR = <b>", options[["IR"]], "</b> and CR = <b>", options[["CR"]], "</b>.")
   sampletable$addFootnote(message = message, symbol="<i>Note.</i>")
 
+  implicitn <- round(result[["implicitn"]], 2)
+  implicitk <- round(result[["implicitk"]], 2)
+
+  priorBound <- base::switch(options[["statistic"]],
+                              "bound" = round(qbeta(p = options[["confidence"]], shape1 = result[["priorA"]], shape2 = result[["priorB"]]), 3),
+                              "interval" = round(qbeta(p = c(  (1 - (1-(1-options[["confidence"]])/2)) , (1 - ((1-options[["confidence"]])/2)) ), shape1 = result[["priorA"]], shape2 = result[["priorB"]]), 3))
+  if(options[["show"]] == "percentage")
+    priorBound <- paste0(priorBound * 100, "%")
+  if(options[["statistic"]] == "bound"){
+      row <- data.frame(implicitn = implicitn, implicitk = implicitk, priorbound = priorBound)
+  } else {
+    row <- data.frame(implicitn = implicitn, implicitk = implicitk, ciLow = priorBound[1], ciHigh = priorBound[2])
+  }
+  sampletable$addRows(row)
 }
 
 .plotPriorBayesianAttributesPlanningFullAudit <- function(options, result, jaspResults, plotWidth = 600, plotHeight = 450){
@@ -249,7 +194,6 @@
 
   p <- ggplot2::ggplot(d, ggplot2::aes(x = x, y = y)) +
       ggplot2::geom_line(ggplot2::aes(x = x, y = y, linetype = type), lwd = 1) +
-      #ggplot2::scale_linetype_manual(values=c("dotted", "dashed"), guide = ggplot2::guide_legend(nrow = 1, byrow = FALSE, title = "", order = 1))
       ggplot2::scale_linetype_manual(values=c("dotted", "dashed"), guide = FALSE)
 
   if(options[["show"]] == "percentage"){
@@ -293,96 +237,58 @@
 
 .bayesianAttributesBoundFullAudit <- function(dataset, options, jaspResults){
 
-    confidence              <- options[["confidence"]]
-    correctID               <- options[["correctID"]]
-    materiality             <- options[["materiality"]]
+    ar                        <- 1 - options[["confidence"]]
+    ir                        <- base::switch(options[["IR"]], "Low" = 0.30, "Medium" = 0.60, "High" = 1)
+    cr                        <- base::switch(options[["CR"]], "Low" = 0.30, "Medium" = 0.60, "High" = 1)
+    alpha                     <- ar / ir / cr
 
-    if(options[["IR"]] == "Low" && options[["CR"]] == "Low"){
-        alpha               <- (1-confidence) / 0.30 / 0.30
-    } else if (options[["IR"]] == "Low" && options[["CR"]] == "Medium"){
-        alpha               <- (1-confidence) / 0.30 / 0.60
-    } else if (options[["IR"]] == "Low" && options[["CR"]] == "High"){
-        alpha               <- (1-confidence) / 0.30 / 1
-    } else if (options[["IR"]] == "Medium" && options[["CR"]] == "High"){
-        alpha               <- (1-confidence) / 0.60 / 1
-    } else if (options[["IR"]] == "Medium" && options[["CR"]] == "Medium"){
-        alpha               <- (1-confidence) / 0.60 / 0.60
-    } else if (options[["IR"]] == "Medium" && options[["CR"]] == "Low"){
-        alpha               <- (1-confidence) / 0.60 / 0.30
-    } else if (options[["IR"]] == "High" && options[["CR"]] == "Low"){
-        alpha               <- (1-confidence) / 1 / 0.30
-    } else if (options[["IR"]] == "High" && options[["CR"]] == "Medium"){
-        alpha               <- (1-confidence) / 0.60 / 1
-    } else if (options[["IR"]] == "High" && options[["CR"]] == "High"){
-        alpha               <- (1-confidence) / 1 / 1
+    if(options[["distribution"]] == "binomial"){
+      n_noprior               <- .calculateBayesianSampleSize(options, 1 - options[["confidence"]])
+      n_withprior             <- .calculateBayesianSampleSize(options, alpha)
+    } else if(options[["distribution"]] == "hypergeometric"){
+      n_noprior               <- .calculateBayesianSampleSizeBetaBinom(options, 1 - options[["confidence"]], options[["N"]])
+      n_withprior             <- .calculateBayesianSampleSizeBetaBinom(options, alpha, options[["N"]])
     }
 
-    if(is.null(dataset) || options[["correctID"]] == ""){
-      n                     <- 0
-      k                     <- 0
-    } else {
-      n                     <- nrow(dataset)
-      k                     <- length(which(dataset[,.v(correctID)] == 1))
-    }
-
-    n_noprior               <- .calculateBayesianSampleSize(options, 1 - confidence)
-    n_withprior             <- .calculateBayesianSampleSize(options, alpha)
-
-    pn                      <- n_noprior - n_withprior
-
-    if(pn == 0){
-        pk                  <- 0
+    pk                        <- 0
+    pn                        <- n_noprior - n_withprior
+    exp.k                     <- base::switch(options[["expected.errors"]],
+                                              "kPercentage" = options[["kPercentageNumber"]],
+                                              "kNumber" = options[["kNumberNumber"]])
+    if(pn != 0){
         if(options[["expected.errors"]] == "kPercentage"){
-            exp.k                   <- options[["kPercentageNumber"]]
+            exp.k             <- options[["kPercentageNumber"]]
+            pk                <- pn * options[["kPercentageNumber"]]
         } else if(options[["expected.errors"]] == "kNumber"){
-            exp.k                   <- options[["kNumberNumber"]]
-        }
-    } else {
-        if(options[["expected.errors"]] == "kPercentage"){
-            exp.k               <- options[["kPercentageNumber"]]
-            pk                  <- pn * options[["kPercentageNumber"]]
-        } else if(options[["expected.errors"]] == "kNumber"){
-            exp.k               <- options[["kNumberNumber"]]
-            pk                  <- exp.k
+            exp.k             <- options[["kNumberNumber"]]
+            pk                <- exp.k
         }
     }
 
-    priorA                  <- 1 + pk
-    priorB                  <- 1 + (pn - pk)
-
-    if(options[["prior"]] == "5050"){
-
-      priorA <- 1
-      priorB <- 1/((3/2) * options[["materiality"]]) - (1/3)
-
+    n                         <- 0
+    k                         <- 0
+    if(options[["correctID"]] != ""){
+      n                       <- nrow(dataset)
+      k                       <- length(which(dataset[,.v(options[["correctID"]])] == 1))
     }
 
-    if(n == 0 || k > n){
-      bound                 <- "."
-      approve               <- "."
-    } else {
-        if(options[["statistic"]] == "bound"){
-          bound             <- qbeta(p = confidence,
-                                    shape1 = priorA + k,
-                                    shape2 = priorB + (n - k),
-                                    lower.tail = TRUE)
-         if(bound < materiality){
-           approve          <- "Yes"
-         } else {
-           approve          <- "No"
-         }
+    if(options[["prior"]] == "ARM"){
+      priorA                  <- 1 + pk
+      priorB                  <- 1 + (pn - pk)
+    } else if(options[["prior"]] == "5050"){
+      priorA                  <- 1
+      priorB                  <- 1/((3/2) * options[["materiality"]]) - (1/3)
+    }
+
+    bound <- "."
+    if(n != 0 && k <= n){
+      if(options[["statistic"]] == "bound"){
+          bound             <- qbeta(p = options[["confidence"]], shape1 = priorA + k, shape2 = priorB + (n - k), lower.tail = TRUE)
        } else if(options[["statistic"]] =="interval"){
-          bound             <- qbeta(p = c(  (1 - (1-(1-confidence)/2)) , (1 - ((1-confidence)/2)) ),
-                                    shape1 = priorA + k,
-                                    shape2 = priorB + (n - k),
-                                    lower.tail = TRUE)
-         if(bound[2] < materiality){
-           approve          <- "Yes"
-         } else {
-           approve          <- "No"
-         }
+          bound             <- qbeta(p = c(  (1 - (1-(1-options[["confidence"]])/2)) , (1 - ((1-options[["confidence"]])/2)) ),
+                                    shape1 = priorA + k, shape2 = priorB + (n - k), lower.tail = TRUE)
       }
-  }
+    }
 
     resultList <- list()
     resultList[["n"]]           <- n
@@ -392,91 +298,69 @@
     resultList[["IR"]]          <- options[["IR"]]
     resultList[["CR"]]          <- options[["CR"]]
     resultList[["alpha"]]       <- alpha
-    resultList[["confidence"]]  <- confidence
+    resultList[["confidence"]]  <- options[["confidence"]]
     resultList[["bound"]]       <- bound
     resultList[["priorA"]]      <- priorA
     resultList[["priorB"]]      <- priorB
     resultList[["posteriorA"]]  <- priorA + k
     resultList[["posteriorB"]]  <- priorB + (n - k)
-    resultList[["approve"]]     <- approve
 
     jaspResults[["result"]]     <- createJaspState(resultList)
     jaspResults[["result"]]     $dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality",
                                                     "correctID", "expected.errors", "kPercentageNumber",
                                                     "kNumberNumber", "sampleFilter", "prior", "k", "n",
                                                     "distribution", "N"))
-
 }
 
 .bayesianAttributesBoundTableFullAudit <- function(options, result, jaspResults, position = 1){
 
     if(!is.null(jaspResults[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-    evaluationTable                       <- createJaspTable("Bayesian Evaluation Table")
+    evaluationTable                       <- createJaspTable("Bayesian Attributes Evaluation Table")
     jaspResults[["evaluationTable"]]      <- evaluationTable
+    evaluationTable$position              <- position
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
                                       "expected.errors", "kPercentageNumber", "kNumberNumber", "sampleFilter",
                                       "mostLikelyError", "bayesFactor", "N", "n", "k", "prior", "distribution", "prior"))
-    evaluationTable$position <- position
 
-    evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",  type = 'string')
-    evaluationTable$addColumnInfo(name = 'n',    title = "Sample size",    type = 'string')
-    evaluationTable$addColumnInfo(name = 'k',    title = "Full errors",         type = 'string')
-    evaluationTable$addColumnInfo(name = 'bound', title = paste0(result[["confidence"]]*100,"% Confidence bound"), type = 'string')
+    evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",        type = 'string')
+    evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",        type = 'string')
+    evaluationTable$addColumnInfo(name = 'k',             title = "Full errors",        type = 'string')
+    evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
     if(options[["mostLikelyError"]])
-      evaluationTable$addColumnInfo(name = 'mle',    title = "Most Likely Error",         type = 'string')
+      evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                type = 'string')
     if(options[["bayesFactor"]])
-      evaluationTable$addColumnInfo(name = 'bf',     title = "Bayes factor",         type = 'string')
+      evaluationTable$addColumnInfo(name = 'bf',          title = "BF\u208B\u208A",     type = 'string')
 
     mle <- ceiling( (result[["posteriorA"]] - 1) / (result[["posteriorA"]] + result[["posteriorB"]] - 2) * options[["N"]] )
 
-    if(options[["correctID"]] != ""){
-      if(options[["mostLikelyError"]]){
-        row <- list(materiality = ".", n = ".", k = ".", bound = ".", mle = ".")
-      } else {
-        row <- list(materiality = ".", n = ".", k = ".", bound = ".")
-      }
+    if(options[["correctID"]] == ""){
+      row                   <- data.frame(materiality = ".", n = ".", k = ".", bound = ".")
+      if(options[["mostLikelyError"]])
+        row                 <- cbind(row, mle = ".")
+      if(options[["bayesFactor"]])
+        row                 <- cbind(row, bf = ".")
+      evaluationTable$addRows(row)
+      return()
     }
 
-    if(options[["show"]] == "percentage"){
-        materialityTable <- paste0(round(options[["materiality"]],2) * 100, "%")
-        if(result[["bound"]] == "."){
-            if(options[["statistic"]] == "bound"){
-                boundTable          <- "."
-            } else if(options[["statistic"]] == "interval"){
-                boundTable          <- c(".", ".")
-            }
-        } else {
-            boundTable <- paste0(round(result[["bound"]],3) * 100, "%")
-        }
-    } else if(options[["show"]] == "proportion"){
-        materialityTable <- round(options[["materiality"]], 2)
-        if(result[["bound"]] == "."){
-            if(options[["statistic"]] == "bound"){
-                boundTable          <- "."
-            } else if(options[["statistic"]] == "interval"){
-                boundTable          <- c(".", ".")
-            }
-        } else {
-            boundTable <- round(result[["bound"]],3)
-        }
-    }
-    if(options[["bayesFactor"]]){
-      if(options[["mostLikelyError"]]){
-        row <- list(materiality = materialityTable, n = result[["n"]], k = result[["k"]], bound = boundTable, mle = mle, bf = .BF(options, result))
-      } else {
-        row <- list(materiality = materialityTable, n = result[["n"]], k = result[["k"]], bound = boundTable, bf = .BF(options, result))
-      }
-    } else {
-      if(options[["mostLikelyError"]]){
-        row <- list(materiality = materialityTable, n = result[["n"]], k = result[["k"]], bound = boundTable, mle = mle)
-      } else {
-        row <- list(materiality = materialityTable, n = result[["n"]], k = result[["k"]], bound = boundTable)
-      }
+    materialityTable        <- round(options[["materiality"]], 2)
+    if(options[["show"]] == "percentage")
+      materialityTable      <- paste0(materialityTable * 100, "%")
+
+    boundTable <- result[["bound"]]
+    if(!"." %in% boundTable){
+      boundTable            <- round(result[["bound"]],3)
+      if(options[["show"]] == "percentage")
+        boundTable          <- paste0(boundTable * 100, "%")
     }
 
+    row                     <- data.frame(materiality = materialityTable, n = result[["n"]], k = result[["k"]], bound = boundTable)
+    if(options[["mostLikelyError"]])
+      row                   <- cbind(row, mle = mle)
+    if(options[["bayesFactor"]])
+      row                   <- cbind(row, bf = .BF(options, result))
     evaluationTable$addRows(row)
-
 }
 
 .plotPriorAndPosteriorBayesianAttributesBoundFullAudit <- function(options, result, jaspResults, plotWidth = 600, plotHeight = 450){
@@ -533,55 +417,72 @@
 
   p <- JASPgraphs::themeJasp(p, legend.position = "top") + thm
 
-  return(createJaspPlot(plot = p, title = "Prior and Posterior", width = plotWidth, height = plotHeight))
+  return(createJaspPlot(plot = p, title = "Prior and Posterior Plot", width = plotWidth, height = plotHeight))
 
 }
 
 .expectedBF <- function(options, result, ktable){
-    priorOdds     <- diff(pbeta(c(0, options[["materiality"]]), result[["priorA"]], result[["priorB"]])) / diff(pbeta(c(options[["materiality"]], 1), result[["priorA"]], result[["priorB"]]))
-    posteriorOdds <- diff(pbeta(c(0, options[["materiality"]]), result[["priorA"]] + ktable, result[["priorB"]] + (result[["n"]] + ktable))) / diff(pbeta(c(options[["materiality"]], 1), result[["priorA"]] + ktable, result[["priorB"]] + (result[["n"]] + ktable)))
-    BF            <- round(posteriorOdds / priorOdds, 2)
+    priorOdds       <- diff(pbeta(c(0, options[["materiality"]]), result[["priorA"]], result[["priorB"]])) / diff(pbeta(c(options[["materiality"]], 1), result[["priorA"]], result[["priorB"]]))
+    posteriorOdds   <- diff(pbeta(c(0, options[["materiality"]]), result[["priorA"]] + ktable, result[["priorB"]] + (result[["n"]] + ktable))) / diff(pbeta(c(options[["materiality"]], 1), result[["priorA"]] + ktable, result[["priorB"]] + (result[["n"]] + ktable)))
+    BF              <- round(posteriorOdds / priorOdds, 2)
     return(BF)
 }
 
 .BF <- function(options, result){
-  priorOdds     <- diff(pbeta(c(0, options[["materiality"]]), result[["priorA"]], result[["priorB"]])) / diff(pbeta(c(options[["materiality"]], 1), result[["priorA"]], result[["priorB"]]))
-  posteriorOdds <- diff(pbeta(c(0, options[["materiality"]]), result[["posteriorA"]], result[["posteriorB"]])) / diff(pbeta(c(options[["materiality"]], 1), result[["posteriorA"]], result[["posteriorB"]]))
-  BF            <- round(posteriorOdds / priorOdds, 2)
+  priorOdds         <- diff(pbeta(c(0, options[["materiality"]]), result[["priorA"]], result[["priorB"]])) / diff(pbeta(c(options[["materiality"]], 1), result[["priorA"]], result[["priorB"]]))
+  posteriorOdds     <- diff(pbeta(c(0, options[["materiality"]]), result[["posteriorA"]], result[["posteriorB"]])) / diff(pbeta(c(options[["materiality"]], 1), result[["posteriorA"]], result[["posteriorB"]]))
+  BF                <- round(posteriorOdds / priorOdds, 2)
+  return(BF)
+}
+
+.BFsamples <- function(options, result){
+  densprior         <- density(result[["prior"]])
+  priorCDF          <- approxfun(densprior$x, densprior$y, yleft=0, yright=0)
+  priorLeft         <- integrate(priorCDF, lower = 0, upper = options[["materiality"]])$value
+  priorRight        <- integrate(priorCDF, lower = options[["materiality"]], upper = 1)$value
+  priorOdds         <- priorLeft / priorRight
+  densposterior     <- density(result[["posterior"]])
+  posteriorCDF      <- approxfun(densposterior$x, densposterior$y, yleft=0, yright=0)
+  posteriorLeft     <- integrate(posteriorCDF, lower = 0, upper = options[["materiality"]])$value
+  posteriorRight    <- integrate(posteriorCDF, lower = options[["materiality"]], upper = 1)$value
+  posteriorOdds     <- posteriorLeft / posteriorRight
+  BF                <- round(posteriorOdds / priorOdds, 2)
   return(BF)
 }
 
 .coxAndSnellBound <- function(dataset, options, jaspResults, priorPi = 0.50, priorMu = 0.50, priorA = 1, priorB = 6){
-
     # Based on the paper:
     # Cox, D. R., & Snell, E. J. (1979). On sampling and the estimation of rare errors. Biometrika, 66(1), 125-132.
-    # Default options are recommendations from the paper
+    # Default prior options (pi = 0.10, mu = 0.40) are recommendations from the paper
+    n                         <- 0
+    M                         <- 0
+    z                         <- 0
+    bound                     <- NULL
+    prior                     <- NULL
+    posterior                 <- NULL
+    alpha                     <- 1 - options[["confidence"]]
+    if(options[["correctMUS"]] != "" && options[["monetaryVariableMUS"]] != ""){
+      sample                  <- dataset[, c(.v(options[["monetaryVariableMUS"]]), .v(options[["correctMUS"]]))]
+      n                       <- nrow(sample)
+      t                       <- sample[, .v(options[["monetaryVariableMUS"]])] - sample[, .v(options[["correctMUS"]])]
+      z                       <- t / sample[, .v(options[["monetaryVariableMUS"]])]
+      z                       <- subset(z, z > 0)
+      M                       <- length(z)
+      z_bar                   <- mean(z)
+      if(M == 0)
+          z_bar               <- 0
 
-    n                       <- nrow(dataset)
-    alpha                   <- 1 - options[["confidence"]]
-    sample                  <- dataset[, c(.v(options[["monetaryVariableMUS"]]), .v(options[["correctMUS"]]))]
+      prior_part_1            <- (0 + priorA) / (0 + priorB)
+      prior_part_2            <- ((priorMu * (priorB - 1)) + (0 * 0)) / (0 + (priorA / priorPi))
+      prior                   <- prior_part_1 * prior_part_2 * stats::rf(n = 1e5, df1 = (2 * (0 + priorA)), df2 = ( 2 *(0 + priorB)))
 
-    t                       <- sample[, 1] - sample[, 2]
-    z                       <- t / sample[, 1]
-    z                       <- subset(z, z > 0)
-    M                       <- length(z)
+      posterior_part_1        <- (M + priorA) / (M + priorB)
+      posterior_part_2        <- ((priorMu * (priorB - 1)) + (M * z_bar)) / (n + (priorA / priorPi))
+      posterior               <- posterior_part_1 * posterior_part_2 * stats::rf(n = 1e5, df1 = (2 * (M + priorA)), df2 = ( 2 *(M + priorB)))
 
-    z_bar                   <- mean(z)
-    if(M == 0)
-        z_bar               <- 0
-
-    prior_part_1            <- (0 + priorA) / (0 + priorB)
-    prior_part_2            <- ((priorMu * (priorB - 1)) + (0 * 0)) / (0 + (priorA / priorPi))
-    prior                   <- prior_part_1 * prior_part_2 * stats::rf(n = 1e5, df1 = (2 * (0 + priorA)), df2 = ( 2 *(0 + priorB)))
-
-    posterior_part_1        <- (M + priorA) / (M + priorB)
-    posterior_part_2        <- ((priorMu * (priorB - 1)) + (M * z_bar)) / (n + (priorA / priorPi))
-    posterior               <- posterior_part_1 * posterior_part_2 * stats::rf(n = 1e5, df1 = (2 * (M + priorA)), df2 = ( 2 *(M + priorB)))
-
-    if(options[["statistic"]] == "bound"){
-        bound                   <- as.numeric(quantile(posterior, probs = (1 - alpha), na.rm = TRUE))
-    } else {
-      bound                     <- as.numeric(quantile(posterior, probs = c(  (1 - (1-(1-alpha)/2)) , (1 - ((1-alpha)/2)) ), na.rm = TRUE))
+      bound <- base::switch(options[["statistic"]],
+                            "bound" = as.numeric(quantile(posterior, probs = (1 - alpha), na.rm = TRUE)),
+                            "interval" = as.numeric(quantile(posterior, probs = c(  (1 - (1-(1-alpha)/2)) , (1 - ((1-alpha)/2)) ), na.rm = TRUE)))
     }
 
     resultList <- list()
@@ -603,93 +504,68 @@
     resultList[["posterior"]]   <- posterior
 
     jaspResults[["result"]] <- createJaspState(resultList)
-    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilterMUS", "auditType", "boundMethodMUS"))
-
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilterMUS",
+                                              "auditType", "boundMethodMUS", "monetaryVariableMUS"))
 }
 
 .bayesianMusBoundTableFullAudit <- function(options, result, jaspResults, position = 1){
 
     if(!is.null(jaspResults[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-    evaluationTable                       <- createJaspTable("Bayesian Evaluation Table")
+    evaluationTable                       <- createJaspTable("Bayesian MUS Evaluation Table")
     jaspResults[["evaluationTable"]]      <- evaluationTable
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
                                       "sampleFilter", "distribution", "mostLikelyError", "N", "correctMUS", "sampleFilterMUS",
                                       "boundMethodMUS", "bayesFactor"))
     evaluationTable$position <- position
 
-    evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",  type = 'string')
+    evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",    type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",    type = 'string')
-    evaluationTable$addColumnInfo(name = 'fk',            title = "Errors",    type = 'string')
+    evaluationTable$addColumnInfo(name = 'fk',            title = "Errors",         type = 'string')
     evaluationTable$addColumnInfo(name = 'k',             title = "Sum of fractional errors",         type = 'string')
 
-    evaluationTable$addColumnInfo(name = 'bound',  title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
+    evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
     if(options[["mostLikelyError"]])
-      evaluationTable$addColumnInfo(name = 'mle',  title = "Most Likely Error", type = 'string')
+      evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",            type = 'string')
     if(options[["bayesFactor"]])
-      evaluationTable$addColumnInfo(name = 'bf',  title = "Bayes factor", type = 'string')
+      evaluationTable$addColumnInfo(name = 'bf',          title = "BF\u208B\u208A", type = 'string')
+
+    message <- base::switch(options[["boundMethodMUS"]],
+                                      "coxAndSnellBound" = "The confidence bound is calculated according to the <b>Cox and Snell</b> method.")
+    evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
     if(options[["correctMUS"]] == "" || options[["sampleFilterMUS"]] == ""){
-      if(options[["bayesFactor"]]){
-        if(options[["mostLikelyError"]]){
-          row <- list(materiality = ".", n = ".", fk = ".", k = ".", bound = ".", mle = ".", bf = ".")
-        } else {
-          row <- list(materiality = ".", n = ".", fk = ".", k = ".", bound = ".", bf = ".")
-        }
-      } else {
-        if(options[["mostLikelyError"]]){
-          row <- list(materiality = ".", n = ".", fk = ".", k = ".", bound = ".", mle = ".")
-        } else {
-          row <- list(materiality = ".", n = ".", fk = ".", k = ".", bound = ".")
-        }
-      }
+      row                   <- data.frame(materiality = ".", n = ".", k = ".", bound = ".")
+      if(options[["mostLikelyError"]])
+        row                 <- cbind(row, mle = ".")
+      if(options[["bayesFactor"]])
+        row                 <- cbind(row, bf = ".")
       evaluationTable$addRows(row)
       return()
     }
 
-    if(options[["N"]] == 0){
-        mle <- 0
-    } else {
-        mle <- floor( sum(result[["z"]]) / result[["n"]] * options[["N"]] )
+    errors                  <- round(sum(result[["z"]]), 2)
+    mle                     <- 0
+    if(options[["N"]] != 0)
+      mle <- floor( sum(result[["z"]]) / result[["n"]] * options[["N"]] )
+
+    materialityTable        <- round(options[["materiality"]], 2)
+    if(options[["show"]] == "percentage")
+      materialityTable      <- paste0(materialityTable * 100, "%")
+
+    boundTable <- result[["bound"]]
+    if(!"." %in% boundTable){
+      boundTable            <- round(result[["bound"]],3)
+      if(options[["show"]] == "percentage")
+        boundTable          <- paste0(boundTable * 100, "%")
     }
 
-      if(options[["show"]] == "percentage"){
-          materialityTable <- paste0(round(options[["materiality"]],2) * 100, "%")
-          if(result[["bound"]] == "."){
-              boundTable          <- "."
-          } else {
-              boundTable <- paste0(round(result[["bound"]],3) * 100, "%")
-          }
-      } else if(options[["show"]] == "proportion"){
-          materialityTable <- round(options[["materiality"]], 2)
-          if(result[["bound"]] == "."){
-              boundTable          <- "."
-          } else {
-              boundTable <- round(result[["bound"]],3)
-          }
-      }
-
-    errors <- round(sum(result[["z"]]), 2)
-
-    if(options[["bayesFactor"]]){
-      if(options[["mostLikelyError"]]){
-        row <- list(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable, mle = mle, bf = .BFsamples(options, result))
-      } else {
-        row <- list(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable, bf = .BFsamples(options, result))
-      }
-    } else {
-      if(options[["mostLikelyError"]]){
-        row <- list(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable, mle = mle)
-      } else {
-        row <- list(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable)
-      }
-    }
+    row <- data.frame(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable)
+    if(options[["mostLikelyError"]])
+      row <- cbind(row, mle = mle)
+    if(options[["bayesFactor"]])
+      row <- cbind(row, bf = .BFsamples(options, result))
     evaluationTable$addRows(row)
-
-    if(options[["boundMethodMUS"]] == "coxAndSnellBound"){
-      message <- "The confidence bound is calculated according to the <b>Cox and Snell</b> method."
-      evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
-    }
 }
 
 .plotPriorAndPosteriorBayesianMUSBoundFullAudit <- function(options, result, jaspResults, plotWidth = 600, plotHeight = 450){
@@ -749,21 +625,6 @@
 
   p <- JASPgraphs::themeJasp(p, legend.position = "top") + thm
 
-  return(createJaspPlot(plot = p, title = "Prior and Posterior", width = plotWidth, height = plotHeight))
+  return(createJaspPlot(plot = p, title = "Prior and Posterior Plot", width = plotWidth, height = plotHeight))
 
-}
-
-.BFsamples <- function(options, result){
-  densprior         <- density(result[["prior"]])
-  priorCDF          <- approxfun(densprior$x, densprior$y, yleft=0, yright=0)
-  priorLeft         <-integrate(priorCDF, lower = 0, upper = options[["materiality"]])$value
-  priorRight        <-integrate(priorCDF, lower = options[["materiality"]], upper = 1)$value
-  priorOdds         <- priorLeft / priorRight
-  densposterior     <- density(result[["posterior"]])
-  posteriorCDF      <- approxfun(densposterior$x, densposterior$y, yleft=0, yright=0)
-  posteriorLeft     <-integrate(posteriorCDF, lower = 0, upper = options[["materiality"]])$value
-  posteriorRight    <-integrate(posteriorCDF, lower = options[["materiality"]], upper = 1)$value
-  posteriorOdds     <- posteriorLeft / posteriorRight
-  BF                <- round(posteriorOdds / priorOdds, 2)
-  return(BF)
 }

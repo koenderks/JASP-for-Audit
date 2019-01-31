@@ -31,12 +31,12 @@ classicalPlanning <- function(jaspResults, dataset, options, state=NULL){
   }
   # Perform the analysis
   .attributesPlanningFullAudit(options, jaspResults)
-  result              <- jaspResults[["result"]]$object
-  .attributesPlanningTableFullAudit(options, result, jaspResults, position = 8)
+  planningResult              <- jaspResults[["planningResult"]]$object
+  .attributesPlanningTableFullAudit(options, planningResult, jaspResults, position = 8)
 
   if(options[["expected.errors"]] == "kPercentage"){
       expected.errors <- paste0(round(options[["kPercentageNumber"]] * 100, 2), "%")
-      max.errors <- ceiling(options[["kPercentageNumber"]] * result[["n"]]) + 1
+      max.errors <- ceiling(options[["kPercentageNumber"]] * planningResult[["n"]]) + 1
   } else {
       expected.errors <- options[["kNumberNumber"]]
       max.errors <- options[["kNumberNumber"]] + 1
@@ -45,7 +45,7 @@ classicalPlanning <- function(jaspResults, dataset, options, state=NULL){
   if(options[["interpretation"]]){
 
       jaspResults[["priorKnowledgeParagraph"]] <- createJaspHtml(paste0("As prior knowledge, the most likely error in the data was specified to be <b>", expected.errors ,"</b>. The sample size that is required to prove an <b>",options$materiality*100,"%</b>
-                                                                      upper confidence bound, assuming the sample contains <b>", expected.errors ,"</b> full errors, is <b>", result[["n"]] ,"</b>. The sample size is calculated with the <b>", options[["distribution"]] , "</b>
+                                                                      upper confidence bound, assuming the sample contains <b>", expected.errors ,"</b> full errors, is <b>", planningResult[["n"]] ,"</b>. The sample size is calculated with the <b>", options[["distribution"]] , "</b>
                                                                       distribution. Consequently, if <b>", max.errors ,"</b> or more full errors are found in the sample, the population cannot be approved."), "p")
       jaspResults[["priorKnowledgeParagraph"]]$position <- 7
 
