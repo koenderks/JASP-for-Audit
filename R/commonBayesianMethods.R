@@ -461,11 +461,11 @@
     prior                     <- NULL
     posterior                 <- NULL
     alpha                     <- 1 - options[["confidence"]]
-    if(options[["correctMUS"]] != "" && options[["monetaryVariableMUS"]] != ""){
-      sample                  <- dataset[, c(.v(options[["monetaryVariableMUS"]]), .v(options[["correctMUS"]]))]
+    if(options[["correctMUS"]] != "" && options[["monetaryVariable"]] != ""){
+      sample                  <- dataset[, c(.v(options[["monetaryVariable"]]), .v(options[["correctMUS"]]))]
       n                       <- nrow(sample)
-      t                       <- sample[, .v(options[["monetaryVariableMUS"]])] - sample[, .v(options[["correctMUS"]])]
-      z                       <- t / sample[, .v(options[["monetaryVariableMUS"]])]
+      t                       <- sample[, .v(options[["monetaryVariable"]])] - sample[, .v(options[["correctMUS"]])]
+      z                       <- t / sample[, .v(options[["monetaryVariable"]])]
       z                       <- subset(z, z > 0)
       M                       <- length(z)
       z_bar                   <- mean(z)
@@ -534,7 +534,7 @@
                                       "coxAndSnellBound" = "The confidence bound is calculated according to the <b>Cox and Snell</b> method.")
     evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
-    if(options[["correctMUS"]] == "" || options[["sampleFilterMUS"]] == ""){
+    if(options[["correctMUS"]] == "" || options[["sampleFilter"]] == ""){
       row                   <- data.frame(materiality = ".", n = ".", k = ".", bound = ".")
       if(options[["mostLikelyError"]])
         row                 <- cbind(row, mle = ".")

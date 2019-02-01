@@ -2,6 +2,7 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
 
     # Set the default internal option for "statistic" to bound
     options[["statistic"]]              <- "bound"
+    options[["show"]]                   <- "percentage"
 
     if(is.null(state))
         state 							            <- list()
@@ -39,9 +40,13 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
       jaspResults[["procedureParagraph"]]$position <- 2
     }
 
-    # Planning phase
-    # Only runs when population size is specified
-    if(options[["N"]] != 0){
+    if(options[["recordNumberVariable"]] != "" && options[["monetaryVariable"]] != ""){
+      dataset <- .readDataSetToEnd(columns.as.numeric = c(options[["recordNumberVariable"]], options[["monetaryVariable"]]))
+      options[["N"]] <- nrow(dataset)
+
+      # Planning phase
+      if(!options[["planningChecked"]]) # Only runs when "To planning" is clicked
+        return()
 
       # Show the Audit Risk Model formula and quantify detection risk
       .ARMformula(options, jaspResults, position = 5)
@@ -127,35 +132,22 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
   }
 
     # Sampling phase
+    if(!options[["samplingChecked"]])
+      return()
     # Read in variables for sampling TODO: Make this a function
-    if(options[["auditType"]] == "attributes"){
-      recordVariable                  <- unlist(options$recordNumberVariable)
-      if(recordVariable == "")        recordVariable <- NULL
-      rankingVariable                 <- unlist(options$rankingVariable)
-      if(rankingVariable == "")       rankingVariable <- NULL
-      monetaryVariable                <- NULL
-      variables                       <- unlist(options$variables)
-      correctID                       <- unlist(options$correctID)
-      if(correctID == "")             correctID <- NULL
-      sampleFilter                    <- unlist(options$sampleFilter)
-      if(sampleFilter == "")          sampleFilter <- NULL
-    } else {
-      recordVariable                  <- unlist(options$recordNumberVariableMUS)
-      if(recordVariable == "")        recordVariable <- NULL
-      monetaryVariable                <- unlist(options$monetaryVariableMUS)
-      if(monetaryVariable == "")      monetaryVariable <- NULL
-      rankingVariable                 <- unlist(options$rankingVariableMUS)
-      if(rankingVariable == "")       rankingVariable <- NULL
-      variables                       <- unlist(options$variablesMUS)
-      correctID                       <- unlist(options$correctMUS)
-      if(correctID == "")             correctID <- NULL
-      sampleFilter                    <- unlist(options$sampleFilterMUS)
-      if(sampleFilter == "")          sampleFilter <- NULL
-    }
+    recordVariable                  <- unlist(options$recordNumberVariable)
+    if(recordVariable == "")        recordVariable <- NULL
+    rankingVariable                 <- unlist(options$rankingVariable)
+    if(rankingVariable == "")       rankingVariable <- NULL
+    monetaryVariable                <- unlist(options$monetaryVariable)
+    if(monetaryVariable == "")      monetaryVariable <- NULL
+    variables                       <- unlist(options$variables)
+    sampleFilter                    <- unlist(options$sampleFilter)
+    if(sampleFilter == "")          sampleFilter <- NULL
+    correctID                       <- base::switch(options[["auditType"]], "attributes" = unlist(options$correctID), "mus" = unlist(options$correctMUS))
+    if(correctID == "")             correctID <- NULL
     variables.to.read               <- c(recordVariable, variables, rankingVariable, correctID, sampleFilter, monetaryVariable)
-
-    if (is.null(dataset))
-        dataset                     <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
+    dataset                         <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
 
     # Only runs when a record variable has been specified
     if(!is.null(recordVariable)){
@@ -227,6 +219,8 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
     }
 
     # Evaluation phase
+    if(!options[["evaluationChecked"]])
+      return()
     # only runs when an error variable has been selected
     if(!is.null(correctID)){
 

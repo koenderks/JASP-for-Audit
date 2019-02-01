@@ -251,11 +251,11 @@
     z                       <- 0
     bound                   <- "."
 
-    if(options[["correctMUS"]] != "" && options[["sampleFilterMUS"]] != "" && options[["monetaryVariableMUS"]] != ""){
-      sample                  <- dataset[, c(.v(options[["monetaryVariableMUS"]]), .v(options[["correctMUS"]]))]
+    if(options[["correctMUS"]] != "" && options[["sampleFilter"]] != "" && options[["monetaryVariable"]] != ""){
+      sample                  <- dataset[, c(.v(options[["monetaryVariable"]]), .v(options[["correctMUS"]]))]
       n                       <- nrow(sample)
-      t                       <- sample[, .v(options[["monetaryVariableMUS"]])] - sample[, .v(options[["correctMUS"]])]
-      z                       <- t / sample[, .v(options[["monetaryVariableMUS"]])]
+      t                       <- sample[, .v(options[["monetaryVariable"]])] - sample[, .v(options[["correctMUS"]])]
+      z                       <- t / sample[, .v(options[["monetaryVariable"]])]
       z                       <- sort(subset(z, z > 0), decreasing = TRUE)
       M                       <- length(z)
       bound                   <- 1 - alpha^(1/n)
@@ -307,7 +307,7 @@
     evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
     # Return empty table
-    if(options[["correctMUS"]] == "" || options[["sampleFilterMUS"]] == "" || options[["monetaryVariableMUS"]] == ""){
+    if(options[["correctMUS"]] == "" || options[["sampleFilter"]] == "" || options[["monetaryVariable"]] == ""){
       row <- data.frame(materiality = ".", n = ".", fk = ".", k = ".", bound = ".")
       if(options[["mostLikelyError"]])
         row <- cbind(row, mle = ".")

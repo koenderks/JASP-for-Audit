@@ -9,11 +9,11 @@
         variables                       <- unlist(options$variables)
         monetaryVariable                <- NULL
     } else {
-        recordVariable                  <- unlist(options$recordNumberVariableMUS)
+        recordVariable                  <- unlist(options$recordNumberVariable)
         if(recordVariable == "")        recordVariable <- NULL
-        monetaryVariable                <- unlist(options$monetaryVariableMUS)
+        monetaryVariable                <- unlist(options$monetaryVariable)
         if(monetaryVariable == "")      monetaryVariable <- NULL
-        variables                       <- unlist(options$variablesMUS)
+        variables                       <- unlist(options$variables)
     }
 
     duplicates                      <- options$allowDuplicates
@@ -101,13 +101,13 @@
         variables                       <- unlist(options$variables)
         monetaryVariable                <- NULL
     } else {
-        recordVariable                  <- unlist(options$recordNumberVariableMUS)
+        recordVariable                  <- unlist(options$recordNumberVariable)
         if(recordVariable == "")        recordVariable <- NULL
-        monetaryVariable                <- unlist(options$monetaryVariableMUS)
+        monetaryVariable                <- unlist(options$monetaryVariable)
         if(monetaryVariable == "")      monetaryVariable <- NULL
-        rankingVariable                 <- unlist(options$rankingVariableMUS)
+        rankingVariable                 <- unlist(options$rankingVariable)
         if(rankingVariable == "")        rankingVariable <- NULL
-        variables                       <- unlist(options$variablesMUS)
+        variables                       <- unlist(options$variables)
     }
 
     startingPoint                       <- options$startingPoint
@@ -212,13 +212,13 @@
         variables                       <- unlist(options$variables)
         monetaryVariable                <- NULL
     } else {
-        recordVariable                  <- unlist(options$recordNumberVariableMUS)
+        recordVariable                  <- unlist(options$recordNumberVariable)
         if(recordVariable == "")        recordVariable <- NULL
-        monetaryVariable                <- unlist(options$monetaryVariableMUS)
+        monetaryVariable                <- unlist(options$monetaryVariable)
         if(monetaryVariable == "")      monetaryVariable <- NULL
-        rankingVariable                 <- unlist(options$rankingVariableMUS)
+        rankingVariable                 <- unlist(options$rankingVariable)
         if(rankingVariable == "")        rankingVariable <- NULL
-        variables                       <- unlist(options$variablesMUS)
+        variables                       <- unlist(options$variables)
     }
 
     startingPoint                       <- options$startingPoint
@@ -453,7 +453,7 @@
   sampleSize                              <- options$sampleSize
 
   if(options[["auditType"]] == "mus"){
-      row <- list("N" = nrow(dataset), "n" = sampleSize, "T" = round(sum(dataset[, .v(options[["monetaryVariableMUS"]])]), 2))
+      row <- list("N" = nrow(dataset), "n" = sampleSize, "T" = round(sum(dataset[, .v(options[["monetaryVariable"]])]), 2))
   } else {
       row <- list("N" = nrow(dataset), "n" = sampleSize)
   }
