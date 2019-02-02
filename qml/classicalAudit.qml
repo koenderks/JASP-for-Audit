@@ -329,6 +329,15 @@ Form {
             enabled: false
             id: executionPhase
 
+            Text {
+                text: qsTr("Click the 'Paste variables' button to amend the data set with two additional variables:
+                            \n 1) sampleFilter: Indicates whether an observation is in(1) or out(0) of the sample
+                            \n2) correctID: Use this variable to fill out the ist-position for the sample observations")
+                font.family: "SansSerif"
+                font.pointSize: 8
+                Layout.leftMargin: 20
+            }
+
             RowLayout {
               CheckBox {
                 visible: true
@@ -426,7 +435,7 @@ Form {
                   GroupBox {
                       title: qsTr("<b>Plots</b>")
                       CheckBox {
-                        text: qsTr("Confidence bound")
+                        text: qsTr("Outcome information")
                         name: "plotBound"
                       }
                   }

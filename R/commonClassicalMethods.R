@@ -25,52 +25,42 @@
   }
 }
 
-.plotConfidenceBounds <- function(options, result, jaspResults, plotWidth = 600, plotHeight = 450){
+.plotConfidenceBounds <- function(options, result, jaspResults){
 
-  plotStat <- data.frame(materiality = options[["materiality"]],
-                          bound = result[["bound"]],
-                          xlab = "")
+  materiality     <- options[["materiality"]]
+  bound           <- result[["bound"]]
+  expected.errors <- base::switch(options[["expected.errors"]],
+                                      "kPercentage" = options[["kPercentageNumber"]],
+                                      "kNumber" = options[["kNumberNumber"]] / result[["n"]])
+  found.errors    <- result[["k"]] / result[["n"]]
+  xlim            <- round(max(c(materiality, bound, expected.errors, found.errors)) * 1.2, 2)
+  xBreaks         <- pretty(c(0, xlim))
+  xLabels         <- paste0(round(xBreaks * 100, 2), "%")
 
-  materialityStat <- data.frame(materiality = options[["materiality"]])
+  boundData <- data.frame(xmin = c(0, bound), xmax = c(bound, xlim), ymin = 0, ymax = 0.5,
+                         fill = c(rgb(0,1,.5,.7), rgb(1,1,1)))
 
-  base_breaks_y <- function(x, options) {
+  df <- data.frame()
+  p <- ggplot2::ggplot(df) +
+      ggplot2::geom_point() +
+      ggplot2::ylim(0, 1) +
+      ggplot2::ylab(NULL) +
+      ggplot2::xlab("Error percentage") +
+      ggplot2::geom_rect(ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+                              data = boundData, fill = boundData$fill, color = "black", size = 2) +
+      ggplot2::scale_x_continuous(breaks = xBreaks, labels = xLabels) +
+      #ggplot2::geom_segment(ggplot2::aes(x = bound, xend = bound, y = 0, yend = 0.5), lty = 1, size = 2) +
+      ggplot2::geom_segment(ggplot2::aes(x = materiality, xend = materiality, y = 0, yend = 0.5), lty = 1, size = 2, color = rgb(1,0,0,.7)) +
+      ggplot2::geom_segment(ggplot2::aes(x = expected.errors, xend = expected.errors, y = 0, yend = 0.5), lty = 2, size = 2, color = "darkgray") +
+      ggplot2::geom_segment(ggplot2::aes(x = found.errors, xend = found.errors, y = 0, yend = 0.5), lty = 2, size = 2)
 
-      values <- c(options$materiality, 0, x[, "bound"])
-      ci.pos <- c(min(values), max(values))
-      b <- pretty(ci.pos)
-      d <- data.frame(x = -Inf, xend = -Inf, y = min(b), yend = max(b))
-      yBreaks <- c(min(b),  options$materiality, max(b))
 
-      if(options[["show"]] == "percentage"){
-          yLabels <- paste0(yBreaks * 100, "%")
-      } else if(options[["show"]] == "proportion"){
-          yLabels <- yBreaks
-      }
+  p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE, legend.position = "top")
+  p <- p + ggplot2::theme(axis.ticks = ggplot2::element_blank(),
+                          axis.text.y = ggplot2::element_blank(),
+                          axis.text.x = ggplot2::element_text(size = 17))
 
-      list(ggplot2::geom_segment(data = d, ggplot2::aes(x = x, y = y, xend = xend, yend = yend), inherit.aes = FALSE, size = 1),
-           ggplot2::scale_y_continuous(breaks = yBreaks, labels = yLabels))
-  }
-
-  pd <- ggplot2::position_dodge(0.2)
-
-  p <- ggplot2::ggplot(plotStat, ggplot2::aes(x = xlab, y = bound)) +
-      ggplot2::geom_errorbar(ggplot2::aes(ymin = 0, ymax = bound), colour = "black", width = 0.2, position = pd) +
-      ggplot2::geom_hline(data = materialityStat, ggplot2::aes(yintercept = materiality), linetype = "dashed") +
-      ggplot2::scale_x_discrete(labels = plotStat[["xlab"]]) +
-      base_breaks_y(plotStat, options) +
-      ggplot2::theme(axis.ticks.x = ggplot2::element_blank())
-
-  if(options[["show"]] == "percentage"){
-    p <- p + ggplot2::ylab("Error percentage")
-  } else if(options[["show"]] == "proportion"){
-    p <- p + ggplot2::ylab("Error proportion")
-  }
-
-  p <- p + ggplot2::xlab(NULL)
-
-  p <- JASPgraphs::themeJasp(p, xAxis = FALSE)
-
-  return(createJaspPlot(plot = p, title = "Confidence Bound Plot", width = plotWidth, height = plotHeight))
+  return(createJaspPlot(plot = p, title = "Outcome information", width = 600, height = 200))
 
 }
 
