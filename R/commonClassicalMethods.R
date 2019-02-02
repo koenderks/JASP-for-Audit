@@ -79,8 +79,8 @@
     if(!is.null(jaspResults[["planningResult"]])) return()
 
     ar                      <- 1 - options[["confidence"]]
-    ir                      <- base::switch(options[["IR"]], "Low" = 0.30, "Medium" = 0.60, "High" = 1)
-    cr                      <- base::switch(options[["CR"]], "Low" = 0.30, "Medium" = 0.60, "High" = 1)
+    ir                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+    cr                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
     alpha                   <- ar / ir / cr
 
     if(options[["distribution"]] == "binomial"){
@@ -157,8 +157,8 @@
 .attributesBoundFullAudit <- function(dataset, options, jaspResults){
 
   ar                      <- 1 - options[["confidence"]]
-  ir                      <- base::switch(options[["IR"]], "Low" = 0.30, "Medium" = 0.60, "High" = 1)
-  cr                      <- base::switch(options[["CR"]], "Low" = 0.30, "Medium" = 0.60, "High" = 1)
+  ir                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+  cr                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
   alpha                   <- ar / ir / cr
 
   n                       <- 0
@@ -242,8 +242,8 @@
     # Based on the paper:
     # Stringer, K. W. (1963). Practical aspects of statistical sampling in auditing. In Proceedings of the Business and Economic Statistics Section (pp. 405-411). American Statistical Association.
     ar                      <- 1 - options[["confidence"]]
-    ir                      <- base::switch(options[["IR"]], "Low" = 0.30, "Medium" = 0.60, "High" = 1)
-    cr                      <- base::switch(options[["CR"]], "Low" = 0.30, "Medium" = 0.60, "High" = 1)
+    ir                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+    cr                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
     alpha                   <- ar / ir / cr
 
     n                       <- 0

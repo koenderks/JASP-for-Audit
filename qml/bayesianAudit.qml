@@ -365,10 +365,11 @@ Form {
           }
         anchors.right: parent.right
           Button {
-            text: qsTr("<b>Paste</b>")
+            text: qsTr("<b>Paste variables</b>")
             id: pasteButton
             onClicked: {
               toEvaluation.enabled = true
+              pasteButton.enabled = false
             }
           }
           Button {
@@ -489,7 +490,7 @@ Form {
           implicitWidth: 560
 
           RadioButtonGroup {
-            title: qsTr("<b>Bound method</b>")
+            title: qsTr("<b>Estimator</b>")
             name: "boundMethodMUS"
 
             RadioButton {

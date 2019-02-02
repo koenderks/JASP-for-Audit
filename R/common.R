@@ -2,38 +2,10 @@
 
     if(!is.null(jaspResults[["DR"]])) return()
 
-    AR <- 1 - options[["confidence"]]
-
-    if(options[["IR"]] == "Low" && options[["CR"]] == "Low"){
-        IR <- 0.30
-        CR <- 0.30
-    } else if (options[["IR"]] == "Low" && options[["CR"]] == "Medium"){
-        IR <- 0.30
-        CR <- 0.60
-    } else if (options[["IR"]] == "Low" && options[["CR"]] == "High"){
-        IR <- 0.30
-        CR <- 1
-    } else if (options[["IR"]] == "Medium" && options[["CR"]] == "High"){
-        IR <- 0.60
-        CR <- 1
-    } else if (options[["IR"]] == "Medium" && options[["CR"]] == "Medium"){
-        IR <- 0.60
-        CR <- 0.60
-    } else if (options[["IR"]] == "Medium" && options[["CR"]] == "Low"){
-        IR <- 0.60
-        CR <- 0.30
-    } else if (options[["IR"]] == "High" && options[["CR"]] == "Low"){
-        IR <- 1
-        CR <- 0.30
-    } else if (options[["IR"]] == "High" && options[["CR"]] == "Medium"){
-        IR <- 1
-        CR <- 0.60
-    } else if (options[["IR"]] == "High" && options[["CR"]] == "High"){
-        IR <- 1
-        CR <- 1
-    }
-    # Audit Risk Model
-    DR               <- AR / IR / CR
+    AR                      <- 1 - options[["confidence"]]
+    IR                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+    CR                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+    DR                      <- AR / IR / CR
 
     if(options[["show"]] == "percentage"){
         text <- paste0("Audit risk (", round(AR * 100, 2),"%) = Inherent risk (", round(IR * 100, 2), "%) x Control risk (", round(CR * 100, 2), "%) x Detection risk (", round(DR * 100, 2), "%)")
@@ -48,6 +20,25 @@
     jaspResults[["DR"]]     <- createJaspState(DR)
     jaspResults[["DR"]]     $dependOnOptions(c("IR", "CR", "confidence"))
 
+}
+
+.dataTable <- function(dataset, options, jaspResults, position){
+
+  if(!is.null(jaspResults[["dataTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
+
+  dataTable                        <- createJaspTable("Population descriptives")
+  jaspResults[["dataTable"]]       <- dataTable
+  dataTable$position               <- position
+  dataTable$dependOnOptions(c("nothing"))
+
+  dataTable$addColumnInfo(name = 'popSize',      title = "Population size",        type = 'string')
+  dataTable$addColumnInfo(name = 'value',        title = "Total value",            type = 'string')
+
+  popSize <- options[["N"]]
+  total.value <- round(sum(dataset[, .v(options[["monetaryVariable"]])]), 2)
+
+  row <- data.frame(popSize = popSize, value = total.value)
+  dataTable$addRows(row)
 }
 
 .plotCriticalErrorsPrior <- function(allowed.errors, reject.errors, jaspResults){

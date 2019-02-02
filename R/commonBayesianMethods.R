@@ -47,8 +47,8 @@
     if(!is.null(jaspResults[["planningResult"]])) return()
 
     ar                      <- 1 - options[["confidence"]]
-    ir                      <- base::switch(options[["IR"]], "Low" = 0.30, "Medium" = 0.60, "High" = 1)
-    cr                      <- base::switch(options[["CR"]], "Low" = 0.30, "Medium" = 0.60, "High" = 1)
+    ir                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+    cr                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
     alpha                   <- ar / ir / cr
 
     if(options[["distribution"]] == "binomial"){
@@ -238,8 +238,8 @@
 .bayesianAttributesBoundFullAudit <- function(dataset, options, jaspResults){
 
     ar                        <- 1 - options[["confidence"]]
-    ir                        <- base::switch(options[["IR"]], "Low" = 0.30, "Medium" = 0.60, "High" = 1)
-    cr                        <- base::switch(options[["CR"]], "Low" = 0.30, "Medium" = 0.60, "High" = 1)
+    ir                        <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+    cr                        <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
     alpha                     <- ar / ir / cr
 
     if(options[["distribution"]] == "binomial"){

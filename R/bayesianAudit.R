@@ -44,6 +44,8 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
       dataset <- .readDataSetToEnd(columns.as.numeric = c(options[["recordNumberVariable"]], options[["monetaryVariable"]]))
       options[["N"]] <- nrow(dataset)
 
+      .dataTable(dataset, options, jaspResults, position = 3)
+
       # Planning phase
       if(!options[["planningChecked"]]) # Only runs when "To planning" is clicked
         return()
