@@ -219,7 +219,8 @@ Form {
            title: qsTr("<b>Plots</b>")
 
            CheckBox {      text: qsTr("Decision plot")                  ; name: "plotCriticalErrors"; checked: true }
-           CheckBox {      text: qsTr("Distribution plot")              ; name: "distributionPlot"; visible: mus.checked }
+           CheckBox {      text: qsTr("Distribution information")       ; name: "distributionPlot"; id: distributionPlot}
+           CheckBox {      text: qsTr("Cumulative density")             ; name: "showCumulative"; Layout.leftMargin: 20; enabled: distributionPlot.checked }
            CheckBox {      text: qsTr("Implied prior and posterior")    ; name: "plotPrior" ; id: plotPrior}
            PercentField {  text: qsTr("x-axis limit")                   ; name: "limx" ; defaultValue: 20; Layout.leftMargin: 20}
            CheckBox {      text: qsTr("Additional info")                ; name: "plotPriorAdditionalInfo" ; Layout.leftMargin: 20; checked: true; enabled: plotPrior.checked}

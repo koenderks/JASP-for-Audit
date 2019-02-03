@@ -107,6 +107,17 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
               jaspResults[["criticalErrorPlot"]] 		$position <- 9
           }
         }
+
+        # Distribution plot
+        if(options[['distributionPlot']])
+        {
+            if(is.null(jaspResults[["valueDistributionPlot"]]))
+            {
+                jaspResults[["valueDistributionPlot"]] 		<- .plotValueDistribution(dataset, options, jaspResults)
+                jaspResults[["valueDistributionPlot"]]		  $dependOnOptions(c("distributionPlot", "showCumulative", "monetaryVariable", "recordNumberVariable", "showHistogram"))
+                jaspResults[["valueDistributionPlot"]] 		$position <- 9
+            }
+          }
     }
 
     # Sampling phase

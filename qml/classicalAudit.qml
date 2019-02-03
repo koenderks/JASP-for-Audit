@@ -196,7 +196,8 @@ Form {
            title: qsTr("<b>Plots</b>")
 
            CheckBox {      text: qsTr("Decision plot")                  ; name: "plotCriticalErrors"; checked: true }
-           CheckBox {      text: qsTr("Distribution plot")              ; name: "distributionPlot"; visible: mus.checked }
+           CheckBox {      text: qsTr("Distribution information")       ; name: "distributionPlot"; id: distributionPlot }
+           CheckBox {      text: qsTr("Cumulative density")             ; name: "showCumulative"; Layout.leftMargin: 20; enabled: distributionPlot.checked }
         }
     }
 

@@ -77,3 +77,127 @@
     return(createJaspPlot(plot = p, title = "Decision Plot", width = 500, height = 300))
 
 }
+
+.plotValueDistribution <- function(dataset, options, jaspResults){
+
+    values <- dataset[, .v(options[["monetaryVariable"]])]
+    index <- 1:length(values)
+    xBreaks <- pretty(index)
+
+    tb <- data.frame(index, values)
+    p1  <- ggplot2::ggplot(data = data.frame(x = tb[, 1], y = tb[, 2]), ggplot2::aes(x = x, y = y)) +
+        ggplot2::geom_bar(stat = "identity", fill = "grey", col = "black", size = .3) +
+        ggplot2::xlab("Record number") +
+        ggplot2::ylab("Value") +
+        ggplot2::scale_x_continuous(breaks = xBreaks)
+    p1 <- JASPgraphs::themeJasp(p1)
+
+    p2 <- .plotMarginalJfA(values, options[["monetaryVariable"]])
+
+    if(!options[["showCumulative"]]){
+      filename <- tempfile()
+      png(filename = filename)
+      p <- gridExtra::grid.arrange(p1, p2, ncol = 2)
+      dev.off()
+      return(createJaspPlot(plot = p, title = "Distribution information", width = 700, height = 300))
+    }
+
+    cum3 <- cumsum(values) / sum(values)
+    tb3 <- data.frame(index, cum3)
+    p3  <- ggplot2::ggplot(data = data.frame(x = tb3[, 1], y = tb3[, 2]), ggplot2::aes(x = x, y = y)) +
+        ggplot2::geom_segment(ggplot2::aes(x = 0, xend = max(index), y = 0, yend = 1), size = 1, color = "darkred") +
+        ggplot2::geom_point(col = "black", size = 1, pch = 21, stroke = 2, fill = "gray") +
+        ggplot2::xlab("Record number") +
+        ggplot2::ylab("Cumulative density")
+    p3 <- JASPgraphs::themeJasp(p3)
+
+    p4 <- ggplot2::ggplot(data.frame(values), ggplot2::aes(sample = values)) +
+          ggplot2::geom_segment(ggplot2::aes(x = -4, xend = 4, y = 0, yend = max(values)), size = 1, color = "darkred") +
+          ggplot2::stat_qq(col = "black", size = 1, pch = 21, stroke = 2, fill = "gray") +
+          ggplot2::ylab("Value") +
+          ggplot2::xlab("Theoretical quantiles")
+    p4 <- JASPgraphs::themeJasp(p4)
+
+    filename <- tempfile()
+    png(filename = filename)
+    p <- gridExtra::grid.arrange(p1, p2, p3, p4, ncol = 2)
+    dev.off()
+
+    return(createJaspPlot(plot = p, title = "Distribution information", width = 700, height = 600))
+}
+
+.plotMarginalJfA <- function(column, variableName,
+                          rugs = FALSE, displayDensity = FALSE) {
+  column <- as.numeric(column)
+  variable <- na.omit(column)
+
+  if(length(variable) == 0)
+    return(NULL)
+
+  h <- hist(variable, plot = FALSE)
+
+  if (!displayDensity)
+    yhigh <- max(h$counts)
+  else {
+    dens <- density(variable)
+    yhigh <- max(max(h$density), max(dens$y))
+  }
+
+  ylow <- 0
+
+  xticks <- base::pretty(c(variable, h$breaks), min.n = 3)
+
+  if (!displayDensity)
+    p <-
+      JASPgraphs::drawAxis(
+        xName = variableName, yName = "Counts", xBreaks = xticks,
+        yBreaks = base::pretty(c(0, h$counts)), force = TRUE, xLabels = xticks
+      )
+  else
+    p <-
+      JASPgraphs::drawAxis(
+        xName = variableName, yName = "Density", xBreaks = xticks,
+        yBreaks = c(0,  1.05 * yhigh), force = TRUE, yLabels = NULL,
+        xLabels = xticks
+      )
+
+  if (displayDensity)
+    p <- p +
+      ggplot2::geom_histogram(
+        data = data.frame(variable),
+        mapping = ggplot2::aes(x = variable, y = ..density..),
+        binwidth = (h$breaks[2] - h$breaks[1]),
+        fill = "grey",
+        col = "black",
+        size = .7,
+        center = ((h$breaks[2] - h$breaks[1])/2)
+      ) +
+      ggplot2::geom_line(
+        data = data.frame(x = dens$x, y = dens$y),
+        mapping = ggplot2::aes(x = x, y = y),
+        lwd = 1,
+        col = "black"
+      )
+  else
+    p <- p +
+      ggplot2::geom_histogram(
+        data     = data.frame(variable),
+        mapping  = ggplot2::aes(x = variable, y = ..count..),
+        binwidth = (h$breaks[2] - h$breaks[1]),
+        fill     = "grey",
+        col      = "black",
+        size     = .7,
+        center    = ((h$breaks[2] - h$breaks[1])/2)
+      )
+
+  # JASP theme
+  p <- JASPgraphs::themeJasp(p,
+                             axisTickWidth = .7,
+                             bty = list(type = "n", ldwX = .7, lwdY = 1))
+  # TODO: Fix jaspgraphs axis width X vs Y. See @vandenman.
+
+  if (displayDensity)
+    p <- p + ggplot2::theme(axis.ticks.y = ggplot2::element_blank())
+
+  return(p)
+}
