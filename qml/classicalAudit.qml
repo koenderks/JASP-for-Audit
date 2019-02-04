@@ -33,7 +33,8 @@ Form {
         id: optionPhase
 
         Flow {
-          spacing: 160
+          Layout.leftMargin: 20
+          spacing: 180
             RadioButtonGroup{
               name: "auditType"
               title: qsTr("<b>Statement level</b>")
@@ -45,7 +46,17 @@ Form {
             GroupBox {
                 title: qsTr("<b>Explanatory text</b>")
 
-                CheckBox { text: qsTr("Turn on")     ; name: "interpretation"; checked: true}
+                RowLayout {
+                  CheckBox { text: qsTr("Turn on")     ; name: "interpretation"; checked: true}
+                  MenuButton
+                  {
+                    width:				20
+                    iconSource:			"qrc:/images/info-button.png"
+                    toolTip:			"Show explanatory text at each step in the analysis"
+                    radius:				20
+                    Layout.alignment: Qt.AlignRight
+                  }
+                }
             }
           }
 
@@ -79,23 +90,32 @@ Form {
             }
         }
 
-        CheckBox {
-          visible: true
-          name: "planningChecked"
-          id: planningChecked
-          checked: false
-        }
-        Button {
-          anchors.right: parent.right
-          text: qsTr("<b>To Planning</b>")
-          enabled: (recordNumberVariable.count > 0 && monetaryVariable.count > 0)
-          onClicked: {
-            optionPhase.expanded = false
-            planningPhase.expanded = true
-            planningPhase.enabled = true
-            planningChecked.checked = true
+        Item {
+          height: toPlanning.height
+          Layout.fillWidth: true
+
+          CheckBox {
+            id: planningChecked
+            anchors.right: toPlanning.left
+            width: visible ? height : 0
+            visible: false
+            name: "planningChecked"
+            checked: false
           }
-        }
+          Button {
+            id: toPlanning
+            anchors.right: parent.right
+            text: qsTr("<b>To Planning</b>")
+            enabled: (recordNumberVariable.count > 0 && monetaryVariable.count > 0)
+
+            onClicked: {
+              optionPhase.expanded = false
+              planningPhase.expanded = true
+              planningPhase.enabled = true
+              planningChecked.checked = true
+            }
+          }
+      }
     }
 
     // Expander button for the Planning phase
@@ -105,68 +125,68 @@ Form {
         enabled: false
         id: planningPhase
 
-      Flow {
-        spacing: 20
-          GroupBox {
-              title: qsTr("<b>Audit risk</b>")
-              id: auditRisk
-              PercentField {
-                  label.text: qsTr("Confidence")
-                  with1Decimal: true
-                  defaultValue: 95
-                  name: "confidence"
-              }
-              PercentField {
-                  label.text: qsTr("Materiality")
-                  with1Decimal: true
-                  defaultValue: 5
-                  name: "materiality"
-              }
-          }
-          RadioButtonGroup {
-              title: qsTr("<b>Inherent risk</b>")
-              name: "IR"
-              id: ir
-                RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
-                RadioButton { text: qsTr("Medium")      ; name: "Medium" }
-                RadioButton { text: qsTr("Low")         ; name: "Low" }
-          }
-          RadioButtonGroup {
-              title: qsTr("<b>Control risk</b>")
-              name: "CR"
-              id: cr
-                RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
-                RadioButton { text: qsTr("Medium")      ; name: "Medium" }
-                RadioButton { text: qsTr("Low")         ; name: "Low" }
-          }
-          RadioButtonGroup {
-              name: "expected.errors"
-              id: expectedErrors
-              title: qsTr("<b>Allowed errors</b>")
+        Flow {
+          spacing: 25
+            GroupBox {
+                title: qsTr("<b>Audit risk</b>")
+                id: auditRisk
+                PercentField {
+                    label.text: qsTr("Confidence")
+                    with1Decimal: true
+                    defaultValue: 95
+                    name: "confidence"
+                }
+                PercentField {
+                    label.text: qsTr("Materiality")
+                    with1Decimal: true
+                    defaultValue: 5
+                    name: "materiality"
+                }
+            }
+            RadioButtonGroup {
+                title: qsTr("<b>Inherent risk</b>")
+                name: "IR"
+                id: ir
+                  RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
+                  RadioButton { text: qsTr("Medium")      ; name: "Medium" }
+                  RadioButton { text: qsTr("Low")         ; name: "Low" }
+            }
+            RadioButtonGroup {
+                title: qsTr("<b>Control risk</b>")
+                name: "CR"
+                id: cr
+                  RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
+                  RadioButton { text: qsTr("Medium")      ; name: "Medium" }
+                  RadioButton { text: qsTr("Low")         ; name: "Low" }
+            }
+            RadioButtonGroup {
+                name: "expected.errors"
+                id: expectedErrors
+                title: qsTr("<b>Allowed errors</b>")
 
-              RowLayout {
-                  RadioButton { text: qsTr("Percentage")            ; name: "kPercentage" ; checked: true; id: expkPercentage}
-                  PercentField {
-                      with1Decimal: true
-                      defaultValue: 2
-                      name: "kPercentageNumber"
-                      enabled: expkPercentage.checked
-                  }
-              }
+                RowLayout {
+                    RadioButton { text: qsTr("Percentage")            ; name: "kPercentage" ; checked: true; id: expkPercentage}
+                    PercentField {
+                        with1Decimal: true
+                        defaultValue: 0
+                        name: "kPercentageNumber"
+                        enabled: expkPercentage.checked
+                    }
+                }
 
-              RowLayout {
-                  RadioButton { text: qsTr("Number")              ; name: "kNumber"       ; id: expkNumber}
-                  TextField {
-                      value: "1"
-                      name: "kNumberNumber"
-                      enabled: expkNumber.checked
-                      inputType: "integer"
-                      validator: IntValidator { bottom: 0 }
-                      Layout.leftMargin: 18
-                  }
-              }
-          }
-      }
+                RowLayout {
+                    RadioButton { text: qsTr("Number")              ; name: "kNumber"       ; id: expkNumber}
+                    TextField {
+                        value: "0"
+                        name: "kNumberNumber"
+                        enabled: expkNumber.checked
+                        inputType: "integer"
+                        validator: IntValidator { bottom: 0 }
+                        Layout.leftMargin: 18
+                    }
+                }
+            }
+        }
 
     ExpanderButton {
         text: qsTr("Advanced planning options")
@@ -174,6 +194,7 @@ Form {
         implicitWidth: 560
 
         Flow {
+            Layout.leftMargin: 20
             spacing: 60
 
             RadioButtonGroup {
@@ -193,7 +214,7 @@ Form {
       spacing: 60
 
        GroupBox {
-           title: qsTr("<b>Plots</b>")
+          title: qsTr("<b>Plots</b>")
 
            CheckBox {      text: qsTr("Decision plot")                  ; name: "plotCriticalErrors"; checked: true }
            CheckBox {      text: qsTr("Distribution information")       ; name: "distributionPlot"; id: distributionPlot }
@@ -201,21 +222,30 @@ Form {
         }
     }
 
-    CheckBox {
-      visible: true
-      name: "samplingChecked"
-      id: samplingChecked
-      checked: false
-    }
-    Button {
-      anchors.right: parent.right
-      text: qsTr("<b>To Sampling</b>")
-      onClicked: {
-        planningPhase.expanded = false
-        samplingPhase.expanded = true
-        samplingPhase.enabled = true
-        samplingChecked.checked = true
-      }
+    Item {
+      height: toSampling.height
+      Layout.fillWidth: true
+
+        CheckBox {
+          anchors.right: toSampling.left
+          width: visible ? height : 0
+          visible: false
+          name: "samplingChecked"
+          id: samplingChecked
+          checked: false
+        }
+        Button {
+          id: toSampling
+          anchors.right: parent.right
+          text: qsTr("<b>To Sampling</b>")
+
+          onClicked: {
+            planningPhase.expanded = false
+            samplingPhase.expanded = true
+            samplingPhase.enabled = true
+            samplingChecked.checked = true
+          }
+        }
     }
   }
 
@@ -246,7 +276,8 @@ Form {
             }
 
             Flow {
-                spacing: 40
+                Layout.leftMargin: 10
+                spacing: 60
 
                 ColumnLayout {
 
@@ -301,25 +332,40 @@ Form {
 
                         CheckBox { text: qsTr("Display sample")       ; name: "showSample"}
                         CheckBox { text: qsTr("Sample descriptives")  ; name: "showDescriptives" ; id: descriptives}
-                        CheckBox { text: qsTr("Mean")                 ; name: "mean"; Layout.leftMargin: 20; enabled: descriptives.checked ; checked: true}
-                        CheckBox { text: qsTr("Median")               ; name: "median"; Layout.leftMargin: 20; enabled: descriptives.checked ; checked: true}
-                        CheckBox { text: qsTr("Std. deviation")       ; name: "sd"; Layout.leftMargin: 20; enabled: descriptives.checked ; checked: true}
-                        CheckBox { text: qsTr("Variance")             ; name: "var"; Layout.leftMargin: 20; enabled: descriptives.checked}
-                        CheckBox { text: qsTr("Minimum")              ; name: "min"; Layout.leftMargin: 20; enabled: descriptives.checked}
-                        CheckBox { text: qsTr("Maximum")              ; name: "max"; Layout.leftMargin: 20; enabled: descriptives.checked}
-                        CheckBox { text: qsTr("Range")                ; name: "range"; Layout.leftMargin: 20; enabled: descriptives.checked}
+                        Flow {
+                          Layout.leftMargin: 20
+                            ColumnLayout {
+                              spacing: 5
+                              CheckBox { text: qsTr("Mean")                 ; name: "mean"; enabled: descriptives.checked ; checked: true}
+                              CheckBox { text: qsTr("Median")               ; name: "median"; enabled: descriptives.checked ; checked: true}
+                              CheckBox { text: qsTr("Std. deviation")       ; name: "sd"; enabled: descriptives.checked ; checked: true}
+                              CheckBox { text: qsTr("Variance")             ; name: "var"; enabled: descriptives.checked}
+                            }
+                            ColumnLayout {
+                              spacing: 5
+                              CheckBox { text: qsTr("Minimum")              ; name: "min"; enabled: descriptives.checked}
+                              CheckBox { text: qsTr("Maximum")              ; name: "max"; enabled: descriptives.checked}
+                              CheckBox { text: qsTr("Range")                ; name: "range"; enabled: descriptives.checked}
+                            }
+                        }
                     }
                 }
             }
 
-            Button {
-              anchors.right: parent.right
-              text: qsTr("<b>To Execution</b>")
-              onClicked: {
-                samplingPhase.expanded = false
-                executionPhase.expanded = true
-                executionPhase.enabled = true
-              }
+            Item {
+              height: toExecution.height
+              Layout.fillWidth: true
+
+                Button {
+                  id: toExecution
+                  anchors.right: parent.right
+                  text: qsTr("<b>To Execution</b>")
+                  onClicked: {
+                    samplingPhase.expanded = false
+                    executionPhase.expanded = true
+                    executionPhase.enabled = true
+                  }
+                }
             }
         }
 
@@ -339,25 +385,33 @@ Form {
                 Layout.leftMargin: 20
             }
 
-            RowLayout {
-              CheckBox {
-                visible: true
-                name: "evaluationChecked"
-                id: evaluationChecked
-                checked: false
-              }
-            anchors.right: parent.right
+            Item {
+              height: toEvaluation.height
+              Layout.fillWidth: true
+
               Button {
                 text: qsTr("<b>Paste variables</b>")
                 id: pasteButton
+                anchors.right: evaluationChecked.left
                 onClicked: {
                   toEvaluation.enabled = true
                   pasteButton.enabled = false
                 }
               }
+
+              CheckBox {
+                anchors.right: toEvaluation.left
+                width: height
+                visible: false
+                name: "evaluationChecked"
+                id: evaluationChecked
+                checked: false
+              }
+
               Button {
                 enabled: false
                 id: toEvaluation
+                anchors.right: parent.right
                 text: qsTr("<b>To Evaluation</b>")
                 onClicked: {
                   executionPhase.expanded = false
@@ -373,7 +427,6 @@ Form {
                   variablesFormSampling.enabled = false
                   seed.enabled = false
                   samplingType.enabled = false
-                  prior.enabled = false
                   evaluationChecked.checked = true
                   pasteButton.enabled = false
                   variablesFormPreparation.enabled = false
@@ -419,7 +472,8 @@ Form {
             }
 
             Flow{
-              spacing: 100
+              Layout.leftMargin: 10
+              spacing: 140
 
               GroupBox {
                 title: qsTr("<b>Statistics</b>")
@@ -429,18 +483,14 @@ Form {
                     name: "mostLikelyError"
                     checked: false
                 }
-
               }
-
-              ColumnLayout {
-                  GroupBox {
-                      title: qsTr("<b>Plots</b>")
-                      CheckBox {
-                        text: qsTr("Outcome information")
-                        name: "plotBound"
-                      }
-                  }
-              }
+                GroupBox {
+                    title: qsTr("<b>Plots</b>")
+                    CheckBox {
+                      text: qsTr("Outcome information")
+                      name: "plotBound"
+                    }
+                }
             }
 
             // Expander button for the various bounds in MUS procedure
@@ -459,17 +509,27 @@ Form {
                   text: qsTr("Stringer")
                   checked: true
                 }
+                RadioButton {
+                  name: "regressionBound"
+                  text: qsTr("Regression")
+                }
               }
             }
 
-            Button {
-              anchors.right: parent.right
-              enabled: attributes.checked ? (sampleFilter.count > 0 && correctID.count > 0) : (sampleFilter.count > 0 && correctMUS.count > 0)
-              text: qsTr("<b>To Report</b>")
-              onClicked: {
-                evaluationPhase.expanded = false
-                interpretationPhase.expanded = true
-                interpretationPhase.enabled = true
+            Item {
+              height: toInterpretation.height
+              Layout.fillWidth: true
+
+              Button {
+                id: toInterpretation
+                anchors.right: parent.right
+                enabled: attributes.checked ? (sampleFilter.count > 0 && correctID.count > 0) : (sampleFilter.count > 0 && correctMUS.count > 0)
+                text: qsTr("<b>To Report</b>")
+                onClicked: {
+                  evaluationPhase.expanded = false
+                  interpretationPhase.expanded = true
+                  interpretationPhase.enabled = true
+                }
               }
             }
         }
@@ -481,19 +541,26 @@ Form {
             enabled: false
             id: interpretationPhase
 
-            Button {
-              anchors.right: parent.right
-              text: qsTr("<b>Download Report</b>")
-              onClicked: {
-                interpretationPhase.expanded = false
-                interpretationPhase.enabled = false
-                optionPhase.enabled = false
-                planningPhase.enabled = false
-                samplingPhase.enabled = false
-                executionPhase.enabled = false
-                evaluationPhase.enabled = false
-                interpretationPhase.enabled = false
-              }
+            Item {
+              height: toReport.height
+              Layout.fillWidth: true
+
+              Button {
+                id: toReport
+                anchors.right: parent.right
+                text: qsTr("<b>Download Report</b>")
+
+                onClicked: {
+                  interpretationPhase.expanded = false
+                  interpretationPhase.enabled = false
+                  optionPhase.enabled = false
+                  planningPhase.enabled = false
+                  samplingPhase.enabled = false
+                  executionPhase.enabled = false
+                  evaluationPhase.enabled = false
+                  interpretationPhase.enabled = false
+                }
             }
+          }
         }
 }

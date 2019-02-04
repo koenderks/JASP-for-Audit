@@ -249,14 +249,14 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
         jaspResults[["resultParagraph"]]$position <- 17
       }
 
-      # Confidence bound plot TODO: Adjust width and height of plot
+      # Confidence bound plot
       if(options[['plotBound']] && !is.null(correctID))
       {
           if(is.null(jaspResults[["confidenceBoundPlot"]]))
           {
               jaspResults[["confidenceBoundPlot"]] 		<- .plotConfidenceBounds(options, result, jaspResults)
               jaspResults[["confidenceBoundPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "correctID",
-                                                                       "show", "plotBound", "materiality", "method", "inference"))
+                                                                       "show", "plotBound", "materiality", "method"))
               jaspResults[["confidenceBoundPlot"]] 		$position <- 19
           }
       }

@@ -287,7 +287,7 @@
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",                      type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",                      type = 'string')
     evaluationTable$addColumnInfo(name = 'fk',            title = "Errors",                           type = 'string')
-    evaluationTable$addColumnInfo(name = 'k',             title = "Sum of fractional errors",         type = 'string')
+    evaluationTable$addColumnInfo(name = 'k',             title = "Total tainting",         type = 'string')
     evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
     if(options[["mostLikelyError"]])
       evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                              type = 'string')

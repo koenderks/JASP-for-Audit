@@ -273,6 +273,18 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
         jaspResults[["resultParagraph"]]$position <- 18
       }
 
+      # Confidence bound plot
+      if(options[['plotBound']] && !is.null(correctID))
+      {
+          if(is.null(jaspResults[["confidenceBoundPlot"]]))
+          {
+              jaspResults[["confidenceBoundPlot"]] 		<- .plotConfidenceBounds(options, result, jaspResults)
+              jaspResults[["confidenceBoundPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "correctID",
+                                                                       "show", "plotBound", "materiality", "method"))
+              jaspResults[["confidenceBoundPlot"]] 		$position <- 19
+          }
+      }
+
       # Prior and Posterior plot
       if(options[['plotPriorAndPosterior']] && !is.null(correctID))
       {

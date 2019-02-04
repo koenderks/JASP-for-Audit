@@ -105,18 +105,20 @@
     cum3 <- cumsum(values) / sum(values)
     tb3 <- data.frame(index, cum3)
     p3  <- ggplot2::ggplot(data = data.frame(x = tb3[, 1], y = tb3[, 2]), ggplot2::aes(x = x, y = y)) +
-        ggplot2::geom_segment(ggplot2::aes(x = 0, xend = max(index), y = 0, yend = 1), size = 1, color = "darkred") +
-        ggplot2::geom_point(col = "black", size = 1, pch = 21, stroke = 2, fill = "gray") +
+        ggplot2::geom_segment(ggplot2::aes(x = 0, xend = max(index), y = 0, yend = 1, linetype = "segment"), size = 1, color = "darkred") +
+        ggplot2::geom_point(col = "black", size = 1, pch = 21, stroke = 1, fill = "gray") +
         ggplot2::xlab("Record number") +
         ggplot2::ylab("Cumulative density")
-    p3 <- JASPgraphs::themeJasp(p3)
+    p3 <- p3 + ggplot2::scale_linetype_manual(name = "", values = c("segment" = 1), labels = "Uniform")
+    p3 <- JASPgraphs::themeJasp(p3, legend.position = "top")
 
     p4 <- ggplot2::ggplot(data.frame(values), ggplot2::aes(sample = values)) +
-          ggplot2::geom_segment(ggplot2::aes(x = -4, xend = 4, y = 0, yend = max(values)), size = 1, color = "darkred") +
-          ggplot2::stat_qq(col = "black", size = 1, pch = 21, stroke = 2, fill = "gray") +
+          ggplot2::geom_segment(ggplot2::aes(x = -4, xend = 4, y = 0, yend = max(values), linetype = "segment"), size = 1, color = "darkred") +
+          ggplot2::stat_qq(col = "black", size = 1, pch = 21, stroke = 1, fill = "gray") +
           ggplot2::ylab("Value") +
           ggplot2::xlab("Theoretical quantiles")
-    p4 <- JASPgraphs::themeJasp(p4)
+    p4 <- p4 + ggplot2::scale_linetype_manual(name = "", values = c("segment" = 1), labels = "Normal")
+    p4 <- JASPgraphs::themeJasp(p4, legend.position = "top")
 
     filename <- tempfile()
     png(filename = filename)

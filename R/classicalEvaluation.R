@@ -69,7 +69,7 @@ classicalEvaluation <- function(jaspResults, dataset, options, state=NULL){
   {
       if(is.null(jaspResults[["confidenceBoundPlot"]]))
       {
-          jaspResults[["confidenceBoundPlot"]] 		<- .plotConfidenceBounds(options, result, jaspResults, plotWidth = 400, plotHeight = 400)
+          jaspResults[["confidenceBoundPlot"]] 		<- .plotConfidenceBounds(options, result, jaspResults)
           jaspResults[["confidenceBoundPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "correctID",
                                                                    "show", "plotBound", "materiality", "method", "inference"))
           jaspResults[["confidenceBoundPlot"]] 		$position <- 3
