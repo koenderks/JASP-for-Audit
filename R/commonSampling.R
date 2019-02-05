@@ -395,7 +395,7 @@
     sampleSize                              <- options$sampleSize
 
     if(options[["auditType"]] == "mus"){
-        row <- list("N" = nrow(dataset), "n" = sampleSize, "T" = round(sum(dataset[, .v(options[["monetaryVariableMUS"]])]), 2),"I" = round(interval, 0))
+        row <- list("N" = nrow(dataset), "n" = sampleSize, "T" = ceiling(sum(dataset[, .v(options[["monetaryVariable"]])])),"I" = round(interval, 0))
     } else {
         row <- list("N" = nrow(dataset), "n" = sampleSize, "I" = round(interval, 0))
     }

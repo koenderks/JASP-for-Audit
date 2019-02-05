@@ -47,12 +47,16 @@ Form {
                 title: qsTr("<b>Explanatory text</b>")
 
                 RowLayout {
-                  CheckBox { text: qsTr("Turn on")     ; name: "interpretation"; checked: true}
+                  CheckBox {
+                    id: interpretationOn
+                    text: interpretationOn.checked ? qsTr("Enabled") : qsTr("Disabled")
+                    name: "interpretation"
+                    checked: true}
                   MenuButton
                   {
                     width:				20
                     iconSource:			"qrc:/images/info-button.png"
-                    toolTip:			"Show explanatory text at each step in the analysis"
+                    toolTip:			"Show explanatory text at each step of the analysis"
                     radius:				20
                     Layout.alignment: Qt.AlignRight
                   }
@@ -126,7 +130,7 @@ Form {
         id: planningPhase
 
         Flow {
-          spacing: 25
+          spacing: attributes.checked ? 25 : 15
             GroupBox {
                 title: qsTr("<b>Audit risk</b>")
                 id: auditRisk
@@ -136,13 +140,28 @@ Form {
                     defaultValue: 95
                     name: "confidence"
                 }
-                PercentField {
-                    label.text: qsTr("Materiality")
-                    with1Decimal: true
-                    defaultValue: 5
-                    name: "materiality"
+
+                RowLayout {
+                  Label {
+                    text: qsTr("Materiality")
+                  }
+                  PercentField {
+                      visible: attributes.checked
+                      with1Decimal: true
+                      defaultValue: 5
+                      name: "materiality"
+                  }
+                  TextField {
+                    visible: mus.checked
+                    name: "materialityValue"
+                    value: "10000"
+                    fieldWidth: 90
+                    inputType: "integer"
+                    validator: IntValidator { bottom: 0 }
+                  }
                 }
             }
+
             RadioButtonGroup {
                 title: qsTr("<b>Inherent risk</b>")
                 name: "IR"
@@ -444,7 +463,7 @@ Form {
 
             VariablesForm {
             availableVariablesList.name: "evaluationVariables"
-            implicitHeight: 200
+            implicitHeight: 150
 
                 AssignedVariablesList {
                     name: "sampleFilter"

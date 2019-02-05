@@ -96,7 +96,7 @@
 
     jaspResults[["planningResult"]] <- createJaspState(resultList)
     jaspResults[["planningResult"]]$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "kPercentageNumber",
-                                                      "kNumberNumber", "prior", "distribution", "N"))
+                                                      "kNumberNumber", "prior", "distribution", "N", "materialityValue"))
 
 }
 
@@ -108,8 +108,10 @@
   jaspResults[["summaryTable"]]       <- summaryTable
   summaryTable$position               <- position
   summaryTable$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "show", "N",
-                                  "kPercentageNumber", "kNumberNumber", "expectedBF", "prior", "distribution"))
+                                  "kPercentageNumber", "kNumberNumber", "expectedBF", "prior", "distribution",
+                                  "materialityValue"))
 
+  summaryTable$addColumnInfo(name = 'materiality',   title = "Materiality", type = 'string')
   summaryTable$addColumnInfo(name = 'IR',     title = "Inherent risk",        type = 'string')
   summaryTable$addColumnInfo(name = 'CR',     title = "Control risk",         type = 'string')
   summaryTable$addColumnInfo(name = 'SR',     title = "Detection risk",       type = 'string')
@@ -129,8 +131,9 @@
   SRtable <- base::switch(options[["show"]],
                             "percentage" = paste0(round(result[["alpha"]], 3) * 100, "%"),
                             "proportion" = round(result[["alpha"]], 3))
+  materialityTitle <- paste0(round(options[["materiality"]] * 100, 2), "%")
 
-  row <- data.frame(IR = result[["IR"]], CR = result[["CR"]], SR = SRtable, k = ktable, n = result[["n"]])
+  row <- data.frame(materiality = materialityTitle, IR = result[["IR"]], CR = result[["CR"]], SR = SRtable, k = ktable, n = result[["n"]])
   if(options[["expectedBF"]])
     row <- cbind(row, expBF = .expectedBF(options, result, ktable))
   summaryTable$addRows(row)
@@ -144,7 +147,7 @@
   jaspResults[["sampletable"]]      <- sampletable
   sampletable$position              <- position
   sampletable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors", "implicitsample", "statistic",
-                                "show", "kPercentageNumber", "kNumberNumber", "distribution", "prior", "N"))
+                                "show", "kPercentageNumber", "kNumberNumber", "distribution", "prior", "N", "materialityValue"))
 
   sampletable$addColumnInfo(name = 'implicitn', title = "Prior sample size", type = 'string')
   sampletable$addColumnInfo(name = 'implicitk', title = "Prior errors", type = 'string')
@@ -309,7 +312,7 @@
     jaspResults[["result"]]     $dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality",
                                                     "correctID", "expected.errors", "kPercentageNumber",
                                                     "kNumberNumber", "sampleFilter", "prior", "k", "n",
-                                                    "distribution", "N"))
+                                                    "distribution", "N", "materialityValue"))
 }
 
 .bayesianAttributesBoundTableFullAudit <- function(options, result, jaspResults, position = 1){
@@ -321,7 +324,8 @@
     evaluationTable$position              <- position
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
                                       "expected.errors", "kPercentageNumber", "kNumberNumber", "sampleFilter",
-                                      "mostLikelyError", "bayesFactor", "N", "n", "k", "prior", "distribution", "prior"))
+                                      "mostLikelyError", "bayesFactor", "N", "n", "k", "prior", "distribution",
+                                      "prior", "materialityValue"))
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",        type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",        type = 'string')
@@ -516,7 +520,7 @@
     jaspResults[["evaluationTable"]]      <- evaluationTable
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
                                       "sampleFilter", "distribution", "mostLikelyError", "N", "correctMUS", "sampleFilterMUS",
-                                      "boundMethodMUS", "bayesFactor"))
+                                      "boundMethodMUS", "bayesFactor", "materialityValue"))
     evaluationTable$position <- position
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",    type = 'string')

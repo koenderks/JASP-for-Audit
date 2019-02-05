@@ -1,5 +1,5 @@
 .calc.n.binomial <- function(options, alpha){
-    for(n in 1:5000){
+    for(n in 1:10000){
       impk <- base::switch(options[["expected.errors"]],
                             "kPercentage" = ceiling(n * options[["kPercentageNumber"]]),
                             "kNumber" = options[["kNumberNumber"]])
@@ -13,12 +13,12 @@
 }
 
 .calc.n.hypergeometric <- function(options, alpha){
-    for(n in 1:5000){
+    for(n in 1:10000){
       k <- base::switch(options[["expected.errors"]],
                             "kPercentage" = ceiling(n * options[["kPercentageNumber"]]),
                             "kNumber" = options[["kNumberNumber"]])
       K <- floor(options[["N"]] * options[["materiality"]])
-      if(n <= k) { next }
+      if(k > n) { next }
       x <- choose(K, 0:k) * choose(options[["N"]]-K, n-(0:k)) / choose(options[["N"]], n)
       if(sum(x) < alpha)
           return(n)
@@ -97,7 +97,7 @@
 
     jaspResults[["planningResult"]] <- createJaspState(resultList)
     jaspResults[["planningResult"]]$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "distribution",
-                                                "N", "kPercentageNumber", "kNumberNumber", "inference"))
+                                                "N", "kPercentageNumber", "kNumberNumber", "materialityValue", "auditType"))
 
 }
 
@@ -109,8 +109,9 @@
   jaspResults[["summaryTable"]]             <- summaryTable
   summaryTable$position                     <- position
   summaryTable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "show", "distribution", "N",
-                                  "expected.errors" , "kPercentageNumber", "kNumberNumber", "inference"))
+                                  "expected.errors" , "kPercentageNumber", "kNumberNumber", "materialityValue", "auditType"))
 
+  summaryTable$addColumnInfo(name = 'materiality',   title = "Materiality", type = 'string')
   summaryTable$addColumnInfo(name = 'IR',   title = "Inherent risk",        type = 'string')
   summaryTable$addColumnInfo(name = 'CR',   title = "Control risk",         type = 'string')
   summaryTable$addColumnInfo(name = 'SR',   title = "Detection risk",       type = 'string')
@@ -136,7 +137,10 @@
                             "percentage" = paste0(round(result[["alpha"]], 3) * 100, "%"),
                             "proportion" = round(result[["alpha"]], 3))
 
-  row <- data.frame(IR = result[["IR"]],
+  materialityTitle <- paste0(round(options[["materiality"]] * 100, 2), "%")
+
+  row <- data.frame(materiality = materialityTitle,
+                    IR = result[["IR"]],
                     CR = result[["CR"]],
                     SR = SRtable,
                     k = ktable,
@@ -176,7 +180,7 @@
   resultList[["alpha"]]       <- alpha
 
   jaspResults[["result"]] <- createJaspState(resultList)
-  jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctID", "sampleFilter"))
+  jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctID", "sampleFilter", "materiality", "materialityValue"))
 
 }
 
@@ -188,7 +192,8 @@
     jaspResults[["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
-                                      "sampleFilter", "distribution", "mostLikelyError", "N", "correctMUS", "sampleFilterMUS"))
+                                      "sampleFilter", "distribution", "mostLikelyError", "N", "correctMUS", "sampleFilterMUS",
+                                      "materialityValue"))
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",          type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",          type = 'string')
@@ -270,7 +275,7 @@
 
     jaspResults[["result"]] <- createJaspState(resultList)
     jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilterMUS",
-                                              "auditType", "boundMethodMUS", "monetaryVariableMUS"))
+                                              "auditType", "boundMethodMUS", "monetaryVariableMUS", "materialityValue"))
 }
 
 .musBoundTableFullAudit <- function(options, result, jaspResults, position = 1){
@@ -282,7 +287,7 @@
     evaluationTable$position              <- position
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show",
                                       "distribution", "mostLikelyError", "N", "correctMUS", "sampleFilterMUS",
-                                      "boundMethodMUS", "monetaryVariableMUS"))
+                                      "boundMethodMUS", "monetaryVariableMUS", "materialityValue"))
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",                      type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",                      type = 'string')

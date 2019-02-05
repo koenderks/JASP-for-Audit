@@ -29,13 +29,13 @@
   dataTable                        <- createJaspTable("Population descriptives")
   jaspResults[["dataTable"]]       <- dataTable
   dataTable$position               <- position
-  dataTable$dependOnOptions(c("nothing"))
+  dataTable$dependOnOptions(c("monetaryVariable", "recordNumberVariable"))
 
   dataTable$addColumnInfo(name = 'popSize',      title = "Population size",        type = 'string')
   dataTable$addColumnInfo(name = 'value',        title = "Total value",            type = 'string')
 
   popSize <- options[["N"]]
-  total.value <- round(sum(dataset[, .v(options[["monetaryVariable"]])]), 2)
+  total.value <- ceiling(sum(dataset[, .v(options[["monetaryVariable"]])]))
 
   row <- data.frame(popSize = popSize, value = total.value)
   dataTable$addRows(row)
