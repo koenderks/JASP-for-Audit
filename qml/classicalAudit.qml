@@ -524,7 +524,7 @@ Form {
                 GroupBox {
                     title: qsTr("<b>Plots</b>")
                     CheckBox {
-                      text: qsTr("Outcome information")
+                      text: qsTr("Evaluation information")
                       name: "plotBound"
                     }
                 }

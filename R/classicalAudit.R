@@ -20,13 +20,13 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
     # Interpretation for the Global Options phase
     if(options[["interpretation"]]){
       if(options[["auditType"]] == "attributes"){
-        jaspResults[["procedureParagraph"]] <- createJaspHtml(paste0("The objective of an attributes sampling procedure is to determine with a specified confidence whether the percentage
-                                                                  of errors in the target population is lower than the specified materiality. An attributes bound procedure considers the
+        jaspResults[["procedureParagraph"]] <- createJaspHtml(paste0("The objective of an attributes procedure is to determine with a specified confidence whether the percentage
+                                                                  of errors in the target population is lower than the specified materiality. An attributes procedure considers the
                                                                   observations in the population to be of one of two categories: 1) the observation is fully correct or 2) the observation is
                                                                   fully incorrect."), "p")
       } else if(options[["auditType"]] == "mus"){
-        jaspResults[["procedureParagraph"]] <- createJaspHtml(paste0("The objective of a monetary unit sampling (MUS) procedure is to determine with a specified confidence whether the percentage
-                                                                  of errors in the target population is lower than the specified materiality. A monetary unit sampling procedure considers the
+        jaspResults[["procedureParagraph"]] <- createJaspHtml(paste0("The objective of a monetary unit (MUS) procedure is to determine with a specified confidence whether the percentage
+                                                                  of errors in the target population is lower than the specified materiality. A monetary unit procedure considers the
                                                                   errors <i>(taintings)</i> in the population to be proportional to the size of the observation, so that the taintings lie between 0 and 1."), "p")
       }
       jaspResults[["procedureParagraph"]]$position <- 2
@@ -225,74 +225,69 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
     # Evaluation phase
     if(!options[["evaluationChecked"]])
       return()
-    # only runs when an error variable has been selected
-    if(!is.null(correctID)){
 
-      jaspResults[["evaluationHeader"]] <- createJaspHtml("<u>Evaluation</u>", "h2")
-      jaspResults[["evaluationHeader"]]$position <- 18
+    jaspResults[["evaluationHeader"]] <- createJaspHtml("<u>Evaluation</u>", "h2")
+    jaspResults[["evaluationHeader"]]$position <- 18
 
-      # Apply the sample filter
-      if(!is.null(sampleFilter)){
-          dataset <- subset(dataset, dataset[, .v(sampleFilter)] == 1)
+    runEvaluation <- (!is.null(correctID) && !is.null(sampleFilter))
+    # Apply the sample filter
+    if(runEvaluation){
+        dataset <- subset(dataset, dataset[, .v(sampleFilter)] == 1)
+    }
+
+    if(type == "attributes"){
+      # Perform the attributes evaluation
+      .attributesBoundFullAudit(dataset, options, jaspResults)
+      result                                       <- jaspResults[["result"]]$object
+      .attributesBoundTableFullAudit(options, result, jaspResults, position = 20)
+    } else {
+      # Perform the MUS evaluaton
+      if(options[["boundMethodMUS"]] == "stringerBound"){
+        .stringerBound(dataset, options, jaspResults)
       }
+      result                                       <- jaspResults[["result"]]$object
+      .musBoundTableFullAudit(total_data_value, options, result, jaspResults, position = 20)
+    }
 
-      if(type == "attributes"){
-        # Perform the attributes evaluation
-        .attributesBoundFullAudit(dataset, options, jaspResults)
-        result                                       <- jaspResults[["result"]]$object
-        .attributesBoundTableFullAudit(options, result, jaspResults, position = 20)
-      } else {
-        # Perform the MUS evaluaton
-        if(options[["boundMethodMUS"]] == "stringerBound"){
-          .stringerBound(dataset, options, jaspResults)
+    # Interpretation before the evalution table
+    if(options[["interpretation"]]){
+      boundLabel <- base::switch(runEvaluation,
+                                  "TRUE" = paste0(round(result[["bound"]] * 100, 2), "%"),
+                                  "FALSE" = "...%")
+      jaspResults[["resultParagraph"]] <- createJaspHtml(paste0("The sample consisted of <b>", nrow(dataset) , "</b> observations, <b>", result[["k"]] , "</b> of which were found to contain a full error. The knowledge from these data, com-
+                                                            bined with the prior knowledge results in an <b>", round((1 - result[["alpha"]]) * 100, 2) , "%</b> upper confidence bound of <b>", boundLabel ,"</b>. The cumulative knowledge states that there
+                                                            is a <b>", confidenceLevelLabel , "</b> probability that, when one would repeaditly sample from this population, the maximum error is calculated to be lower
+                                                            than <b>", boundLabel ,"</b>."), "p")
+      jaspResults[["resultParagraph"]]$position <- 19
+    }
+
+    # Confidence bound plot
+    if(options[['plotBound']] && runEvaluation)
+    {
+        if(is.null(jaspResults[["confidenceBoundPlot"]]))
+        {
+            jaspResults[["confidenceBoundPlot"]] 		<- .plotConfidenceBounds(options, result, jaspResults)
+            jaspResults[["confidenceBoundPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "correctID", "plotBound", "materiality",
+                                                                     "method", "materialityValue"))
+            jaspResults[["confidenceBoundPlot"]] 		$position <- 21
         }
-        result                                       <- jaspResults[["result"]]$object
-        .musBoundTableFullAudit(total_data_value, options, result, jaspResults, position = 20)
-      }
+    }
 
-      # Interpretation before the evalution table
-      if(options[["interpretation"]]){
-        if(options[["show"]] == "percentage"){
-          boundLabel <- paste0(round(result[["bound"]] * 100, 2), "%")
-        } else {
-          boundLabel <- round(result[["bound"]], 2)
+    # Interpretation after the evaluation table
+    if(options[["interpretation"]] && runEvaluation){
+        jaspResults[["conclusionTitle"]] <- createJaspHtml("<u>Conclusion</u>", "h2")
+        jaspResults[["conclusionTitle"]]$position <- 22
+        if(result[["bound"]] < options[["materiality"]]){
+            above_below <- "lower"
+            approve <- "<b>no material misstatement</b>"
+        } else if(result[["bound"]] >= options[["materiality"]]){
+            above_below <- "higher"
+            approve <- "<b>material misstatement, or more information has to be seen.</b>"
         }
-        jaspResults[["resultParagraph"]] <- createJaspHtml(paste0("The sample consisted of <b>", nrow(dataset) , "</b> observations, <b>", result[["k"]] , "</b> of which were found to contain a full error. The knowledge from these data, com-
-                                                              bined with the prior knowledge results in an <b>",round((1 - result[["alpha"]]) * 100, 2), "%</b> upper confidence bound of <b>", boundLabel ,"</b>. The cumulative knowledge states that there
-                                                              is a <b>", confidenceLevelLabel , "</b> probability that, when one would repeaditly sample from this population, the maximum error is calculated to be lower
-                                                              than <b>", boundLabel ,"</b>."), "p")
-        jaspResults[["resultParagraph"]]$position <- 19
-      }
-
-      # Confidence bound plot
-      if(options[['plotBound']] && !is.null(correctID))
-      {
-          if(is.null(jaspResults[["confidenceBoundPlot"]]))
-          {
-              jaspResults[["confidenceBoundPlot"]] 		<- .plotConfidenceBounds(options, result, jaspResults)
-              jaspResults[["confidenceBoundPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "correctID",
-                                                                       "show", "plotBound", "materiality",
-                                                                       "method", "materialityValue"))
-              jaspResults[["confidenceBoundPlot"]] 		$position <- 21
-          }
-      }
-
-      # Interpretation after the evaluation table
-      if(options[["interpretation"]]){
-          jaspResults[["conclusionTitle"]] <- createJaspHtml("<u>Conclusion</u>", "h2")
-          jaspResults[["conclusionTitle"]]$position <- 22
-          if(result[["bound"]] < options[["materiality"]]){
-              above_below <- "lower"
-              approve <- "<b>no material misstatement</b>"
-          } else if(result[["bound"]] >= options[["materiality"]]){
-              above_below <- "higher"
-              approve <- "<b>material misstatement, or more information has to be seen.</b>"
-          }
-          jaspResults[["conclusionParagraph"]] <- createJaspHtml(paste0("To approve these data, a <b>", confidenceLevelLabel ,"</b> upper confidence bound on the population proportion of full errors should be determined to be
-                                                                      lower than materiality, in this case <b>", materialityLevelLabel ,"</b>. For the current data, the confidence bound is <b>", above_below ,"</b> than materiality.
-                                                                      The conclusion for these data is that the data contain ", approve ,"."), "p")
-          jaspResults[["conclusionParagraph"]]$position <- 23
-      }
+        jaspResults[["conclusionParagraph"]] <- createJaspHtml(paste0("To approve these data, a <b>", confidenceLevelLabel ,"</b> upper confidence bound on the population proportion of full errors should be determined to be
+                                                                    lower than materiality, in this case <b>", materialityLevelLabel ,"</b>. For the current data, the confidence bound is <b>", above_below ,"</b> than materiality.
+                                                                    The conclusion for these data is that the data contain ", approve ,"."), "p")
+        jaspResults[["conclusionParagraph"]]$position <- 23
     }
 
     # Save the state

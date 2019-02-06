@@ -180,3 +180,41 @@
 
   return(p)
 }
+
+.plotConfidenceBounds <- function(options, result, jaspResults){
+
+  materiality     <- options[["materiality"]]
+  bound           <- result[["bound"]]
+  expected.errors <- base::switch(options[["expected.errors"]],
+                                      "kPercentage" = options[["kPercentageNumber"]],
+                                      "kNumber" = options[["kNumberNumber"]] / result[["n"]])
+  found.errors    <- result[["k"]] / result[["n"]]
+  xlim            <- round(max(c(materiality, bound, expected.errors, found.errors)) * 1.2, 2)
+  xBreaks         <- pretty(c(0, xlim))
+  xLabels         <- paste0(round(xBreaks * 100, 2), "%")
+
+  boundData <- data.frame(xmin = c(0, bound), xmax = c(bound, xlim), ymin = 0, ymax = 0.5,
+                         fill = c(rgb(1,0,0,.7), rgb(1,1,1)))
+
+  df <- data.frame()
+  p <- ggplot2::ggplot(df) +
+      ggplot2::geom_point() +
+      ggplot2::ylim(0, 1) +
+      ggplot2::ylab(NULL) +
+      ggplot2::xlab("Error percentage") +
+      ggplot2::geom_rect(ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+                              data = boundData, fill = boundData$fill, color = "black", size = 2) +
+      ggplot2::scale_x_continuous(breaks = xBreaks, labels = xLabels) +
+      ggplot2::geom_segment(ggplot2::aes(x = materiality, xend = materiality, y = 0.025, yend = 0.475), lty = 1, size = 2, color = rgb(0,1,.5,.7)) +
+      ggplot2::geom_segment(ggplot2::aes(x = expected.errors, xend = expected.errors, y = 0.025, yend = 0.475), lty = 1, size = 2, color = "darkgray") +
+      ggplot2::geom_segment(ggplot2::aes(x = found.errors, xend = found.errors, y = 0.025, yend = 0.475), lty = 1, size = 2, color = "blue")
+
+
+  p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE, legend.position = "top")
+  p <- p + ggplot2::theme(axis.ticks = ggplot2::element_blank(),
+                          axis.text.y = ggplot2::element_blank(),
+                          axis.text.x = ggplot2::element_text(size = 17))
+
+  return(createJaspPlot(plot = p, title = "Outcome information", width = 650, height = 150))
+
+}

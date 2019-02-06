@@ -14,12 +14,7 @@
 .dBetaBinom <- function (x, N, u, v, log = FALSE)
 {
     logval <- lbeta(x + u, N - x + v) - lbeta(u, v) + lchoose(N, x)
-    if (log) {
-        ret <- logval
-    }
-    else {
-        ret <- exp(logval)
-    }
+    if (log) { ret <- logval } else { ret <- exp(logval) }
     return(ret)
 }
 
@@ -51,35 +46,45 @@
     cr                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
     alpha                   <- ar / ir / cr
 
-    if(options[["distribution"]] == "binomial"){
-      n_noprior               <- .calculateBayesianSampleSize(options, 1 - options[["confidence"]])
-      n_withprior             <- .calculateBayesianSampleSize(options, alpha)
-    } else if(options[["distribution"]] == "hypergeometric"){
-      n_noprior               <- .calculateBayesianSampleSizeBetaBinom(options, 1 - options[["confidence"]], options[["N"]])
-      n_withprior             <- .calculateBayesianSampleSizeBetaBinom(options, alpha, options[["N"]])
-    }
-
-    pk                      <- 0
-    pn                      <- n_noprior - n_withprior
-    k                       <- base::switch(options[["expected.errors"]],
-                                            "kPercentage" = options[["kPercentageNumber"]],
-                                            "kNumber" = options[["kNumberNumber"]])
-    if(pn != 0){
-        if(options[["expected.errors"]] == "kPercentage"){
-            k               <- options[["kPercentageNumber"]]
-            pk              <- pn * options[["kPercentageNumber"]]
-        } else if(options[["expected.errors"]] == "kNumber"){
-            k               <- options[["kNumberNumber"]]
-            pk              <- k
-        }
-    }
-
-    if(options[["prior"]] == "ARM"){
-      priorA                  <- 1 + pk
-      priorB                  <- 1 + (pn - pk)
-    } else if(options[["prior"]] == "5050"){
+    if(options[["materiality"]] == 0){
+      pk                    <- 0
+      pn                    <- 0
+      k                     <- 0
       priorA                <- 1
-      priorB                <- 1/((3/2) * options[["materiality"]]) - (1/3)
+      priorB                <- 1
+      n_withprior           <- 0
+    } else {
+
+      if(options[["distribution"]] == "binomial"){
+        n_noprior               <- .calculateBayesianSampleSize(options, 1 - options[["confidence"]])
+        n_withprior             <- .calculateBayesianSampleSize(options, alpha)
+      } else if(options[["distribution"]] == "hypergeometric"){
+        n_noprior               <- .calculateBayesianSampleSizeBetaBinom(options, 1 - options[["confidence"]], options[["N"]])
+        n_withprior             <- .calculateBayesianSampleSizeBetaBinom(options, alpha, options[["N"]])
+      }
+
+      pk                      <- 0
+      pn                      <- n_noprior - n_withprior
+      k                       <- base::switch(options[["expected.errors"]],
+                                              "kPercentage" = options[["kPercentageNumber"]],
+                                              "kNumber" = options[["kNumberNumber"]])
+      if(pn != 0){
+          if(options[["expected.errors"]] == "kPercentage"){
+              k               <- options[["kPercentageNumber"]]
+              pk              <- pn * options[["kPercentageNumber"]]
+          } else if(options[["expected.errors"]] == "kNumber"){
+              k               <- options[["kNumberNumber"]]
+              pk              <- k
+          }
+      }
+
+      if(options[["prior"]] == "ARM"){
+        priorA                  <- 1 + pk
+        priorB                  <- 1 + (pn - pk)
+      } else if(options[["prior"]] == "5050"){
+        priorA                <- 1
+        priorB                <- 1/((3/2) * options[["materiality"]]) - (1/3)
+      }
     }
 
     resultList <- list()
@@ -363,7 +368,7 @@
 
     boundTable <- result[["bound"]]
     if(!"." %in% boundTable){
-      boundTable            <- round(result[["bound"]],3)
+      boundTable            <- round(result[["bound"]], 2)
       if(options[["show"]] == "percentage")
         boundTable          <- paste0(boundTable * 100, "%")
     }

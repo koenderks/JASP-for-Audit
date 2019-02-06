@@ -22,13 +22,13 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
     # Interpretation for the Global Options phase
     if(options[["interpretation"]]){
       if(options[["auditType"]] == "attributes"){
-        jaspResults[["procedureParagraph"]] <- createJaspHtml(paste0("The objective of an attributes sampling procedure is to determine with a specified confidence whether the percentage
-                                                                  of errors in the target population is lower than the specified materiality. An attributes bound procedure considers
+        jaspResults[["procedureParagraph"]] <- createJaspHtml(paste0("The objective of an attributes procedure is to determine with a specified confidence whether the percentage
+                                                                  of errors in the target population is lower than the specified materiality. An attributes procedure considers
                                                                   the observations in the population to be of one of two categories: 1) the observation is fully correct or 2) the observation is
                                                                   fully incorrect."), "p")
       } else if(options[["auditType"]] == "mus"){
-        jaspResults[["procedureParagraph"]] <- createJaspHtml(paste0("The objective of a monetary unit sampling (MUS) procedure is to determine with a specified confidence whether the percentage
-                                                                  of errors in the target population is lower than the specified materiality. A monetary unit sampling procedure considers the
+        jaspResults[["procedureParagraph"]] <- createJaspHtml(paste0("The objective of a monetary unit (MUS) procedure is to determine with a specified confidence whether the percentage
+                                                                  of errors in the target population is lower than the specified materiality. A monetary unit procedure considers the
                                                                   errors <i>(taintings)</i> in the population to be proportional to the size of the observation, so that the taintings lie between 0 and 1."), "p")
       }
       jaspResults[["procedureParagraph"]]$position <- 2
@@ -116,10 +116,11 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
 
           jaspResults[["priorKnowledgeParagraph"]] <- createJaspHtml(paste0("As prior knowledge, the most likely error in the data was specified to be <b>", expected.errors ,"</b>. The probability distribution that corresponds with
                                                                         this prior knowledge is the <b>Beta(",round(planningResult[["priorA"]],2), ",", round(planningResult[["priorB"]],2),")</b> distribution. This probability distribution states that there is a <b>",
-                                                                            round(pbeta(options[["materiality"]], planningResult[["priorA"]],planningResult[["priorB"]])*100, 2) ,"%</b> prior probability that the
-                                                                        population error is lower than materiality. The sample size that is required to prove an upper confidence bound of <b>", materialityLevelLabel ,"</b>, assuming the sample contains <b>", expected.errors ,"</b> full
-                                                                        errors, is <b>", planningResult[["n"]] ,"</b>. This sample size is calculated according to the <b>", options[["distribution"]] , "</b> distribution.
-                                                                        Consequently, if <b>", max.errors ,"</b> or more full errors are found in the sample, the projected misstatement exceeds the upper confidence bound and the population cannot be approved."), "p")
+                                                                            round(pbeta(options[["materiality"]], planningResult[["priorA"]], planningResult[["priorB"]]) * 100, 2) ,"%</b> prior probability that the
+                                                                        population error is lower than materiality. The sample size that is required to prove an upper confidence bound of <b>", materialityLevelLabel ,"</b>,
+                                                                        assuming the sample contains <b>", expected.errors ,"</b> full errors, is <b>", planningResult[["n"]] ,"</b>. This sample size is calculated according to the <b>", options[["distribution"]] , "</b> distribution.
+                                                                        Consequently, if <b>", max.errors ,"</b> or more full errors are found in the sample, the projected misstatement exceeds the upper confidence bound
+                                                                        and the population cannot be approved."), "p")
           jaspResults[["priorKnowledgeParagraph"]]$position <- 9
       }
 
@@ -249,47 +250,44 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
     # Evaluation phase
     if(!options[["evaluationChecked"]])
       return()
-    # only runs when an error variable has been selected
-    if(!is.null(correctID)){
 
-      jaspResults[["evaluationHeader"]] <- createJaspHtml("<u>Evaluation</u>", "h2")
-      jaspResults[["evaluationHeader"]]$position <- 19
+    jaspResults[["evaluationHeader"]] <- createJaspHtml("<u>Evaluation</u>", "h2")
+    jaspResults[["evaluationHeader"]]$position <- 19
 
-      # Apply the sample filter
-      if(!is.null(sampleFilter)){
-          dataset <- subset(dataset, dataset[, .v(sampleFilter)] == 1)
+    runEvaluation <- (!is.null(correctID) && !is.null(sampleFilter))
+    # Apply the sample filter
+    if(!is.null(sampleFilter)){
+        dataset <- subset(dataset, dataset[, .v(sampleFilter)] == 1)
+    }
+
+    if(type == "attributes"){
+      # Perform the attributes evaluation
+      .bayesianAttributesBoundFullAudit(dataset, options, jaspResults)
+      result                                       <- jaspResults[["result"]]$object
+      .bayesianAttributesBoundTableFullAudit(options, result, jaspResults, position = 21)
+    } else {
+      # Perform the mus evaluation
+      if(options[["boundMethodMUS"]] == "coxAndSnellBound"){
+        # Prior parameters for pi and mu are recommendations from the paper
+        .coxAndSnellBound(dataset, options, jaspResults, priorPi = 0.1, priorMu = 0.4, priorA = planningResult[["priorA"]], priorB = planningResult[["priorB"]])
       }
+      result                                       <- jaspResults[["result"]]$object
+      .bayesianMusBoundTableFullAudit(total_data_value, options, result, jaspResults, position = 21)
+    }
 
-      if(type == "attributes"){
-        # Perform the attributes evaluation
-        .bayesianAttributesBoundFullAudit(dataset, options, jaspResults)
-        result                                       <- jaspResults[["result"]]$object
-        .bayesianAttributesBoundTableFullAudit(options, result, jaspResults, position = 21)
-      } else {
-        # Perform the mus evaluation
-        if(options[["boundMethodMUS"]] == "coxAndSnellBound"){
-          # Prior parameters for pi and mu are recommendations from the paper
-          .coxAndSnellBound(dataset, options, jaspResults, priorPi = 0.1, priorMu = 0.4, priorA = planningResult[["priorA"]], priorB = planningResult[["priorB"]])
-        }
-        result                                       <- jaspResults[["result"]]$object
-        .bayesianMusBoundTableFullAudit(total_data_value, options, result, jaspResults, position = 21)
-      }
-
-      # Interpretation before the evalution table
-      if(options[["interpretation"]]){
-        if(options[["show"]] == "percentage"){
-          boundLabel <- paste0(round(result[["bound"]] * 100, 2), "%")
-        } else {
-          boundLabel <- round(result[["bound"]], 2)
-        }
-        jaspResults[["resultParagraph"]] <- createJaspHtml(paste0("The sample consisted of <b>", nrow(dataset) , "</b> observations, <b>",result[["k"]], "</b> of which were found to contain a full error. The knowledge from these data, com-
-                                                              bined with the prior knowledge results in an <b>", confidenceLevelLabel , "</b> upper confidence bound of <b>", boundLabel ,"</b>. The cumulative knowledge states that there
-                                                              is a true probability of <b>", confidenceLevelLabel , "</b> that the error proportion in the population is lower than <b>", boundLabel ,"</b>."), "p")
-        jaspResults[["resultParagraph"]]$position <- 20
-      }
+    # Interpretation before the evalution table
+    if(options[["interpretation"]]){
+      boundLabel <- base::switch(runEvaluation,
+                                  "TRUE" = paste0(round(result[["bound"]] * 100, 2), "%"),
+                                  "FALSE" = "...%")
+      jaspResults[["resultParagraph"]] <- createJaspHtml(paste0("The sample consisted of <b>", nrow(dataset) , "</b> observations, <b>",result[["k"]], "</b> of which were found to contain a full error. The knowledge from these data, com-
+                                                            bined with the prior knowledge results in an <b>", confidenceLevelLabel , "</b> upper confidence bound of <b>", boundLabel ,"</b>. The cumulative knowledge states that there
+                                                            is a true probability of <b>", confidenceLevelLabel , "</b> that the error proportion in the population is lower than <b>", boundLabel ,"</b>."), "p")
+      jaspResults[["resultParagraph"]]$position <- 20
+    }
 
       # Confidence bound plot
-      if(options[['plotBound']] && !is.null(correctID))
+      if(options[['plotBound']] && runEvaluation)
       {
           if(is.null(jaspResults[["confidenceBoundPlot"]]))
           {
@@ -302,7 +300,7 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
       }
 
       # Prior and Posterior plot
-      if(options[['plotPriorAndPosterior']] && !is.null(correctID))
+      if(options[['plotPriorAndPosterior']] && runEvaluation)
       {
           if(is.null(jaspResults[["priorAndPosteriorPlot"]]))
           {
@@ -311,8 +309,8 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
             } else {
               jaspResults[["priorAndPosteriorPlot"]] 		<- .plotPriorAndPosteriorBayesianMUSBoundFullAudit(options, result, jaspResults)
             }
-            jaspResults[["priorAndPosteriorPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "limx_backup", "statistic", "plotPriorAndPosterior",
-                                                                       "plotPriorAndPosteriorAdditionalInfo", "materiality", "show", "correctID",
+            jaspResults[["priorAndPosteriorPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "limx_backup", "plotPriorAndPosterior",
+                                                                       "plotPriorAndPosteriorAdditionalInfo", "materiality", "correctID",
                                                                        "expected.errors", "kPercentageNumber", "kNumberNumber", "prior", "sampleFilter",
                                                                        "distribution", "N", "correctMUS", "sampleFilterMUS", "materialityValue"))
             jaspResults[["priorAndPosteriorPlot"]] 		$position <- 23
@@ -320,7 +318,7 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
       }
 
       # Interpretation after the evaluation table
-      if(options[["interpretation"]]){
+      if(options[["interpretation"]] && runEvaluation){
           jaspResults[["conclusionTitle"]] <- createJaspHtml("<u>Conclusion</u>", "h2")
           jaspResults[["conclusionTitle"]]$position <- 24
           if(result[["bound"]] < options[["materiality"]]){
@@ -335,7 +333,6 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
                                                                       The conclusion for these data is that the data contain ", approve ,"."), "p")
           jaspResults[["conclusionParagraph"]]$position <- 25
       }
-    }
 
     # Save the state
     state[["options"]] 					<- options
