@@ -31,13 +31,28 @@
   dataTable$position               <- position
   dataTable$dependOnOptions(c("monetaryVariable", "recordNumberVariable"))
 
-  dataTable$addColumnInfo(name = 'popSize',      title = "Population size",        type = 'string')
-  dataTable$addColumnInfo(name = 'value',        title = "Total value",            type = 'string')
+  dataTable$addColumnInfo(name = 'popSize',     title = "Population size",        type = 'string')
+  dataTable$addColumnInfo(name = 'value',       title = "Total value",            type = 'string')
+  dataTable$addColumnInfo(name = 'mean',        title = "Mean",                   type = 'string')
+  dataTable$addColumnInfo(name = 'sd',          title = "sd",                     type = 'string')
+  dataTable$addColumnInfo(name = 'q1',          title = "25%",                    type = 'string', overtitle = "Quantiles")
+  dataTable$addColumnInfo(name = 'q2',          title = "50%",                    type = 'string', overtitle = "Quantiles")
+  dataTable$addColumnInfo(name = 'q3',          title = "75%",                    type = 'string', overtitle = "Quantiles")
 
-  popSize <- options[["N"]]
-  total.value <- ceiling(sum(dataset[, .v(options[["monetaryVariable"]])]))
+  if(options[["recordNumberVariable"]] == "" || options[["monetaryVariable"]] == ""){
+    row <- data.frame(popSize = ".", value = ".", mean = ".", sd = ".", q1 = ".", q2 = ".", q3 = ".")
+    dataTable$addRows(row)
+    return()
+  }
 
-  row <- data.frame(popSize = popSize, value = total.value)
+  popSize                           <- options[["N"]]
+  values                            <- dataset[, .v(options[["monetaryVariable"]])]
+  total.value                       <- ceiling(sum(values))
+  mean.value                        <- round(mean(values), 2)
+  sd.value                          <- round(sd(values), 2)
+  Q                                 <- round(as.numeric(quantile(values, c(0.25, 0.50, 0.75))), 2)
+
+  row <- data.frame(popSize = popSize, value = total.value, mean = mean.value, sd = sd.value, q1 = Q[1], q2 = Q[2], q3 = Q[3])
   dataTable$addRows(row)
 }
 
@@ -56,7 +71,7 @@
         ggplot2::geom_point() +
         ggplot2::ylim(0, 1) +
         ggplot2::ylab(NULL) +
-        ggplot2::xlab("Sample errors")
+        ggplot2::xlab("Observed sample errors")
 
     p <- p + ggplot2::geom_rect(ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
                                 data = rectdata, fill = rectdata$fill, color = "black")
@@ -81,55 +96,17 @@
 .plotValueDistribution <- function(dataset, options, jaspResults){
 
     values <- dataset[, .v(options[["monetaryVariable"]])]
-    index <- 1:length(values)
-    xBreaks <- pretty(index)
 
-    tb <- data.frame(index, values)
-    p1  <- ggplot2::ggplot(data = data.frame(x = tb[, 1], y = tb[, 2]), ggplot2::aes(x = x, y = y)) +
-        ggplot2::geom_bar(stat = "identity", fill = "grey", col = "black", size = .3) +
-        ggplot2::xlab("Record number") +
-        ggplot2::ylab("Value") +
-        ggplot2::scale_x_continuous(breaks = xBreaks)
-    p1 <- JASPgraphs::themeJasp(p1)
+    p <- .plotMarginalJfA(values, options[["monetaryVariable"]])
+    return(createJaspPlot(plot = p, title = "Distribution Information", width = 700, height = 300))
 
-    p2 <- .plotMarginalJfA(values, options[["monetaryVariable"]])
-
-    if(!options[["showCumulative"]]){
-      filename <- tempfile()
-      png(filename = filename)
-      p <- gridExtra::grid.arrange(p1, p2, ncol = 2)
-      dev.off()
-      return(createJaspPlot(plot = p, title = "Distribution information", width = 700, height = 300))
-    }
-
-    cum3 <- cumsum(values) / sum(values)
-    tb3 <- data.frame(index, cum3)
-    p3  <- ggplot2::ggplot(data = data.frame(x = tb3[, 1], y = tb3[, 2]), ggplot2::aes(x = x, y = y)) +
-        ggplot2::geom_segment(ggplot2::aes(x = 0, xend = max(index), y = 0, yend = 1, linetype = "segment"), size = 1, color = "darkred") +
-        ggplot2::geom_point(col = "black", size = 1, pch = 21, stroke = 1, fill = "gray") +
-        ggplot2::xlab("Record number") +
-        ggplot2::ylab("Cumulative density")
-    p3 <- p3 + ggplot2::scale_linetype_manual(name = "", values = c("segment" = 1), labels = "Uniform")
-    p3 <- JASPgraphs::themeJasp(p3, legend.position = "top")
-
-    p4 <- ggplot2::ggplot(data.frame(values), ggplot2::aes(sample = values)) +
-          ggplot2::geom_segment(ggplot2::aes(x = -4, xend = 4, y = 0, yend = max(values), linetype = "segment"), size = 1, color = "darkred") +
-          ggplot2::stat_qq(col = "black", size = 1, pch = 21, stroke = 1, fill = "gray") +
-          ggplot2::ylab("Value") +
-          ggplot2::xlab("Theoretical quantiles")
-    p4 <- p4 + ggplot2::scale_linetype_manual(name = "", values = c("segment" = 1), labels = "Normal")
-    p4 <- JASPgraphs::themeJasp(p4, legend.position = "top")
-
-    filename <- tempfile()
-    png(filename = filename)
-    p <- gridExtra::grid.arrange(p1, p2, p3, p4, ncol = 2)
-    dev.off()
-
-    return(createJaspPlot(plot = p, title = "Distribution information", width = 700, height = 600))
+    # filename <- tempfile()
+    # png(filename = filename)
+    # p <- gridExtra::grid.arrange(p1, p2, p3, p4, ncol = 2)
+    # dev.off()
 }
 
-.plotMarginalJfA <- function(column, variableName,
-                          rugs = FALSE, displayDensity = FALSE) {
+.plotMarginalJfA <- function(column, variableName, rugs = FALSE, displayDensity = FALSE) {
   column <- as.numeric(column)
   variable <- na.omit(column)
 

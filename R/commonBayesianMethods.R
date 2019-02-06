@@ -100,7 +100,7 @@
 
 }
 
-.bayesianAttributesPlanningTableFullAudit <- function(options, result, jaspResults, position = 1){
+.bayesianAttributesPlanningTableFullAudit <- function(dataset, options, result, jaspResults, position = 1){
 
   if(!is.null(jaspResults[["summaryTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
@@ -111,29 +111,38 @@
                                   "kPercentageNumber", "kNumberNumber", "expectedBF", "prior", "distribution",
                                   "materialityValue"))
 
-  summaryTable$addColumnInfo(name = 'materiality',   title = "Materiality", type = 'string')
-  summaryTable$addColumnInfo(name = 'IR',     title = "Inherent risk",        type = 'string')
-  summaryTable$addColumnInfo(name = 'CR',     title = "Control risk",         type = 'string')
-  summaryTable$addColumnInfo(name = 'SR',     title = "Detection risk",       type = 'string')
-  summaryTable$addColumnInfo(name = 'k',      title = "Allowed errors",        type = 'string')
-  summaryTable$addColumnInfo(name = 'n',      title = "Required sample size",  type = 'string')
+  summaryTable$addColumnInfo(name = 'materialityPercent',   title = "Percentage",           type = 'string', overtitle = "Materiality")
+  summaryTable$addColumnInfo(name = 'materialityValue',     title = "Value",                type = 'string', overtitle = "Materiality")
+  summaryTable$addColumnInfo(name = 'IR',                   title = "Inherent risk",        type = 'string')
+  summaryTable$addColumnInfo(name = 'CR',                   title = "Control risk",         type = 'string')
+  summaryTable$addColumnInfo(name = 'DR',                   title = "Detection risk",       type = 'string')
+  summaryTable$addColumnInfo(name = 'k',                    title = "Allowed errors",       type = 'string')
+  summaryTable$addColumnInfo(name = 'n',                    title = "Required sample size", type = 'string')
   if(options[["expectedBF"]])
-    summaryTable$addColumnInfo(name = 'expBF', title = "Expected BF\u208B\u208A", type = 'string')
+    summaryTable$addColumnInfo(name = 'expBF',              title = "Expected BF\u208B\u208A", type = 'string')
 
   message <- base::switch(options[["distribution"]],
                             "binomial" = "The sample size is calculated using the <b>beta</b> distribution.",
                             "hypergeometric" = paste0("The sample size is calculated using the <b>beta-binomial</b> distribution (N = ", options[["N"]] ,")."))
   summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
+  if(options[["materiality"]] == 0){
+    row <- data.frame(materialityPercent = ".", materialityValue = ".", IR = ".", CR = ".", SR = ".", k = ".", n = ".")
+    summaryTable$addRows(row)
+    return()
+  }
+
   ktable <- base::switch(options[["expected.errors"]],
                           "kPercentage" = floor(result[["k"]] * result[["n"]]),
                           "kNumber" = options[["kNumberNumber"]])
-  SRtable <- base::switch(options[["show"]],
-                            "percentage" = paste0(round(result[["alpha"]], 3) * 100, "%"),
-                            "proportion" = round(result[["alpha"]], 3))
-  materialityTitle <- paste0(round(options[["materiality"]] * 100, 2), "%")
+  DRtable <- paste0(round(result[["alpha"]], 3) * 100, "%")
 
-  row <- data.frame(materiality = materialityTitle, IR = result[["IR"]], CR = result[["CR"]], SR = SRtable, k = ktable, n = result[["n"]])
+  materialityTitle <- paste0(round(options[["materiality"]] * 100, 2), "%")
+  materialityValue <- base::switch(options[["auditType"]],
+                                    "attributes" = ceiling(options[["materiality"]] * sum(dataset[, .v(options[["monetaryVariable"]])])),
+                                    "mus" = options[["materialityValue"]])
+
+  row <- data.frame(materialityPercent = materialityTitle, materialityValue = materialityValue, IR = result[["IR"]], CR = result[["CR"]], DR = DRtable, k = ktable, n = result[["n"]])
   if(options[["expectedBF"]])
     row <- cbind(row, expBF = .expectedBF(options, result, ktable))
   summaryTable$addRows(row)
@@ -512,7 +521,7 @@
                                               "auditType", "boundMethodMUS", "monetaryVariableMUS"))
 }
 
-.bayesianMusBoundTableFullAudit <- function(options, result, jaspResults, position = 1){
+.bayesianMusBoundTableFullAudit <- function(total_data_value, options, result, jaspResults, position = 1){
 
     if(!is.null(jaspResults[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
@@ -523,23 +532,24 @@
                                       "boundMethodMUS", "bayesFactor", "materialityValue"))
     evaluationTable$position <- position
 
-    evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",    type = 'string')
-    evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",    type = 'string')
-    evaluationTable$addColumnInfo(name = 'fk',            title = "Errors",         type = 'string')
+    evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",            type = 'string')
+    evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",            type = 'string')
+    evaluationTable$addColumnInfo(name = 'fk',            title = "Errors",                 type = 'string')
     evaluationTable$addColumnInfo(name = 'k',             title = "Total tainting",         type = 'string')
 
-    evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
+    evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"),  type = 'string')
+    evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement", type = 'string')
     if(options[["mostLikelyError"]])
-      evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",            type = 'string')
+      evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                    type = 'string')
     if(options[["bayesFactor"]])
-      evaluationTable$addColumnInfo(name = 'bf',          title = "BF\u208B\u208A", type = 'string')
+      evaluationTable$addColumnInfo(name = 'bf',          title = "BF\u208B\u208A",         type = 'string')
 
     message <- base::switch(options[["boundMethodMUS"]],
                                       "coxAndSnellBound" = "The confidence bound is calculated according to the <b>Cox and Snell</b> method.")
     evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
     if(options[["correctMUS"]] == "" || options[["sampleFilter"]] == ""){
-      row                   <- data.frame(materiality = ".", n = ".", k = ".", bound = ".")
+      row                   <- data.frame(materiality = ".", n = ".", k = ".", bound = ".", projm = ".")
       if(options[["mostLikelyError"]])
         row                 <- cbind(row, mle = ".")
       if(options[["bayesFactor"]])
@@ -553,18 +563,18 @@
     if(options[["N"]] != 0)
       mle <- floor( sum(result[["z"]]) / result[["n"]] * options[["N"]] )
 
-    materialityTable        <- round(options[["materiality"]], 2)
-    if(options[["show"]] == "percentage")
-      materialityTable      <- paste0(materialityTable * 100, "%")
+    materialityTable <- ceiling(options[["materialityValue"]])
 
     boundTable <- result[["bound"]]
+    projectedMisstatement <- "."
     if(!"." %in% boundTable){
       boundTable            <- round(result[["bound"]],3)
+      projectedMisstatement <- ceiling(result[["bound"]] * total_data_value)
       if(options[["show"]] == "percentage")
         boundTable          <- paste0(boundTable * 100, "%")
     }
 
-    row <- data.frame(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable)
+    row <- data.frame(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable, projm = projectedMisstatement)
     if(options[["mostLikelyError"]])
       row <- cbind(row, mle = mle)
     if(options[["bayesFactor"]])

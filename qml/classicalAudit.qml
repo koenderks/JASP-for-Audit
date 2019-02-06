@@ -97,6 +97,19 @@ Form {
         Item {
           height: toPlanning.height
           Layout.fillWidth: true
+          Layout.leftMargin: 5
+
+          RowLayout {
+          Label {
+            text: qsTr("<b>Plot</b>")
+          }
+          CheckBox {
+            enabled: (recordNumberVariable.count > 0 && monetaryVariable.count > 0)
+            text: qsTr("Distribution information")
+            name: "distributionPlot"
+            id: distributionPlot
+            }
+          }
 
           CheckBox {
             id: planningChecked
@@ -134,31 +147,34 @@ Form {
             GroupBox {
                 title: qsTr("<b>Audit risk</b>")
                 id: auditRisk
-                PercentField {
-                    label.text: qsTr("Confidence")
-                    with1Decimal: true
-                    defaultValue: 95
-                    name: "confidence"
-                }
 
                 RowLayout {
                   Label {
                     text: qsTr("Materiality")
                   }
                   PercentField {
+                      id: materiality
                       visible: attributes.checked
                       with1Decimal: true
-                      defaultValue: 5
+                      defaultValue: 0
                       name: "materiality"
                   }
                   TextField {
+                    id: materialityValue
                     visible: mus.checked
                     name: "materialityValue"
-                    value: "10000"
+                    value: "0"
                     fieldWidth: 90
                     inputType: "integer"
                     validator: IntValidator { bottom: 0 }
                   }
+                }
+
+                PercentField {
+                    label.text: qsTr("Confidence")
+                    with1Decimal: true
+                    defaultValue: 95
+                    name: "confidence"
                 }
             }
 
@@ -235,9 +251,10 @@ Form {
        GroupBox {
           title: qsTr("<b>Plots</b>")
 
-           CheckBox {      text: qsTr("Decision plot")                  ; name: "plotCriticalErrors"; checked: true }
-           CheckBox {      text: qsTr("Distribution information")       ; name: "distributionPlot"; id: distributionPlot }
-           CheckBox {      text: qsTr("Cumulative density")             ; name: "showCumulative"; Layout.leftMargin: 20; enabled: distributionPlot.checked }
+           CheckBox {
+            text: qsTr("Decision plot")
+            name: "plotCriticalErrors"
+            }
         }
     }
 
@@ -255,6 +272,7 @@ Form {
         }
         Button {
           id: toSampling
+          enabled: attributes.checked ? (materiality.value == "0" ? false : true) : (materialityValue.value == "0" ? false : true)
           anchors.right: parent.right
           text: qsTr("<b>To Sampling</b>")
 

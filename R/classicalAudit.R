@@ -21,9 +21,9 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
     if(options[["interpretation"]]){
       if(options[["auditType"]] == "attributes"){
         jaspResults[["procedureParagraph"]] <- createJaspHtml(paste0("The objective of an attributes sampling procedure is to determine with a specified confidence whether the percentage
-                                                                  of errors in the target population is lower than the specified materiality. An attributes bound procedure considers
-                                                                  the observations in the population to be of one of two categories: 1) the observation is fully correct or 2) the observation
-                                                                  is fully incorrect."), "p")
+                                                                  of errors in the target population is lower than the specified materiality. An attributes bound procedure considers the
+                                                                  observations in the population to be of one of two categories: 1) the observation is fully correct or 2) the observation is
+                                                                  fully incorrect."), "p")
       } else if(options[["auditType"]] == "mus"){
         jaspResults[["procedureParagraph"]] <- createJaspHtml(paste0("The objective of a monetary unit sampling (MUS) procedure is to determine with a specified confidence whether the percentage
                                                                   of errors in the target population is lower than the specified materiality. A monetary unit sampling procedure considers the
@@ -32,23 +32,38 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
       jaspResults[["procedureParagraph"]]$position <- 2
     }
 
-    if(options[["recordNumberVariable"]] != "" && options[["monetaryVariable"]] != ""){
-      dataset <- .readDataSetToEnd(columns.as.numeric = c(options[["recordNumberVariable"]], options[["monetaryVariable"]]))
-      options[["N"]] <- nrow(dataset)
+    if(options[["recordNumberVariable"]] == "" || options[["monetaryVariable"]] == ""){
+      .dataTable(dataset, options, jaspResults, position = 3)
+    } else {
+
+      dataset             <- .readDataSetToEnd(columns.as.numeric = c(options[["recordNumberVariable"]], options[["monetaryVariable"]]))
+      options[["N"]]      <- nrow(dataset)
+      total_data_value    <- ceiling(sum(dataset[, .v(options[["monetaryVariable"]])]))
 
       .dataTable(dataset, options, jaspResults, position = 3)
+
+      # Distribution plot
+      if(options[['distributionPlot']])
+      {
+          if(is.null(jaspResults[["valueDistributionPlot"]]))
+          {
+              jaspResults[["valueDistributionPlot"]] 		<- .plotValueDistribution(dataset, options, jaspResults)
+              jaspResults[["valueDistributionPlot"]]		  $dependOnOptions(c("distributionPlot", "monetaryVariable", "recordNumberVariable"))
+              jaspResults[["valueDistributionPlot"]] 		$position <- 4
+          }
+        }
 
       # Planning phase
       if(!options[["planningChecked"]]) # Only runs when "To planning" is clicked
         return()
 
       # Show the Audit Risk Model formula and quantify detection risk
-      .ARMformula(options, jaspResults, position = 5)
+      .ARMformula(options, jaspResults, position = 6)
       DR                          <- jaspResults[["DR"]]$object
 
       # Read in alternative materiality (based on value)
       if(options[["auditType"]] == "mus")
-          options[["materiality"]] <- options[["materialityValue"]] / sum(dataset[, .v(options[["monetaryVariable"]])])
+          options[["materiality"]] <- options[["materialityValue"]] / total_data_value
 
       # Create labels for the confidence and materiality
       confidenceLevelLabel              <- round(options[["confidence"]], 2)
@@ -71,20 +86,20 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
           dectectionRiskLabel     <- round(DR, 2)
         }
         jaspResults[["AuditRiskModelHeader"]] <- createJaspHtml("<u>Audit Risk Model</u>", "h2")
-        jaspResults[["AuditRiskModelHeader"]]$position <- 3
+        jaspResults[["AuditRiskModelHeader"]]$position <- 5
         jaspResults[["AuditRiskModelParagraph"]] <- createJaspHtml(paste0("Prior to the substantive testing phase, the inherent risk was determined to be <b>", options[["IR"]] ,"</b>. The internal control risk was determined
                                                                         to be <b>", options[["CR"]] ,"</b>. According to the Audit Risk Model, the required detection risk to then maintain an audit risk of <b>", auditRiskLabel, "</b> for a materiality
                                                                         of <b>", materialityLevelLabel ,"</b> should be <b>", dectectionRiskLabel , "</b>."), "p")
-        jaspResults[["AuditRiskModelParagraph"]]$position <- 4
+        jaspResults[["AuditRiskModelParagraph"]]$position <- 7
       }
 
       jaspResults[["priorKnowledgeHeader"]] <- createJaspHtml("<u>Planning</u>", "h2")
-      jaspResults[["priorKnowledgeHeader"]]$position <- 6
+      jaspResults[["priorKnowledgeHeader"]]$position <- 8
 
       # Perform the planning
       .attributesPlanningFullAudit(options, jaspResults)
       planningResult              <- jaspResults[["planningResult"]]$object
-      .attributesPlanningTableFullAudit(options, planningResult, jaspResults, position = 8)
+      .attributesPlanningTableFullAudit(dataset, options, planningResult, jaspResults, position = 10)
 
       if(options[["expected.errors"]] == "kPercentage"){
           expected.errors <- paste0(round(options[["kPercentageNumber"]] * 100, 2), "%")
@@ -101,7 +116,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
                                                                             confidence bound of <b>", materialityLevelLabel ,"</b>, assuming the sample contains <b>", expected.errors ,"</b> full errors, is <b>", planningResult[["n"]] ,"</b>. This sample size is
                                                                             calculated according to the <b>", options[["distribution"]] , "</b> distribution. Consequently, if <b>", max.errors ,"</b> or more full errors are found in the sample, the projected
                                                                             misstatement exceeds the upper confidence bound and the population cannot be approved."), "p")
-          jaspResults[["priorKnowledgeParagraph"]]$position <- 7
+          jaspResults[["priorKnowledgeParagraph"]]$position <- 9
       }
 
       # Decision plot
@@ -115,20 +130,9 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
               jaspResults[["criticalErrorPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors",
                                                                           "show", "statistic", "kPercentageNumber", "kNumberNumber", "plotCriticalErrors",
                                                                           "distribution", "N", "materialityValue"))
-              jaspResults[["criticalErrorPlot"]] 		$position <- 9
+              jaspResults[["criticalErrorPlot"]] 		$position <- 11
           }
         }
-
-        # Distribution plot
-        if(options[['distributionPlot']])
-        {
-            if(is.null(jaspResults[["valueDistributionPlot"]]))
-            {
-                jaspResults[["valueDistributionPlot"]] 		<- .plotValueDistribution(dataset, options, jaspResults)
-                jaspResults[["valueDistributionPlot"]]		  $dependOnOptions(c("distributionPlot", "showCumulative", "monetaryVariable", "recordNumberVariable", "showHistogram"))
-                jaspResults[["valueDistributionPlot"]] 		$position <- 9
-            }
-          }
     }
 
     # Sampling phase
@@ -156,7 +160,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
         options[["sampleSize"]] <- planningResult[["n"]]
 
         jaspResults[["samplingHeader"]] <- createJaspHtml("<u>Sampling</u>", "h2")
-        jaspResults[["samplingHeader"]]$position <- 11
+        jaspResults[["samplingHeader"]]$position <- 13
 
         # Interpretation for the sampling phase
         if(options[["interpretation"]]){
@@ -168,7 +172,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
                                         "attributes" = paste(technique, "attributes sampling"),
                                         "mus" = paste(technique, "MUS sampling"))
             jaspResults[["samplingParagraph"]] <- createJaspHtml(paste0("From the population of <b>", options[["N"]], "</b> observations, <b>", planningResult[["n"]], "</b> samples were drawn using a <b>", technique, "</b> method."), "p")
-            jaspResults[["samplingParagraph"]]$position <- 12
+            jaspResults[["samplingParagraph"]]$position <- 14
         }
 
         type <- options[["auditType"]]
@@ -176,36 +180,36 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
         # Perform the sampling and draw the outcome tables
         if(options[["samplingType"]] == "simplerandomsampling"){
           if(type == "attributes"){
-            .simpleRandomSamplingInfoTable(dataset, options, jaspResults, position = 13)
-            .SimpleRandomSamplingTable(dataset, options, jaspResults, type = "attributes", sample = jaspResults[["sample"]]$object, position = 14)
+            .simpleRandomSamplingInfoTable(dataset, options, jaspResults, position = 15)
+            .SimpleRandomSamplingTable(dataset, options, jaspResults, type = "attributes", sample = jaspResults[["sample"]]$object, position = 16)
           } else {
             if(!is.null(monetaryVariable)){
-              .simpleRandomSamplingInfoTable(dataset, options, jaspResults, position = 13)
-              .SimpleRandomSamplingTable(dataset, options, jaspResults, type = "mus", sample = jaspResults[["sample"]]$object, position = 14)
+              .simpleRandomSamplingInfoTable(dataset, options, jaspResults, position = 15)
+              .SimpleRandomSamplingTable(dataset, options, jaspResults, type = "mus", sample = jaspResults[["sample"]]$object, position = 16)
             }
           }
         } else if(options[["samplingType"]] == "systematicsampling"){
           if(type == "attributes"){
             interval <- ceiling(nrow(dataset) / options[["sampleSize"]])
-            .intervalTable(dataset, options, jaspResults, interval, position = 13)
-            .SystematicSamplingTable(dataset, options, jaspResults, interval, type = "attributes", sample = jaspResults[["sample"]]$object, position = 14)
+            .intervalTable(dataset, options, jaspResults, interval, position = 15)
+            .SystematicSamplingTable(dataset, options, jaspResults, interval, type = "attributes", sample = jaspResults[["sample"]]$object, position = 16)
           } else {
             if(!is.null(monetaryVariable)){
               interval <- ceiling(sum(dataset[, .v(monetaryVariable)]) / options[["sampleSize"]])
-              .intervalTable(dataset, options, jaspResults, interval, position = 13)
-              .SystematicSamplingTable(dataset, options, jaspResults, interval, type = "mus", sample = jaspResults[["sample"]]$object, position = 14)
+              .intervalTable(dataset, options, jaspResults, interval, position = 15)
+              .SystematicSamplingTable(dataset, options, jaspResults, interval, type = "mus", sample = jaspResults[["sample"]]$object, position = 16)
             }
           }
         } else if(options[["samplingType"]] == "cellsampling"){
           if(type == "attributes"){
             interval <- ceiling(nrow(dataset) / options[["sampleSize"]])
-            .intervalTable(dataset, options, jaspResults, interval, position = 13)
-            .cellSamplingTable(dataset, options, jaspResults, interval, type = "attributes", sample = jaspResults[["sample"]]$object, position = 14)
+            .intervalTable(dataset, options, jaspResults, interval, position = 15)
+            .cellSamplingTable(dataset, options, jaspResults, interval, type = "attributes", sample = jaspResults[["sample"]]$object, position = 16)
           } else {
             if(!is.null(monetaryVariable)){
               interval <- ceiling(sum(dataset[, .v(monetaryVariable)]) / options[["sampleSize"]])
-              .intervalTable(dataset, options, jaspResults, interval, position = 13)
-              .cellSamplingTable(dataset, options, jaspResults, interval, type = "mus", sample = jaspResults[["sample"]]$object, position = 14)
+              .intervalTable(dataset, options, jaspResults, interval, position = 15)
+              .cellSamplingTable(dataset, options, jaspResults, interval, type = "mus", sample = jaspResults[["sample"]]$object, position = 16)
             }
           }
         }
@@ -214,7 +218,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
 
         # Descriptives table
         if(options[["showDescriptives"]]){
-          .samplingDescriptivesTable(dataset, options, jaspResults, sample, position = 15)
+          .samplingDescriptivesTable(dataset, options, jaspResults, sample, position = 17)
         }
     }
 
@@ -225,7 +229,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
     if(!is.null(correctID)){
 
       jaspResults[["evaluationHeader"]] <- createJaspHtml("<u>Evaluation</u>", "h2")
-      jaspResults[["evaluationHeader"]]$position <- 16
+      jaspResults[["evaluationHeader"]]$position <- 18
 
       # Apply the sample filter
       if(!is.null(sampleFilter)){
@@ -236,14 +240,14 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
         # Perform the attributes evaluation
         .attributesBoundFullAudit(dataset, options, jaspResults)
         result                                       <- jaspResults[["result"]]$object
-        .attributesBoundTableFullAudit(options, result, jaspResults, position = 18)
+        .attributesBoundTableFullAudit(options, result, jaspResults, position = 20)
       } else {
         # Perform the MUS evaluaton
         if(options[["boundMethodMUS"]] == "stringerBound"){
           .stringerBound(dataset, options, jaspResults)
         }
         result                                       <- jaspResults[["result"]]$object
-        .musBoundTableFullAudit(options, result, jaspResults, position = 18)
+        .musBoundTableFullAudit(total_data_value, options, result, jaspResults, position = 20)
       }
 
       # Interpretation before the evalution table
@@ -257,7 +261,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
                                                               bined with the prior knowledge results in an <b>",round((1 - result[["alpha"]]) * 100, 2), "%</b> upper confidence bound of <b>", boundLabel ,"</b>. The cumulative knowledge states that there
                                                               is a <b>", confidenceLevelLabel , "</b> probability that, when one would repeaditly sample from this population, the maximum error is calculated to be lower
                                                               than <b>", boundLabel ,"</b>."), "p")
-        jaspResults[["resultParagraph"]]$position <- 17
+        jaspResults[["resultParagraph"]]$position <- 19
       }
 
       # Confidence bound plot
@@ -269,14 +273,14 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
               jaspResults[["confidenceBoundPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "correctID",
                                                                        "show", "plotBound", "materiality",
                                                                        "method", "materialityValue"))
-              jaspResults[["confidenceBoundPlot"]] 		$position <- 19
+              jaspResults[["confidenceBoundPlot"]] 		$position <- 21
           }
       }
 
       # Interpretation after the evaluation table
       if(options[["interpretation"]]){
           jaspResults[["conclusionTitle"]] <- createJaspHtml("<u>Conclusion</u>", "h2")
-          jaspResults[["conclusionTitle"]]$position <- 20
+          jaspResults[["conclusionTitle"]]$position <- 22
           if(result[["bound"]] < options[["materiality"]]){
               above_below <- "lower"
               approve <- "<b>no material misstatement</b>"
@@ -287,7 +291,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
           jaspResults[["conclusionParagraph"]] <- createJaspHtml(paste0("To approve these data, a <b>", confidenceLevelLabel ,"</b> upper confidence bound on the population proportion of full errors should be determined to be
                                                                       lower than materiality, in this case <b>", materialityLevelLabel ,"</b>. For the current data, the confidence bound is <b>", above_below ,"</b> than materiality.
                                                                       The conclusion for these data is that the data contain ", approve ,"."), "p")
-          jaspResults[["conclusionParagraph"]]$position <- 21
+          jaspResults[["conclusionParagraph"]]$position <- 23
       }
     }
 

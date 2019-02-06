@@ -101,50 +101,52 @@
 
 }
 
-.attributesPlanningTableFullAudit <- function(options, result, jaspResults, position = 1){
+.attributesPlanningTableFullAudit <- function(dataset, options, result, jaspResults, position = 1){
 
   if(!is.null(jaspResults[["summaryTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-  summaryTable                              <- createJaspTable("Classical Attributes Planning Table")
+  summaryTable                              <- createJaspTable("Planning Table")
   jaspResults[["summaryTable"]]             <- summaryTable
   summaryTable$position                     <- position
   summaryTable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "show", "distribution", "N",
                                   "expected.errors" , "kPercentageNumber", "kNumberNumber", "materialityValue", "auditType"))
 
-  summaryTable$addColumnInfo(name = 'materiality',   title = "Materiality", type = 'string')
-  summaryTable$addColumnInfo(name = 'IR',   title = "Inherent risk",        type = 'string')
-  summaryTable$addColumnInfo(name = 'CR',   title = "Control risk",         type = 'string')
-  summaryTable$addColumnInfo(name = 'SR',   title = "Detection risk",       type = 'string')
-  summaryTable$addColumnInfo(name = 'k',    title = "Allowed errors",       type = 'string')
-  summaryTable$addColumnInfo(name = 'n',    title = "Required sample size", type = 'string')
+  summaryTable$addColumnInfo(name = 'materialityPercent',   title = "Percentage",           type = 'string', overtitle = "Materiality")
+  summaryTable$addColumnInfo(name = 'materialityValue',     title = "Value",                type = 'string', overtitle = "Materiality")
+  summaryTable$addColumnInfo(name = 'IR',                   title = "Inherent risk",        type = 'string')
+  summaryTable$addColumnInfo(name = 'CR',                   title = "Control risk",         type = 'string')
+  summaryTable$addColumnInfo(name = 'DR',                   title = "Detection risk",       type = 'string')
+  summaryTable$addColumnInfo(name = 'k',                    title = "Allowed errors",       type = 'string')
+  summaryTable$addColumnInfo(name = 'n',                    title = "Required sample size", type = 'string')
 
   message <- base::switch(options[["distribution"]],
                           "binomial" =  "The sample size is calculated using the <b>binomial</b> distribution.",
                           "hypergeometric" = paste0("The sample size is calculated using the <b>hypergeometric</b> distribution (N = ", options[["N"]] ,")."))
   summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
-  if(options[["N"]] == 0 && options[["distribution"]] == "hypergeometric"){
-    message <- "The population size is specified to be 0. Please enter your population size."
-    summaryTable$errorMessage <- message
-    summaryTable$error <- "badData"
+  if(options[["materiality"]] == 0){
+    row <- data.frame(materialityPercent = ".", materialityValue = ".", IR = ".", CR = ".", DR = ".", k = ".", n = ".")
+    summaryTable$addRows(row)
     return()
   }
 
   ktable <- base::switch(options[["expected.errors"]],
                           "kPercentage" = ceiling(result[["k"]] * result[["n"]]),
                           "kNumber" = options[["kNumberNumber"]])
-  SRtable <- base::switch(options[["show"]],
-                            "percentage" = paste0(round(result[["alpha"]], 3) * 100, "%"),
-                            "proportion" = round(result[["alpha"]], 3))
+  DRtable <- paste0(round(result[["alpha"]], 3) * 100, "%")
 
   materialityTitle <- paste0(round(options[["materiality"]] * 100, 2), "%")
+  materialityValue <- base::switch(options[["auditType"]],
+                                    "attributes" = ceiling(options[["materiality"]] * sum(dataset[, .v(options[["monetaryVariable"]])])),
+                                    "mus" = options[["materialityValue"]])
 
-  row <- data.frame(materiality = materialityTitle,
-                    IR = result[["IR"]],
-                    CR = result[["CR"]],
-                    SR = SRtable,
-                    k = ktable,
-                    n = result[["n"]])
+  row <- data.frame(materialityPercent    = materialityTitle,
+                    materialityValue      = materialityValue,
+                    IR                    = result[["IR"]],
+                    CR                    = result[["CR"]],
+                    DR                    = DRtable,
+                    k                     = ktable,
+                    n                     = result[["n"]])
   summaryTable$addRows(row)
 }
 
@@ -188,7 +190,7 @@
 
     if(!is.null(jaspResults[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-    evaluationTable                       <- createJaspTable("Classical Attributes Evaluation Table")
+    evaluationTable                       <- createJaspTable("Attributes Evaluation Table")
     jaspResults[["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
@@ -278,11 +280,11 @@
                                               "auditType", "boundMethodMUS", "monetaryVariableMUS", "materialityValue"))
 }
 
-.musBoundTableFullAudit <- function(options, result, jaspResults, position = 1){
+.musBoundTableFullAudit <- function(total_data_value, options, result, jaspResults, position = 1){
 
     if(!is.null(jaspResults[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-    evaluationTable                       <- createJaspTable("Classical Evaluation Table")
+    evaluationTable                       <- createJaspTable("MUS Evaluation Table")
     jaspResults[["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show",
@@ -292,8 +294,9 @@
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",                      type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",                      type = 'string')
     evaluationTable$addColumnInfo(name = 'fk',            title = "Errors",                           type = 'string')
-    evaluationTable$addColumnInfo(name = 'k',             title = "Total tainting",         type = 'string')
+    evaluationTable$addColumnInfo(name = 'k',             title = "Total tainting",                   type = 'string')
     evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
+    evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
     if(options[["mostLikelyError"]])
       evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                              type = 'string')
 
@@ -303,7 +306,7 @@
 
     # Return empty table
     if(options[["correctMUS"]] == "" || options[["sampleFilter"]] == "" || options[["monetaryVariable"]] == ""){
-      row <- data.frame(materiality = ".", n = ".", fk = ".", k = ".", bound = ".")
+      row <- data.frame(materiality = ".", n = ".", fk = ".", k = ".", bound = ".", projm = ".")
       if(options[["mostLikelyError"]])
         row <- cbind(row, mle = ".")
       evaluationTable$addRows(row)
@@ -315,18 +318,18 @@
       mle <- floor( sum(result[["z"]]) / result[["n"]] * options[["N"]] )
 
     errors <- round(sum(result[["z"]]), 2)
-    materialityTable <- round(options[["materiality"]], 2)
-    if(options[["show"]] == "percentage")
-      materialityTable <- paste0(materialityTable * 100, "%")
+    materialityTable <- ceiling(options[["materialityValue"]])
 
     boundTable          <- "."
+    projectedMisstatement <- "."
     if(result[["bound"]] != "."){
         boundTable <- round(result[["bound"]],3)
+        projectedMisstatement <- ceiling(result[["bound"]] * total_data_value)
         if(options[["show"]] == "percentage")
           boundTable <- paste0(boundTable * 100, "%")
     }
 
-    row <- data.frame(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable)
+    row <- data.frame(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable, projm = projectedMisstatement)
     if(options[["mostLikelyError"]])
       row <- cbind(row, mle = mle)
     evaluationTable$addRows(row)
