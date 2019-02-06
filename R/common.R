@@ -189,7 +189,7 @@
                                       "kPercentage" = options[["kPercentageNumber"]],
                                       "kNumber" = options[["kNumberNumber"]] / result[["n"]])
   found.errors    <- result[["k"]] / result[["n"]]
-  xlim            <- round(max(c(materiality, bound, expected.errors, found.errors)) * 1.2, 2)
+  xlim            <- round(max(c(materiality, bound, expected.errors, found.errors)) * 1.1, 2)
   xBreaks         <- pretty(c(0, xlim))
   xLabels         <- paste0(round(xBreaks * 100, 2), "%")
 
@@ -203,18 +203,20 @@
       ggplot2::ylab(NULL) +
       ggplot2::xlab("Error percentage") +
       ggplot2::geom_rect(ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
-                              data = boundData, fill = boundData$fill, color = "black", size = 2) +
+                         data = boundData, fill = boundData[["fill"]], color = "black", size = 2) +
       ggplot2::scale_x_continuous(breaks = xBreaks, labels = xLabels) +
-      ggplot2::geom_segment(ggplot2::aes(x = materiality, xend = materiality, y = 0.025, yend = 0.475), lty = 1, size = 2, color = rgb(0,1,.5,.7)) +
-      ggplot2::geom_segment(ggplot2::aes(x = expected.errors, xend = expected.errors, y = 0.025, yend = 0.475), lty = 1, size = 2, color = "darkgray") +
-      ggplot2::geom_segment(ggplot2::aes(x = found.errors, xend = found.errors, y = 0.025, yend = 0.475), lty = 1, size = 2, color = "blue")
-
+      ggplot2::geom_segment(ggplot2::aes(x = materiality, xend = materiality, y = 0.025, yend = 0.475, col = "Materiality"), size = 2) +
+      ggplot2::geom_segment(ggplot2::aes(x = bound, xend = bound, y = 0.025, yend = 0.475, col = "Bound"), size = 2) +
+      ggplot2::geom_segment(ggplot2::aes(x = expected.errors, xend = expected.errors, y = 0.025, yend = 0.475, col = "Expected errors"), size = 2) +
+      ggplot2::geom_segment(ggplot2::aes(x = found.errors, xend = found.errors, y = 0.025, yend = 0.475, col = "Found errors"), size = 2) +
+      ggplot2::scale_color_manual(name = "", values=c("Bound" = "black", "Materiality" = rgb(0,1,.5,1), "Expected errors" = "yellow", "Found errors" = "orange")) +
+      ggplot2::guides(col = ggplot2::guide_legend(nrow = 1, byrow = TRUE))
 
   p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE, legend.position = "top")
   p <- p + ggplot2::theme(axis.ticks = ggplot2::element_blank(),
                           axis.text.y = ggplot2::element_blank(),
                           axis.text.x = ggplot2::element_text(size = 17))
 
-  return(createJaspPlot(plot = p, title = "Outcome information", width = 650, height = 150))
+  return(createJaspPlot(plot = p, title = "Evaluation information", width = 650, height = 200))
 
 }
