@@ -3,18 +3,11 @@
 
     if(!is.null(jaspResults[["table"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-    if(type == "attributes"){
-        recordVariable                  <- unlist(options$recordNumberVariable)
-        if(recordVariable == "")        recordVariable <- NULL
-        variables                       <- unlist(options$variables)
-        monetaryVariable                <- NULL
-    } else {
-        recordVariable                  <- unlist(options$recordNumberVariable)
-        if(recordVariable == "")        recordVariable <- NULL
-        monetaryVariable                <- unlist(options$monetaryVariable)
-        if(monetaryVariable == "")      monetaryVariable <- NULL
-        variables                       <- unlist(options$variables)
-    }
+    recordVariable                  <- unlist(options$recordNumberVariable)
+    if(recordVariable == "")        recordVariable <- NULL
+    monetaryVariable                <- unlist(options$monetaryVariable)
+    if(monetaryVariable == "")      monetaryVariable <- NULL
+    variables                       <- unlist(options$variables)
 
     duplicates                      <- options$allowDuplicates
     sampleSize                      <- options$sampleSize
@@ -93,22 +86,13 @@
 
     if(!is.null(jaspResults[["table"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-    if(type == "attributes"){
-        recordVariable                  <- unlist(options$recordNumberVariable)
-        if(recordVariable == "")        recordVariable <- NULL
-        rankingVariable                 <- unlist(options$rankingVariable)
-        if(rankingVariable == "")        rankingVariable <- NULL
-        variables                       <- unlist(options$variables)
-        monetaryVariable                <- NULL
-    } else {
-        recordVariable                  <- unlist(options$recordNumberVariable)
-        if(recordVariable == "")        recordVariable <- NULL
-        monetaryVariable                <- unlist(options$monetaryVariable)
-        if(monetaryVariable == "")      monetaryVariable <- NULL
-        rankingVariable                 <- unlist(options$rankingVariable)
-        if(rankingVariable == "")        rankingVariable <- NULL
-        variables                       <- unlist(options$variables)
-    }
+    recordVariable                  <- unlist(options$recordNumberVariable)
+    if(recordVariable == "")        recordVariable <- NULL
+    monetaryVariable                <- unlist(options$monetaryVariable)
+    if(monetaryVariable == "")      monetaryVariable <- NULL
+    rankingVariable                 <- unlist(options$rankingVariable)
+    if(rankingVariable == "")        rankingVariable <- NULL
+    variables                       <- unlist(options$variables)
 
     startingPoint                       <- options$startingPoint
     sampleSize                          <- options$sampleSize
@@ -204,22 +188,13 @@
 
     if(!is.null(jaspResults[["table"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-    if(type == "attributes"){
-        recordVariable                  <- unlist(options$recordNumberVariable)
-        if(recordVariable == "")        recordVariable <- NULL
-        rankingVariable                 <- unlist(options$rankingVariable)
-        if(rankingVariable == "")        rankingVariable <- NULL
-        variables                       <- unlist(options$variables)
-        monetaryVariable                <- NULL
-    } else {
-        recordVariable                  <- unlist(options$recordNumberVariable)
-        if(recordVariable == "")        recordVariable <- NULL
-        monetaryVariable                <- unlist(options$monetaryVariable)
-        if(monetaryVariable == "")      monetaryVariable <- NULL
-        rankingVariable                 <- unlist(options$rankingVariable)
-        if(rankingVariable == "")        rankingVariable <- NULL
-        variables                       <- unlist(options$variables)
-    }
+    recordVariable                  <- unlist(options$recordNumberVariable)
+    if(recordVariable == "")        recordVariable <- NULL
+    monetaryVariable                <- unlist(options$monetaryVariable)
+    if(monetaryVariable == "")      monetaryVariable <- NULL
+    rankingVariable                 <- unlist(options$rankingVariable)
+    if(rankingVariable == "")        rankingVariable <- NULL
+    variables                       <- unlist(options$variables)
 
     startingPoint                       <- options$startingPoint
     sampleSize                          <- options$sampleSize
@@ -309,22 +284,14 @@
 
     if(!is.null(jaspResults[["descriptives"]])) return()
 
-    if(options[["auditType"]] == "attributes"){
-      recordVariable                  <- unlist(options$recordNumberVariable)
-      if(recordVariable == "")        recordVariable <- NULL
-      rankingVariable                 <- unlist(options$rankingVariable)
-      if(rankingVariable == "")       rankingVariable <- NULL
-      monetaryVariable                <- NULL
-      variables                       <- unlist(options$variables)
-    } else {
-      recordVariable                  <- unlist(options$recordNumberVariableMUS)
-      if(recordVariable == "")        recordVariable <- NULL
-      monetaryVariable                <- unlist(options$monetaryVariableMUS)
-      if(monetaryVariable == "")      monetaryVariable <- NULL
-      rankingVariable                 <- unlist(options$rankingVariableMUS)
-      if(rankingVariable == "")       rankingVariable <- NULL
-      variables                       <- unlist(options$variablesMUS)
-    }
+    recordVariable                  <- unlist(options$recordNumberVariable)
+    if(recordVariable == "")        recordVariable <- NULL
+    rankingVariable                 <- unlist(options$rankingVariable)
+    if(rankingVariable == "")       rankingVariable <- NULL
+    monetaryVariable                <- unlist(options$monetaryVariable)
+    if(monetaryVariable == "")      monetaryVariable <- NULL
+    variables                       <- unlist(options$variables)
+
 
     all.variables                   <- c(rankingVariable, monetaryVariable, variables)
     descriptives                    <- createJaspTable("Sample Descriptives")
@@ -374,33 +341,30 @@
 
 }
 
-.intervalTable <- function(dataset, options, jaspResults, interval, position = 1)
-{
+.samplingInfoTable <- function(sample, total_data_value, options, jaspResults, position = 1, interval = NULL){
 
-    if(!is.null(jaspResults[["intervalTable"]])) return()
+  if(!is.null(jaspResults[["simpleRandomSamplingInfoTable"]])) return()
 
-    intervalTable                           <- createJaspTable("Sampling information")
-    jaspResults[["intervalTable"]]          <- intervalTable
-    intervalTable$position                  <- position
-    intervalTable$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
-                            "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "N"))
+  simpleRandomSamplingInfoTable                           <- createJaspTable("Sampling information")
+  jaspResults[["simpleRandomSamplingInfoTable"]]          <- simpleRandomSamplingInfoTable
+  simpleRandomSamplingInfoTable$position                  <- position
+  simpleRandomSamplingInfoTable$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
+                                                  "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "N"))
 
-    intervalTable$addColumnInfo(name="N", title ="Population size", type = "string")
-    intervalTable$addColumnInfo(name="n", title ="Sample size", type = "string")
-    if(options[["auditType"]] == "mus"){
-      intervalTable$addColumnInfo(name="T", title ="Total value", type = "string")
-    }
-    intervalTable$addColumnInfo(name="I", title ="Interval width", type = "string")
+  simpleRandomSamplingInfoTable$addColumnInfo(name="n", title ="Sample size", type = "string")
+  simpleRandomSamplingInfoTable$addColumnInfo(name="V", title ="Sample value", type = "string")
+  simpleRandomSamplingInfoTable$addColumnInfo(name="P", title ="% of total value", type = "string")
+  if(options[["samplingType"]] != "simplerandomsampling")
+    simpleRandomSamplingInfoTable$addColumnInfo(name="I", title ="Interval", type = "string")
 
-    sampleSize                              <- options$sampleSize
+  sampleSize                              <- options$sampleSize
+  sampleValue                             <- ceiling(sum(sample[, .v(options[["monetaryVariable"]])]))
+  percOfTotal                             <- paste0(round(sampleValue / total_data_value * 100, 2), "%")
 
-    if(options[["auditType"]] == "mus"){
-        row <- list("N" = nrow(dataset), "n" = sampleSize, "T" = ceiling(sum(dataset[, .v(options[["monetaryVariable"]])])),"I" = round(interval, 0))
-    } else {
-        row <- list("N" = nrow(dataset), "n" = sampleSize, "I" = round(interval, 0))
-    }
-    intervalTable$addRows(row)
-
+  row <- data.frame("n" = sampleSize, "V" = sampleValue, "P" = percOfTotal)
+  if(options[["samplingType"]] != "simplerandomsampling")
+    row <- cbind(row, I = interval)
+  simpleRandomSamplingInfoTable$addRows(row)
 }
 
 .plotSampleLocations <- function(options, rows, samples, xlab, jaspResults){
@@ -431,32 +395,5 @@
                           axis.text.y = ggplot2::element_blank())
 
   return(createJaspPlot(plot = p, title = "Sampling locations", width = 1000, height = 200))
-
-}
-
-.simpleRandomSamplingInfoTable <- function(dataset, options, jaspResults, position = 1){
-
-  if(!is.null(jaspResults[["simpleRandomSamplingInfoTable"]])) return()
-
-  simpleRandomSamplingInfoTable                           <- createJaspTable("Sampling information")
-  jaspResults[["simpleRandomSamplingInfoTable"]]          <- simpleRandomSamplingInfoTable
-  simpleRandomSamplingInfoTable$position                  <- position
-  simpleRandomSamplingInfoTable$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
-                                                  "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "N"))
-
-  simpleRandomSamplingInfoTable$addColumnInfo(name="N", title ="Population size", type = "string")
-  simpleRandomSamplingInfoTable$addColumnInfo(name="n", title ="Sample size", type = "string")
-  if(options[["auditType"]] == "mus"){
-    simpleRandomSamplingInfoTable$addColumnInfo(name="T", title ="Total value", type = "string")
-  }
-
-  sampleSize                              <- options$sampleSize
-
-  if(options[["auditType"]] == "mus"){
-      row <- list("N" = nrow(dataset), "n" = sampleSize, "T" = round(sum(dataset[, .v(options[["monetaryVariable"]])]), 2))
-  } else {
-      row <- list("N" = nrow(dataset), "n" = sampleSize)
-  }
-  simpleRandomSamplingInfoTable$addRows(row)
 
 }

@@ -70,7 +70,7 @@
       ggplot2::geom_point() +
       ggplot2::ylim(0, 0.5) +
       ggplot2::ylab(NULL) +
-      ggplot2::xlab("Observed sample errors")
+      ggplot2::xlab("Sample errors")
 
   p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = pointdata, fill = fill, shape = 21, stroke = 2, size = 15)
   pdata <- data.frame(x = c(0,0), y = c(0,0), l = c("1","2"))
