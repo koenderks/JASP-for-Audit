@@ -58,38 +58,34 @@
 
 .plotCriticalErrorsPrior <- function(allowed.errors, reject.errors, jaspResults){
 
-    errorrange <- 0:max(reject.errors)
-    errors <- c(allowed.errors, reject.errors)
-    fill <- c(rep(rgb(0,1,.5,.7), length(allowed.errors)),
-              rep(rgb(1,0,0,.7), length(reject.errors)))
+  errorrange <- 0:max(reject.errors)
+  errors <- c(allowed.errors, reject.errors)
+  fill <- c(rep(rgb(0,1,.5,.7), length(allowed.errors)),
+            rep(rgb(1,0,0,.7), length(reject.errors)))
 
-    rectdata <- data.frame(xmin = errors - 0.5, xmax = errors + 0.5, ymin = 0, ymax = 0.5,
-                           fill = fill)
+  pointdata <- data.frame(x = errorrange, y = 0.2)
 
-    df <- data.frame()
-    p <- ggplot2::ggplot(df) +
-        ggplot2::geom_point() +
-        ggplot2::ylim(0, 1) +
-        ggplot2::ylab(NULL) +
-        ggplot2::xlab("Observed sample errors")
+  df <- data.frame()
+  p <- ggplot2::ggplot(df) +
+      ggplot2::geom_point() +
+      ggplot2::ylim(0, 0.5) +
+      ggplot2::ylab(NULL) +
+      ggplot2::xlab("Observed sample errors")
 
-    p <- p + ggplot2::geom_rect(ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
-                                data = rectdata, fill = rectdata$fill, color = "black")
+  p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = pointdata, fill = fill, shape = 21, stroke = 2, size = 15)
+  pdata <- data.frame(x = c(0,0), y = c(0,0), l = c("1","2"))
+  p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = c(rgb(0,1,0,0), rgb(1,0,0,0)))
+  p <- p + ggplot2::scale_shape_manual(name = "", values = c(21,21), labels = c("Accept population", "Reject population"))
+  p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 9, shape = 21, fill = c(rgb(0,1,.5,.7),rgb(1,0,0,.7)), stroke = 2, color = "black")), order = 1)
 
-    pdata <- data.frame(x = c(0,0), y = c(0,0), l = c("1","2"))
-    p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = c(rgb(0,1,0,0), rgb(1,0,0,0)))
-    p <- p + ggplot2::scale_shape_manual(name = "", values = c(22,22), labels = c("Accept population", "Reject population"))
-    p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 9, shape = 22, fill = c(rgb(0,1,.5,.7),rgb(1,0,0,.7)), stroke = 2, color = "black")), order = 1)
-
-    p <- p + ggplot2::scale_x_continuous(breaks = errorrange)
-
+  p <- p + ggplot2::scale_x_continuous(breaks = errorrange)
 
     p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE, legend.position = "top")
     p <- p + ggplot2::theme(axis.ticks = ggplot2::element_blank(),
                             axis.text.y = ggplot2::element_blank(),
                             axis.text.x = ggplot2::element_text(size = 17))
 
-    return(createJaspPlot(plot = p, title = "Decision Plot", width = 500, height = 300))
+    return(createJaspPlot(plot = p, title = "Decision Plot", width = 600, height = 200))
 
 }
 
@@ -97,8 +93,54 @@
 
     values <- dataset[, .v(options[["monetaryVariable"]])]
 
+    meanx <- mean(values)
+    sdx <- sd(values)
+    q <- as.numeric(quantile(values, c(0.25, 0.5, 0.75)))
+    minx <- min(q[1], meanx - sdx)
+    maxx <- max(q[3], meanx + sdx)
+
     p <- .plotMarginalJfA(values, options[["monetaryVariable"]])
-    return(createJaspPlot(plot = p, title = "Distribution Information", width = 700, height = 300))
+
+    if(options[["interpretation"]]){
+      p <- p + ggplot2::geom_point(ggplot2::aes(x = q[1], y = 0), shape = 21, fill = "orange", stroke = 2, size = 3)
+      p <- p + ggplot2::geom_point(ggplot2::aes(x = q[2], y = 0), shape = 21, fill = "orange", stroke = 2, size = 3)
+      p <- p + ggplot2::geom_point(ggplot2::aes(x = q[3], y = 0), shape = 21, fill = "orange", stroke = 2, size = 3)
+      p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx, y = 0), shape = 21, fill = "red", stroke = 2, size = 5)
+      p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx + sdx, y = 0), shape = 21, fill = "blue", stroke = 2, size = 4)
+      p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx - sdx, y = 0), shape = 21, fill = "blue", stroke = 2, size = 4)
+
+      pdata <- data.frame(x = c(0,0,0), y = c(0,0,0), l = c("1","2","3"))
+      p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = c(rgb(0,1,0,0))) +
+      ggplot2::scale_shape_manual(name = "", values = c(21,21,21), labels = c("Mean", "Mean \u00B1 sd", "Quantile")) +
+      ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = c(5, 4, 3), shape = 21, fill = c("red","blue", "orange"), stroke = 2, color = "black")), order = 1)
+      p <- JASPgraphs::themeJasp(p, legend.position = "top")
+    }
+
+    # # Code for points on distribution bars
+    # h <- hist(values, plot = FALSE)
+    # q1loc <- h$counts[which(q[1] < h$breaks)[1] - 1]
+    # q2loc <- h$counts[which(q[2] < h$breaks)[1] - 1]
+    # q3loc <- h$counts[which(q[3] < h$breaks)[1] - 1]
+    # meanloc <- h$counts[which(meanx < h$breaks)[1] - 1]
+    # sd1loc <- h$counts[which(meanx - sdx < h$breaks)[1] - 1]
+    # sd2loc <- h$counts[which(meanx + sdx < h$breaks)[1] - 1]
+    #
+    # if(options[["interpretation"]]){
+    #   p <- p + ggplot2::geom_point(ggplot2::aes(x = q[1], y = q1loc),         shape = 21, fill = "orange", stroke = 2, size = 3)
+    #   p <- p + ggplot2::geom_point(ggplot2::aes(x = q[2], y = q2loc),         shape = 21, fill = "orange", stroke = 2, size = 3)
+    #   p <- p + ggplot2::geom_point(ggplot2::aes(x = q[3], y = q3loc),         shape = 21, fill = "orange", stroke = 2, size = 3)
+    #   p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx, y = meanloc),      shape = 21, fill = "red", stroke = 2, size = 5)
+    #   p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx + sdx, y = sd2loc), shape = 21, fill = "blue", stroke = 2, size = 4)
+    #   p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx - sdx, y = sd1loc), shape = 21, fill = "blue", stroke = 2, size = 4)
+    #
+    #   pdata <- data.frame(x = c(0,0,0), y = c(0,0,0), l = c("1","2","3"))
+    #   p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = c(rgb(0,1,0,0))) +
+    #   ggplot2::scale_shape_manual(name = "", values = c(21,21,21), labels = c("Mean", "Mean \u00B1 sd", "Quantile")) +
+    #   ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 5, shape = 21, fill = c("red","blue", "orange"), stroke = 2, color = "black")), order = 1)
+    #   p <- JASPgraphs::themeJasp(p, legend.position = "top")
+    # }
+
+    return(createJaspPlot(plot = p, title = "Distribution Information", width = 600, height = 300))
 
     # filename <- tempfile()
     # png(filename = filename)
@@ -192,31 +234,34 @@
   xlim            <- round(max(c(materiality, bound, expected.errors, found.errors)) * 1.1, 2)
   xBreaks         <- pretty(c(0, xlim))
   xLabels         <- paste0(round(xBreaks * 100, 2), "%")
+  boundColor      <- ifelse(bound < materiality, yes = rgb(0,1,.5,1), no = rgb(1,0,0,.7))
 
+  pdata <- data.frame(x = c(0,0,0,0), y = c(0,0,0,0), l = c("1","2","3","4"))
   boundData <- data.frame(xmin = c(0, bound), xmax = c(bound, xlim), ymin = 0, ymax = 0.5,
-                         fill = c(rgb(1,0,0,.7), rgb(1,1,1)))
+                         fill = c(boundColor, rgb(1,1,1)))
 
-  df <- data.frame()
-  p <- ggplot2::ggplot(df) +
-      ggplot2::geom_point() +
-      ggplot2::ylim(0, 1) +
-      ggplot2::ylab(NULL) +
-      ggplot2::xlab("Error percentage") +
-      ggplot2::geom_rect(ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
-                         data = boundData, fill = boundData[["fill"]], color = "black", size = 2) +
-      ggplot2::scale_x_continuous(breaks = xBreaks, labels = xLabels) +
-      ggplot2::geom_segment(ggplot2::aes(x = materiality, xend = materiality, y = 0.025, yend = 0.475, col = "Materiality"), size = 2) +
-      ggplot2::geom_segment(ggplot2::aes(x = bound, xend = bound, y = 0.025, yend = 0.475, col = "Bound"), size = 2) +
-      ggplot2::geom_segment(ggplot2::aes(x = expected.errors, xend = expected.errors, y = 0.025, yend = 0.475, col = "Expected errors"), size = 2) +
-      ggplot2::geom_segment(ggplot2::aes(x = found.errors, xend = found.errors, y = 0.025, yend = 0.475, col = "Found errors"), size = 2) +
-      ggplot2::scale_color_manual(name = "", values=c("Bound" = "black", "Materiality" = rgb(0,1,.5,1), "Expected errors" = "yellow", "Found errors" = "orange")) +
-      ggplot2::guides(col = ggplot2::guide_legend(nrow = 1, byrow = TRUE))
+ df <- data.frame()
+ p <- ggplot2::ggplot(df) +
+     ggplot2::geom_point() +
+     ggplot2::ylim(0, 1) +
+     ggplot2::ylab(NULL) +
+     ggplot2::xlab("Error percentage") +
+     ggplot2::geom_rect(ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+                        data = boundData, fill = boundData[["fill"]], color = "black", size = 2) +
+     ggplot2::scale_x_continuous(breaks = xBreaks, labels = xLabels) +
+     ggplot2::geom_segment(ggplot2::aes(x = materiality, xend = materiality, y = 0.025, yend = 0.475), size = 2, col = rgb(0,.5,1,1)) +
+     ggplot2::geom_segment(ggplot2::aes(x = expected.errors, xend = expected.errors, y = 0.025, yend = 0.475), size = 2, col = "yellow") +
+     ggplot2::geom_segment(ggplot2::aes(x = found.errors, xend = found.errors, y = 0.025, yend = 0.475), size = 2, col = "orange") +
+     ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = c(rgb(0,1,0,0))) +
+     ggplot2::scale_shape_manual(name = "", values = c(21,21,21,21), labels = c("Expected errors", "Observed errors", "Maximum error", "Materiality")) +
+     ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 9, shape = 21, fill = c("yellow","orange", "black", rgb(0,.5,1,1)), stroke = 2, color = "black")), order = 1)
 
   p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE, legend.position = "top")
   p <- p + ggplot2::theme(axis.ticks = ggplot2::element_blank(),
                           axis.text.y = ggplot2::element_blank(),
-                          axis.text.x = ggplot2::element_text(size = 17))
+                          axis.text.x = ggplot2::element_text(size = 17),
+                          legend.text = ggplot2::element_text(size = 12))
 
-  return(createJaspPlot(plot = p, title = "Evaluation information", width = 650, height = 200))
+  return(createJaspPlot(plot = p, title = "Evaluation information", width = 700, height = 200))
 
 }

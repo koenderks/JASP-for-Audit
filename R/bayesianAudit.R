@@ -50,7 +50,7 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
           if(is.null(jaspResults[["valueDistributionPlot"]]))
           {
               jaspResults[["valueDistributionPlot"]] 		<- .plotValueDistribution(dataset, options, jaspResults)
-              jaspResults[["valueDistributionPlot"]]		$dependOnOptions(c("distributionPlot", "monetaryVariable", "recordNumberVariable"))
+              jaspResults[["valueDistributionPlot"]]		$dependOnOptions(c("distributionPlot", "monetaryVariable", "recordNumberVariable", "interpretation"))
               jaspResults[["valueDistributionPlot"]] 		$position <- 4
           }
         }
