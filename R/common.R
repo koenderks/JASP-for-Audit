@@ -101,20 +101,19 @@
 
     p <- .plotMarginalJfA(values, options[["monetaryVariable"]])
 
-    if(options[["interpretation"]]){
-      p <- p + ggplot2::geom_point(ggplot2::aes(x = q[1], y = 0), shape = 21, fill = "orange", stroke = 2, size = 3)
-      p <- p + ggplot2::geom_point(ggplot2::aes(x = q[2], y = 0), shape = 21, fill = "orange", stroke = 2, size = 3)
-      p <- p + ggplot2::geom_point(ggplot2::aes(x = q[3], y = 0), shape = 21, fill = "orange", stroke = 2, size = 3)
-      p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx, y = 0), shape = 21, fill = "red", stroke = 2, size = 5)
-      p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx + sdx, y = 0), shape = 21, fill = "blue", stroke = 2, size = 4)
-      p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx - sdx, y = 0), shape = 21, fill = "blue", stroke = 2, size = 4)
+    p <- p + ggplot2::geom_point(ggplot2::aes(x = q[1], y = 0), shape = 21, fill = "orange", stroke = 2, size = 3)
+    p <- p + ggplot2::geom_point(ggplot2::aes(x = q[2], y = 0), shape = 21, fill = "orange", stroke = 2, size = 3)
+    p <- p + ggplot2::geom_point(ggplot2::aes(x = q[3], y = 0), shape = 21, fill = "orange", stroke = 2, size = 3)
+    p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx, y = 0), shape = 21, fill = "red", stroke = 2, size = 5)
+    p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx + sdx, y = 0), shape = 21, fill = "blue", stroke = 2, size = 4)
+    p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx - sdx, y = 0), shape = 21, fill = "blue", stroke = 2, size = 4)
 
-      pdata <- data.frame(x = c(0,0,0), y = c(0,0,0), l = c("1","2","3"))
-      p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = c(rgb(0,1,0,0))) +
-      ggplot2::scale_shape_manual(name = "", values = c(21,21,21), labels = c("Mean", "Mean \u00B1 sd", "Quantile")) +
-      ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = c(5, 4, 3), shape = 21, fill = c("red","blue", "orange"), stroke = 2, color = "black")), order = 1)
-      p <- JASPgraphs::themeJasp(p, legend.position = "top")
-    }
+    pdata <- data.frame(x = c(0,0,0), y = c(0,0,0), l = c("1","2","3"))
+    p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = c(rgb(0,1,0,0))) +
+    ggplot2::scale_shape_manual(name = "", values = c(21,21,21), labels = c("Mean", "Mean \u00B1 sd", "Quantile")) +
+    ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = c(5, 4, 3), shape = 21, fill = c("red","blue", "orange"), stroke = 2, color = "black")), order = 1)
+
+    p <- JASPgraphs::themeJasp(p, legend.position = "top")
 
     # # Code for points on distribution bars
     # h <- hist(values, plot = FALSE)
@@ -141,11 +140,6 @@
     # }
 
     return(createJaspPlot(plot = p, title = "Distribution Information", width = 600, height = 300))
-
-    # filename <- tempfile()
-    # png(filename = filename)
-    # p <- gridExtra::grid.arrange(p1, p2, p3, p4, ncol = 2)
-    # dev.off()
 }
 
 .plotMarginalJfA <- function(column, variableName, rugs = FALSE, displayDensity = FALSE) {

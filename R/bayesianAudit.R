@@ -4,9 +4,6 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
     options[["statistic"]]              <- "bound"
     options[["show"]]                   <- "percentage"
 
-    if(is.null(state))
-        state 							            <- list()
-
     # Specify the title of the analysis
     jaspResults$title                   <- "Bayesian Audit"
 
@@ -52,7 +49,7 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
           if(is.null(jaspResults[["valueDistributionPlot"]]))
           {
               jaspResults[["valueDistributionPlot"]] 		<- .plotValueDistribution(dataset, options, jaspResults)
-              jaspResults[["valueDistributionPlot"]]		$dependOnOptions(c("distributionPlot", "monetaryVariable", "recordNumberVariable", "interpretation"))
+              jaspResults[["valueDistributionPlot"]]		$dependOnOptions(c("distributionPlot", "monetaryVariable", "recordNumberVariable"))
               jaspResults[["valueDistributionPlot"]] 		$position <- 4
           }
         }
@@ -343,8 +340,4 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
           jaspResults[["conclusionParagraph"]]$dependOnOptions(c("IR", "CR", "confidence", "correctID", "plotBound", "materiality",
                                                                    "method", "materialityValue", "correctMUS"))
       }
-
-    # Save the state
-    state[["options"]] 					<- options
-    return(state)
 }
