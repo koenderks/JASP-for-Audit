@@ -8,9 +8,7 @@ JASP for Audit **(JfA)** is an officially supported add-on module for JASP (www.
 
 **Note: The required version of JASP (0.9.3) is not released yet, which means that the dynamic module functionality is not supported.**
 
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/25059399/51800040-01761f00-222a-11e9-8d68-4b3b23e5c97f.PNG" alt="readme4">
-</p>
+![readme5](https://user-images.githubusercontent.com/25059399/52532560-9ea37e00-2d27-11e9-888b-7c9fa466eb25.JPG)
 
 ## How to install JfA
 
@@ -32,7 +30,9 @@ This will install the Audit module into JASP, and it can be accessed by clicking
 
 You now have access to all that JfA has to offer, including methods to plan, perform and evaluate an audit. Click one of the icons in the tabbar to select an analysis. JfA provides the auditor with a workflow for performing the full statistical process of substantive testing.
 
-![readme5](https://user-images.githubusercontent.com/25059399/51800041-033fe280-222a-11e9-85a1-78565388969f.PNG)
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/25059399/51800040-01761f00-222a-11e9-8d68-4b3b23e5c97f.PNG" alt="readme4">
+</p>
 
 **Currently implemented in JfA is:**
 
@@ -41,4 +41,4 @@ You now have access to all that JfA has to offer, including methods to plan, per
 | Hypergeometric distribution      | Simple random sampling    | Attributes bound           |
 | Binomial distribution            | Systematic sampling       | Bayesian attributes bound  |
 | Beta distribution                | Cell sampling             | Stringer bound             |  
-| Beta-binomial distribution       |                           |                            |
+| Beta-binomial distribution       |                           | Cox and Snell bound        |

@@ -31,6 +31,7 @@ Form {
         expanded: true
         enabled: true
         id: optionPhase
+        columns: 1
 
         Flow {
           Layout.leftMargin: 20
@@ -141,9 +142,10 @@ Form {
         expanded: false
         enabled: false
         id: planningPhase
+        columns: 2
 
       Flow {
-      spacing: attributes.checked ? 25 : 15
+        spacing: attributes.checked ? 25 : 15
         GroupBox {
             title: qsTr("<b>Audit risk</b>")
             id: auditRisk
@@ -226,6 +228,7 @@ Form {
         text: qsTr("Advanced planning options")
         Layout.leftMargin: 20
         implicitWidth: 560
+        columns: 1
 
         Flow {
             Layout.leftMargin: 20
@@ -278,8 +281,9 @@ Form {
            PercentField {  text: qsTr("x-axis limit")                   ; name: "limx" ; defaultValue: 20; Layout.leftMargin: 20; enabled: plotPrior.checked}
            CheckBox {      text: qsTr("Additional info")                ; name: "plotPriorAdditionalInfo" ; Layout.leftMargin: 20; checked: true; enabled: plotPrior.checked}
         }
-
     }
+
+    Divider { }
 
     Item {
       height: toSampling.height
@@ -412,6 +416,8 @@ Form {
             }
         }
 
+        Divider { }
+
         Item {
           height: toExecution.height
           Layout.fillWidth: true
@@ -435,6 +441,7 @@ Form {
         expanded: false
         enabled: false
         id: executionPhase
+        columns: 1
 
         Text {
             text: qsTr("Click the 'Paste variables' button to amend the data set with two additional variables:
@@ -501,6 +508,7 @@ Form {
         expanded: false
         enabled: false
         id: evaluationPhase
+        columns: 1
 
         VariablesForm {
         availableVariablesList.name: "evaluationVariables"
@@ -626,6 +634,7 @@ Form {
         expanded: false
         enabled: false
         id: interpretationPhase
+        columns: 1
 
         Item {
           height: toReport.height

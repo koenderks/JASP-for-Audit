@@ -31,6 +31,7 @@ Form {
         expanded: true
         enabled: true
         id: optionPhase
+        columns: 1
 
         Flow {
           Layout.leftMargin: 20
@@ -258,6 +259,8 @@ Form {
         }
     }
 
+    Divider { }
+
     Item {
       height: toSampling.height
       Layout.fillWidth: true
@@ -389,6 +392,8 @@ Form {
                 }
             }
 
+            Divider { }
+
             Item {
               height: toExecution.height
               Layout.fillWidth: true
@@ -412,6 +417,7 @@ Form {
             expanded: false
             enabled: false
             id: executionPhase
+            columns: 1
 
             Text {
                 text: qsTr("Click the 'Paste variables' button to amend the data set with two additional variables:
@@ -478,6 +484,7 @@ Form {
             expanded: false
             enabled: false
             id: evaluationPhase
+            columns: 1
 
             VariablesForm {
             availableVariablesList.name: "evaluationVariables"
@@ -577,6 +584,7 @@ Form {
             expanded: false
             enabled: false
             id: interpretationPhase
+            columns: 1
 
             Item {
               height: toReport.height
