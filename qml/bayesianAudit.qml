@@ -24,6 +24,7 @@ import JASP.Widgets 1.0
 
 Form {
     id: form
+    columns: 1
 
     // Expander button for the Audit type phase
     ExpanderButton {
@@ -73,6 +74,7 @@ Form {
             font.pointSize: 12
             Layout.leftMargin: 200
         }
+
         // Variables form for preparation
         VariablesForm {
             availableVariablesList.name: "variablesFormPreparation"
@@ -98,7 +100,6 @@ Form {
         Item {
           height: toPlanning.height
           Layout.fillWidth: true
-          Layout.leftMargin: 5
 
           RowLayout {
           Label {
@@ -142,7 +143,7 @@ Form {
         expanded: false
         enabled: false
         id: planningPhase
-        columns: 2
+        columns: 1
 
       Flow {
         spacing: attributes.checked ? 25 : 15
@@ -283,8 +284,6 @@ Form {
         }
     }
 
-    Divider { }
-
     Item {
       height: toSampling.height
       Layout.fillWidth: true
@@ -319,6 +318,7 @@ Form {
         enabled: false
         expanded: false
         id: samplingPhase
+        columns: 1
 
         VariablesForm {
             availableVariablesList.name: "variablesFormSampling"
@@ -416,8 +416,6 @@ Form {
             }
         }
 
-        Divider { }
-
         Item {
           height: toExecution.height
           Layout.fillWidth: true
@@ -508,11 +506,11 @@ Form {
         expanded: false
         enabled: false
         id: evaluationPhase
-        columns: 2
+        columns: 1
 
         VariablesForm {
         availableVariablesList.name: "evaluationVariables"
-        implicitHeight: 150
+        implicitHeight: 200
 
             AssignedVariablesList {
                 name: "sampleFilter"
@@ -538,6 +536,8 @@ Form {
                 id: correctMUS
             }
         }
+
+        Divider { }
 
         Flow{
           Layout.leftMargin: 10
@@ -598,6 +598,7 @@ Form {
           Layout.leftMargin: 20
           title: qsTr("Advanced output options")
           implicitWidth: 560
+          columns: 1
 
           RadioButtonGroup {
             title: qsTr("<b>Estimator</b>")
@@ -614,8 +615,6 @@ Form {
             }
           }
         }
-
-        Divider {}
 
         Item {
           height: toInterpretation.height
