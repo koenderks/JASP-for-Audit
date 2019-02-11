@@ -390,6 +390,13 @@ Form {
 
             ColumnLayout {
 
+                  GroupBox {
+                    title: qsTr("<b>Plots</b>")
+                    id: samplingPlots
+
+                    CheckBox { text: qsTr("Sampling ratio")       ; name: "samplePie"}
+                  }
+
                 GroupBox {
                     title: qsTr("<b>Tables</b>")
                     id: samplingTables

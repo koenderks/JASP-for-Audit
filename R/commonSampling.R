@@ -397,3 +397,28 @@
   return(createJaspPlot(plot = p, title = "Sampling locations", width = 1000, height = 200))
 
 }
+
+.plotSamplePie <- function(percentage, jaspResults)
+{
+        legendTitles = c(paste0("Sample value\n(", round(percentage*100, 2) ,"%)"), paste0("Non-sample value\n(", round((1-percentage)*100, 2) ,"%)"))
+
+        lab <- c("1", "2")
+        pieData <- c(percentage, 1 - percentage)
+        ggdata <- data.frame(lab = lab, pieData = pieData)
+        p <- ggplot2::ggplot(data = ggdata, mapping = ggplot2::aes(x = "", y = pieData)) +
+            ggplot2::geom_bar(stat = "identity", width = 1e10, color = "black", size = 1, fill = c("dodgerblue1", "darkgray")) +
+            ggplot2::geom_col()
+        p <- p + ggplot2::coord_polar(theta = "y", direction = -1) +
+            ggplot2::labs(x = "", y = "") +
+            ggplot2::scale_y_continuous(breaks = c(pieData[1]/2, 0.66), labels = NULL)
+
+        pdata <- data.frame(x = c(0,0), y = c(0,0), l = c("1","2"))
+        p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = c(rgb(0,1,0,0), rgb(1,0,0,0)))
+        p <- p + ggplot2::scale_shape_manual(name = "", values = c(21,21), labels = legendTitles)
+        p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 9, shape = 21, fill = c("dodgerblue1","darkgray"), stroke = 2, color = "black")), order = 1)
+        p <- p + ggplot2::theme(axis.ticks.y = ggplot2::element_blank())
+
+        p <- JASPgraphs::themeJasp(p, legend.position = "top")
+
+    return(createJaspPlot(plot = p, title = "Sampling Ratio", width = 450, height = 450))
+}

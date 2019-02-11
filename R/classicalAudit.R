@@ -220,6 +220,18 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
         if(options[["showDescriptives"]]){
           .samplingDescriptivesTable(dataset, options, jaspResults, sample, position = 17)
         }
+
+        # Sample pie plot
+        if(options[['samplePie']] && !is.null(sample))
+        {
+            if(is.null(jaspResults[["confidenceBoundPlot"]]))
+            {
+                percentage <- sum(sample[,.v(options[["monetaryVariable"]])]) / total_data_value
+                jaspResults[["samplePiePlot"]] 		<- .plotSamplePie(percentage, jaspResults)
+                jaspResults[["samplePiePlot"]]		$dependOnOptions(c("monetaryVariable", "sampleSize", "samplePie", "sample"))
+                jaspResults[["samplePiePlot"]] 		$position <- 18
+            }
+        }
     }
 
     # Evaluation phase
@@ -227,7 +239,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
       return()
 
     jaspResults[["evaluationHeader"]] <- createJaspHtml("<u>Evaluation</u>", "h2")
-    jaspResults[["evaluationHeader"]]$position <- 18
+    jaspResults[["evaluationHeader"]]$position <- 19
     jaspResults[["evaluationHeader"]]$dependOnOptions(c("none"))
 
     runEvaluation <- (!is.null(correctID) && !is.null(sampleFilter))
@@ -240,7 +252,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
       # Perform the attributes evaluation
       .attributesBoundFullAudit(dataset, options, jaspResults)
       result                                       <- jaspResults[["result"]]$object
-      .attributesBoundTableFullAudit(options, result, jaspResults, position = 20)
+      .attributesBoundTableFullAudit(options, result, jaspResults, position = 21)
     } else {
       # Perform the MUS evaluaton
       if(options[["boundMethodMUS"]] == "stringerBound"){
@@ -249,7 +261,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
         .regressionEstimator(dataset, options, total_data_value, jaspResults)
       }
       result                                       <- jaspResults[["result"]]$object
-      .musBoundTableFullAudit(total_data_value, options, result, jaspResults, position = 20)
+      .musBoundTableFullAudit(total_data_value, options, result, jaspResults, position = 21)
     }
 
     # Interpretation before the evalution table
@@ -261,7 +273,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
                                                             bined with the prior knowledge results in an <b>", round((1 - result[["alpha"]]) * 100, 2) , "%</b> upper confidence bound of <b>", boundLabel ,"</b>. The cumulative knowledge states that there
                                                             is a <b>", confidenceLevelLabel , "</b> probability that, when one would repeaditly sample from this population, the maximum error is calculated to be lower
                                                             than <b>", boundLabel ,"</b>."), "p")
-      jaspResults[["resultParagraph"]]$position <- 19
+      jaspResults[["resultParagraph"]]$position <- 20
       jaspResults[["resultParagraph"]]$dependOnOptions(c("IR", "CR", "confidence", "correctID", "plotBound", "materiality",
                                                                "method", "materialityValue"))
     }
@@ -273,8 +285,8 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
         {
             jaspResults[["confidenceBoundPlot"]] 		<- .plotConfidenceBounds(options, result, jaspResults)
             jaspResults[["confidenceBoundPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "correctID", "plotBound", "materiality",
-                                                                     "method", "materialityValue", "correctMUS"))
-            jaspResults[["confidenceBoundPlot"]] 		$position <- 21
+                                                                     "method", "materialityValue", "correctMUS", "boundMethodMUS", "result"))
+            jaspResults[["confidenceBoundPlot"]] 		$position <- 22
         }
     }
 
@@ -285,14 +297,14 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
         {
             jaspResults[["correlationPlot"]] 		<- .plotScatterJFA(dataset, options, jaspResults)
             jaspResults[["correlationPlot"]]		$dependOnOptions(c("correctMUS", "plotRegression", "monetaryVariable"))
-            jaspResults[["correlationPlot"]] 		$position <- 22
+            jaspResults[["correlationPlot"]] 		$position <- 23
         }
     }
 
     # Interpretation after the evaluation table
     if(options[["interpretation"]] && runEvaluation){
         jaspResults[["conclusionTitle"]] <- createJaspHtml("<u>Conclusion</u>", "h2")
-        jaspResults[["conclusionTitle"]]$position <- 23
+        jaspResults[["conclusionTitle"]]$position <- 24
         jaspResults[["conclusionTitle"]]$dependOnOptions(c("none"))
 
         if(result[["bound"]] < options[["materiality"]]){
@@ -305,7 +317,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
         jaspResults[["conclusionParagraph"]] <- createJaspHtml(paste0("To approve these data, a <b>", confidenceLevelLabel ,"</b> upper confidence bound on the population proportion of full errors should be determined to be
                                                                     lower than materiality, in this case <b>", materialityLevelLabel ,"</b>. For the current data, the confidence bound is <b>", above_below ,"</b> than materiality.
                                                                     The conclusion for these data is that the data contain ", approve ,"."), "p")
-        jaspResults[["conclusionParagraph"]]$position <- 24
+        jaspResults[["conclusionParagraph"]]$position <- 25
         jaspResults[["conclusionParagraph"]]$dependOnOptions(c("IR", "CR", "confidence", "correctID", "plotBound", "materiality",
                                                                  "method", "materialityValue", "correctMUS"))
     }
