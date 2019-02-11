@@ -263,7 +263,8 @@
       evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                              type = 'string')
 
     message <- base::switch(options[["boundMethodMUS"]],
-                              "stringerBound" = "The confidence bound is calculated according to the <b>Stringer</b> method.")
+                              "stringerBound" = "The confidence bound is calculated according to the <b>Stringer</b> method.",
+                              "regressionBound" = "The confidence bound is calculated according to the <b>Regression</b> method." )
     evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
     # Return empty table
@@ -295,4 +296,56 @@
     if(options[["mostLikelyError"]])
       row <- cbind(row, mle = mle)
     evaluationTable$addRows(row)
+}
+
+.regressionEstimator <- function(dataset, options, total_data_value, jaspResults){
+
+    ar                      <- 1 - options[["confidence"]]
+    ir                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+    cr                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+    alpha                   <- ar / ir / cr
+
+    n                       <- 0
+    M                       <- 0
+    z                       <- 0
+    bound                   <- "."
+
+    if(options[["correctMUS"]] != "" && options[["sampleFilter"]] != "" && options[["monetaryVariable"]] != ""){
+        sample                  <- dataset[, c(.v(options[["monetaryVariable"]]), .v(options[["correctMUS"]]))]
+        n                       <- nrow(sample)
+
+        t                       <- sample[, .v(options[["monetaryVariable"]])] - sample[, .v(options[["correctMUS"]])]
+        z                       <- t / sample[, .v(options[["monetaryVariable"]])]
+        z                       <- sort(subset(z, z > 0), decreasing = TRUE)
+        M                       <- length(z)
+
+        B                       <- total_data_value
+        N                       <- options[["N"]]
+        b                       <- sample[, .v(options[["monetaryVariable"]])]
+        w                       <- sample[, .v(options[["correctMUS"]])]
+        #b1                      <- as.numeric(coef(lm(w ~ b))[2])
+        b1                      <- (sum(b * w) - (sum(b) * sum(w) / n)) / (sum(b^2) - (sum(b)^2 / n))
+
+        meanb                   <- mean(b)
+        meanw                   <- mean(w)
+
+        mleregression           <- (N * meanw + b1 * (B - N * meanb))
+        s                       <- sd(w) * ( N / sqrt(n)) * sqrt( (N-n) / (N-1) ) * sqrt(1 - cor(b, w)^2)
+        upperValue              <- mleregression + qnorm(options[["confidence"]]) * s
+        bound                   <- (upperValue - B) / B
+    }
+
+    resultList <- list()
+    resultList[["n"]]           <- n
+    resultList[["k"]]           <- M
+    resultList[["z"]]           <- z
+    resultList[["IR"]]          <- options[["IR"]]
+    resultList[["CR"]]          <- options[["CR"]]
+    resultList[["confidence"]]  <- options[["confidence"]]
+    resultList[["bound"]]       <- bound
+    resultList[["alpha"]]       <- alpha
+
+    jaspResults[["result"]] <- createJaspState(resultList)
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilterMUS",
+                                              "auditType", "boundMethodMUS", "monetaryVariableMUS", "materialityValue"))
 }

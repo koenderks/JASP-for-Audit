@@ -77,7 +77,7 @@ Form {
         VariablesForm {
             availableVariablesList.name: "variablesFormPreparation"
             id: variablesFormPreparation
-            implicitHeight: 100
+            implicitHeight: 110
 
             AssignedVariablesList {
                 name: "recordNumberVariable"
@@ -484,7 +484,7 @@ Form {
             expanded: false
             enabled: false
             id: evaluationPhase
-            columns: 1
+            columns: 2
 
             VariablesForm {
             availableVariablesList.name: "evaluationVariables"
@@ -534,6 +534,11 @@ Form {
                       text: qsTr("Evaluation information")
                       name: "plotBound"
                     }
+                    CheckBox {
+                      text: qsTr("Correlation plot")
+                      name: "plotCorrelation"
+                      visible: mus.checked
+                    }
                 }
             }
 
@@ -543,6 +548,7 @@ Form {
               Layout.leftMargin: 20
               title: qsTr("Advanced output options")
               implicitWidth: 560
+              columns: 1
 
               RadioButtonGroup {
                 title: qsTr("<b>Estimator</b>")
@@ -556,9 +562,12 @@ Form {
                 RadioButton {
                   name: "regressionBound"
                   text: qsTr("Regression")
+                  id: regressionBound
                 }
               }
             }
+
+            Divider {}
 
             Item {
               height: toInterpretation.height

@@ -77,7 +77,7 @@ Form {
         VariablesForm {
             availableVariablesList.name: "variablesFormPreparation"
             id: variablesFormPreparation
-            implicitHeight: 100
+            implicitHeight: 110
 
             AssignedVariablesList {
                 name: "recordNumberVariable"
@@ -508,7 +508,7 @@ Form {
         expanded: false
         enabled: false
         id: evaluationPhase
-        columns: 1
+        columns: 2
 
         VariablesForm {
         availableVariablesList.name: "evaluationVariables"
@@ -583,6 +583,11 @@ Form {
                     checked: true
                     enabled: plotPriorAndPosterior.checked
                   }
+                  CheckBox {
+                    text: qsTr("Correlation plot")
+                    name: "plotCorrelation"
+                    visible: mus.checked
+                  }
               }
           }
         }
@@ -609,6 +614,8 @@ Form {
             }
           }
         }
+
+        Divider {}
 
         Item {
           height: toInterpretation.height

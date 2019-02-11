@@ -259,3 +259,75 @@
   return(createJaspPlot(plot = p, title = "Evaluation information", width = 700, height = 200))
 
 }
+
+.plotScatterJFA <- function(dataset, options, jaspResults) {
+
+    d <- data.frame(xx= dataset[,.v(options[["monetaryVariable"]])], yy= dataset[,.v(options[["correctMUS"]])])
+    d <- na.omit(d)
+    xVar <- d$xx
+    yVar <- d$yy
+
+    fit <- vector("list", 1)# vector("list", 4)
+    fit[[1]] <- lm(yy ~ poly(xx, 1, raw= TRUE), data = d)
+
+    bestModel <- 1 # which.min(Bic)
+
+    xlow <- min(pretty(xVar))
+    xhigh <- max(pretty(xVar))
+    xticks <- pretty(c(xlow, xhigh))
+    ylow <- min(min(pretty(yVar)), min(.poly.pred(fit[[bestModel]], line= FALSE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd=lwd)))
+    yhigh <- max(max(pretty(yVar)), max(.poly.pred(fit[[bestModel]], line= FALSE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd=lwd)))
+
+    yticks <- pretty(c(ylow, yhigh))
+
+    # format x labels
+    xLabs <- vector("character", length(xticks))
+    xLabs <- format(xticks, digits= 3, scientific = FALSE)
+
+    # Format y labels
+    yLabs <- vector("character", length(yticks))
+    yLabs <- format(yticks, digits= 3, scientific = FALSE)
+
+    co <- round(cor(dataset[,.v(options[["monetaryVariable"]])], dataset[,.v(options[["correctMUS"]])]), 2)
+
+    p <- JASPgraphs::drawAxis(xName = "Book Values", yName = "True Values", xBreaks = xticks, yBreaks = yticks, yLabels = yLabs, xLabels = xLabs, force = TRUE)
+    p <- JASPgraphs::drawPoints(p, dat = d, size = 3)
+    p <- .poly.pred(fit[[bestModel]], plot = p, line= TRUE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd = 1)
+    p <- p + ggplot2::annotate("text", x = xticks[1], y = yticks[length(yticks)],
+                                label = paste0("italic(r) == ", co), size = 7, parse = TRUE, hjust = -0.5, vjust = 0.5)
+
+    # JASP theme
+    p <- JASPgraphs::themeJasp(p)
+
+    return(createJaspPlot(plot = p, title = "Correlation Plot", width = 500, height = 400))
+
+}
+
+.poly.pred <- function(fit, plot = NULL, line=FALSE, xMin, xMax, lwd) {
+  # create function formula
+  f <- vector("character", 0)
+
+  for (i in seq_along(coef(fit))) {
+    if (i == 1) {
+      temp <- paste(coef(fit)[[i]])
+      f <- paste(f, temp, sep="")
+    }
+
+    if (i > 1) {
+      temp <- paste("(", coef(fit)[[i]], ")*", "x^", i-1, sep="")
+      f <- paste(f, temp, sep="+")
+    }
+  }
+
+  x <- seq(xMin, xMax, length.out = 100)
+  predY <- eval(parse(text=f))
+
+  if (line == FALSE) {
+    return(predY)
+  }
+
+  if (line) {
+    plot <- plot + ggplot2::geom_line(data = data.frame(x, predY),mapping = ggplot2::aes(x = x, y = predY), size=lwd)
+    return(plot)
+  }
+}

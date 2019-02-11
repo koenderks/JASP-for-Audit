@@ -66,7 +66,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
 
       # Create labels for the confidence and materiality
       confidenceLevelLabel              <- round(options[["confidence"]], 2)
-      materialityLevelLabel             <- round(options[["materiality"]], 2)
+      materialityLevelLabel             <- round(options[["materiality"]], 4)
       if(options[["show"]] == "percentage"){
         confidenceLevelLabel            <- paste0(confidenceLevelLabel * 100, "%")
         materialityLevelLabelBackup     <- paste0(materialityLevelLabel * 100, "%")
@@ -245,6 +245,8 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
       # Perform the MUS evaluaton
       if(options[["boundMethodMUS"]] == "stringerBound"){
         .stringerBound(dataset, options, jaspResults)
+      } else if(options[["boundMethodMUS"]] == "regressionBound"){
+        .regressionEstimator(dataset, options, total_data_value, jaspResults)
       }
       result                                       <- jaspResults[["result"]]$object
       .musBoundTableFullAudit(total_data_value, options, result, jaspResults, position = 20)
@@ -255,7 +257,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
       boundLabel <- base::switch(runEvaluation,
                                   "TRUE" = paste0(round(result[["bound"]] * 100, 2), "%"),
                                   "FALSE" = "...%")
-      jaspResults[["resultParagraph"]] <- createJaspHtml(paste0("The sample consisted of <b>", nrow(dataset) , "</b> observations, <b>", result[["k"]] , "</b> of which were found to contain a full error. The knowledge from these data, com-
+      jaspResults[["resultParagraph"]] <- createJaspHtml(paste0("The sample consisted of <b>", nrow(dataset) , "</b> observations, <b>", result[["k"]] , "</b> of which were found to contain an error. The knowledge from these data, com-
                                                             bined with the prior knowledge results in an <b>", round((1 - result[["alpha"]]) * 100, 2) , "%</b> upper confidence bound of <b>", boundLabel ,"</b>. The cumulative knowledge states that there
                                                             is a <b>", confidenceLevelLabel , "</b> probability that, when one would repeaditly sample from this population, the maximum error is calculated to be lower
                                                             than <b>", boundLabel ,"</b>."), "p")
@@ -276,10 +278,21 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
         }
     }
 
+    # Correlation plot
+    if(options[['plotCorrelation']] && runEvaluation)
+    {
+        if(is.null(jaspResults[["correlationPlot"]]))
+        {
+            jaspResults[["correlationPlot"]] 		<- .plotScatterJFA(dataset, options, jaspResults)
+            jaspResults[["correlationPlot"]]		$dependOnOptions(c("correctMUS", "plotRegression", "monetaryVariable"))
+            jaspResults[["correlationPlot"]] 		$position <- 22
+        }
+    }
+
     # Interpretation after the evaluation table
     if(options[["interpretation"]] && runEvaluation){
         jaspResults[["conclusionTitle"]] <- createJaspHtml("<u>Conclusion</u>", "h2")
-        jaspResults[["conclusionTitle"]]$position <- 22
+        jaspResults[["conclusionTitle"]]$position <- 23
         jaspResults[["conclusionTitle"]]$dependOnOptions(c("none"))
 
         if(result[["bound"]] < options[["materiality"]]){
@@ -292,7 +305,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
         jaspResults[["conclusionParagraph"]] <- createJaspHtml(paste0("To approve these data, a <b>", confidenceLevelLabel ,"</b> upper confidence bound on the population proportion of full errors should be determined to be
                                                                     lower than materiality, in this case <b>", materialityLevelLabel ,"</b>. For the current data, the confidence bound is <b>", above_below ,"</b> than materiality.
                                                                     The conclusion for these data is that the data contain ", approve ,"."), "p")
-        jaspResults[["conclusionParagraph"]]$position <- 23
+        jaspResults[["conclusionParagraph"]]$position <- 24
         jaspResults[["conclusionParagraph"]]$dependOnOptions(c("IR", "CR", "confidence", "correctID", "plotBound", "materiality",
                                                                  "method", "materialityValue", "correctMUS"))
     }
