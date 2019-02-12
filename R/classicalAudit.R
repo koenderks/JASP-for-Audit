@@ -238,8 +238,11 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
       emptyVariable <- rep(NA, options[["N"]])
       .setColumnDataAsNominal("sampleFilter", sampleFilter)
       # base::switch(options[["auditType"]],
-      #               "attributes" = .setColumnDataAsNominal("ErrorVariable", emptyVariable),
+      #               "attributes" = .setColumnDataAsNominal("errorVariable", emptyVariable),
       #               "mus" = .setColumnDataAsScale("TrueValues", emptyVariable))
+      base::switch(options[["auditType"]],
+                    "attributes" = .setColumnDataAsNominal("errorVariable", base::sample(0:1, size = options[["N"]], replace = TRUE, prob = c(0.97, 0.03))),
+                    "mus" = .setColumnDataAsScale("TrueValues", dataset[,.v(options[["monetaryVariable"]])] - (base::sample(0:1, size = options[["N"]],replace = TRUE, prob = c(0.80, 0.20)) * rnorm(options[["N"]], mean = 300, sd = 150))))
     }
 
     # Evaluation phase

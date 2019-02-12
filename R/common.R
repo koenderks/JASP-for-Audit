@@ -165,7 +165,7 @@
   if (!displayDensity)
     p <-
       JASPgraphs::drawAxis(
-        xName = "Book value", yName = "Counts", xBreaks = xticks,
+        xName = "Book values", yName = "Counts", xBreaks = xticks,
         yBreaks = base::pretty(c(0, h$counts)), force = TRUE, xLabels = xticks
       )
   else
@@ -283,7 +283,7 @@
  #                          axis.text.x = ggplot2::element_text(size = 17),
  #                          legend.text = ggplot2::element_text(size = 12))
 
-  return(createJaspPlot(plot = p, title = "Evaluation information", width = 600, height = 300))
+  return(createJaspPlot(plot = p, title = "Evaluation Information", width = 600, height = 300))
 
 }
 
@@ -321,7 +321,7 @@
     cols <- rep("gray", nrow(d))
     cols[which(d$xx != d$yy)] <- "red"
 
-    p <- JASPgraphs::drawAxis(xName = "Book Values", yName = "True Values", xBreaks = xticks, yBreaks = yticks, yLabels = yLabs, xLabels = xLabs, force = TRUE)
+    p <- JASPgraphs::drawAxis(xName = "Book values", yName = "True values", xBreaks = xticks, yBreaks = yticks, yLabels = yLabs, xLabels = xLabs, force = TRUE)
     p <- JASPgraphs::drawPoints(p, dat = d, size = 3, fill = cols)
     p <- .poly.pred(fit[[bestModel]], plot = p, line= TRUE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd = 1)
     p <- p + ggplot2::annotate("text", x = xticks[1], y = yticks[length(yticks)],

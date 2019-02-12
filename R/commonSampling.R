@@ -345,7 +345,7 @@
 
   if(!is.null(jaspResults[["simpleRandomSamplingInfoTable"]])) return()
 
-  simpleRandomSamplingInfoTable                           <- createJaspTable("Sampling information")
+  simpleRandomSamplingInfoTable                           <- createJaspTable("Sample Information Table")
   jaspResults[["simpleRandomSamplingInfoTable"]]          <- simpleRandomSamplingInfoTable
   simpleRandomSamplingInfoTable$position                  <- position
   simpleRandomSamplingInfoTable$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
@@ -389,5 +389,5 @@
 
         p <- JASPgraphs::themeJasp(p, legend.position = "top")
 
-    return(createJaspPlot(plot = p, title = "Sampling Ratio", width = 450, height = 450))
+    return(createJaspPlot(plot = p, title = "Sampling Proportions", width = 450, height = 450))
 }

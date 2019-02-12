@@ -157,7 +157,7 @@
 
   if(!is.null(jaspResults[["sampletable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-  sampletable                       <- createJaspTable("Prior Sample Table")
+  sampletable                       <- createJaspTable("Implicit Sample Table")
   jaspResults[["sampletable"]]      <- sampletable
   sampletable$position              <- position
   sampletable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors", "implicitsample", "statistic",
