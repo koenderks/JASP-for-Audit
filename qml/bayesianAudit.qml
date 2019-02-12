@@ -394,7 +394,7 @@ Form {
                     title: qsTr("<b>Plots</b>")
                     id: samplingPlots
 
-                    CheckBox { text: qsTr("Sampling ratio")       ; name: "samplePie"}
+                    CheckBox { text: qsTr("Sampling proportions")       ; name: "samplePie"}
                   }
 
                 GroupBox {
@@ -461,6 +461,15 @@ Form {
           height: toEvaluation.height
           Layout.fillWidth: true
 
+          CheckBox {
+            anchors.right: pasteButton.left
+            width: height
+            visible: false
+            name: "pasteVariables"
+            id: pasteVariables
+            checked: false
+          }
+
           Button {
             text: qsTr("<b>Paste variables</b>")
             id: pasteButton
@@ -468,6 +477,7 @@ Form {
             onClicked: {
               toEvaluation.enabled = true
               pasteButton.enabled = false
+              pasteVariables.checked = true
             }
           }
 

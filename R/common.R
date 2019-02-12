@@ -165,7 +165,7 @@
   if (!displayDensity)
     p <-
       JASPgraphs::drawAxis(
-        xName = variableName, yName = "Counts", xBreaks = xticks,
+        xName = "Book value", yName = "Counts", xBreaks = xticks,
         yBreaks = base::pretty(c(0, h$counts)), force = TRUE, xLabels = xticks
       )
   else
@@ -224,24 +224,30 @@
   expected.errors <- base::switch(options[["expected.errors"]],
                                       "kPercentage" = options[["kPercentageNumber"]],
                                       "kNumber" = options[["kNumberNumber"]] / result[["n"]])
-  found.errors    <- result[["k"]] / result[["n"]]
+  if(options[["auditType"]] == "attributes"){
+    found.errors    <- result[["k"]] / result[["n"]]
+  } else {
+    found.errors    <- sum(result[["z"]]) / result[["n"]]
+  }
 
-  name <- rev(c("Materiality", "Upper Bound", "MLE", "Expected Error"))
-  column <- rev(c(materiality, bound, found.errors, expected.errors))
+  name <- rev(c("Materiality", "Maximum Error", "Expected Error"))
+  column <- rev(c(materiality, found.errors, expected.errors))
 
   boundColor      <- ifelse(bound < materiality, yes = rgb(0,1,.5,1), no = rgb(1,0,0,.7))
 
-  yBreaks <- JASPgraphs::getPrettyAxisBreaks(c(0,column), min.n = 4)
+  yBreaks <- JASPgraphs::getPrettyAxisBreaks(c(0,column, bound), min.n = 4)
 
   tb <- data.frame(x = name, column = column)
   tb$x <- factor(tb$x, levels = tb$x)
   p  <- ggplot2::ggplot(data = data.frame(x = tb[, 1], y = tb[, 2]), ggplot2::aes(x = x, y = y)) +
-      ggplot2::geom_bar(stat = "identity", col = "black", size = 1, fill = rev(c("darkgray", boundColor, "orange", "yellow"))) +
+      ggplot2::geom_bar(stat = "identity", col = "black", size = 1, fill = rev(c("darkgray", boundColor, "yellow"))) +
       ggplot2::coord_flip() +
       ggplot2::xlab(NULL) +
       ggplot2::ylab("Error percentage") +
       ggplot2::theme(axis.ticks.x = ggplot2::element_blank(),axis.ticks.y = ggplot2::element_blank()) +
-      ggplot2::scale_y_continuous(breaks = yBreaks, labels = paste0(round(yBreaks,2)*100, "%"))
+      ggplot2::scale_y_continuous(breaks = yBreaks, labels = paste0(round(yBreaks,2)*100, "%")) +
+      ggplot2::geom_segment(ggplot2::aes(y = found.errors, yend = bound, x = 2, xend = 2), size = 1) +
+      ggplot2::geom_segment(ggplot2::aes(y = bound, yend = bound, x = 2.25, xend = 1.75), size = 1)
 
   # JASP theme
   p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE)
@@ -285,6 +291,7 @@
 
     d <- data.frame(xx= dataset[,.v(options[["monetaryVariable"]])], yy= dataset[,.v(options[["correctMUS"]])])
     d <- na.omit(d)
+    d <- ceiling(d)
     xVar <- d$xx
     yVar <- d$yy
 

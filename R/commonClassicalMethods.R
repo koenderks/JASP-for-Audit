@@ -185,7 +185,7 @@
 
     boundTable          <- "."
     if(result[["bound"]] != "."){
-        boundTable <- round(result[["bound"]], 2)
+        boundTable <- round(result[["bound"]], 4)
         if(options[["show"]] == "percentage")
           boundTable <- paste0(boundTable * 100, "%")
     }
@@ -206,7 +206,7 @@
     alpha                   <- ar / ir / cr
 
     n                       <- 0
-    M                       <- 0
+    NoOfErrors              <- 0
     z                       <- 0
     bound                   <- "."
 
@@ -215,13 +215,14 @@
       n                       <- nrow(sample)
       t                       <- sample[, .v(options[["monetaryVariable"]])] - sample[, .v(options[["correctMUS"]])]
       z                       <- t / sample[, .v(options[["monetaryVariable"]])]
-      z                       <- sort(subset(z, z > 0), decreasing = TRUE)
-      M                       <- length(z)
+      zplus                   <- sort(subset(z, z > 0), decreasing = TRUE)
+      M                       <- length(zplus)
+      NoOfErrors              <- length(which(t != 0))
       bound                   <- 1 - alpha^(1/n)
       if(M > 0){
           prop.sum            <- 0
           for(i in 1:M){
-              prop.sum        <- prop.sum + ((qbeta(1 - alpha, i + 1, n - i) - qbeta(1 - alpha, (i-1) + 1, n - (i-1) ))  * z[i])
+              prop.sum        <- prop.sum + ((qbeta(1 - alpha, i + 1, n - i) - qbeta(1 - alpha, (i-1) + 1, n - (i-1) ))  * zplus[i])
           }
           bound               <- bound + prop.sum
       }
@@ -229,7 +230,7 @@
 
     resultList <- list()
     resultList[["n"]]           <- n
-    resultList[["k"]]           <- M
+    resultList[["k"]]           <- NoOfErrors
     resultList[["z"]]           <- z
     resultList[["IR"]]          <- options[["IR"]]
     resultList[["CR"]]          <- options[["CR"]]
@@ -264,7 +265,7 @@
 
     message <- base::switch(options[["boundMethodMUS"]],
                               "stringerBound" = "The confidence bound is calculated according to the <b>Stringer</b> method.",
-                              "regressionBound" = "The confidence bound is calculated according to the <b>Regression</b> method." )
+                              "regressionBound" = "The confidence bound is calculated according to the <b>Regression</b> method.")
     evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
     # Return empty table
@@ -316,8 +317,8 @@
 
         t                       <- sample[, .v(options[["monetaryVariable"]])] - sample[, .v(options[["correctMUS"]])]
         z                       <- t / sample[, .v(options[["monetaryVariable"]])]
-        z                       <- sort(subset(z, z > 0), decreasing = TRUE)
-        M                       <- length(z)
+        zplus                   <- sort(subset(z, z > 0), decreasing = TRUE)
+        M                       <- length(which(t != 0))
 
         B                       <- total_data_value
         N                       <- options[["N"]]

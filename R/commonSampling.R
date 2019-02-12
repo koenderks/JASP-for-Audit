@@ -349,7 +349,7 @@
   jaspResults[["simpleRandomSamplingInfoTable"]]          <- simpleRandomSamplingInfoTable
   simpleRandomSamplingInfoTable$position                  <- position
   simpleRandomSamplingInfoTable$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
-                                                  "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "N"))
+                                                  "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "N", "seed", "seedNumber"))
 
   simpleRandomSamplingInfoTable$addColumnInfo(name="n", title ="Sample size", type = "string")
   simpleRandomSamplingInfoTable$addColumnInfo(name="V", title ="Sample value", type = "string")
@@ -365,37 +365,6 @@
   if(options[["samplingType"]] != "simplerandomsampling")
     row <- cbind(row, I = interval)
   simpleRandomSamplingInfoTable$addRows(row)
-}
-
-.plotSampleLocations <- function(options, rows, samples, xlab, jaspResults){
-
-  df <- data.frame()
-  p <- ggplot2::ggplot(df) +
-      ggplot2::geom_point() +
-      ggplot2::xlim(min(rows) - 1, max(rows) + 1) +
-      ggplot2::ylim(-0.5, 0.5) +
-      ggplot2::ylab(NULL) +
-      ggplot2::xlab(xlab) +
-      ggplot2::geom_segment(data = data.frame(x = min(rows) - 1, xend = max(rows) + 1, y = 0, yend = 0),
-                            ggplot2::aes(x = x, y = y, xend = xend, yend = yend), inherit.aes = FALSE, size = 1) +
-      ggplot2::geom_segment(data = data.frame(x = min(rows) - 1, xend = min(rows) - 1, y = 0.3, yend = -0.3),
-                            ggplot2::aes(x = x, y = y, xend = xend, yend = yend), inherit.aes = FALSE, size = 1) +
-      ggplot2::geom_segment(data = data.frame(x = max(rows) + 1, xend = max(rows) + 1, y = 0.3, yend = -0.3),
-                            ggplot2::aes(x = x, y = y, xend = xend, yend = yend), inherit.aes = FALSE, size = 1) +
-      ggplot2::geom_segment(data = data.frame(x = samples, xend = samples, y = rep(0.1, length(samples)), yend = rep(-0.1, length(samples))),
-                            ggplot2::aes(x = x, y = y, xend = xend, yend = yend), inherit.aes = FALSE, size = 1, color = "red")
-
-      if(options[["markSamples"]]){
-        p <- p + ggrepel::geom_text_repel(ggplot2::aes(x = samples, y = rep(0, length(samples)), label = samples), vjust = -1, hjust = -0.5)
-      }
-
-  p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE)
-  p <- p + ggplot2::theme(axis.ticks = ggplot2::element_blank(),
-                          axis.text.x = ggplot2::element_blank(),
-                          axis.text.y = ggplot2::element_blank())
-
-  return(createJaspPlot(plot = p, title = "Sampling locations", width = 1000, height = 200))
-
 }
 
 .plotSamplePie <- function(percentage, jaspResults)

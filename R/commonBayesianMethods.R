@@ -368,7 +368,7 @@
 
     boundTable <- result[["bound"]]
     if(!"." %in% boundTable){
-      boundTable            <- round(result[["bound"]], 2)
+      boundTable            <- round(result[["bound"]], 4)
       if(options[["show"]] == "percentage")
         boundTable          <- paste0(boundTable * 100, "%")
     }
@@ -550,7 +550,8 @@
       evaluationTable$addColumnInfo(name = 'bf',          title = "BF\u208B\u208A",         type = 'string')
 
     message <- base::switch(options[["boundMethodMUS"]],
-                                      "coxAndSnellBound" = "The confidence bound is calculated according to the <b>Cox and Snell</b> method.")
+                                      "coxAndSnellBound" = "The confidence bound is calculated according to the <b>Cox and Snell</b> method.",
+                                      "regressionBound" = "The confidence bound is calculated according to the <b>Regression</b> method.")
     evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
     if(options[["correctMUS"]] == "" || options[["sampleFilter"]] == ""){
@@ -573,7 +574,7 @@
     boundTable <- result[["bound"]]
     projectedMisstatement <- "."
     if(!"." %in% boundTable){
-      boundTable            <- round(result[["bound"]],3)
+      boundTable            <- round(result[["bound"]], 4)
       projectedMisstatement <- ceiling(result[["bound"]] * total_data_value)
       if(options[["show"]] == "percentage")
         boundTable          <- paste0(boundTable * 100, "%")

@@ -150,11 +150,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
     monetaryVariable                <- unlist(options$monetaryVariable)
     if(monetaryVariable == "")      monetaryVariable <- NULL
     variables                       <- unlist(options$variables)
-    sampleFilter                    <- unlist(options$sampleFilter)
-    if(sampleFilter == "")          sampleFilter <- NULL
-    correctID                       <- base::switch(options[["auditType"]], "attributes" = unlist(options$correctID), "mus" = unlist(options$correctMUS))
-    if(correctID == "")             correctID <- NULL
-    variables.to.read               <- c(recordVariable, variables, rankingVariable, correctID, sampleFilter, monetaryVariable)
+    variables.to.read               <- c(recordVariable, variables, rankingVariable, monetaryVariable)
     dataset                         <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
 
     # Only runs when a record variable has been specified
@@ -234,9 +230,35 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
         }
     }
 
+    # TODO: Add columns to data instead of replace existing
+    if(options[["pasteVariables"]]){
+      sampleFilter <- rep(0, options[["N"]])
+      sampleFilter[sample[,.v(options[["recordNumberVariable"]])]] <- 1
+      sampleFilter <- as.integer(sampleFilter)
+      emptyVariable <- rep(NA, options[["N"]])
+      .setColumnDataAsNominal("sampleFilter", sampleFilter)
+      # base::switch(options[["auditType"]],
+      #               "attributes" = .setColumnDataAsNominal("ErrorVariable", emptyVariable),
+      #               "mus" = .setColumnDataAsScale("TrueValues", emptyVariable))
+    }
+
     # Evaluation phase
     if(!options[["evaluationChecked"]])
       return()
+
+    recordVariable                  <- unlist(options$recordNumberVariable)
+    if(recordVariable == "")        recordVariable <- NULL
+    rankingVariable                 <- unlist(options$rankingVariable)
+    if(rankingVariable == "")       rankingVariable <- NULL
+    monetaryVariable                <- unlist(options$monetaryVariable)
+    if(monetaryVariable == "")      monetaryVariable <- NULL
+    variables                       <- unlist(options$variables)
+    sampleFilter                    <- unlist(options$sampleFilter)
+    if(sampleFilter == "")          sampleFilter <- NULL
+    correctID                       <- base::switch(options[["auditType"]], "attributes" = unlist(options$correctID), "mus" = unlist(options$correctMUS))
+    if(correctID == "")             correctID <- NULL
+    variables.to.read               <- c(recordVariable, variables, rankingVariable, correctID, sampleFilter, monetaryVariable)
+    dataset                         <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
 
     jaspResults[["evaluationHeader"]] <- createJaspHtml("<u>Evaluation</u>", "h2")
     jaspResults[["evaluationHeader"]]$position <- 19
