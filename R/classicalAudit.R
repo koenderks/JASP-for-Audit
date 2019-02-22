@@ -3,7 +3,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
     options[["show"]]                   <- "percentage"
 
     # Specify the title of the analysis
-    jaspResults$title   <- "Audit"
+    jaspResults$title   <- "Sampling Process"
 
     # Headers for the sub-analyses
     if(options[["auditType"]] == "attributes"){

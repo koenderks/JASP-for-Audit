@@ -105,19 +105,19 @@ Form {
             AssignedVariablesList {
                 name: "recordNumberVariable"
                 title: qsTr("Record numbers")
-                singleItem: true
+                singleVariable: true
                 allowedColumns: ["nominal", "ordinal", "scale"]
             }
             AssignedVariablesList {
                 name: "rankingVariable"
                 title: qsTr("Ranking variable (optional)")
-                singleItem: true
+                singleVariable: true
                 allowedColumns: ["scale"]
                 }
             AssignedVariablesList {
                 name: "variables"
                 title: qsTr("Sampling variables")
-                singleItem: false
+                singleVariable: false
                 allowedColumns: ["scale", "ordinal", "nominal"]
             }
         }
@@ -132,25 +132,25 @@ Form {
             AssignedVariablesList {
                 name: "recordNumberVariableMUS"
                 title: qsTr("Record numbers")
-                singleItem: true
+                singleVariable: true
                 allowedColumns: ["nominal", "ordinal", "scale"]
             }
             AssignedVariablesList {
                 name: "monetaryVariableMUS"
                 title: qsTr("Monetary values")
-                singleItem: true
+                singleVariable: true
                 allowedColumns: ["scale"]
                 }
             AssignedVariablesList {
                 name: "rankingVariableMUS"
                 title: qsTr("Ranking variable (optional)")
-                singleItem: true
+                singleVariable: true
                 allowedColumns: ["scale"]
                 }
             AssignedVariablesList {
                 name: "variablesMUS"
                 title: qsTr("Sampling variables")
-                singleItem: false
+                singleVariable: false
                 allowedColumns: ["scale", "ordinal", "nominal"]
             }
         }

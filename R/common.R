@@ -34,25 +34,25 @@
   dataTable$addColumnInfo(name = 'popSize',     title = "Population size",        type = 'string')
   dataTable$addColumnInfo(name = 'value',       title = "Total value",            type = 'string')
   dataTable$addColumnInfo(name = 'mean',        title = "Mean",                   type = 'string')
-  dataTable$addColumnInfo(name = 'sd',          title = "sd",                     type = 'string')
-  dataTable$addColumnInfo(name = 'q1',          title = "25%",                    type = 'string', overtitle = "Quantiles")
-  dataTable$addColumnInfo(name = 'q2',          title = "50%",                    type = 'string', overtitle = "Quantiles")
-  dataTable$addColumnInfo(name = 'q3',          title = "75%",                    type = 'string', overtitle = "Quantiles")
+  dataTable$addColumnInfo(name = 'sd',          title = "Std. deviation",         type = 'string')
+  dataTable$addColumnInfo(name = 'p1',          title = "25%",                    type = 'string', overtitle = "Percentile")
+  dataTable$addColumnInfo(name = 'p2',          title = "50%",                    type = 'string', overtitle = "Percentile")
+  dataTable$addColumnInfo(name = 'p3',          title = "75%",                    type = 'string', overtitle = "Percentile")
 
   if(options[["recordNumberVariable"]] == "" || options[["monetaryVariable"]] == ""){
-    row <- data.frame(popSize = ".", value = ".", mean = ".", sd = ".", q1 = ".", q2 = ".", q3 = ".")
+    row <- data.frame(popSize = ".", value = ".", mean = ".", sd = ".", p1 = ".", p2 = ".", p3 = ".")
     dataTable$addRows(row)
     return()
   }
 
   popSize                           <- options[["N"]]
   values                            <- dataset[, .v(options[["monetaryVariable"]])]
-  total.value                       <- ceiling(sum(values))
-  mean.value                        <- ceiling(mean(values))
-  sd.value                          <- ceiling(sd(values))
-  Q                                 <- ceiling(as.numeric(quantile(values, c(0.25, 0.50, 0.75))))
+  total.value                       <- round(sum(values), 2)
+  mean.value                        <- round(mean(values), 2)
+  sd.value                          <- round(sd(values), 2)
+  Q                                 <- round(as.numeric(quantile(values, c(0.25, 0.50, 0.75))), 2)
 
-  row <- data.frame(popSize = popSize, value = total.value, mean = mean.value, sd = sd.value, q1 = Q[1], q2 = Q[2], q3 = Q[3])
+  row <- data.frame(popSize = popSize, value = total.value, mean = mean.value, sd = sd.value, p1 = Q[1], p2 = Q[2], p3 = Q[3])
   dataTable$addRows(row)
 }
 
@@ -110,7 +110,7 @@
 
     pdata <- data.frame(x = c(0,0,0), y = c(0,0,0), l = c("1","2","3"))
     p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = c(rgb(0,1,0,0))) +
-    ggplot2::scale_shape_manual(name = "", values = c(21,21,21), labels = c("Mean", "Mean \u00B1 sd", "Quantile")) +
+    ggplot2::scale_shape_manual(name = "", values = c(21,21,21), labels = c("Mean", "Mean \u00B1 sd", "Quartile")) +
     ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = c(5, 4, 3), shape = 21, fill = c("red","dodgerblue1", "orange"), stroke = 2, color = "black")), order = 1)
 
     p <- JASPgraphs::themeJasp(p, legend.position = "top")

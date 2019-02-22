@@ -42,8 +42,8 @@ Form {
               title: qsTr("<b>Statement level</b>")
               id: auditProcedure
 
-              RadioButton { text: qsTr("Percentages")           ; name: "attributes" ; checked: true; id: attributes}
-              RadioButton { text: qsTr("Monetary Units")        ; name: "mus"; id: mus}
+              RadioButton { text: qsTr("Monetary Units")        ; name: "mus"; id: mus; checked: true}
+              RadioButton { text: qsTr("Percentages")           ; name: "attributes" ; id: attributes}
             }
             GroupBox {
                 title: qsTr("<b>Explanatory text</b>")
@@ -84,14 +84,14 @@ Form {
             AssignedVariablesList {
                 name: "recordNumberVariable"
                 title: qsTr("Record numbers")
-                singleItem: true
+                singleVariable: true
                 allowedColumns: ["nominal", "ordinal", "scale"]
                 id: recordNumberVariable
             }
             AssignedVariablesList {
                 name: "monetaryVariable"
                 title: qsTr("Book values")
-                singleItem: true
+                singleVariable: true
                 allowedColumns: ["scale"]
                 id: monetaryVariable
             }
@@ -174,7 +174,7 @@ Form {
             }
 
             PercentField {
-                label.text: qsTr("Confidence")
+                label: qsTr("Confidence")
                 with1Decimal: true
                 defaultValue: 95
                 name: "confidence"
@@ -300,7 +300,7 @@ Form {
           id: toSampling
           enabled: attributes.checked ? (materiality.value == "0" ? false : true) : (materialityValue.value == "0" ? false : true)
           anchors.right: parent.right
-          text: qsTr("<b>To Sampling</b>")
+          text: qsTr("<b>To Selection</b>")
 
           onClicked: {
             planningPhase.expanded = false
@@ -314,7 +314,7 @@ Form {
 
   // Expander button for the Sampling phase
     ExpanderButton {
-        text: samplingPhase.expanded ? qsTr("<b>3. Sampling</b>") : qsTr("3. Sampling")
+        text: samplingPhase.expanded ? qsTr("<b>3. Selection</b>") : qsTr("3. Selection")
         enabled: false
         expanded: false
         id: samplingPhase
@@ -328,13 +328,13 @@ Form {
             AssignedVariablesList {
                 name: "rankingVariable"
                 title: qsTr("Ranking variable (optional)")
-                singleItem: true
+                singleVariable: true
                 allowedColumns: ["scale"]
                 }
             AssignedVariablesList {
                 name: "variables"
                 title: qsTr("Additional variables (optional)")
-                singleItem: false
+                singleVariable: false
                 allowedColumns: ["scale", "ordinal", "nominal"]
             }
         }
@@ -532,7 +532,7 @@ Form {
             AssignedVariablesList {
                 name: "sampleFilter"
                 title: qsTr("Sample filter")
-                singleItem: true
+                singleVariable: true
                 allowedColumns: ["nominal"]
                 id: sampleFilter
             }
@@ -540,7 +540,7 @@ Form {
                 visible: attributes.checked
                 name: "correctID"
                 title: qsTr("Error variable")
-                singleItem: true
+                singleVariable: true
                 allowedColumns: ["nominal"]
                 id: correctID
             }
@@ -548,7 +548,7 @@ Form {
                 visible: mus.checked
                 name: "correctMUS"
                 title: qsTr("True values")
-                singleItem: true
+                singleVariable: true
                 allowedColumns: ["scale"]
                 id: correctMUS
             }

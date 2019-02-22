@@ -5,7 +5,7 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
     options[["show"]]                   <- "percentage"
 
     # Specify the title of the analysis
-    jaspResults$title                   <- "Bayesian Audit"
+    jaspResults$title                   <- "Bayesian Sampling Process"
 
     # Headers for the sub-analyses
     if(options[["auditType"]] == "attributes"){

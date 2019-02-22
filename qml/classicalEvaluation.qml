@@ -31,13 +31,13 @@ Form {
         AssignedVariablesList {
             name: "sampleFilter"
             title: qsTr("Sample filter variable")
-            singleItem: true
+            singleVariable: true
             allowedColumns: ["nominal"]
         }
         AssignedVariablesList {
             name: "correctID"
             title: qsTr("Error variable")
-            singleItem: true
+            singleVariable: true
             allowedColumns: ["nominal"]
         }
     }
@@ -50,19 +50,19 @@ Form {
         AssignedVariablesList {
             name: "sampleFilterMUS"
             title: qsTr("Sample filter variable")
-            singleItem: true
+            singleVariable: true
             allowedColumns: ["nominal"]
         }
         AssignedVariablesList {
             name: "monetaryVariableMUS"
             title: qsTr("Book values")
-            singleItem: true
+            singleVariable: true
             allowedColumns: ["scale"]
         }
         AssignedVariablesList {
             name: "correctMUS"
             title: qsTr("True values")
-            singleItem: true
+            singleVariable: true
             allowedColumns: ["scale"]
         }
     }
