@@ -11,15 +11,16 @@
 
     duplicates                      <- options$allowDuplicates
     sampleSize                      <- options$sampleSize
-    seed                            <- options$seed
     manualSeed                      <- options$seedNumber
+
     if(options[["showSample"]]){
       table                           <- createJaspTable("Resulting sample")
       jaspResults[["table"]]          <- table
       table$position                  <- position
 
       table$dependOnOptions(c("variables", "allowDuplicates", "seed", "sampleSize", "seedNumber", "recordNumberVariable",
-                              "samplingType", "auditType", "recordNumberVariableMUS", "monetaryVariableMUS", "variablesMUS", "showSample"))
+                              "samplingType", "auditType", "recordNumberVariableMUS", "monetaryVariableMUS", "variablesMUS",
+                              "showSample", "samplingMethod"))
 
       table$addColumnInfo(name="number", title ="", type = "string")
       table$addColumnInfo(name="recordNumber", title ="Record Number", type = "string")
@@ -43,10 +44,7 @@
         return()
     }
 
-    if(seed == "seedDefault")
-        set.seed(1)
-    if(seed == "seedManual")
-        set.seed(manualSeed)
+    set.seed(manualSeed)
 
     if(is.null(jaspResults[["sample"]])){
       recordColumnIndex <- which(colnames(dataset) == .v(recordVariable))
@@ -64,7 +62,7 @@
       }
       jaspResults[["sample"]] <- createJaspState(sample)
       jaspResults[["sample"]]$dependOnOptions(c("variables", "allowDuplicates", "seed", "sampleSize", "seedNumber", "recordNumberVariable",
-                              "samplingType", "auditType", "recordNumberVariableMUS", "monetaryVariableMUS", "variablesMUS"))
+                              "samplingType", "recordNumberVariableMUS", "monetaryVariableMUS", "variablesMUS", "samplingMethod"))
     }
 
     if(options[["showSample"]]){
@@ -96,13 +94,16 @@
 
     startingPoint                       <- options$startingPoint
     sampleSize                          <- options$sampleSize
+    manualSeed                          <- options$seedNumber
+    set.seed(manualSeed)
 
     if(options[["showSample"]]){
         table                               <- createJaspTable("Resulting sample")
         jaspResults[["table"]]              <- table
         table$position                      <- position
         table$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
-                                "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "showSample"))
+                                "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "showSample",
+                              "samplingMethod"))
 
         table$addColumnInfo(name="number",          title ="", type = "string")
         table$addColumnInfo(name="recordNumber",    title ="Record Number", type = "string")
@@ -166,7 +167,7 @@
 
       jaspResults[["sample"]] <- createJaspState(sample)
       jaspResults[["sample"]]$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
-                                                "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS"))
+                                                "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "samplingMethod"))
     }
 
     if(options[["showSample"]]){
@@ -204,7 +205,8 @@
       jaspResults[["table"]]              <- table
       table$position                      <- position
       table$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
-                              "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "showSample"))
+                              "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "showSample",
+                            "samplingMethod"))
 
       table$addColumnInfo(name="number",          title ="", type = "string")
       table$addColumnInfo(name="recordNumber",    title ="Record Number", type = "string")
@@ -262,7 +264,7 @@
       sample                  <- as.data.frame(dataset[sample.rows, ])
       jaspResults[["sample"]] <- createJaspState(sample)
       jaspResults[["sample"]]$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
-                              "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS"))
+                              "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "samplingMethod"))
     }
 
     if(options[["showSample"]]){
@@ -348,7 +350,7 @@
   simpleRandomSamplingInfoTable                           <- createJaspTable("Sample Information Table")
   jaspResults[["simpleRandomSamplingInfoTable"]]          <- simpleRandomSamplingInfoTable
   simpleRandomSamplingInfoTable$position                  <- position
-  simpleRandomSamplingInfoTable$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
+  simpleRandomSamplingInfoTable$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType", "samplingMethod",
                                                   "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "N", "seed", "seedNumber"))
 
   simpleRandomSamplingInfoTable$addColumnInfo(name="n", title ="Sample size", type = "string")
@@ -365,29 +367,4 @@
   if(options[["samplingType"]] != "simplerandomsampling")
     row <- cbind(row, I = interval)
   simpleRandomSamplingInfoTable$addRows(row)
-}
-
-.plotSamplePie <- function(percentage, jaspResults)
-{
-        legendTitles = c(paste0("Sample value\n(", round(percentage*100, 2) ,"%)"), paste0("Non-sample value\n(", round((1-percentage)*100, 2) ,"%)"))
-
-        lab <- c("1", "2")
-        pieData <- c(percentage, 1 - percentage)
-        ggdata <- data.frame(lab = lab, pieData = pieData)
-        p <- ggplot2::ggplot(data = ggdata, mapping = ggplot2::aes(x = "", y = pieData)) +
-            ggplot2::geom_bar(stat = "identity", width = 1e10, color = "black", size = 1, fill = c("dodgerblue1", "darkgray")) +
-            ggplot2::geom_col()
-        p <- p + ggplot2::coord_polar(theta = "y", direction = -1) +
-            ggplot2::labs(x = "", y = "") +
-            ggplot2::scale_y_continuous(breaks = c(pieData[1]/2, 0.66), labels = NULL)
-
-        pdata <- data.frame(x = c(0,0), y = c(0,0), l = c("1","2"))
-        p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = c(rgb(0,1,0,0), rgb(1,0,0,0)))
-        p <- p + ggplot2::scale_shape_manual(name = "", values = c(21,21), labels = legendTitles)
-        p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 9, shape = 21, fill = c("dodgerblue1","darkgray"), stroke = 2, color = "black")), order = 1)
-        p <- p + ggplot2::theme(axis.ticks.y = ggplot2::element_blank())
-
-        p <- JASPgraphs::themeJasp(p, legend.position = "top")
-
-    return(createJaspPlot(plot = p, title = "Sampling Proportions", width = 450, height = 450))
 }

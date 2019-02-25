@@ -26,7 +26,7 @@
 
   if(!is.null(jaspResults[["dataTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-  dataTable                        <- createJaspTable("Population descriptives")
+  dataTable                        <- createJaspTable("Population Descriptives")
   jaspResults[["dataTable"]]       <- dataTable
   dataTable$position               <- position
   dataTable$dependOnOptions(c("monetaryVariable", "recordNumberVariable"))
@@ -39,7 +39,7 @@
   dataTable$addColumnInfo(name = 'p2',          title = "50%",                    type = 'string', overtitle = "Percentile")
   dataTable$addColumnInfo(name = 'p3',          title = "75%",                    type = 'string', overtitle = "Percentile")
 
-  if(options[["recordNumberVariable"]] == "" || options[["monetaryVariable"]] == ""){
+  if(!options[["run"]]){
     row <- data.frame(popSize = ".", value = ".", mean = ".", sd = ".", p1 = ".", p2 = ".", p3 = ".")
     dataTable$addRows(row)
     return()
@@ -115,31 +115,7 @@
 
     p <- JASPgraphs::themeJasp(p, legend.position = "top")
 
-    # # Code for points on distribution bars
-    # h <- hist(values, plot = FALSE)
-    # q1loc <- h$counts[which(q[1] < h$breaks)[1] - 1]
-    # q2loc <- h$counts[which(q[2] < h$breaks)[1] - 1]
-    # q3loc <- h$counts[which(q[3] < h$breaks)[1] - 1]
-    # meanloc <- h$counts[which(meanx < h$breaks)[1] - 1]
-    # sd1loc <- h$counts[which(meanx - sdx < h$breaks)[1] - 1]
-    # sd2loc <- h$counts[which(meanx + sdx < h$breaks)[1] - 1]
-    #
-    # if(options[["interpretation"]]){
-    #   p <- p + ggplot2::geom_point(ggplot2::aes(x = q[1], y = q1loc),         shape = 21, fill = "orange", stroke = 2, size = 3)
-    #   p <- p + ggplot2::geom_point(ggplot2::aes(x = q[2], y = q2loc),         shape = 21, fill = "orange", stroke = 2, size = 3)
-    #   p <- p + ggplot2::geom_point(ggplot2::aes(x = q[3], y = q3loc),         shape = 21, fill = "orange", stroke = 2, size = 3)
-    #   p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx, y = meanloc),      shape = 21, fill = "red", stroke = 2, size = 5)
-    #   p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx + sdx, y = sd2loc), shape = 21, fill = "blue", stroke = 2, size = 4)
-    #   p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx - sdx, y = sd1loc), shape = 21, fill = "blue", stroke = 2, size = 4)
-    #
-    #   pdata <- data.frame(x = c(0,0,0), y = c(0,0,0), l = c("1","2","3"))
-    #   p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = c(rgb(0,1,0,0))) +
-    #   ggplot2::scale_shape_manual(name = "", values = c(21,21,21), labels = c("Mean", "Mean \u00B1 sd", "Quantile")) +
-    #   ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 5, shape = 21, fill = c("red","blue", "orange"), stroke = 2, color = "black")), order = 1)
-    #   p <- JASPgraphs::themeJasp(p, legend.position = "top")
-    # }
-
-    return(createJaspPlot(plot = p, title = "Distribution Information", width = 600, height = 300))
+    return(createJaspPlot(plot = p, title = "Population Distribution", width = 600, height = 300))
 }
 
 .plotMarginalJfA <- function(column, variableName, rugs = FALSE, displayDensity = FALSE) {
@@ -230,8 +206,8 @@
     found.errors    <- sum(result[["z"]]) / result[["n"]]
   }
 
-  name <- rev(c("Materiality", "Maximum Error", "Expected Error"))
-  column <- rev(c(materiality, found.errors, expected.errors))
+  name <- rev(c("Materiality", "Maximum Error", "Observed Error", "Expected Error"))
+  column <- rev(c(materiality, bound, found.errors, expected.errors))
 
   boundColor      <- ifelse(bound < materiality, yes = rgb(0,1,.5,1), no = rgb(1,0,0,.7))
 
@@ -240,48 +216,15 @@
   tb <- data.frame(x = name, column = column)
   tb$x <- factor(tb$x, levels = tb$x)
   p  <- ggplot2::ggplot(data = data.frame(x = tb[, 1], y = tb[, 2]), ggplot2::aes(x = x, y = y)) +
-      ggplot2::geom_bar(stat = "identity", col = "black", size = 1, fill = rev(c("darkgray", boundColor, "yellow"))) +
+      ggplot2::geom_bar(stat = "identity", col = "black", size = 1, fill = rev(c("darkgray", boundColor, "orange" ,"yellow"))) +
       ggplot2::coord_flip() +
       ggplot2::xlab(NULL) +
       ggplot2::ylab("Error percentage") +
       ggplot2::theme(axis.ticks.x = ggplot2::element_blank(),axis.ticks.y = ggplot2::element_blank()) +
-      ggplot2::scale_y_continuous(breaks = yBreaks, labels = paste0(round(yBreaks,2)*100, "%")) +
-      ggplot2::geom_segment(ggplot2::aes(y = found.errors, yend = bound, x = 2, xend = 2), size = 1) +
-      ggplot2::geom_segment(ggplot2::aes(y = bound, yend = bound, x = 2.25, xend = 1.75), size = 1)
+      ggplot2::scale_y_continuous(breaks = yBreaks, labels = paste0(round(yBreaks,2) * 100, "%"))
 
   # JASP theme
   p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE)
-
- #  xlim            <- round(max(c(materiality, bound, expected.errors, found.errors)) * 1.1, 2)
- #  xBreaks         <- pretty(c(0, xlim))
- #  xLabels         <- paste0(round(xBreaks * 100, 2), "%")
- #  boundColor      <- ifelse(bound < materiality, yes = rgb(0,1,.5,1), no = rgb(1,0,0,.7))
- #
- #  pdata <- data.frame(x = c(0,0,0,0), y = c(0,0,0,0), l = c("1","2","3","4"))
- #  boundData <- data.frame(xmin = c(0, bound), xmax = c(bound, xlim), ymin = 0, ymax = 0.5,
- #                         fill = c(boundColor, rgb(1,1,1)))
- #
- # df <- data.frame()
- # p <- ggplot2::ggplot(df) +
- #     ggplot2::geom_point() +
- #     ggplot2::ylim(0, 1) +
- #     ggplot2::ylab(NULL) +
- #     ggplot2::xlab("Error percentage") +
- #     ggplot2::geom_rect(ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
- #                        data = boundData, fill = boundData[["fill"]], color = "black", size = 2) +
- #     ggplot2::scale_x_continuous(breaks = xBreaks, labels = xLabels) +
- #     ggplot2::geom_segment(ggplot2::aes(x = materiality, xend = materiality, y = 0.025, yend = 0.475), size = 2, col = rgb(0,.5,1,1)) +
- #     ggplot2::geom_segment(ggplot2::aes(x = expected.errors, xend = expected.errors, y = 0.025, yend = 0.475), size = 2, col = "yellow") +
- #     ggplot2::geom_segment(ggplot2::aes(x = found.errors, xend = found.errors, y = 0.025, yend = 0.475), size = 2, col = "orange") +
- #     ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = c(rgb(0,1,0,0))) +
- #     ggplot2::scale_shape_manual(name = "", values = c(21,21,21,21), labels = c("Expected errors", "Observed errors", "Maximum error", "Materiality")) +
- #     ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 9, shape = 21, fill = c("yellow","orange", "black", rgb(0,.5,1,1)), stroke = 2, color = "black")), order = 1)
- #
- #  p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE, legend.position = "top")
- #  p <- p + ggplot2::theme(axis.ticks = ggplot2::element_blank(),
- #                          axis.text.y = ggplot2::element_blank(),
- #                          axis.text.x = ggplot2::element_text(size = 17),
- #                          legend.text = ggplot2::element_text(size = 12))
 
   return(createJaspPlot(plot = p, title = "Evaluation Information", width = 600, height = 300))
 
@@ -321,7 +264,7 @@
     cols <- rep("gray", nrow(d))
     cols[which(d$xx != d$yy)] <- "red"
 
-    p <- JASPgraphs::drawAxis(xName = "Book values", yName = "True values", xBreaks = xticks, yBreaks = yticks, yLabels = yLabs, xLabels = xLabs, force = TRUE)
+    p <- JASPgraphs::drawAxis(xName = "Book values", yName = "Audit values", xBreaks = xticks, yBreaks = yticks, yLabels = yLabs, xLabels = xLabs, force = TRUE)
     p <- JASPgraphs::drawPoints(p, dat = d, size = 3, fill = cols)
     p <- .poly.pred(fit[[bestModel]], plot = p, line= TRUE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd = 1)
     p <- p + ggplot2::annotate("text", x = xticks[1], y = yticks[length(yticks)],
