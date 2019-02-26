@@ -59,7 +59,8 @@
 
     jaspResults[["planningResult"]] <- createJaspState(resultList)
     jaspResults[["planningResult"]]$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "distribution",
-                                                "N", "kPercentageNumber", "kNumberNumber", "materialityValue", "auditType", "recordNumberVariable", "monetaryVariable"))
+                                                      "N", "kPercentageNumber", "kNumberNumber", "materialityValue", "auditType",
+                                                      "recordNumberVariable", "monetaryVariable"))
 
 }
 

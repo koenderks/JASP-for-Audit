@@ -78,13 +78,9 @@
           }
       }
 
-      if(options[["prior"]] == "ARM"){
-        priorA                  <- 1 + pk
-        priorB                  <- 1 + (pn - pk)
-      } else if(options[["prior"]] == "5050"){
-        priorA                <- 1
-        priorB                <- 1/((3/2) * options[["materiality"]]) - (1/3)
-      }
+    priorA                  <- 1 + pk
+    priorB                  <- 1 + (pn - pk)
+
     }
 
     resultList <- list()
@@ -101,7 +97,8 @@
 
     jaspResults[["planningResult"]] <- createJaspState(resultList)
     jaspResults[["planningResult"]]$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "kPercentageNumber",
-                                                      "kNumberNumber", "prior", "distribution", "N", "materialityValue"))
+                                                      "kNumberNumber", "distribution", "N", "materialityValue", "recordNumberVariable",
+                                                      "monetaryVariable"))
 
 }
 
@@ -114,10 +111,9 @@
   summaryTable$position               <- position
   summaryTable$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "show", "N",
                                   "kPercentageNumber", "kNumberNumber", "expectedBF", "prior", "distribution",
-                                  "materialityValue"))
+                                  "materialityValue", "recordNumberVariable", "monetaryVariable"))
 
-  summaryTable$addColumnInfo(name = 'materialityPercent',   title = "Percentage",           type = 'string', overtitle = "Materiality")
-  summaryTable$addColumnInfo(name = 'materialityValue',     title = "Value",                type = 'string', overtitle = "Materiality")
+  summaryTable$addColumnInfo(name = 'materiality',          title = "Materiality",          type = 'string')
   summaryTable$addColumnInfo(name = 'IR',                   title = "Inherent risk",        type = 'string')
   summaryTable$addColumnInfo(name = 'CR',                   title = "Control risk",         type = 'string')
   summaryTable$addColumnInfo(name = 'DR',                   title = "Detection risk",       type = 'string')
@@ -131,23 +127,47 @@
                             "hypergeometric" = paste0("The sample size is calculated using the <b>beta-binomial</b> distribution (N = ", options[["N"]] ,")."))
   summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
-  if(options[["materiality"]] == 0){
-    row <- data.frame(materialityPercent = ".", materialityValue = ".", IR = ".", CR = ".", SR = ".", k = ".", n = ".")
-    summaryTable$addRows(row)
-    return()
-  }
-
   ktable <- base::switch(options[["expected.errors"]],
                           "kPercentage" = floor(result[["k"]] * result[["n"]]),
                           "kNumber" = options[["kNumberNumber"]])
   DRtable <- paste0(round(result[["alpha"]], 3) * 100, "%")
+
+  if(options[["materiality"]] == 0){
+    row <- data.frame(materiality = ".", IR = result[["IR"]], CR = result[["CR"]], DR = DRtable, k = 0, n = ".")
+    if(options[["expectedBF"]])
+      row <- cbind(row, expBF = ".")
+    summaryTable$addRows(row)
+    return()
+  }
 
   materialityTitle <- paste0(round(options[["materiality"]] * 100, 2), "%")
   materialityValue <- base::switch(options[["auditType"]],
                                     "attributes" = ceiling(options[["materiality"]] * sum(dataset[, .v(options[["monetaryVariable"]])])),
                                     "mus" = options[["materialityValue"]])
 
-  row <- data.frame(materialityPercent = materialityTitle, materialityValue = materialityValue, IR = result[["IR"]], CR = result[["CR"]], DR = DRtable, k = ktable, n = result[["n"]])
+  materiality <- base::switch(options[["auditType"]],
+                                "attributes" = materialityTitle,
+                                "mus" = materialityValue)
+
+  if(!options[["run"]] && options[["auditType"]] == "mus"){
+    row <- data.frame(materiality           = materiality,
+                      IR                    = result[["IR"]],
+                      CR                    = result[["CR"]],
+                      DR                    = DRtable,
+                      k                     = ktable,
+                      n                     = ".")
+  if(options[["expectedBF"]])
+    row <- cbind(row, expBF = ".")
+    summaryTable$addRows(row)
+    return()
+  }
+
+  row <- data.frame(materiality           = materiality,
+                    IR                    = result[["IR"]],
+                    CR                    = result[["CR"]],
+                    DR                    = DRtable,
+                    k                     = ktable,
+                    n                     = result[["n"]])
   if(options[["expectedBF"]])
     row <- cbind(row, expBF = .expectedBF(options, result, ktable))
   summaryTable$addRows(row)
@@ -198,8 +218,8 @@
   xseq <- seq(0, options[["limx"]], 0.001)
   d <- data.frame(
       x = rep(xseq, 2),
-      y = c(dbeta(x = xseq, shape1 = result[["priorA"]], shape2 = result[["priorB"]]), dbeta(x = xseq, shape1 = result[["priorA"]] + mle, shape2 = result[["priorB"]] + (result[["n"]] - mle))),
-      type = c(rep("Prior", length(xseq)), rep("Posterior", length(xseq)))
+      y = dbeta(x = xseq, shape1 = result[["priorA"]], shape2 = result[["priorB"]]),
+      type = c(rep("Prior", length(xseq)))
   )
 
   xBreaks <- JASPgraphs::getPrettyAxisBreaks(xseq, min.n = 4)
@@ -211,19 +231,16 @@
 
   p <- ggplot2::ggplot(d, ggplot2::aes(x = x, y = y)) +
       ggplot2::geom_line(ggplot2::aes(x = x, y = y, linetype = type), lwd = 1) +
-      ggplot2::scale_linetype_manual(values=c("dotted", "dashed"), guide = FALSE)
+      ggplot2::scale_linetype_manual(values=c("dashed"), guide = FALSE)
 
-  if(options[["show"]] == "percentage"){
-      p <- p + ggplot2::scale_x_continuous(name = "Error percentage", breaks = xBreaks, limits = xLim, labels = paste0(xBreaks * 100, "%"))
-  } else if(options[["show"]] == "proportion"){
-      p <- p + ggplot2::scale_x_continuous(name = "Error proportion", breaks = xBreaks, limits = xLim)
-  }
+  p <- p + ggplot2::scale_x_continuous(name = "Error percentage", breaks = xBreaks, limits = xLim, labels = paste0(xBreaks * 100, "%"))
+
 
   if(options[["plotPriorAdditionalInfo"]]){
       pdata <- data.frame(x = 0, y = 0, l = "1")
       p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 1, 0.5, 0))
       p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Prior confidence region"))
-      p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 20, shape = 21, fill = rgb(0, 1, 0.5, .7), stroke = 2, color = "black")))
+      p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 1, 0.5, .7), stroke = 2, color = "black")))
 
         if(options[["statistic"]] == "bound"){
           p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["priorA"]], shape2 = result[["priorB"]]),
@@ -248,7 +265,7 @@
 
   p <- JASPgraphs::themeJasp(p, legend.position = "top") + thm
 
-  return(createJaspPlot(plot = p, title = "Implied Prior and Posterior", width = plotWidth, height = plotHeight))
+  return(createJaspPlot(plot = p, title = "Implied Prior from Risk Assessments", width = plotWidth, height = plotHeight))
 
 }
 
@@ -289,13 +306,8 @@
       k                       <- length(which(dataset[,.v(options[["correctID"]])] == 1))
     }
 
-    if(options[["prior"]] == "ARM"){
-      priorA                  <- 1 + pk
-      priorB                  <- 1 + (pn - pk)
-    } else if(options[["prior"]] == "5050"){
-      priorA                  <- 1
-      priorB                  <- 1/((3/2) * options[["materiality"]]) - (1/3)
-    }
+    priorA                  <- 1 + pk
+    priorB                  <- 1 + (pn - pk)
 
     bound <- "."
     if(n != 0 && k <= n){
@@ -413,7 +425,7 @@
     pdata <- data.frame(x = 0, y = 0, l = "1")
     p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 0.25, 1, 0))
     p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior \nconfidence region"))
-    p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 20, shape = 21, fill = rgb(0, 0.25, 1, .5), stroke = 2, color = "black")), order = 2)
+    p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 0.25, 1, .5), stroke = 2, color = "black")), order = 2)
 
     if(options[["statistic"]] == "bound"){
       p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["posteriorA"]], shape2 = result[["posteriorB"]]), xlim = c(0, result[["bound"]]),
@@ -523,7 +535,7 @@
 
     jaspResults[["result"]] <- createJaspState(resultList)
     jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilterMUS",
-                                              "auditType", "boundMethodMUS", "monetaryVariableMUS"))
+                                              "auditType", "boundMethod", "monetaryVariableMUS"))
 }
 
 .bayesianMusBoundTableFullAudit <- function(total_data_value, options, result, jaspResults, position = 1){
@@ -534,7 +546,7 @@
     jaspResults[["evaluationTable"]]      <- evaluationTable
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
                                       "sampleFilter", "distribution", "mostLikelyError", "N", "correctMUS", "sampleFilterMUS",
-                                      "boundMethodMUS", "bayesFactor", "materialityValue"))
+                                      "boundMethod", "bayesFactor", "materialityValue"))
     evaluationTable$position <- position
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",            type = 'string')
@@ -549,7 +561,7 @@
     if(options[["bayesFactor"]])
       evaluationTable$addColumnInfo(name = 'bf',          title = "BF\u208B\u208A",         type = 'string')
 
-    message <- base::switch(options[["boundMethodMUS"]],
+    message <- base::switch(options[["boundMethod"]],
                                       "coxAndSnellBound" = "The confidence bound is calculated according to the <b>Cox and Snell</b> method.",
                                       "regressionBound" = "The confidence bound is calculated according to the <b>Regression</b> method.")
     evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
@@ -625,7 +637,7 @@
     pdata <- data.frame(x = 0, y = 0, l = "1")
     p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 0.25, 1, 0))
     p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior \nconfidence region"))
-    p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 20, shape = 21, fill = rgb(0, 0.25, 1, .5), stroke = 2, color = "black")), order = 2)
+    p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 0.25, 1, .5), stroke = 2, color = "black")), order = 2)
 
     if(options[["statistic"]] == "bound"){
       p <- p + ggplot2::geom_area(mapping = ggplot2::aes(x = x, y = y), data = subset(subset(d, d$type == "Posterior"), subset(d, d$type == "Posterior")$x <= result[["bound"]]), fill = rgb(0, 0.25, 1, .5))

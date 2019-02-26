@@ -298,7 +298,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
     if(options[["interpretation"]] && runEvaluation){
         jaspResults[["conclusionTitle"]] <- createJaspHtml("<u>Conclusion</u>", "h2")
         jaspResults[["conclusionTitle"]]$position <- 24
-        jaspResults[["conclusionTitle"]]$dependOnOptions(c("none"))
+        jaspResults[["conclusionTitle"]]$dependOnOptions(c("interpretation"))
 
         if(result[["bound"]] < options[["materiality"]]){
             above_below <- "lower"

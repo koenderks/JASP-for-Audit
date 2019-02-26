@@ -448,7 +448,7 @@ Form {
               }
 
               Button {
-                text: qsTr("<b>Add variables</b>")
+                text: qsTr("<b>Add Variables</b>")
                 id: pasteButton
                 anchors.right: evaluationChecked.left
                 onClicked: {
@@ -524,7 +524,7 @@ Form {
                 AssignedVariablesList {
                     visible: variableTypeTrueValues.checked
                     name: "correctMUS"
-                    title: qsTr("True values")
+                    title: qsTr("Audit values")
                     singleVariable: true
                     allowedColumns: ["scale"]
                     id: correctMUS
