@@ -311,15 +311,16 @@ Form {
             }
 
             RadioButtonGroup {
-              title: qsTr("<b>Sampling type</b>")
+              title: qsTr("<b>Selection type</b>")
               name: "samplingMethod"
+              id: samplingMethod
 
               RadioButton { text: qsTr("Monetary Unit Sampling")      ; name: "mussampling" ; id: mussampling; checked: true}
               RadioButton { text: qsTr("Record Sampling")             ; name: "recordsampling" ; id: recordsampling}
             }
 
                 ExpanderButton {
-                  title: qsTr("Sampling methods")
+                  title: qsTr("Selection methods")
                   implicitWidth: 260
                   id: samplingType
 
@@ -476,6 +477,19 @@ Form {
               pasteButton.enabled = false
               pasteVariables.checked = true
               variableType.enabled = false
+              auditProcedure.enabled = false
+              auditRisk.enabled = false
+              ir.enabled = false
+              cr.enabled = false
+              distribution.enabled = false
+              expectedErrors.enabled = false
+              variablesFormSampling.enabled = false
+              seedNumber.enabled = false
+              samplingType.enabled = false
+              evaluationChecked.checked = true
+              pasteButton.enabled = false
+              variablesFormPreparation.enabled = false
+              samplingMethod.enabled = false
             }
           }
 
@@ -497,18 +511,6 @@ Form {
               executionPhase.expanded = false
               evaluationPhase.expanded = true
               evaluationPhase.enabled = true
-              auditProcedure.enabled = false
-              auditRisk.enabled = false
-              ir.enabled = false
-              cr.enabled = false
-              distribution.enabled = false
-              expectedErrors.enabled = false
-              variablesFormSampling.enabled = false
-              seedNumber.enabled = false
-              samplingType.enabled = false
-              evaluationChecked.checked = true
-              pasteButton.enabled = false
-              variablesFormPreparation.enabled = false
             }
           }
         }
@@ -608,9 +610,7 @@ Form {
 
         // Expander button for the various bounds
         ExpanderButton {
-          visible: true
-          title: qsTr("Advanced output options")
-          implicitWidth: 560
+          title: qsTr("Advanced evaluation options")
           columns: 1
 
           RadioButtonGroup {
@@ -637,9 +637,9 @@ Form {
               name: "regressionBound"
               text: qsTr("Regression")
               id: regressionBound
-              visible: variableTypeTrueValues.checked ? (recordsampling.checked ? true : false) : false
-              enabled: variableTypeTrueValues.checked ? (recordsampling.checked ? true : false) : false
-              checked: variableTypeTrueValues.checked ? (recordsampling.checked ? true : false) : false
+              visible: variableTypeTrueValues.checked ? (mussampling.checked ? false : true) : false
+              enabled: variableTypeTrueValues.checked ? (mussampling.checked ? false : true) : false
+              checked: variableTypeTrueValues.checked ? (mussampling.checked ? false : true) : false
             }
           }
         }

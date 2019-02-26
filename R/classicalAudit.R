@@ -263,7 +263,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
                                   "TRUE" = paste0(round(result[["bound"]] * 100, 2), "%"),
                                   "FALSE" = "...%")
       jaspResults[["resultParagraph"]] <- createJaspHtml(paste0("The sample consisted of <b>", nrow(dataset) , "</b> observations, <b>", result[["k"]] , "</b> of which were found to contain an error. The knowledge from these data, com-
-                                                            bined with the prior knowledge results in an <b>", round((1 - result[["alpha"]]) * 100, 2) , "%</b> upper confidence bound of <b>", boundLabel ,"</b>. The cumulative knowledge states that there
+                                                            bined with the prior knowledge results in an <b>", confidenceLevelLabel , "%</b> upper confidence bound of <b>", boundLabel ,"</b>. The cumulative knowledge states that there
                                                             is a <b>", confidenceLevelLabel , "</b> probability that, when one would repeaditly sample from this population, the maximum error is calculated to be lower
                                                             than <b>", boundLabel ,"</b>."), "p")
       jaspResults[["resultParagraph"]]$position <- 20

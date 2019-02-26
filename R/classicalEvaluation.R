@@ -1,49 +1,33 @@
 classicalEvaluation <- function(jaspResults, dataset, options, state=NULL){
 
-  if(is.null(state))
-      state 							                     <- list()
+  monetaryVariable                  <- unlist(options[["monetaryVariable"]])
+  if(monetaryVariable == "")        monetaryVariable <- NULL
+  correctID                         <- base::switch(options[["variableType"]], "variableTypeCorrect" = unlist(options$correctID), "variableTypeTrueValues" = unlist(options$correctMUS))
+  if(correctID == "")               correctID <- NULL
+  variables.to.read                 <- c(monetaryVariable, correctID)
+  dataset                           <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
 
-    if(options[["auditType"]] == "attributes"){
-      correctID                       <- unlist(options$correctID)
-      if(correctID == "")             correctID <- NULL
-      sampleFilter                    <- unlist(options$sampleFilter)
-      if(sampleFilter == "")          sampleFilter <- NULL
-      monetaryVariable                <- NULL
-    } else {
-      correctID                       <- unlist(options$correctMUS)
-      if(correctID == "")             correctID <- NULL
-      sampleFilter                    <- unlist(options$sampleFilterMUS)
-      if(sampleFilter == "")          sampleFilter <- NULL
-      monetaryVariable                <- unlist(options$monetaryVariableMUS)
-      if(monetaryVariable == "")      monetaryVariable <- NULL
-    }
-    variables.to.read               <- c(correctID, sampleFilter, monetaryVariable)
-
-  if (is.null(dataset))
-      dataset                     <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
-
-  if(!is.null(sampleFilter)){
-      dataset <- subset(dataset, dataset[, .v(sampleFilter)] == 1)
-  }
-
-  options[["sampleSize"]] <- nrow(dataset)
-  type <- options[["auditType"]]
+  options[["sampleSize"]]           <- nrow(dataset)
+  options[["sampleFilter"]]         <- "Not applicable"
+  options[["show"]]                 <- "percentage"
 
   # Set the title
   jaspResults$title 					                 <- "Evaluation"
 
-  if(type == "attributes"){
+  if(options[["variableType"]] == "variableTypeCorrect"){
     # Perform the attributes evaluation
     .attributesBoundFullAudit(dataset, options, jaspResults)
     result                                       <- jaspResults[["result"]]$object
-    .attributesBoundTableFullAudit(options, result, jaspResults, position = 2)
+    .attributesBoundTableFullAudit(options, result, jaspResults, position = 21)
   } else {
     # Perform the MUS evaluaton
-    if(options[["boundMethodMUS"]] == "stringerBound"){
+    if(options[["boundMethod"]] == "stringerBound"){
       .stringerBound(dataset, options, jaspResults)
+    } else if(options[["boundMethod"]] == "regressionBound"){
+      .regressionEstimator(dataset, options, total_data_value, jaspResults)
     }
     result                                       <- jaspResults[["result"]]$object
-    .musBoundTableFullAudit(options, result, jaspResults, position = 2)
+    .musBoundTableFullAudit(total_data_value, options, result, jaspResults, position = 21)
   }
 
   # Interpretation before the evalution table

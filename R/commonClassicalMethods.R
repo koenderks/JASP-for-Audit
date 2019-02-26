@@ -60,7 +60,7 @@
     jaspResults[["planningResult"]] <- createJaspState(resultList)
     jaspResults[["planningResult"]]$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "distribution",
                                                       "N", "kPercentageNumber", "kNumberNumber", "materialityValue", "auditType",
-                                                      "recordNumberVariable", "monetaryVariable"))
+                                                      "recordNumberVariable", "monetaryVariable", "populationValue"))
 
 }
 
@@ -72,7 +72,7 @@
   jaspResults[["summaryTable"]]             <- summaryTable
   summaryTable$position                     <- position
   summaryTable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "show", "distribution", "N", "recordNumberVariable", "monetaryVariable",
-                                  "expected.errors" , "kPercentageNumber", "kNumberNumber", "materialityValue", "auditType"))
+                                  "expected.errors" , "kPercentageNumber", "kNumberNumber", "materialityValue", "auditType", "populationValue"))
 
   summaryTable$addColumnInfo(name = 'materiality',          title = "Materiality",          type = 'string')
   summaryTable$addColumnInfo(name = 'IR',                   title = "Inherent risk",        type = 'string')
@@ -345,10 +345,9 @@
         meanb                   <- mean(b)
         meanw                   <- mean(w)
 
-        mleregression           <- (N * meanw + b1 * (B - N * meanb))
-        s                       <- sd(w) * ( N / sqrt(n)) * sqrt( (N-n) / (N-1) ) * sqrt(1 - cor(b, w)^2)
-        upperValue              <- mleregression + qnorm(options[["confidence"]]) * s
-        bound                   <- (upperValue - B) / B
+        mleregression           <- (N * meanw + b1 * (B - N * meanb)) - B
+        upperValue              <- mleregression + qt(p = options[["confidence"]], df = n - 1) * sqrt(1 - cor(b, w)^2) * sd(w) * ( N / sqrt(n)) * sqrt( (N-n) / (N-1) )
+        bound                   <- upperValue / B
     }
 
     resultList <- list()

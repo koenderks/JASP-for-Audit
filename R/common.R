@@ -7,15 +7,11 @@
     CR                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
     DR                      <- AR / IR / CR
 
-    if(options[["show"]] == "percentage"){
-        text <- paste0("Audit risk (", round(AR * 100, 2),"%) = Inherent risk (", round(IR * 100, 2), "%) x Control risk (", round(CR * 100, 2), "%) x Detection risk (", round(DR * 100, 2), "%)")
-    } else {
-        text <- paste0("Audit risk (", round(AR, 2),") = Inherent risk (", round(IR, 2), ") x Control risk (", round(CR, 2), ") x Detection risk (", round(DR, 2), ")")
-    }
+    text <- paste0("Audit risk (", round(AR * 100, 2),"%) = Inherent risk (", round(IR * 100, 2), "%) x Control risk (", round(CR * 100, 2), "%) x Detection risk (", round(DR * 100, 2), "%)")
 
     jaspResults[["ARMformula"]] <- createJaspHtml(text, "h3")
     jaspResults[["ARMformula"]]$position <- position
-    jaspResults[["ARMformula"]]$dependOnOptions(c("IR", "CR", "confidence", "show"))
+    jaspResults[["ARMformula"]]$dependOnOptions(c("IR", "CR", "confidence"))
 
     jaspResults[["DR"]]     <- createJaspState(DR)
     jaspResults[["DR"]]     $dependOnOptions(c("IR", "CR", "confidence"))
@@ -206,17 +202,17 @@
     found.errors    <- sum(result[["z"]]) / result[["n"]]
   }
 
-  name <- rev(c("Materiality", "Maximum Error", "Observed Error", "Expected Error"))
+  name <- rev(c("Materiality", "Maximum Error", "Most Likely Error", "Expected Error"))
   column <- rev(c(materiality, bound, found.errors, expected.errors))
 
-  boundColor      <- ifelse(bound < materiality, yes = rgb(0,1,.5,1), no = rgb(1,0,0,.7))
+  boundColor      <- ifelse(bound < materiality, yes = rgb(0,1,.7,1), no = rgb(1,0,0,1))
 
   yBreaks <- JASPgraphs::getPrettyAxisBreaks(c(0,column, bound), min.n = 4)
 
   tb <- data.frame(x = name, column = column)
   tb$x <- factor(tb$x, levels = tb$x)
   p  <- ggplot2::ggplot(data = data.frame(x = tb[, 1], y = tb[, 2]), ggplot2::aes(x = x, y = y)) +
-      ggplot2::geom_bar(stat = "identity", col = "black", size = 1, fill = rev(c("darkgray", boundColor, "orange" ,"yellow"))) +
+      ggplot2::geom_bar(stat = "identity", col = "black", size = 1, fill = rev(c("#1380A1", boundColor, "#1380A1" ,"#1380A1"))) +
       ggplot2::coord_flip() +
       ggplot2::xlab(NULL) +
       ggplot2::ylab("Error percentage") +

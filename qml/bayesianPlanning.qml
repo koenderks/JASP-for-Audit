@@ -26,178 +26,207 @@ Form {
     id: form
 
     Flow {
-        spacing: 60
-
-        ColumnLayout {
-          GroupBox {
-              title: qsTr("<b>Audit risk</b>")
-
-              PercentField {
-                  label.text: qsTr("Confidence")
-                  with1Decimal: true
-                  defaultValue: 95
-                  name: "confidence"
-              }
-
-              PercentField {
-                  label.text: qsTr("Materiality")
-                  with1Decimal: true
-                  defaultValue: 5
-                  name: "materiality"
-              }
-
-            TextField {
-                text: qsTr("Population size")
-                value: "0"
-                name: "N"
-                inputType: "integer"
-                validator: IntValidator { bottom: 0 }
-                id: populationSize
-            }
-          }
-        }
-
-        ColumnLayout {
-
-            RadioButtonGroup {
-                title: qsTr("<b>Inherent risk</b>")
-                name: "IR"
-
-                RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
-                RadioButton { text: qsTr("Medium")      ; name: "Medium" }
-                RadioButton { text: qsTr("Low")         ; name: "Low" }
-            }
-        }
-
-        ColumnLayout {
-
-            RadioButtonGroup {
-                title: qsTr("<b>Control risk</b>")
-                name: "CR"
-
-                RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
-                RadioButton { text: qsTr("Medium")      ; name: "Medium" }
-                RadioButton { text: qsTr("Low")         ; name: "Low" }
-            }
-        }
-    }
-
-    ExpanderButton {
-        text: qsTr("Advanced prior options")
-        Layout.leftMargin: 20
-        implicitWidth: 560
-
-        RadioButtonGroup {
-            title: qsTr("<b>Prior</b>")
-            name: "prior"
-
-            RadioButton { text: qsTr("Audit Risk Model")        ; name: "ARM" ; checked: true}
-            RadioButton { text: qsTr("50-50")                   ; name: "5050" }
-        }
-
-    }
-
-    Divider { }
-
-    Flow {
-        spacing: 60
-
-        RadioButtonGroup {
-            title: qsTr("<b>Sampling model</b>")
-            name: "distribution"
-
-            RadioButton { text: qsTr("With replacement")            ; name: "binomial" ; checked: true}
-            RadioButton { text: qsTr("Without replacement")         ; name: "hypergeometric" ; id: hyperDist}
-        }
-
-        GroupBox {
-          title: qsTr("<b>Allowed errors</b>")
-
-          RadioButtonGroup {
-              name: "expected.errors"
-
-              RowLayout {
-                  RadioButton { text: qsTr("Percentage")            ; name: "kPercentage" ; checked: true; id: expkPercentage}
-                  PercentField {
-                      with1Decimal: true
-                      defaultValue: 2
-                      name: "kPercentageNumber"
-                      enabled: expkPercentage.checked
-                  }
-              }
-
-              RowLayout {
-                  RadioButton { text: qsTr("Number")              ; name: "kNumber"       ; id: expkNumber}
-                  TextField {
-                      value: "1"
-                      name: "kNumberNumber"
-                      enabled: expkNumber.checked
-                      inputType: "integer"
-                      validator: IntValidator { bottom: 0 }
-                      Layout.leftMargin: 18
-                  }
-              }
-
-          }
-        }
-    }
-
-    Divider { }
-
-    Flow {
-      spacing: 60
+      spacing: 30
 
       ColumnLayout {
-        GroupBox {
-          title: qsTr("<b>Statistics</b>")
+        RadioButtonGroup{
+          name: "auditType"
+          title: qsTr("<b>Materiality</b>")
+          id: auditProcedure
 
-          CheckBox {      text: qsTr("Expected Bayes factor\u208B\u208A") ; name: "expectedBF"}
+          RowLayout {
+            RadioButton { text: qsTr("Absolute")          ; name: "mus"; id: mus; checked: true}
+            TextField {
+              id: materialityValue
+              visible: mus.checked
+              name: "materialityValue"
+              value: "0"
+              fieldWidth: 90
+              inputType: "integer"
+              validator: IntValidator { bottom: 0 }
+            }
+          }
+          RowLayout {
+            RadioButton { text: qsTr("Relative")          ; name: "attributes" ; id: attributes}
+            PercentField {
+                id: materiality
+                visible: attributes.checked
+                with1Decimal: true
+                defaultValue: 0
+                name: "materiality"
+            }
+          }
         }
 
         GroupBox {
-            title: qsTr("<b>Tables</b>")
+        title: qsTr("<b>Population</b>")
 
-            CheckBox {      text: qsTr("Implicit sample") ; name: "implicitsample"}
+          TextField {
+            id: populationSize
+            name: "N"
+            text: qsTr("Size")
+            value: "0"
+            fieldWidth: 90
+            inputType: "integer"
+            validator: IntValidator { bottom: 0 }
+            enabled: mus.checked
+          }
+          TextField {
+            id: populationValue
+            name: "populationValue"
+            text: qsTr("Value")
+            value: "0"
+            fieldWidth: 90
+            inputType: "integer"
+            validator: IntValidator { bottom: 0 }
+            enabled: mus.checked
+          }
+        }
+      }
+
+        GroupBox {
+            title: qsTr("<b>Audit risk</b>")
+            id: auditRisk
+
+            PercentField {
+                label: qsTr("Confidence")
+                with1Decimal: true
+                defaultValue: 95
+                name: "confidence"
+            }
+        }
+
+        GroupBox {
+            title: qsTr("<b>Explanatory text</b>")
+
+            RowLayout {
+              CheckBox {
+                id: interpretationOn
+                text: interpretationOn.checked ? qsTr("Enabled") : qsTr("Disabled")
+                name: "interpretation"
+                checked: false
+                }
+              MenuButton
+              {
+                width:				20
+                iconSource:		"qrc:/images/info-button.png"
+                toolTip:			"Show explanatory text in the analysis"
+                radius:				20
+                Layout.alignment: Qt.AlignRight
+              }
+            }
+        }
+      }
+
+      ExpanderButton {
+          text: qsTr("Advanced planning options")
+
+          Flow {
+              spacing: 20
+
+              RadioButtonGroup {
+                  title: qsTr("<b>Inherent risk</b>")
+                  name: "IR"
+                  id: ir
+
+                  RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
+                  RadioButton { text: qsTr("Medium")      ; name: "Medium" }
+                  RadioButton { text: qsTr("Low")         ; name: "Low" }
+              }
+              RadioButtonGroup {
+                  title: qsTr("<b>Control risk</b>")
+                  name: "CR"
+                  id: cr
+
+                  RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
+                  RadioButton { text: qsTr("Medium")      ; name: "Medium" }
+                  RadioButton { text: qsTr("Low")         ; name: "Low" }
+              }
+              RadioButtonGroup {
+                  name: "expected.errors"
+                  id: expectedErrors
+                  title: qsTr("<b>Allowed errors</b>")
+
+                  RowLayout {
+                      RadioButton { text: qsTr("Percentage")            ; name: "kPercentage" ; checked: true; id: expkPercentage}
+                      PercentField {
+                          with1Decimal: true
+                          defaultValue: 0
+                          name: "kPercentageNumber"
+                          enabled: expkPercentage.checked
+                      }
+                  }
+
+                  RowLayout {
+                      RadioButton { text: qsTr("Number")              ; name: "kNumber"       ; id: expkNumber}
+                      TextField {
+                          value: "0"
+                          name: "kNumberNumber"
+                          enabled: expkNumber.checked
+                          inputType: "integer"
+                          validator: IntValidator { bottom: 0 }
+                          Layout.leftMargin: 18
+                      }
+                  }
+              }
+
+              RadioButtonGroup {
+                  title: qsTr("<b>Sampling model</b>")
+                  name: "distribution"
+                  id: distribution
+
+                  RadioButton { text: qsTr("With replacement")            ; name: "binomial" ; checked: true}
+                  RadioButton { text: qsTr("Without replacement")         ; name: "hypergeometric" ; id: hyperDist}
+              }
+            }
+      }
+
+    Flow {
+      spacing: 120
+
+      ColumnLayout {
+         GroupBox {
+           title: qsTr("<b>Statistics</b>")
+
+           CheckBox {      text: qsTr("Expected Bayes factor\u208B\u208A") ; name: "expectedBF"}
          }
+         GroupBox {
+             title: qsTr("<b>Tables</b>")
+
+             CheckBox {      text: qsTr("Implicit sample") ; name: "implicitsample"}
+          }
       }
 
        GroupBox {
            title: qsTr("<b>Plots</b>")
 
-           CheckBox {      text: qsTr("Decision plot")   ; name: "plotCriticalErrors"; checked: true }
-           CheckBox {      text: qsTr("Implied prior and posterior")   ; name: "plotPrior" ; id: plotPrior}
-           PercentField {  text: qsTr("x-axis limit")    ; name: "limx"; defaultValue: 20; Layout.leftMargin: 20}
-           CheckBox {      text: qsTr("Additional info") ; name: "plotPriorAdditionalInfo" ; Layout.leftMargin: 20; checked: true; enabled: plotPrior.checked}
+             CheckBox {
+                text: qsTr("Decision plot")
+                name: "plotCriticalErrors"
+                enabled: attributes.checked ? (materiality.value == "0" ? false : true) : (materialityValue.value == "0" ? false : true)
+              }
+           CheckBox {
+              text: qsTr("Implied prior from risk assessments")
+              name: "plotPrior"
+              id: plotPrior
+              enabled: attributes.checked ? (materiality.value == "0" ? false : true) : (materialityValue.value == "0" ? false : true)
+            }
+           PercentField {  text: qsTr("x-axis limit")                   ; name: "limx" ; defaultValue: 20; Layout.leftMargin: 20; enabled: plotPrior.checked}
+           CheckBox {      text: qsTr("Additional info")                ; name: "plotPriorAdditionalInfo" ; Layout.leftMargin: 20; checked: true; enabled: plotPrior.checked}
         }
-
     }
 
-    ExpanderButton {
-      title: qsTr("Advanced output options")
+    Item {
+      height: downloadReportPlanning.height
+      Layout.fillWidth: true
+      anchors.bottom: parent.bottom
 
-      Flow {
-        spacing: 50
-
-        RadioButtonGroup{
-          title: qsTr("<b>Units</b>")
-          name: "show"
-
-          RadioButton {text: qsTr("Percentages")              ; name: "percentage"; checked: true}
-          RadioButton {text: qsTr("Proportions")              ; name: "proportion"}
-        }
-
-        RadioButtonGroup {
-            title: qsTr("<b>Confidence interval</b>")
-            name: "statistic"
-
-            RadioButton { text: qsTr("One-sided")         ; name: "bound" ; checked: true}
-            RadioButton { text: qsTr("Two-sided")         ; name: "interval" }
-        }
-
-        GroupBox {
-          title: qsTr("<b>Explanatory text</b>")
-          CheckBox { text: qsTr("Turn on"); name: "interpretation"; checked: false }
-        }
+      Button {
+        id: downloadReportPlanning
+        enabled: attributes.checked ? (materiality.value == "0" ? false : true) : (materialityValue.value == "0" ? false : (recordNumberVariable.count > 0 && monetaryVariable.count > 0))
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        text: qsTr("<b>Download Report</b>")
       }
     }
 }

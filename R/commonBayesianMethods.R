@@ -98,7 +98,7 @@
     jaspResults[["planningResult"]] <- createJaspState(resultList)
     jaspResults[["planningResult"]]$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "kPercentageNumber",
                                                       "kNumberNumber", "distribution", "N", "materialityValue", "recordNumberVariable",
-                                                      "monetaryVariable"))
+                                                      "monetaryVariable", "populationValue"))
 
 }
 
@@ -111,7 +111,7 @@
   summaryTable$position               <- position
   summaryTable$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "show", "N",
                                   "kPercentageNumber", "kNumberNumber", "expectedBF", "prior", "distribution",
-                                  "materialityValue", "recordNumberVariable", "monetaryVariable"))
+                                  "materialityValue", "recordNumberVariable", "monetaryVariable", "populationValue", "auditType"))
 
   summaryTable$addColumnInfo(name = 'materiality',          title = "Materiality",          type = 'string')
   summaryTable$addColumnInfo(name = 'IR',                   title = "Inherent risk",        type = 'string')
@@ -201,8 +201,7 @@
   priorBound <- base::switch(options[["statistic"]],
                               "bound" = round(qbeta(p = options[["confidence"]], shape1 = result[["priorA"]], shape2 = result[["priorB"]]), 3),
                               "interval" = round(qbeta(p = c(  (1 - (1-(1-options[["confidence"]])/2)) , (1 - ((1-options[["confidence"]])/2)) ), shape1 = result[["priorA"]], shape2 = result[["priorB"]]), 3))
-  if(options[["show"]] == "percentage")
-    priorBound <- paste0(priorBound * 100, "%")
+  priorBound <- paste0(priorBound * 100, "%")
   if(options[["statistic"]] == "bound"){
       row <- data.frame(implicitn = implicitn, implicitk = implicitk, priorbound = priorBound)
   } else {
