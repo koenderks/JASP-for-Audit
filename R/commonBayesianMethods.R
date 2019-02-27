@@ -337,7 +337,7 @@
     jaspResults[["result"]]     $dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality",
                                                     "correctID", "expected.errors", "kPercentageNumber",
                                                     "kNumberNumber", "sampleFilter", "prior", "k", "n",
-                                                    "distribution", "N", "materialityValue"))
+                                                    "distribution", "N", "materialityValue", "populationValue", "variableType"))
 }
 
 .bayesianAttributesBoundTableFullAudit <- function(options, result, jaspResults, position = 1){
@@ -350,7 +350,7 @@
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
                                       "expected.errors", "kPercentageNumber", "kNumberNumber", "sampleFilter",
                                       "mostLikelyError", "bayesFactor", "N", "n", "k", "prior", "distribution",
-                                      "prior", "materialityValue"))
+                                      "prior", "materialityValue", "populationValue", "variableType"))
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",        type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",        type = 'string')
@@ -533,8 +533,8 @@
     resultList[["posterior"]]   <- posterior
 
     jaspResults[["result"]] <- createJaspState(resultList)
-    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilterMUS",
-                                              "auditType", "boundMethod", "monetaryVariableMUS"))
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilter",
+                                              "auditType", "boundMethod", "monetaryVariable"))
 }
 
 .bayesianMusBoundTableFullAudit <- function(total_data_value, options, result, jaspResults, position = 1){
@@ -545,7 +545,7 @@
     jaspResults[["evaluationTable"]]      <- evaluationTable
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
                                       "sampleFilter", "distribution", "mostLikelyError", "N", "correctMUS", "sampleFilterMUS",
-                                      "boundMethod", "bayesFactor", "materialityValue"))
+                                      "boundMethod", "bayesFactor", "materialityValue", "populationValue", "variableType"))
     evaluationTable$position <- position
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",            type = 'string')
@@ -658,4 +658,76 @@
 
   return(createJaspPlot(plot = p, title = "Prior and Posterior Plot", width = plotWidth, height = plotHeight))
 
+}
+
+.regressionEstimatorBayesian <- function(dataset, options, total_data_value, jaspResults){
+
+    ar                      <- 1 - options[["confidence"]]
+    ir                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+    cr                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+    alpha                   <- ar / ir / cr
+
+    n                       <- 0
+    M                       <- 0
+    z                       <- 0
+    bound                   <- "."
+
+    if(options[["correctMUS"]] != "" && options[["sampleFilter"]] != "" && options[["monetaryVariable"]] != ""){
+        sample                  <- dataset[, c(.v(options[["monetaryVariable"]]), .v(options[["correctMUS"]]))]
+        n                       <- nrow(sample)
+
+        t                       <- sample[, .v(options[["monetaryVariable"]])] - sample[, .v(options[["correctMUS"]])]
+        z                       <- t / sample[, .v(options[["monetaryVariable"]])]
+        zplus                   <- sort(subset(z, z > 0), decreasing = TRUE)
+        M                       <- length(which(t != 0))
+
+        B                       <- total_data_value
+        N                       <- options[["N"]]
+        b                       <- sample[, .v(options[["monetaryVariable"]])]
+        w                       <- sample[, .v(options[["correctMUS"]])]
+        #b1                      <- as.numeric(coef(lm(w ~ b))[2])
+        set.seed(1)
+        formula                 <- lm(w ~ b)
+        bayesFit                <- .bayesfit(formula, 100000)
+        b1                      <- median(bayesFit[, 2])
+
+        meanb                   <- mean(b)
+        meanw                   <- mean(w)
+
+        mleregression           <- (N * meanw + b1 * (B - N * meanb)) - B
+        upperValue              <- mleregression + qt(p = options[["confidence"]], df = n - 1) * sqrt(1 - cor(b, w)^2) * sd(w) * ( N / sqrt(n)) * sqrt( (N-n) / (N-1) )
+        bound                   <- (upperValue + B) / B
+    }
+
+    resultList <- list()
+    resultList[["n"]]           <- n
+    resultList[["k"]]           <- M
+    resultList[["z"]]           <- z
+    resultList[["IR"]]          <- options[["IR"]]
+    resultList[["CR"]]          <- options[["CR"]]
+    resultList[["confidence"]]  <- options[["confidence"]]
+    resultList[["bound"]]       <- bound
+    resultList[["alpha"]]       <- alpha
+
+    jaspResults[["result"]] <- createJaspState(resultList)
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilterMUS", "populationValue",
+                                              "auditType", "boundMethod", "monetaryVariable", "materialityValue", "N", "variableType"))
+}
+
+.bayesfit<-function(lmfit,N){
+    QR<-lmfit$qr
+    df.residual<-lmfit$df.residual
+    R<-qr.R(QR) ## R component
+    coef<-lmfit$coef
+    Vb<-chol2inv(R) ## variance(unscaled)
+    s2<-(t(lmfit$residuals)%*%lmfit$residuals)
+    s2<-s2[1,1]/df.residual
+
+    ## now to sample residual variance
+    sigma<-df.residual*s2/rchisq(N,df.residual)
+    coef.sim<-sapply(sigma,function(x) MASS::mvrnorm(1,coef,Vb*x))
+    ret<-data.frame(t(coef.sim))
+    names(ret)<-names(lmfit$coef)
+    ret$sigma<-sqrt(sigma)
+    ret
 }

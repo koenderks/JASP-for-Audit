@@ -1,55 +1,52 @@
 bayesianEvaluation <- function(jaspResults, dataset, options, state=NULL){
-  # Set the state
-  if(is.null(state))
-      state 							                     <- list()
-  # Read the data
-  if(options[["auditType"]] == "attributes"){
-    correctID                       <- unlist(options$correctID)
-    if(correctID == "")             correctID <- NULL
-    sampleFilter                    <- unlist(options$sampleFilter)
-    if(sampleFilter == "")          sampleFilter <- NULL
-    monetaryVariable                <- NULL
-  } else {
-    correctID                       <- unlist(options$correctMUS)
-    if(correctID == "")             correctID <- NULL
-    sampleFilter                    <- unlist(options$sampleFilterMUS)
-    if(sampleFilter == "")          sampleFilter <- NULL
-    monetaryVariable                <- unlist(options$monetaryVariableMUS)
-    if(monetaryVariable == "")      monetaryVariable <- NULL
-  }
-  variables.to.read               <- c(correctID, sampleFilter, monetaryVariable)
 
-  if (is.null(dataset))
-      dataset                     <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
+  monetaryVariable                  <- unlist(options[["monetaryVariable"]])
+  if(monetaryVariable == "")        monetaryVariable <- NULL
+  correctID                         <- base::switch(options[["variableType"]], "variableTypeCorrect" = unlist(options$correctID), "variableTypeTrueValues" = unlist(options$correctMUS))
+  if(correctID == "")               correctID <- NULL
+  variables.to.read                 <- c(monetaryVariable, correctID)
+  dataset                           <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
 
-  if(!is.null(sampleFilter)){
-      dataset <- subset(dataset, dataset[, .v(sampleFilter)] == 1)
-  }
+  total_data_value                  <- options[["populationValue"]]
+
+  options[["sampleSize"]]           <- nrow(dataset)
+  options[["sampleFilter"]]         <- "Not applicable"
+  options[["show"]]                 <- "percentage"
+  options[["distribution"]]         <- "binomial"
+  options[["expected.errors"]]      <- "kNumber"
+  options[["kNumberNumber"]]        <- 0
+  options[["statistic"]]            <- "bound"
 
   # Set the title
-  jaspResults$title 					                   <- "Bayesian Evaluation"
-  options[["sampleSize"]]                       <- nrow(dataset)
-  type                                          <- options[["auditType"]]
+  jaspResults$title 					      <- "Bayesian Evaluation"
 
   .ARMformula(options, jaspResults, position = 1)   # Show the Audit Risk Model formula and quantify detection risk
   DR              <- jaspResults[["DR"]]$object
+
+  # Rewrite materiality based on value
+  if(options[["auditType"]] == "mus")
+      options[["materiality"]] <- options[["materialityValue"]] / total_data_value
+
   # Perform the analysis
-  if(type == "attributes"){
+  if(options[["variableType"]] == "variableTypeCorrect"){
     # Perform the attributes evaluation
     .bayesianAttributesBoundFullAudit(dataset, options, jaspResults)
     result                                       <- jaspResults[["result"]]$object
     .bayesianAttributesBoundTableFullAudit(options, result, jaspResults, position = 3)
   } else {
     # Perform planning to get prior parameters
-    .bayesianAttributesPlanningFullAudit(options, jaspResults)
-    planningResult              <- jaspResults[["planningResult"]]$object
+    # .bayesianAttributesPlanningFullAudit(options, jaspResults)
+    # planningResult              <- jaspResults[["planningResult"]]$object
+    planningResult <- list("priorA" = 1, "priorB" = 1)
     # Perform the mus evaluation
-    if(options[["boundMethodMUS"]] == "coxAndSnellBound"){
+    if(options[["boundMethod"]] == "coxAndSnellBound"){
       # Prior parameters for pi and mu are recommendations from the paper
       .coxAndSnellBound(dataset, options, jaspResults, priorPi = 0.10, priorMu = 0.40, priorA = planningResult[["priorA"]], priorB = planningResult[["priorB"]])
+    } else if(options[["boundMethod"]] == "regressionBound"){
+      .regressionEstimatorBayesian(dataset, options, total_data_value, jaspResults)
     }
     result                                       <- jaspResults[["result"]]$object
-    .bayesianMusBoundTableFullAudit(options, result, jaspResults, position = 3)
+    .bayesianMusBoundTableFullAudit(total_data_value, options, result, jaspResults, position = 3)
   }
   # Interpretation before the evalution table
   if(options[["interpretation"]]){
@@ -69,11 +66,11 @@ bayesianEvaluation <- function(jaspResults, dataset, options, state=NULL){
   }
 
   # Prior and Posterior plot
-  if(options[['plotPriorAndPosterior']] && !is.null(correctID) && !is.null(sampleFilter))
+  if(options[['plotPriorAndPosterior']])
   {
       if(is.null(jaspResults[["priorAndPosteriorPlot"]]))
       {
-        if(type == "attributes"){
+        if(options[["variableType"]] == "variableTypeCorrect"){
           jaspResults[["priorAndPosteriorPlot"]] 		<- .plotPriorAndPosteriorBayesianAttributesBoundFullAudit(options, result, jaspResults)
         } else {
           jaspResults[["priorAndPosteriorPlot"]] 		<- .plotPriorAndPosteriorBayesianMUSBoundFullAudit(options, result, jaspResults)
@@ -102,7 +99,28 @@ bayesianEvaluation <- function(jaspResults, dataset, options, state=NULL){
                                                                   these data is that the data contain ", approve ,"."), "p")
       jaspResults[["conclusionParagraph"]]$position <- 6
   }
-  # Save the state
-  state[["options"]] 					                  <- options
-  return(state)
+
+  # Confidence bound plot
+  if(options[['plotBound']])
+  {
+      if(is.null(jaspResults[["confidenceBoundPlot"]]))
+      {
+          jaspResults[["confidenceBoundPlot"]] 		<- .plotConfidenceBounds(options, result, jaspResults)
+          jaspResults[["confidenceBoundPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "correctID",
+                                                                   "show", "plotBound", "materiality", "method",
+                                                                   "materialityValue", "result", "boundMethod"))
+          jaspResults[["confidenceBoundPlot"]] 		$position <- 23
+      }
+  }
+
+  # Correlation plot
+  if(options[['plotCorrelation']])
+  {
+      if(is.null(jaspResults[["correlationPlot"]]))
+      {
+          jaspResults[["correlationPlot"]] 		<- .plotScatterJFA(dataset, options, jaspResults)
+          jaspResults[["correlationPlot"]]		$dependOnOptions(c("correctMUS", "plotCorrelation", "monetaryVariable"))
+          jaspResults[["correlationPlot"]] 		$position <- 25
+      }
+  }
 }

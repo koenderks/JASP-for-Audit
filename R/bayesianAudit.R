@@ -332,7 +332,7 @@ bayesianAudit <- function(jaspResults, dataset, options, state=NULL){
           if(is.null(jaspResults[["correlationPlot"]]))
           {
               jaspResults[["correlationPlot"]] 		<- .plotScatterJFA(dataset, options, jaspResults)
-              jaspResults[["correlationPlot"]]		$dependOnOptions(c("correctMUS", "plotRegression", "monetaryVariable"))
+              jaspResults[["correlationPlot"]]		$dependOnOptions(c("correctMUS", "plotCorrelation", "monetaryVariable"))
               jaspResults[["correlationPlot"]] 		$position <- 25
           }
       }

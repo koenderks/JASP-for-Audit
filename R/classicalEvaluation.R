@@ -7,12 +7,21 @@ classicalEvaluation <- function(jaspResults, dataset, options, state=NULL){
   variables.to.read                 <- c(monetaryVariable, correctID)
   dataset                           <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
 
+  total_data_value                  <- options[["populationValue"]]
+
   options[["sampleSize"]]           <- nrow(dataset)
   options[["sampleFilter"]]         <- "Not applicable"
   options[["show"]]                 <- "percentage"
 
   # Set the title
   jaspResults$title 					                 <- "Evaluation"
+
+  # Rewrite materiality based on value
+  if(options[["auditType"]] == "mus")
+      options[["materiality"]] <- options[["materialityValue"]] / total_data_value
+
+  .ARMformula(options, jaspResults, position = 1)   # Show the Audit Risk Model formula and quantify detection risk
+  DR              <- jaspResults[["DR"]]$object
 
   if(options[["variableType"]] == "variableTypeCorrect"){
     # Perform the attributes evaluation
@@ -48,15 +57,26 @@ classicalEvaluation <- function(jaspResults, dataset, options, state=NULL){
     jaspResults[["resultParagraph"]]$position <- 1
   }
 
-  # Create the confidence bounds plot
-  if(options[['plotBound']] && !is.null(correctID))
+  # Confidence bound plot
+  if(options[['plotBound']])
   {
       if(is.null(jaspResults[["confidenceBoundPlot"]]))
       {
           jaspResults[["confidenceBoundPlot"]] 		<- .plotConfidenceBounds(options, result, jaspResults)
-          jaspResults[["confidenceBoundPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "correctID",
-                                                                   "show", "plotBound", "materiality", "method", "inference"))
-          jaspResults[["confidenceBoundPlot"]] 		$position <- 3
+          jaspResults[["confidenceBoundPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "correctID", "plotBound", "materiality",
+                                                                   "method", "materialityValue", "correctMUS", "boundMethod", "result"))
+          jaspResults[["confidenceBoundPlot"]] 		$position <- 22
+      }
+  }
+
+  # Correlation plot
+  if(options[['plotCorrelation']])
+  {
+      if(is.null(jaspResults[["correlationPlot"]]))
+      {
+          jaspResults[["correlationPlot"]] 		<- .plotScatterJFA(dataset, options, jaspResults)
+          jaspResults[["correlationPlot"]]		$dependOnOptions(c("correctMUS", "plotRegression", "monetaryVariable"))
+          jaspResults[["correlationPlot"]] 		$position <- 23
       }
   }
 
@@ -73,11 +93,6 @@ classicalEvaluation <- function(jaspResults, dataset, options, state=NULL){
       jaspResults[["conclusionParagraph"]] <- createJaspHtml(paste0("To approve these data, a <b>", confidenceLevelLabel ,"</b> upper confidence bound on the population proportion of full errors should be determined to be
                                                                   lower than materiality, in this case <b>", materialityLevelLabel ,"</b>. For the current data, the confidence bound is <b>", above_below ,"</b> than materiality. The conclusion for
                                                                   these data is that the data contain ", approve ,"."), "p")
-      jaspResults[["conclusionParagraph"]]$position <- 4
+      jaspResults[["conclusionParagraph"]]$position <- 10
   }
-
-  # Save the state
-  state[["options"]] 					                  <- options
-  return(state)
-
 }

@@ -25,8 +25,6 @@
 					"function":						"classicalAudit",
 					"usesJaspResults":		true
 				},
-				/* {
-				}, */
 				{
 					"title":							"Bayesian Sampling Process",
 					"qml":								"bayesianAudit.qml",
@@ -58,14 +56,6 @@
 					"function":						"classicalEvaluation",
 					"usesJaspResults":		true
 				},
-				/* {
-					"title":							"Summary Evaluation",
-					"qml":								"summaryClassicalEvaluation.qml",
-					"function":						"summaryClassicalEvaluation",
-					"usesJaspResults":		true
-				}, */
-				/* {
-				}, */
 				{
 					"title":							"Bayesian Planning",
 					"qml":								"bayesianPlanning.qml",
@@ -77,13 +67,7 @@
 					"qml":								"bayesianEvaluation.qml",
 					"function":						"bayesianEvaluation",
 					"usesJaspResults":		true
-				}/*,*/
-				/* {
-					"title":							"Bayesian Summary Evaluation",
-					"qml":								"summaryBayesianEvaluation.qml",
-					"function":						"summaryBayesianEvaluation",
-					"usesJaspResults":		true
-				} */
+				}
 			]
 		}
 	]

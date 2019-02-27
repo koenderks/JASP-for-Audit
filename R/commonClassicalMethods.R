@@ -254,7 +254,7 @@
     resultList[["alpha"]]       <- alpha
 
     jaspResults[["result"]] <- createJaspState(resultList)
-    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilterMUS",
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilterMUS", "variableType",
                                               "auditType", "boundMethod", "monetaryVariableMUS", "materialityValue"))
 }
 
@@ -266,8 +266,8 @@
     jaspResults[["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show",
-                                      "distribution", "mostLikelyError", "N", "correctMUS", "sampleFilterMUS",
-                                      "boundMethod", "monetaryVariableMUS", "materialityValue"))
+                                      "distribution", "mostLikelyError", "N", "correctMUS", "sampleFilter", "variableType",
+                                      "boundMethod", "monetaryVariable", "materialityValue", "populationValue"))
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",                      type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",                      type = 'string')
@@ -347,7 +347,7 @@
 
         mleregression           <- (N * meanw + b1 * (B - N * meanb)) - B
         upperValue              <- mleregression + qt(p = options[["confidence"]], df = n - 1) * sqrt(1 - cor(b, w)^2) * sd(w) * ( N / sqrt(n)) * sqrt( (N-n) / (N-1) )
-        bound                   <- upperValue / B
+        bound                   <- (upperValue + B) / B
     }
 
     resultList <- list()
@@ -361,6 +361,6 @@
     resultList[["alpha"]]       <- alpha
 
     jaspResults[["result"]] <- createJaspState(resultList)
-    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilterMUS",
-                                              "auditType", "boundMethod", "monetaryVariableMUS", "materialityValue"))
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilterMUS", "populationValue",
+                                              "auditType", "boundMethod", "monetaryVariable", "materialityValue", "N", "variableType"))
 }
