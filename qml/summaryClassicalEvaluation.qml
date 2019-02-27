@@ -34,14 +34,14 @@ Form {
 
               PercentField {
                   label.text: qsTr("Confidence")
-                  with1Decimal: true
+                  decimals: 1
                   defaultValue: 95
                   name: "confidence"
               }
 
               PercentField {
                   label.text: qsTr("Materiality")
-                  with1Decimal: true
+                  decimals: 1
                   defaultValue: 5
                   name: "materiality"
               }

@@ -51,7 +51,7 @@ Form {
             PercentField {
                 id: materiality
                 visible: attributes.checked
-                with1Decimal: true
+                decimals: 1
                 defaultValue: 0
                 name: "materiality"
             }
@@ -90,7 +90,7 @@ Form {
 
             PercentField {
                 label: qsTr("Confidence")
-                with1Decimal: true
+                decimals: 1
                 defaultValue: 95
                 name: "confidence"
             }
@@ -150,7 +150,7 @@ Form {
                   RowLayout {
                       RadioButton { text: qsTr("Percentage")            ; name: "kPercentage" ; checked: true; id: expkPercentage}
                       PercentField {
-                          with1Decimal: true
+                          decimals: 1
                           defaultValue: 0
                           name: "kPercentageNumber"
                           enabled: expkPercentage.checked

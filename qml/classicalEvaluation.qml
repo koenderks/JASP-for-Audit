@@ -24,8 +24,9 @@ Form {
     id: form
 
     VariablesForm {
-    availableVariablesList.name: "evaluationVariables"
     implicitHeight: 200
+
+    AvailableVariablesList { name: "evaluationVariables"}
 
         AssignedVariablesList {
             enabled: true
@@ -79,7 +80,7 @@ Form {
             PercentField {
                 id: materiality
                 visible: attributes.checked
-                with1Decimal: true
+                decimals: 1
                 defaultValue: 0
                 name: "materiality"
             }
@@ -117,7 +118,7 @@ Form {
 
           PercentField {
               label: qsTr("Confidence")
-              with1Decimal: true
+              decimals: 1
               defaultValue: 95
               name: "confidence"
           }
