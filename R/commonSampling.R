@@ -347,7 +347,7 @@
 
   if(!is.null(jaspResults[["simpleRandomSamplingInfoTable"]])) return()
 
-  simpleRandomSamplingInfoTable                           <- createJaspTable("Sample Information Table")
+  simpleRandomSamplingInfoTable                           <- createJaspTable("Sample Information")
   jaspResults[["simpleRandomSamplingInfoTable"]]          <- simpleRandomSamplingInfoTable
   simpleRandomSamplingInfoTable$position                  <- position
   simpleRandomSamplingInfoTable$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType", "samplingMethod",
@@ -358,6 +358,9 @@
   simpleRandomSamplingInfoTable$addColumnInfo(name="P", title ="% of total value", type = "string")
   if(options[["samplingType"]] != "simplerandomsampling")
     simpleRandomSamplingInfoTable$addColumnInfo(name="I", title ="Interval", type = "string")
+
+  message <- paste0("The sample is drawn with <i>seed ", options[["seedNumber"]], "</i>.")
+  simpleRandomSamplingInfoTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
   sampleSize                              <- options$sampleSize
   sampleValue                             <- ceiling(sum(sample[, .v(options[["monetaryVariable"]])]))

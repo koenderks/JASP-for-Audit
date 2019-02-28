@@ -152,6 +152,7 @@ Form {
                       PercentField {
                           decimals: 1
                           defaultValue: 0
+                          fieldWidth: 40
                           name: "kPercentageNumber"
                           enabled: expkPercentage.checked
                       }
@@ -175,8 +176,8 @@ Form {
                   name: "distribution"
                   id: distribution
 
-                  RadioButton { text: qsTr("With replacement")            ; name: "binomial" ; checked: true}
-                  RadioButton { text: qsTr("Without replacement")         ; name: "hypergeometric" ; id: hyperDist}
+                  RadioButton { text: qsTr("With replacement")            ; name: "beta" ; checked: true}
+                  RadioButton { text: qsTr("Without replacement")         ; name: "beta-binomial" ; id: hyperDist}
               }
             }
       }

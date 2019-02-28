@@ -43,6 +43,9 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
             jaspResults[["valueDistributionPlot"]]		$dependOnOptions(c("distributionPlot", "monetaryVariable", "recordNumberVariable"))
             jaspResults[["valueDistributionPlot"]] 		$position <- 4
         }
+        jaspResults[["figure1"]] <- createJaspHtml(paste0("<b>Figure 1.</b>The distribution of book values in the audit population."), "p")
+        jaspResults[["figure1"]]$position <- 4
+        jaspResults[["figure1"]]$dependOnOptions(c("distributionPlot", "monetaryVariable", "recordNumberVariable"))
       }
 
     # Audit Risk Model formula

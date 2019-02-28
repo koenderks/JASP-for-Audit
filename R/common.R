@@ -254,8 +254,8 @@
     xlow <- min(pretty(xVar))
     xhigh <- max(pretty(xVar))
     xticks <- pretty(c(xlow, xhigh))
-    ylow <- min(min(pretty(yVar)), min(.poly.pred(fit[[bestModel]], line= FALSE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd=lwd)))
-    yhigh <- max(max(pretty(yVar)), max(.poly.pred(fit[[bestModel]], line= FALSE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd=lwd)))
+    ylow <- min(min(pretty(yVar)), min(.poly.predJfA(fit[[bestModel]], line= FALSE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd=lwd)))
+    yhigh <- max(max(pretty(yVar)), max(.poly.predJfA(fit[[bestModel]], line= FALSE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd=lwd)))
 
     yticks <- pretty(c(ylow, yhigh))
 
@@ -274,7 +274,7 @@
 
     p <- JASPgraphs::drawAxis(xName = "Book values", yName = "Audit values", xBreaks = xticks, yBreaks = yticks, yLabels = yLabs, xLabels = xLabs, force = TRUE)
     p <- JASPgraphs::drawPoints(p, dat = d, size = 3, fill = cols)
-    p <- .poly.pred(fit[[bestModel]], plot = p, line= TRUE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd = 1)
+    p <- .poly.predJfA(fit[[bestModel]], plot = p, line= TRUE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd = 1)
     p <- p + ggplot2::annotate("text", x = xticks[1], y = yticks[length(yticks)],
                                 label = paste0("italic(r) == ", co), size = 8, parse = TRUE, hjust = -0.5, vjust = 0.5)
 
@@ -285,7 +285,7 @@
 
 }
 
-.poly.pred <- function(fit, plot = NULL, line=FALSE, xMin, xMax, lwd) {
+.poly.predJfA <- function(fit, plot = NULL, line=FALSE, xMin, xMax, lwd) {
   # create function formula
   f <- vector("character", 0)
 
@@ -309,7 +309,7 @@
   }
 
   if (line) {
-    plot <- plot + ggplot2::geom_line(data = data.frame(x, predY),mapping = ggplot2::aes(x = x, y = predY), size=lwd)
+    plot <- plot + ggplot2::geom_line(data = data.frame(x, predY),mapping = ggplot2::aes(x = x, y = predY), size=lwd, lty = 1)
     return(plot)
   }
 }

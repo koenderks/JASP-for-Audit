@@ -152,6 +152,7 @@ Form {
                     PercentField {
                         decimals: 1
                         defaultValue: 0
+                        fieldWidth: 40
                         name: "kPercentageNumber"
                         enabled: expkPercentage.checked
                     }

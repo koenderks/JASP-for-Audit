@@ -28,9 +28,9 @@ bayesianPlanning <- function(jaspResults, dataset, options, state=NULL){
   if(options[["auditType"]] == "mus")
       options[["materiality"]]                      <- options[["materialityValue"]] / populationValue
 
-  options[["run"]]                                  <- base::switch(options[["auditType"]],
-                                                                      "mus" = (options[["materiality"]] != 0 && (populationValue != 0 && populationValue != 0.01) && options[["N"]] != 0),
-                                                                      "attributes" = options[["materiality"]] != 0)
+      options[["run"]]                                          <- base::switch(options[["auditType"]],
+                                                                                  "attributes" = options[["materiality"]] != 0,
+                                                                                  "mus" = (options[["materiality"]] != 0 && (populationValue != 0 && populationValue != 0.01) && options[["N"]] != 0))
 
   # Interpretation for the Planning phase
   if(options[["interpretation"]]){

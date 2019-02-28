@@ -55,10 +55,10 @@
       n_withprior           <- 0
     } else {
 
-      if(options[["distribution"]] == "binomial"){
+      if(options[["distribution"]] == "beta"){
         n_noprior               <- .calculateBayesianSampleSize(options, 1 - options[["confidence"]])
         n_withprior             <- .calculateBayesianSampleSize(options, alpha)
-      } else if(options[["distribution"]] == "hypergeometric"){
+      } else if(options[["distribution"]] == "beta-binomial"){
         n_noprior               <- .calculateBayesianSampleSizeBetaBinom(options, 1 - options[["confidence"]], options[["N"]])
         n_withprior             <- .calculateBayesianSampleSizeBetaBinom(options, alpha, options[["N"]])
       }
@@ -123,8 +123,8 @@
     summaryTable$addColumnInfo(name = 'expBF',              title = "Expected BF\u208B\u208A", type = 'string')
 
   message <- base::switch(options[["distribution"]],
-                            "binomial" = "The sample size is calculated using the <b>beta</b> distribution.",
-                            "hypergeometric" = paste0("The sample size is calculated using the <b>beta-binomial</b> distribution (N = ", options[["N"]] ,")."))
+                            "beta" = "The sample size is calculated using the <b>beta</b> distribution.",
+                            "beta-binomial" = paste0("The sample size is calculated using the <b>beta-binomial</b> distribution (N = ", options[["N"]] ,")."))
   summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
   ktable <- base::switch(options[["expected.errors"]],
@@ -275,10 +275,10 @@
     cr                        <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
     alpha                     <- ar / ir / cr
 
-    if(options[["distribution"]] == "binomial"){
+    if(options[["distribution"]] == "beta"){
       n_noprior               <- .calculateBayesianSampleSize(options, 1 - options[["confidence"]])
       n_withprior             <- .calculateBayesianSampleSize(options, alpha)
-    } else if(options[["distribution"]] == "hypergeometric"){
+    } else if(options[["distribution"]] == "beta-binomial"){
       n_noprior               <- .calculateBayesianSampleSizeBetaBinom(options, 1 - options[["confidence"]], options[["N"]])
       n_withprior             <- .calculateBayesianSampleSizeBetaBinom(options, alpha, options[["N"]])
     }

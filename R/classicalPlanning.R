@@ -32,7 +32,9 @@ classicalPlanning <- function(jaspResults, dataset, options, state=NULL){
                                                                               "attributes" = paste0(round(options[["materiality"]], 4) * 100, "%"),
                                                                               "mus" = options[["materialityValue"]])
 
-  options[["run"]]                                          <- (options[["materiality"]] != 0 && (populationValue != 0 && populationValue != 0.01) && options[["N"]] != 0)
+  options[["run"]]                                          <- base::switch(options[["auditType"]],
+                                                                              "attributes" = options[["materiality"]] != 0,
+                                                                              "mus" = (options[["materiality"]] != 0 && (populationValue != 0 && populationValue != 0.01) && options[["N"]] != 0))
 
   if(options[["interpretation"]]){
       jaspResults[["AuditRiskModelHeader"]]                 <- createJaspHtml("<u>Audit Risk Model</u>", "h2")

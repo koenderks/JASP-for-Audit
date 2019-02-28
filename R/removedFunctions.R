@@ -1,51 +1,3 @@
-summaryBayesianEvaluation <- function(jaspResults, dataset, options, state=NULL){
-
-  if(is.null(state))
-      state 							    <- list()
-  # Set the title
-  jaspResults$title 					<- "Summary Statistics Bayesian Attributes Bound"
-
-  .ARMformula(options, jaspResults, position = 3)   # Show the Audit Risk Model formula and quantify detection risk
-  DR              <- jaspResults[["DR"]]$object
-
-  # Interpretation for the Planning phase
-  if(options[["interpretation"]]){
-      jaspResults[["AuditRiskModelHeader"]] <- createJaspHtml("<u>Audit Risk Model</u>", "h2")
-      jaspResults[["AuditRiskModelHeader"]]$position <- 1
-      jaspResults[["AuditRiskModelParagraph"]] <- createJaspHtml(paste0("Prior to the substantive testing phase, the inherent risk was determined to be <b>",options$IR,"</b>. The internal control risk was determined
-                                                                      to be <b>", options$CR,"</b>. According to the Audit Risk Model, the required detection risk to then maintain an audit risk of <b>", (1 - options$confidence) * 100, "%</b> should be <b>",round(DR*100, 2), "%</b>."), "p")
-      jaspResults[["AuditRiskModelParagraph"]]$position <- 2
-
-      jaspResults[["evaluationHeader"]] <- createJaspHtml("<u>Evaluation</u>", "h2")
-      jaspResults[["evaluationHeader"]]$position <- 4
-  }
-
-  # Perform the analysis
-  .summaryBayesianAttributesBound(options, jaspResults)
-  result                      <- jaspResults[["result"]]$object
-  .summaryBayesianAttributesBoundTable(options, result, jaspResults, position = 5)
-
-  # Create the prior and posterior plot ##
-   if(options[['plotPriorAndPosterior']])
-   {
-      if(is.null(jaspResults[["priorAndPosteriorPlot"]]))
-      {
-      jaspResults[["priorAndPosteriorPlot"]] 		<- .plotPriorAndPosteriorBayesianAttributesBoundFullAudit(options, result, jaspResults)
-      jaspResults[["priorAndPosteriorPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "limx_backup", "statistic",
-                                                                  "plotPriorAndPosterior", "plotPriorAndPosteriorAdditionalInfo",
-                                                                  "materiality", "show", "expected.errors", "kPercentageNumber",
-                                                                  "kNumberNumber", "prior"))
-			jaspResults[["priorAndPosteriorPlot"]] 		$position <- 6
-	    }
-   }
-
-
-  # Save the state
-  state[["options"]] 					<- options
-  return(state)
-
-}
-
 .summaryBayesianAttributesBound <- function(options, jaspResults){
 
     confidence              <- options[["confidence"]]
@@ -238,4 +190,173 @@ summaryBayesianEvaluation <- function(jaspResults, dataset, options, state=NULL)
     }
     summaryTable$addRows(row)
   }
+}
+
+.summaryAttributesBound <- function(options, jaspResults){
+
+    if(!is.null(jaspResults[["result"]])) return()
+
+    confidence <- options[["confidence"]]
+    n <- options[["n"]]
+    k <- options[["k"]]
+
+    if(options[["IR"]] == "Low" && options[["CR"]] == "Low"){
+        alpha               <- (1-confidence) / 0.30 / 0.30
+    } else if (options[["IR"]] == "Low" && options[["CR"]] == "Medium"){
+        alpha               <- (1-confidence) / 0.30 / 0.60
+    } else if (options[["IR"]] == "Low" && options[["CR"]] == "High"){
+        alpha               <- (1-confidence) / 0.30 / 1
+    } else if (options[["IR"]] == "Medium" && options[["CR"]] == "High"){
+        alpha               <- (1-confidence) / 0.60 / 1
+    } else if (options[["IR"]] == "Medium" && options[["CR"]] == "Medium"){
+        alpha               <- (1-confidence) / 0.60 / 0.60
+    } else if (options[["IR"]] == "Medium" && options[["CR"]] == "Low"){
+        alpha               <- (1-confidence) / 0.60 / 0.30
+    } else if (options[["IR"]] == "High" && options[["CR"]] == "Low"){
+        alpha               <- (1-confidence) / 1 / 0.30
+    } else if (options[["IR"]] == "High" && options[["CR"]] == "Medium"){
+        alpha               <- (1-confidence) / 0.60 / 1
+    } else if (options[["IR"]] == "High" && options[["CR"]] == "High"){
+        alpha               <- (1-confidence) / 1 / 1
+    }
+
+    if(options[["n"]] == 0){
+      bound         <- "."
+    } else {
+
+        binomResult <- binom.test(x = options[["k"]],
+                                  n = n,
+                                  p = options[["materiality"]],
+                                  alternative = "less",
+                                  conf.level = 1 - alpha)
+        bound       <- binomResult$conf.int[2]
+
+    }
+
+    resultList <- list()
+    resultList[["n"]]               <- n
+    resultList[["k"]]               <- k
+    resultList[["IR"]]              <- options[["IR"]]
+    resultList[["CR"]]              <- options[["CR"]]
+    resultList[["confidence"]]      <- confidence
+    resultList[["bound"]]           <- bound
+    resultList[["alpha"]]           <- alpha
+
+    jaspResults[["result"]] <- createJaspState(resultList)
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "N", "expected.errors",
+                                              "kPercentageNumber", "kNumberNumber"))
+
+}
+
+.summaryAttributesBoundTable <- function(options, result, jaspResults, position = 1){
+
+  if(!is.null(jaspResults[["summaryTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
+
+  summaryTable                       <- createJaspTable("Classical Evaluation Table")
+  jaspResults[["summaryTable"]]      <- summaryTable
+  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "n", "k", "show", "N", "K", "mostLikelyError"))
+
+  summaryTable$addColumnInfo(name = 'IR', title = "Inherent risk", type = 'string')
+  summaryTable$addColumnInfo(name = 'CR', title = "Control risk", type = 'string')
+  summaryTable$addColumnInfo(name = 'SR', title = "Sampling risk", type = 'string')
+  summaryTable$addColumnInfo(name = 'n', title = "Sample size", type = 'string')
+  summaryTable$addColumnInfo(name = 'k', title = "Errors", type = 'string')
+  summaryTable$addColumnInfo(name = 'bound', title = paste0(result[["confidence"]]*100,"% Confidence bound"), type = 'string')
+  if(options[["mostLikelyError"]])
+    summaryTable$addColumnInfo(name = 'mle',  title = "Most Likely Error", type = 'string')
+
+  summaryTable$position <- position
+
+  if(options[["show"]] == "percentage"){
+    SRtable <- paste0(round(result[["alpha"]],3) * 100, "%")
+    if(result[["bound"]] == "."){
+        boundTable <- "."
+    } else {
+      boundTable <- paste0(round(result[["bound"]],3) * 100, "%")
+    }
+  } else if(options[["show"]] == "proportion"){
+    SRtable <- round(result[["alpha"]], 3)
+    if(result[["bound"]] == "."){
+      boundTable <- "."
+    } else {
+      boundTable <- round(result[["bound"]],3)
+    }
+  }
+
+  if(options[["N"]] == 0){
+      mle <- 0
+  } else {
+      mle <- floor(options[["k"]] / options[["n"]] * options[["N"]])
+  }
+
+  if(options[["mostLikelyError"]]){
+    row <- list(IR = result[["IR"]],
+                CR = result[["CR"]],
+                SR = SRtable,
+                n = result[["n"]],
+                k = result[["k"]],
+                bound = boundTable, mle = mle)
+  } else {
+    row <- list(IR = result[["IR"]],
+                CR = result[["CR"]],
+                SR = SRtable,
+                n = result[["n"]],
+                k = result[["k"]],
+                bound = boundTable)
+  }
+
+  summaryTable$addRows(row)
+
+}
+
+.plotConfidenceBoundsSummary <- function(options, result, jaspResults, plotWidth = 600, plotHeight = 450){
+
+  if(options[["n"]] == 0)
+    return(createJaspPlot(error="badData", errorMessage="Plotting is not possible: No analysis has been run."))
+
+  plotStat <- data.frame(materiality = options[["materiality"]],
+                          bound = result[["bound"]],
+                          stratum = "Population")
+
+
+  materialityStat <- data.frame(materiality = options[["materiality"]])
+
+  base_breaks_y <- function(x, options) {
+
+      values <- c(options$materiality, 0, x[, "bound"])
+      ci.pos <- c(min(values), max(values))
+      b <- pretty(ci.pos)
+      d <- data.frame(x = -Inf, xend = -Inf, y = min(b), yend = max(b))
+      yBreaks <- c(min(b),  options$materiality, max(b))
+
+      if(options[["show"]] == "percentage"){
+          yLabels <- paste(yBreaks * 100, "%")
+      } else if(options[["show"]] == "proportion"){
+          yLabels <- yBreaks
+      }
+
+      list(ggplot2::geom_segment(data = d, ggplot2::aes(x = x, y = y, xend = xend,
+                                                        yend = yend), inherit.aes = FALSE, size = 1),
+           ggplot2::scale_y_continuous(breaks = yBreaks, labels = yLabels))
+  }
+
+  pd <- ggplot2::position_dodge(0.2)
+
+  p <- ggplot2::ggplot(plotStat, ggplot2::aes(x = stratum, y = bound, group = stratum)) +
+      ggplot2::geom_errorbar(ggplot2::aes(ymin = 0, ymax = bound), colour = "black", width = 0.2, position = pd) +
+      ggplot2::geom_hline(data = materialityStat, ggplot2::aes(yintercept = materiality), linetype = "dashed") +
+      ggplot2::xlab(NULL) +
+      ggplot2::scale_x_discrete(labels = plotStat[["stratum"]]) +
+      base_breaks_y(plotStat, options)
+
+  if(options[["show"]] == "percentage"){
+    p <- p + ggplot2::ylab("Error percentage")
+  } else if(options[["show"]] == "proportion"){
+    p <- p + ggplot2::ylab("Error proportion")
+  }
+
+  p <- JASPgraphs::themeJasp(p, xAxis = FALSE)
+
+  return(createJaspPlot(plot = p, title = "Confidence Bound Plot", width = plotWidth, height = plotHeight))
+
 }

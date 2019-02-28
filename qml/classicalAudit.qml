@@ -36,7 +36,7 @@ Form {
 
         Flow {
           Layout.leftMargin: 20
-          spacing: 30
+          spacing: 150
 
             RadioButtonGroup{
               name: "auditType"
@@ -78,27 +78,6 @@ Form {
                     name: "confidence"
                 }
             }
-
-            GroupBox {
-                title: qsTr("<b>Explanatory text</b>")
-
-                RowLayout {
-                  CheckBox {
-                    id: interpretationOn
-                    text: interpretationOn.checked ? qsTr("Enabled") : qsTr("Disabled")
-                    name: "interpretation"
-                    checked: true
-                    }
-                  MenuButton
-                  {
-                    width:				20
-                    iconSource:		"qrc:/images/info-button.png"
-                    toolTip:			"Show explanatory text at each step of the analysis"
-                    radius:				20
-                    Layout.alignment: Qt.AlignRight
-                  }
-                }
-            }
           }
 
         Divider { }
@@ -137,16 +116,38 @@ Form {
         text: qsTr("Advanced planning options")
 
         Flow {
-            spacing: 20
+            spacing: 0
 
-            RadioButtonGroup {
-                title: qsTr("<b>Inherent risk</b>")
-                name: "IR"
-                id: ir
+            ColumnLayout {
+              RadioButtonGroup {
+                  title: qsTr("<b>Inherent risk</b>")
+                  name: "IR"
+                  id: ir
 
-                RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
-                RadioButton { text: qsTr("Medium")      ; name: "Medium" }
-                RadioButton { text: qsTr("Low")         ; name: "Low" }
+                  RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
+                  RadioButton { text: qsTr("Medium")      ; name: "Medium" }
+                  RadioButton { text: qsTr("Low")         ; name: "Low" }
+              }
+              GroupBox {
+                  title: qsTr("<b>Explanatory text</b>")
+
+                  RowLayout {
+                    CheckBox {
+                      id: interpretationOn
+                      text: interpretationOn.checked ? qsTr("Enabled") : qsTr("Disabled")
+                      name: "interpretation"
+                      checked: true
+                      }
+                    MenuButton
+                    {
+                      width:				20
+                      iconSource:		"qrc:/images/info-button.png"
+                      toolTip:			"Show explanatory text at each step of the analysis"
+                      radius:				20
+                      Layout.alignment: Qt.AlignRight
+                    }
+                  }
+              }
             }
             RadioButtonGroup {
                 title: qsTr("<b>Control risk</b>")
@@ -167,6 +168,7 @@ Form {
                     PercentField {
                         decimals: 1
                         defaultValue: 0
+                        fieldWidth: 40
                         name: "kPercentageNumber"
                         enabled: expkPercentage.checked
                     }
@@ -184,7 +186,6 @@ Form {
                     }
                 }
             }
-
             RadioButtonGroup {
                 title: qsTr("<b>Sampling model</b>")
                 name: "distribution"
@@ -274,6 +275,7 @@ Form {
                     name: "variables"
                     title: qsTr("Additional variables (optional)")
                     singleVariable: false
+                    height: 140
                     allowedColumns: ["scale", "ordinal", "nominal"]
                 }
             }
@@ -284,48 +286,72 @@ Form {
 
                 ColumnLayout {
 
-                TextField {
-                    value: "1"
-                    text: qsTr("Seed")
-                    name: "seedNumber"
-                    id: seedNumber
-                    validator: IntValidator { bottom: 0 }
-                }
+                    TextField {
+                        value: "1"
+                        text: qsTr("Seed")
+                        name: "seedNumber"
+                        id: seedNumber
+                        validator: IntValidator { bottom: 0 }
+                    }
 
-                RadioButtonGroup {
-                  title: qsTr("<b>Selection type</b>")
-                  name: "samplingMethod"
-                  id: samplingMethod
+                      ExpanderButton {
+                        title: qsTr("Advanced selection options")
+                        implicitWidth: 260
+                        id: samplingType
 
-                  RadioButton { text: qsTr("Monetary Unit Sampling")      ; name: "mussampling" ; id: mussampling; checked: true}
-                  RadioButton { text: qsTr("Record Sampling")             ; name: "recordsampling" ; id: recordsampling}
-                }
+                        ColumnLayout {
 
-                    ExpanderButton {
-                      title: qsTr("Selection methods")
-                      implicitWidth: 260
-                      id: samplingType
+                          RadioButtonGroup {
+                            title: qsTr("<b>Selection type</b>")
+                            name: "samplingMethod"
+                            id: samplingMethod
 
-                      RadioButtonGroup {
-                        name: "samplingType"
+                            RowLayout {
+                              RadioButton { text: qsTr("Monetary Unit Sampling")      ; name: "mussampling" ; id: mussampling; checked: true}
+                              MenuButton
+                              {
+                                width:				20
+                                iconSource:		"qrc:/images/info-button.png"
+                                toolTip:			"Select observations with probability proportional to their value"
+                                radius:				20
+                                Layout.alignment: Qt.AlignRight
+                              }
+                            }
+                            RowLayout {
+                              RadioButton { text: qsTr("Record Sampling")             ; name: "recordsampling" ; id: recordsampling}
+                              MenuButton
+                              {
+                                width:				20
+                                iconSource:		"qrc:/images/info-button.png"
+                                toolTip:			"Select observations with equal probability"
+                                radius:				20
+                                Layout.alignment: Qt.AlignRight
+                              }
+                            }
+                          }
 
-                        RadioButton { text: qsTr("Simple random sampling")                 ; name: "simplerandomsampling" ; id: simplerandomsampling; checked: true}
-                        CheckBox { text: qsTr("Allow duplicate records")                   ; name: "allowDuplicates"; Layout.leftMargin: 20; enabled: simplerandomsampling.checked }
-                        RadioButton { text: qsTr("Cell sampling")                   ; name: "cellsampling" ; id: cellsampling}
+                          RadioButtonGroup {
+                            title: qsTr("<b>Selection method</b>")
+                            name: "samplingType"
 
-                        RadioButton { text: qsTr("Systematic sampling")             ; name: "systematicsampling" ; id: systematicsampling}
-                        TextField {
-                            text: qsTr("Interval starting point")
-                            value: "1"
-                            name: "startingPoint"
-                            inputType: "integer"
-                            validator: IntValidator { bottom: 1 }
-                            Layout.leftMargin: 20
-                            enabled: systematicsampling.checked
+                            RadioButton { text: qsTr("Simple random sampling")                 ; name: "simplerandomsampling" ; id: simplerandomsampling; checked: true}
+                            CheckBox { text: qsTr("Allow duplicate records")                   ; name: "allowDuplicates"; Layout.leftMargin: 20; enabled: simplerandomsampling.checked }
+                            RadioButton { text: qsTr("Cell sampling")                   ; name: "cellsampling" ; id: cellsampling}
+
+                            RadioButton { text: qsTr("Systematic sampling")             ; name: "systematicsampling" ; id: systematicsampling}
+                            TextField {
+                                text: qsTr("Interval starting point")
+                                value: "1"
+                                name: "startingPoint"
+                                inputType: "integer"
+                                validator: IntValidator { bottom: 1 }
+                                Layout.leftMargin: 20
+                                enabled: systematicsampling.checked
+                            }
                         }
-                      }
                     }
                   }
+                }
 
                 ColumnLayout {
 
@@ -397,10 +423,10 @@ Form {
             columns: 1
 
             Text {
-                text: qsTr("<b>How would you like to assess your observations?</b>")
+                text: qsTr("<b>How would you like to evaluate your observations?</b>")
                 font.family: "SansSerif"
                 font.pointSize: 10
-                Layout.leftMargin: 100
+                Layout.leftMargin: 80
             }
 
             RadioButtonGroup {
