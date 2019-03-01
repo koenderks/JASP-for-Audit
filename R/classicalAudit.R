@@ -4,6 +4,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
 
     # Specify the title of the analysis
     jaspResults$title   <- "Sampling Process"
+    figNumber           <- 1
 
     # Headers for the sub-analyses
     jaspResults[["procedureHeader"]] <- createJaspHtml("<u>Procedure</u>", "h2")
@@ -43,13 +44,16 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
             jaspResults[["valueDistributionPlot"]]		$dependOnOptions(c("distributionPlot", "monetaryVariable", "recordNumberVariable"))
             jaspResults[["valueDistributionPlot"]] 		$position <- 4
         }
-        jaspResults[["figure1"]] <- createJaspHtml(paste0("<b>Figure 1.</b>The distribution of book values in the audit population."), "p")
-        jaspResults[["figure1"]]$position <- 4
-        jaspResults[["figure1"]]$dependOnOptions(c("distributionPlot", "monetaryVariable", "recordNumberVariable"))
+        jaspResults[["figure1"]] <- createJaspHtml(paste0("<b>Figure ", figNumber ,".</b>The distribution of book values in the audit population. The red and blue dots respectively represent the mean
+                                                                                          and the values exactly one standard deviation from the mean. The orange dots represent the 25th, 50th (median) and
+                                                                                          75th percentile of the book values."), "p")
+        jaspResults[["figure1"]]$position <- 5
+        jaspResults[["figure1"]]$copyDependenciesFromJaspObject(jaspResults[["valueDistributionPlot"]])
+        figNumber <- figNumber + 1
       }
 
     # Audit Risk Model formula
-    .ARMformula(options, jaspResults, position = 6)
+    .ARMformula(options, jaspResults, position = 7)
     DR                          <- jaspResults[["DR"]]$object
 
     # Rewrite materiality based on value
@@ -71,23 +75,23 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
         dectectionRiskLabel     <- round(DR, 2)
       }
       jaspResults[["AuditRiskModelHeader"]] <- createJaspHtml("<u>Audit Risk Model</u>", "h2")
-      jaspResults[["AuditRiskModelHeader"]]$position <- 5
+      jaspResults[["AuditRiskModelHeader"]]$position <- 6
       jaspResults[["AuditRiskModelHeader"]]$dependOnOptions(c("none"))
       jaspResults[["AuditRiskModelParagraph"]] <- createJaspHtml(paste0("Prior to the substantive testing phase, the inherent risk was determined to be <b>", options[["IR"]] ,"</b>. The internal control risk was determined
                                                                       to be <b>", options[["CR"]] ,"</b>. According to the Audit Risk Model, the required detection risk to then maintain an audit risk of <b>", auditRiskLabel, "</b> for a materiality
                                                                       of <b>", materialityLevelLabel ,"</b> should be <b>", dectectionRiskLabel , "</b>."), "p")
-      jaspResults[["AuditRiskModelParagraph"]]$position <- 7
+      jaspResults[["AuditRiskModelParagraph"]]$position <- 8
       jaspResults[["AuditRiskModelParagraph"]]$dependOnOptions(c("confidence", "IR", "CR", "materiality", "materialityValue", "interpretation"))
     }
 
     jaspResults[["priorKnowledgeHeader"]] <- createJaspHtml("<u>Planning</u>", "h2")
-    jaspResults[["priorKnowledgeHeader"]]$position <- 8
+    jaspResults[["priorKnowledgeHeader"]]$position <- 9
     jaspResults[["priorKnowledgeHeader"]]$dependOnOptions(c("none"))
 
     # Planning
     .attributesPlanningFullAudit(options, jaspResults)
     planningResult              <- jaspResults[["planningResult"]]$object
-    .attributesPlanningTableFullAudit(dataset, options, planningResult, jaspResults, position = 10)
+    .attributesPlanningTableFullAudit(dataset, options, planningResult, jaspResults, position = 11)
 
     if(options[["expected.errors"]] == "kPercentage"){
         expected.errors <- paste0(round(options[["kPercentageNumber"]] * 100, 2), "%")
@@ -104,7 +108,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
                                                                           confidence bound of <b>", materialityLevelLabel ,"</b>, assuming the sample contains <b>", expected.errors ,"</b> full errors, is <b>", planningResult[["n"]] ,"</b>. This sample size is calculated according to the
                                                                           <b>", options[["distribution"]] , "</b> distribution. Consequently, if <b>", max.errors ,"</b> or more full errors are found in the sample, the projected misstatement exceeds
                                                                           the materiality and the population cannot be approved."), "p")
-        jaspResults[["priorKnowledgeParagraph"]]$position <- 9
+        jaspResults[["priorKnowledgeParagraph"]]$position <- 10
         jaspResults[["priorKnowledgeParagraph"]]$dependOnOptions(c("kPercentageNumber", "expected.errors", "kNumberNumber", "distribution", "IR", "CR", "materiality", "N",
                                                                 "confidence", "materialityValue", "interpretation"))
     }
@@ -120,8 +124,13 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
             jaspResults[["criticalErrorPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors",
                                                                         "show", "statistic", "kPercentageNumber", "kNumberNumber", "plotCriticalErrors",
                                                                         "distribution", "N", "materialityValue"))
-            jaspResults[["criticalErrorPlot"]] 		$position <- 11
+            jaspResults[["criticalErrorPlot"]] 		$position <- 12
         }
+        jaspResults[["figure2"]] <- createJaspHtml(paste0("<b>Figure ", figNumber ,".</b>The number of full errors that are allowed in the sample before rejecting the population are displayed in green.
+                                                          Whenever more than this number of full errors is found, displayed in red, the population should be rejected."), "p")
+        jaspResults[["figure2"]]$position <- 13
+        jaspResults[["figure2"]]$copyDependenciesFromJaspObject(jaspResults[["criticalErrorPlot"]])
+        figNumber <- figNumber + 1
       }
 
     # Selection phase (analysis starts when button is clicked)
@@ -146,20 +155,20 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
         options[["sampleSize"]] <- planningResult[["n"]]
 
         jaspResults[["samplingHeader"]] <- createJaspHtml("<u>Selection</u>", "h2")
-        jaspResults[["samplingHeader"]]$position <- 13
+        jaspResults[["samplingHeader"]]$position <- 14
         jaspResults[["samplingHeader"]]$dependOnOptions(c("none"))
 
         # Interpretation for the sampling phase
         if(options[["interpretation"]]){
             technique <- base::switch(options[["samplingType"]],
-                                        "simplerandomsampling" = "simple random",
+                                        "simplerandomsampling" = "random",
                                         "systematicsampling" = "systematic",
                                         "cellsampling" = "cell")
             technique <- base::switch(options[["samplingMethod"]],
                                         "recordsampling" = paste(technique, "record sampling"),
                                         "mussampling" = paste(technique, "MUS sampling"))
             jaspResults[["samplingParagraph"]] <- createJaspHtml(paste0("From the population of <b>", options[["N"]], "</b> observations, <b>", planningResult[["n"]], "</b> samples were drawn using a <b>", technique, "</b> method."), "p")
-            jaspResults[["samplingParagraph"]]$position <- 14
+            jaspResults[["samplingParagraph"]]$position <- 15
             jaspResults[["samplingParagraph"]]$dependOnOptions(c("sampleSize", "N", "samplingType", "samplingMethod"))
         }
 
@@ -168,31 +177,31 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
         # Perform the sampling and draw the outcome tables
         if(options[["samplingType"]] == "simplerandomsampling"){
           if(samplingMethod == "recordsampling"){
-            .SimpleRandomSamplingTable(dataset, options, jaspResults, type = "attributes", sample = jaspResults[["sample"]]$object, position = 16)
-            .samplingInfoTable(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 15)
+            .SimpleRandomSamplingTable(dataset, options, jaspResults, type = "attributes", sample = jaspResults[["sample"]]$object, position = 18)
+            .samplingInfoTable(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 16)
           } else {
-            .SimpleRandomSamplingTable(dataset, options, jaspResults, type = "mus", sample = jaspResults[["sample"]]$object, position = 16)
-            .samplingInfoTable(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 15)
+            .SimpleRandomSamplingTable(dataset, options, jaspResults, type = "mus", sample = jaspResults[["sample"]]$object, position = 17)
+            .samplingInfoTable(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 16)
           }
         } else if(options[["samplingType"]] == "systematicsampling"){
           if(samplingMethod == "recordsampling"){
             interval <- ceiling(nrow(dataset) / options[["sampleSize"]])
-            .SystematicSamplingTable(dataset, options, jaspResults, interval, type = "attributes", sample = jaspResults[["sample"]]$object, position = 16)
-            .samplingInfoTable(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 15, interval = interval)
+            .SystematicSamplingTable(dataset, options, jaspResults, interval, type = "attributes", sample = jaspResults[["sample"]]$object, position = 18)
+            .samplingInfoTable(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 16, interval = interval)
           } else {
             interval <- ceiling(sum(dataset[, .v(monetaryVariable)]) / options[["sampleSize"]])
-            .SystematicSamplingTable(dataset, options, jaspResults, interval, type = "mus", sample = jaspResults[["sample"]]$object, position = 16)
-            .samplingInfoTable(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 15, interval = interval)
+            .SystematicSamplingTable(dataset, options, jaspResults, interval, type = "mus", sample = jaspResults[["sample"]]$object, position = 18)
+            .samplingInfoTable(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 16, interval = interval)
           }
         } else if(options[["samplingType"]] == "cellsampling"){
           if(samplingMethod == "recordsampling"){
             interval <- ceiling(nrow(dataset) / options[["sampleSize"]])
-            .cellSamplingTable(dataset, options, jaspResults, interval, type = "attributes", sample = jaspResults[["sample"]]$object, position = 16)
-            .samplingInfoTable(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 15, interval = interval)
+            .cellSamplingTable(dataset, options, jaspResults, interval, type = "attributes", sample = jaspResults[["sample"]]$object, position = 18)
+            .samplingInfoTable(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 16, interval = interval)
           } else {
             interval <- ceiling(sum(dataset[, .v(monetaryVariable)]) / options[["sampleSize"]])
-            .cellSamplingTable(dataset, options, jaspResults, interval, type = "mus", sample = jaspResults[["sample"]]$object, position = 16)
-            .samplingInfoTable(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 15, interval = interval)
+            .cellSamplingTable(dataset, options, jaspResults, interval, type = "mus", sample = jaspResults[["sample"]]$object, position = 18)
+            .samplingInfoTable(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 16, interval = interval)
           }
         }
         # Store the sample
@@ -284,6 +293,11 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
                                                                      "method", "materialityValue", "correctMUS", "boundMethod", "result"))
             jaspResults[["confidenceBoundPlot"]] 		$position <- 22
         }
+        jaspResults[["figure3"]] <- createJaspHtml(paste0("<b>Figure ", figNumber ,".</b> Results of the sample evaluation compared with materiality and expected errors. The most likely error (MLE)
+                                                              is an estimate of the true misstatement in the population. The maximum error is the upper confidence bound on this MLE."), "p")
+        jaspResults[["figure3"]]$position <- 23
+        jaspResults[["figure3"]]$copyDependenciesFromJaspObject(jaspResults[["confidenceBoundPlot"]])
+        figNumber <- figNumber + 1
     }
 
     # Correlation plot
@@ -293,14 +307,20 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
         {
             jaspResults[["correlationPlot"]] 		<- .plotScatterJFA(dataset, options, jaspResults)
             jaspResults[["correlationPlot"]]		$dependOnOptions(c("correctMUS", "plotRegression", "monetaryVariable"))
-            jaspResults[["correlationPlot"]] 		$position <- 23
+            jaspResults[["correlationPlot"]] 		$position <- 24
         }
+        jaspResults[["figure4"]] <- createJaspHtml(paste0("<b>Figure ", figNumber ,".</b> Scatterplot of the sample book values versus their audit values. Red dots indicate observations that did not match
+                                                                their original book value. If these red dots lie in the bottom part of the graph, the observations are overstated. If these red dots
+                                                                lie in the upper part of the graph, they are understated."), "p")
+        jaspResults[["figure4"]]$position <- 25
+        jaspResults[["figure4"]]$copyDependenciesFromJaspObject(jaspResults[["correlationPlot"]])
+        figNumber <- figNumber + 1
     }
 
     # Interpretation after the evaluation table
     if(options[["interpretation"]] && runEvaluation){
         jaspResults[["conclusionTitle"]] <- createJaspHtml("<u>Conclusion</u>", "h2")
-        jaspResults[["conclusionTitle"]]$position <- 24
+        jaspResults[["conclusionTitle"]]$position <- 26
         jaspResults[["conclusionTitle"]]$dependOnOptions(c("interpretation"))
 
         if(result[["bound"]] < options[["materiality"]]){
@@ -313,7 +333,7 @@ classicalAudit <- function(jaspResults, dataset, options, state=NULL){
         jaspResults[["conclusionParagraph"]] <- createJaspHtml(paste0("To approve these data, a <b>", confidenceLevelLabel ,"</b> upper confidence bound on the population proportion of full errors should be determined to be
                                                                     lower than materiality, in this case <b>", materialityLevelLabel ,"</b>. For the current data, the confidence bound is <b>", above_below ,"</b> than materiality.
                                                                     The conclusion for these data is that the data contain ", approve ,"."), "p")
-        jaspResults[["conclusionParagraph"]]$position <- 25
+        jaspResults[["conclusionParagraph"]]$position <- 27
         jaspResults[["conclusionParagraph"]]$dependOnOptions(c("IR", "CR", "confidence", "correctID", "plotBound", "materiality",
                                                                  "method", "materialityValue", "correctMUS"))
     }

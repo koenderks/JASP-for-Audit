@@ -233,7 +233,7 @@ Form {
               id: plotPrior
               enabled: mus.checked ? (recordNumberVariable.count > 0 && monetaryVariable.count > 0) : true
             }
-           PercentField {  text: qsTr("x-axis limit")                   ; name: "limx" ; defaultValue: 20; Layout.leftMargin: 20; enabled: plotPrior.checked}
+           PercentField {  text: qsTr("x-axis limit")                   ; name: "limx" ; defaultValue: 100; Layout.leftMargin: 20; enabled: plotPrior.checked}
            CheckBox {      text: qsTr("Additional info")                ; name: "plotPriorAdditionalInfo" ; Layout.leftMargin: 20; checked: true; enabled: plotPrior.checked}
         }
     }
@@ -582,7 +582,7 @@ Form {
                 id: correctMUS
             }
         }
-        
+
         Flow{
           Layout.leftMargin: 10
           spacing: 140
