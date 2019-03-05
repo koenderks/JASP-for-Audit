@@ -115,7 +115,7 @@ Form {
               text: qsTr("Advanced planning options")
 
               Flow {
-                  spacing: 0
+                  spacing: 10
 
                   ColumnLayout {
                     RadioButtonGroup {

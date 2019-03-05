@@ -1,3 +1,31 @@
+.auditRiskModel <- function(options, jaspResults){
+
+  jaspResults[["ARMcontainer"]] <- createJaspContainer(title= "<u>Audit Risk Model</u>")
+  jaspResults[["ARMcontainer"]]$position <- 2
+
+  #  Audit Risk Model formula
+  .ARMformula(options, jaspResults, position = 2)
+  DR                          <- jaspResults[["DR"]]$object
+
+  # Create labels for the materiality
+  materialityLevelLabel           <- base::switch(options[["auditType"]],
+                                                  "attributes" = paste0(round(options[["materiality"]], 4) * 100, "%"),
+                                                  "mus" = options[["materialityValue"]])
+
+  # Interpretation before the planning table
+  if(options[["interpretation"]]){
+
+    auditRiskLabel          <- paste0(round((1 - options[["confidence"]]) * 100, 2), "%")
+    dectectionRiskLabel     <- paste0(round(DR * 100, 2), "%")
+
+    jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]] <- createJaspHtml(paste0("Prior to the substantive testing phase, the inherent risk was determined to be <b>", options[["IR"]] ,"</b>. The internal control risk was determined
+                                                                    to be <b>", options[["CR"]] ,"</b>. According to the Audit Risk Model, the required detection risk to then maintain an audit risk of <b>", auditRiskLabel, "</b> for a materiality
+                                                                    of <b>", materialityLevelLabel ,"</b> should be <b>", dectectionRiskLabel , "</b>."), "p")
+    jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]]$position <- 1
+    jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]]$dependOnOptions(c("confidence", "IR", "CR", "materiality", "materialityValue"))
+  }
+}
+
 .ARMformula <- function(options, jaspResults, position = 2){
 
     if(!is.null(jaspResults[["ARMcontainer"]][["ARMformula"]])) return()
@@ -7,24 +35,23 @@
     CR                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
     DR                      <- AR / IR / CR
 
+    jaspResults[["DR"]]     <- createJaspState(DR)
+    jaspResults[["DR"]]     $dependOnOptions(c("IR", "CR", "confidence"))
+
     text <- paste0("Audit risk (", round(AR * 100, 2),"%) = Inherent risk (", round(IR * 100, 2), "%) x Control risk (", round(CR * 100, 2), "%) x Detection risk (", round(DR * 100, 2), "%)")
 
     jaspResults[["ARMcontainer"]][["ARMformula"]] <- createJaspHtml(text, "h3")
     jaspResults[["ARMcontainer"]][["ARMformula"]]$position <- position
     jaspResults[["ARMcontainer"]][["ARMformula"]]$dependOnOptions(c("IR", "CR", "confidence"))
-
-    jaspResults[["DR"]]     <- createJaspState(DR)
-    jaspResults[["DR"]]     $dependOnOptions(c("IR", "CR", "confidence"))
-
 }
 
 .dataTable <- function(dataset, options, jaspResults, position){
 
   if(!is.null(jaspResults[["procedureContainer"]][["dataTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-  dataTable                        <- createJaspTable("Population Descriptives")
-  jaspResults[["procedureContainer"]][["dataTable"]]       <- dataTable
-  dataTable$position               <- position
+  dataTable                                                 <- createJaspTable("Population Descriptives")
+  jaspResults[["procedureContainer"]][["dataTable"]]        <- dataTable
+  dataTable$position                                        <- position
   dataTable$dependOnOptions(c("monetaryVariable", "recordNumberVariable"))
 
   dataTable$addColumnInfo(name = 'popSize',     title = "Population size",        type = 'string')
@@ -35,13 +62,13 @@
   dataTable$addColumnInfo(name = 'p2',          title = "50%",                    type = 'string', overtitle = "Percentile")
   dataTable$addColumnInfo(name = 'p3',          title = "75%",                    type = 'string', overtitle = "Percentile")
 
-  if(!options[["run"]]){
+  if(!jaspResults[["ready"]]$object){
     row <- data.frame(popSize = ".", value = ".", mean = ".", sd = ".", p1 = ".", p2 = ".", p3 = ".")
     dataTable$addRows(row)
     return()
   }
 
-  popSize                           <- options[["N"]]
+  popSize                           <- jaspResults[["N"]]$object
   values                            <- dataset[, .v(options[["monetaryVariable"]])]
   total.value                       <- round(sum(values), 2)
   mean.value                        <- round(mean(values), 2)
@@ -191,7 +218,7 @@
 
 .plotConfidenceBounds <- function(options, result, jaspResults){
 
-  materiality     <- options[["materiality"]]
+  materiality     <- jaspResults[["materiality"]]$object
   bound           <- result[["bound"]]
   if(is.null(options[["expected.errors"]])){
     expected.errors <- NULL

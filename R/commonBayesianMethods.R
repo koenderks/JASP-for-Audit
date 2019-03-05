@@ -1,11 +1,11 @@
-.calculateBayesianSampleSize <- function(options, alpha){
+.calculateBayesianSampleSize <- function(options, alpha, jaspResults){
     for(n in 1:5000){
       impk <- base::switch(options[["expected.errors"]],
                             "kPercentage" = n * options[["kPercentageNumber"]],
                             "kNumber" = options[["kNumberNumber"]])
         if(impk >= n){ next }
         x                     <- qbeta(p = 1 - alpha, shape1 = 1 + impk, shape2 = 1 + (n - impk))
-        if(x < options[["materiality"]]){
+        if(x < jaspResults[["materiality"]]$object){
             return(n)
         }
     }
@@ -24,14 +24,15 @@
     return(sapply(p, function(x) sum(pp < x)))
 }
 
-.calculateBayesianSampleSizeBetaBinom <- function(options, alpha, N){
+.calculateBayesianSampleSizeBetaBinom <- function(options, alpha, jaspResults){
+    N <- jaspResults[["N"]]$object
     for(n in 1:5000){
       impk <- base::switch(options[["expected.errors"]],
                             "kPercentage" = n * options[["kPercentageNumber"]],
                             "kNumber" = options[["kNumberNumber"]])
         if(impk >= n){ next }
         x                     <- .qBetaBinom(p = 1 - alpha, N = N, u = 1 + impk, v = 1 + (n - impk))
-        if((x / N) < options[["materiality"]]){
+        if((x / N) < jaspResults[["materiality"]]$object){
             return(n)
         }
     }
@@ -46,7 +47,7 @@
     cr                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
     alpha                   <- ar / ir / cr
 
-    if(options[["materiality"]] == 0){
+    if(jaspResults[["materiality"]]$object == 0){
       pk                    <- 0
       pn                    <- 0
       k                     <- 0
@@ -56,11 +57,11 @@
     } else {
 
       if(options[["distribution"]] == "beta"){
-        n_noprior               <- .calculateBayesianSampleSize(options, 1 - options[["confidence"]])
-        n_withprior             <- .calculateBayesianSampleSize(options, alpha)
+        n_noprior               <- .calculateBayesianSampleSize(options, 1 - options[["confidence"]], jaspResults)
+        n_withprior             <- .calculateBayesianSampleSize(options, alpha, jaspResults)
       } else if(options[["distribution"]] == "beta-binomial"){
-        n_noprior               <- .calculateBayesianSampleSizeBetaBinom(options, 1 - options[["confidence"]], options[["N"]])
-        n_withprior             <- .calculateBayesianSampleSizeBetaBinom(options, alpha, options[["N"]])
+        n_noprior               <- .calculateBayesianSampleSizeBetaBinom(options, 1 - options[["confidence"]], jaspResults)
+        n_withprior             <- .calculateBayesianSampleSizeBetaBinom(options, alpha, jaspResults)
       }
 
       pk                      <- 0
@@ -106,9 +107,9 @@
 
   if(!is.null(jaspResults[["planningContainer"]][["summaryTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-  summaryTable                        <- createJaspTable("Bayesian Attributes Planning Table")
-  jaspResults[["planningContainer"]][["summaryTable"]]       <- summaryTable
-  summaryTable$position               <- position
+  summaryTable                                                <- createJaspTable("Bayesian Attributes Planning Table")
+  jaspResults[["planningContainer"]][["summaryTable"]]        <- summaryTable
+  summaryTable$position                                       <- position
   summaryTable$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "show", "N",
                                   "kPercentageNumber", "kNumberNumber", "expectedBF", "prior", "distribution",
                                   "materialityValue", "recordNumberVariable", "monetaryVariable", "populationValue", "auditType"))
@@ -124,7 +125,7 @@
 
   message <- base::switch(options[["distribution"]],
                             "beta" = "The sample size is calculated using the <b>beta</b> distribution.",
-                            "beta-binomial" = paste0("The sample size is calculated using the <b>beta-binomial</b> distribution (N = ", options[["N"]] ,")."))
+                            "beta-binomial" = paste0("The sample size is calculated using the <b>beta-binomial</b> distribution (N = ", jaspResults[["N"]]$object ,")."))
   summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
   ktable <- base::switch(options[["expected.errors"]],
@@ -132,7 +133,7 @@
                           "kNumber" = options[["kNumberNumber"]])
   DRtable <- paste0(round(result[["alpha"]], 3) * 100, "%")
 
-  if(options[["materiality"]] == 0){
+  if(jaspResults[["materiality"]]$object == 0){
     row <- data.frame(materiality = ".", IR = result[["IR"]], CR = result[["CR"]], DR = DRtable, k = 0, n = ".")
     if(options[["expectedBF"]])
       row <- cbind(row, expBF = ".")
@@ -140,16 +141,16 @@
     return()
   }
 
-  materialityTitle <- paste0(round(options[["materiality"]] * 100, 2), "%")
+  materialityTitle <- paste0(round(jaspResults[["materiality"]]$object * 100, 2), "%")
   materialityValue <- base::switch(options[["auditType"]],
-                                    "attributes" = ceiling(options[["materiality"]] * sum(dataset[, .v(options[["monetaryVariable"]])])),
+                                    "attributes" = ceiling(jaspResults[["materiality"]]$object * sum(dataset[, .v(options[["monetaryVariable"]])])),
                                     "mus" = options[["materialityValue"]])
 
   materiality <- base::switch(options[["auditType"]],
                                 "attributes" = materialityTitle,
                                 "mus" = materialityValue)
 
-  if(!options[["run"]] && options[["auditType"]] == "mus"){
+  if(!jaspResults[["ready"]]$object && options[["auditType"]] == "mus"){
     row <- data.frame(materiality           = materiality,
                       IR                    = result[["IR"]],
                       CR                    = result[["CR"]],
@@ -169,7 +170,7 @@
                     k                     = ktable,
                     n                     = result[["n"]])
   if(options[["expectedBF"]])
-    row <- cbind(row, expBF = .expectedBF(options, result, ktable))
+    row <- cbind(row, expBF = .expectedBF(options, result, ktable, jaspResults))
   summaryTable$addRows(row)
 }
 
@@ -177,7 +178,7 @@
 
   if(!is.null(jaspResults[["planningContainer"]][["sampletable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-  if (options[["implicitsample"]] && options[["run"]]){
+  if (options[["implicitsample"]] && jaspResults[["ready"]]$object){
       if(is.null(jaspResults[["planningContainer"]][["sampletable"]])){
 
   sampletable                       <- createJaspTable("Implicit Sample Table")
@@ -188,12 +189,7 @@
 
   sampletable$addColumnInfo(name = 'implicitn', title = "Prior sample size", type = 'string')
   sampletable$addColumnInfo(name = 'implicitk', title = "Prior errors", type = 'string')
-  if(options[["statistic"]] == "bound"){
-    sampletable$addColumnInfo(name = 'priorbound', title = paste0(result[["confidence"]]*100,"% Prior confidence bound"), type = 'string')
-  } else {
-    sampletable$addColumnInfo(name = 'ciLow', title = "Lower", type = "string", overtitle = paste0(result[["confidence"]]*100,"% Prior confidence interval"))
-    sampletable$addColumnInfo(name = 'ciHigh', title = "Upper", type = "string", overtitle = paste0(result[["confidence"]]*100,"% Prior confidence interval"))
-  }
+  sampletable$addColumnInfo(name = 'priorbound', title = paste0(result[["confidence"]]*100,"% Prior confidence bound"), type = 'string')
 
   message <- paste0("Sample sizes shown are implicit sample sizes derived from the ARM risk assessments: IR = <b>", options[["IR"]], "</b> and CR = <b>", options[["CR"]], "</b>.")
   sampletable$addFootnote(message = message, symbol="<i>Note.</i>")
@@ -201,15 +197,10 @@
   implicitn <- round(result[["implicitn"]], 2)
   implicitk <- round(result[["implicitk"]], 2)
 
-  priorBound <- base::switch(options[["statistic"]],
-                              "bound" = round(qbeta(p = options[["confidence"]], shape1 = result[["priorA"]], shape2 = result[["priorB"]]), 3),
-                              "interval" = round(qbeta(p = c(  (1 - (1-(1-options[["confidence"]])/2)) , (1 - ((1-options[["confidence"]])/2)) ), shape1 = result[["priorA"]], shape2 = result[["priorB"]]), 3))
+  priorBound <- round(qbeta(p = options[["confidence"]], shape1 = result[["priorA"]], shape2 = result[["priorB"]]), 3)
+
   priorBound <- paste0(priorBound * 100, "%")
-  if(options[["statistic"]] == "bound"){
-      row <- data.frame(implicitn = implicitn, implicitk = implicitk, priorbound = priorBound)
-  } else {
-    row <- data.frame(implicitn = implicitn, implicitk = implicitk, ciLow = priorBound[1], ciHigh = priorBound[2])
-  }
+  row <- data.frame(implicitn = implicitn, implicitk = implicitk, priorbound = priorBound)
   sampletable$addRows(row)
     }
   }
@@ -231,7 +222,7 @@
   yBreaks <- c(0, 1.2*max(d$y))
   yLim <- range(yBreaks)
 
-  pointdata <- data.frame(x = options[["materiality"]], y = dbeta(options[["materiality"]], result[["priorA"]], result[["priorB"]]))
+  pointdata <- data.frame(x = jaspResults[["materiality"]]$object, y = dbeta(jaspResults[["materiality"]]$object, result[["priorA"]], result[["priorB"]]))
 
   p <- ggplot2::ggplot(d, ggplot2::aes(x = x, y = y)) +
       ggplot2::geom_line(ggplot2::aes(x = x, y = y, linetype = type), lwd = 1) +
@@ -246,15 +237,9 @@
       p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Prior confidence region"))
       p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 1, 0.5, .7), stroke = 2, color = "black")))
 
-        if(options[["statistic"]] == "bound"){
-          p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["priorA"]], shape2 = result[["priorB"]]),
-                                          xlim = c(0, qbeta(options[["confidence"]], result[["priorA"]], result[["priorB"]])),
-                                          geom = "area", fill = rgb(0, 1, 0.5, .7))
-        } else if(options[["statistic"]] == "interval"){
-          p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["priorA"]], shape2 = result[["priorB"]]),
-                                          xlim = c(qbeta((1 - (1-(1-options[["confidence"]])/2)), result[["priorA"]], result[["priorB"]]), qbeta((1 - ((1-options[["confidence"]])/2)), result[["priorA"]], result[["priorB"]])),
-                                          geom = "area", fill = rgb(0, 1, 0.5, .7))
-        }
+      p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["priorA"]], shape2 = result[["priorB"]]),
+                                      xlim = c(0, qbeta(options[["confidence"]], result[["priorA"]], result[["priorB"]])),
+                                      geom = "area", fill = rgb(0, 1, 0.5, .7))
   }
 
   p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = pointdata, size = 3, shape = 21, stroke = 2, color = "black", fill = "red")
@@ -281,11 +266,11 @@
     alpha                     <- ar / ir / cr
 
     if(options[["distribution"]] == "beta"){
-      n_noprior               <- .calculateBayesianSampleSize(options, 1 - options[["confidence"]])
-      n_withprior             <- .calculateBayesianSampleSize(options, alpha)
+      n_noprior               <- .calculateBayesianSampleSize(options, 1 - options[["confidence"]], jaspResults)
+      n_withprior             <- .calculateBayesianSampleSize(options, alpha, jaspResults)
     } else if(options[["distribution"]] == "beta-binomial"){
-      n_noprior               <- .calculateBayesianSampleSizeBetaBinom(options, 1 - options[["confidence"]], options[["N"]])
-      n_withprior             <- .calculateBayesianSampleSizeBetaBinom(options, alpha, options[["N"]])
+      n_noprior               <- .calculateBayesianSampleSizeBetaBinom(options, 1 - options[["confidence"]], jaspResults)
+      n_withprior             <- .calculateBayesianSampleSizeBetaBinom(options, alpha, jaspResults)
     }
 
     pk                        <- 0
@@ -315,12 +300,7 @@
 
     bound <- "."
     if(n != 0 && k <= n){
-      if(options[["statistic"]] == "bound"){
-          bound             <- qbeta(p = options[["confidence"]], shape1 = priorA + k, shape2 = priorB + (n - k), lower.tail = TRUE)
-       } else if(options[["statistic"]] =="interval"){
-          bound             <- qbeta(p = c(  (1 - (1-(1-options[["confidence"]])/2)) , (1 - ((1-options[["confidence"]])/2)) ),
-                                    shape1 = priorA + k, shape2 = priorB + (n - k), lower.tail = TRUE)
-      }
+      bound             <- qbeta(p = options[["confidence"]], shape1 = priorA + k, shape2 = priorB + (n - k), lower.tail = TRUE)
     }
 
     resultList <- list()
@@ -378,22 +358,20 @@
       return()
     }
 
-    materialityTable        <- round(options[["materiality"]], 2)
-    if(options[["show"]] == "percentage")
-      materialityTable      <- paste0(materialityTable * 100, "%")
+    materialityTable      <- paste0(round(jaspResults[["materiality"]]$object, 2) * 100, "%")
 
     boundTable <- result[["bound"]]
     if(!"." %in% boundTable){
       boundTable            <- round(result[["bound"]], 4)
-      if(options[["show"]] == "percentage")
-        boundTable          <- paste0(boundTable * 100, "%")
-    }
+
+    boundTable          <- paste0(round(result[["bound"]], 4) * 100, "%")
+  }
 
     row                     <- data.frame(materiality = materialityTable, n = result[["n"]], k = result[["k"]], bound = boundTable)
     if(options[["mostLikelyError"]])
       row                   <- cbind(row, mle = mle)
     if(options[["bayesFactor"]])
-      row                   <- cbind(row, bf = .BF(options, result))
+      row                   <- cbind(row, bf = .BF(options, result, jaspResults))
     evaluationTable$addRows(row)
 }
 
@@ -413,17 +391,13 @@
   yBreaks <- c(0, 1.2*max(d$y))
   yLim <- range(yBreaks)
 
-  pointdata <- data.frame(x = options[["materiality"]], y = dbeta(options[["materiality"]], result[["posteriorA"]], result[["posteriorB"]]))
+  pointdata <- data.frame(x = jaspResults[["materiality"]]$object, y = dbeta(jaspResults[["materiality"]]$object, result[["posteriorA"]], result[["posteriorB"]]))
 
   p <- ggplot2::ggplot(d, ggplot2::aes(x = x, y = y)) +
       ggplot2::geom_line(ggplot2::aes(x = x, y = y, linetype = type), lwd = 1) +
       ggplot2::scale_linetype_manual(values=c("dashed", "solid"), guide = ggplot2::guide_legend(nrow = 1, byrow = FALSE, title = "", order = 1))
 
-  if(options[["show"]] == "percentage"){
-    p <- p + ggplot2::scale_x_continuous(name = "Error percentage", breaks = xBreaks, limits = xLim, labels = paste0(xBreaks * 100, "%"))
-  } else if(options[["show"]] == "proportion"){
-    p <- p + ggplot2::scale_x_continuous(name = "Error proportion", breaks = xBreaks, limits = xLim)
-  }
+  p <- p + ggplot2::scale_x_continuous(name = "Error percentage", breaks = xBreaks, limits = xLim, labels = paste0(xBreaks * 100, "%"))
 
   if(options[["plotPriorAndPosteriorAdditionalInfo"]]){
     pdata <- data.frame(x = 0, y = 0, l = "1")
@@ -431,13 +405,8 @@
     p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior \nconfidence region"))
     p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 0.25, 1, .5), stroke = 2, color = "black")), order = 2)
 
-    if(options[["statistic"]] == "bound"){
       p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["posteriorA"]], shape2 = result[["posteriorB"]]), xlim = c(0, result[["bound"]]),
                                       geom = "area", fill = rgb(0, 0.25, 1, .5))
-    } else if(options[["statistic"]] == "interval") {
-      p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["posteriorA"]], shape2 = result[["posteriorB"]]), xlim = c(result[["bound"]][1], result[["bound"]][2]),
-                                      geom = "area", fill = rgb(0, 0.25, 1, .5))
-    }
   }
 
   p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = pointdata, size = 3, shape = 21, stroke = 2, color = "black", fill = "red")
@@ -455,30 +424,30 @@
 
 }
 
-.expectedBF <- function(options, result, ktable){
-    priorOdds       <- diff(pbeta(c(0, options[["materiality"]]), result[["priorA"]], result[["priorB"]])) / diff(pbeta(c(options[["materiality"]], 1), result[["priorA"]], result[["priorB"]]))
-    posteriorOdds   <- diff(pbeta(c(0, options[["materiality"]]), result[["priorA"]] + ktable, result[["priorB"]] + (result[["n"]] + ktable))) / diff(pbeta(c(options[["materiality"]], 1), result[["priorA"]] + ktable, result[["priorB"]] + (result[["n"]] + ktable)))
+.expectedBF <- function(options, result, ktable, jaspResults){
+    priorOdds       <- diff(pbeta(c(0, jaspResults[["materiality"]]$object), result[["priorA"]], result[["priorB"]])) / diff(pbeta(c(jaspResults[["materiality"]]$object, 1), result[["priorA"]], result[["priorB"]]))
+    posteriorOdds   <- diff(pbeta(c(0, jaspResults[["materiality"]]$object), result[["priorA"]] + ktable, result[["priorB"]] + (result[["n"]] + ktable))) / diff(pbeta(c(jaspResults[["materiality"]]$object, 1), result[["priorA"]] + ktable, result[["priorB"]] + (result[["n"]] + ktable)))
     BF              <- round(posteriorOdds / priorOdds, 2)
     return(BF)
 }
 
-.BF <- function(options, result){
-  priorOdds         <- diff(pbeta(c(0, options[["materiality"]]), result[["priorA"]], result[["priorB"]])) / diff(pbeta(c(options[["materiality"]], 1), result[["priorA"]], result[["priorB"]]))
-  posteriorOdds     <- diff(pbeta(c(0, options[["materiality"]]), result[["posteriorA"]], result[["posteriorB"]])) / diff(pbeta(c(options[["materiality"]], 1), result[["posteriorA"]], result[["posteriorB"]]))
+.BF <- function(options, result, jaspResults){
+  priorOdds         <- diff(pbeta(c(0, jaspResults[["materiality"]]$object), result[["priorA"]], result[["priorB"]])) / diff(pbeta(c(jaspResults[["materiality"]]$object, 1), result[["priorA"]], result[["priorB"]]))
+  posteriorOdds     <- diff(pbeta(c(0, jaspResults[["materiality"]]$object), result[["posteriorA"]], result[["posteriorB"]])) / diff(pbeta(c(jaspResults[["materiality"]]$object, 1), result[["posteriorA"]], result[["posteriorB"]]))
   BF                <- round(posteriorOdds / priorOdds, 2)
   return(BF)
 }
 
-.BFsamples <- function(options, result){
+.BFsamples <- function(options, result, jaspResults){
   densprior         <- density(result[["prior"]])
   priorCDF          <- approxfun(densprior$x, densprior$y, yleft=0, yright=0)
-  priorLeft         <- integrate(priorCDF, lower = 0, upper = options[["materiality"]])$value
-  priorRight        <- integrate(priorCDF, lower = options[["materiality"]], upper = 1)$value
+  priorLeft         <- integrate(priorCDF, lower = 0, upper = jaspResults[["materiality"]]$object)$value
+  priorRight        <- integrate(priorCDF, lower = jaspResults[["materiality"]]$object, upper = 1)$value
   priorOdds         <- priorLeft / priorRight
   densposterior     <- density(result[["posterior"]])
   posteriorCDF      <- approxfun(densposterior$x, densposterior$y, yleft=0, yright=0)
-  posteriorLeft     <- integrate(posteriorCDF, lower = 0, upper = options[["materiality"]])$value
-  posteriorRight    <- integrate(posteriorCDF, lower = options[["materiality"]], upper = 1)$value
+  posteriorLeft     <- integrate(posteriorCDF, lower = 0, upper = jaspResults[["materiality"]]$object)$value
+  posteriorRight    <- integrate(posteriorCDF, lower = jaspResults[["materiality"]]$object, upper = 1)$value
   posteriorOdds     <- posteriorLeft / posteriorRight
   BF                <- round(posteriorOdds / priorOdds, 2)
   return(BF)
@@ -514,9 +483,7 @@
       posterior_part_2        <- ((priorMu * (priorB - 1)) + (M * z_bar)) / (n + (priorA / priorPi))
       posterior               <- posterior_part_1 * posterior_part_2 * stats::rf(n = 1e5, df1 = (2 * (M + priorA)), df2 = ( 2 *(M + priorB)))
 
-      bound <- base::switch(options[["statistic"]],
-                            "bound" = as.numeric(quantile(posterior, probs = (1 - alpha), na.rm = TRUE)),
-                            "interval" = as.numeric(quantile(posterior, probs = c(  (1 - (1-(1-alpha)/2)) , (1 - ((1-alpha)/2)) ), na.rm = TRUE)))
+      bound <- as.numeric(quantile(posterior, probs = (1 - alpha), na.rm = TRUE))
     }
 
     resultList <- list()
@@ -582,8 +549,8 @@
 
     errors                  <- round(sum(result[["z"]]), 2)
     mle                     <- 0
-    if(options[["N"]] != 0)
-      mle <- floor( sum(result[["z"]]) / result[["n"]] * options[["N"]] )
+    if(jaspResults[["N"]]$object != 0)
+      mle <- floor( sum(result[["z"]]) / result[["n"]] * jaspResults[["N"]]$object )
 
     materialityTable <- ceiling(options[["materialityValue"]])
 
@@ -592,15 +559,15 @@
     if(!"." %in% boundTable){
       boundTable            <- round(result[["bound"]], 4)
       projectedMisstatement <- ceiling(result[["bound"]] * total_data_value)
-      if(options[["show"]] == "percentage")
-        boundTable          <- paste0(boundTable * 100, "%")
+      boundTable            <- paste0(boundTable * 100, "%")
     }
 
     row <- data.frame(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable, projm = projectedMisstatement)
     if(options[["mostLikelyError"]])
       row <- cbind(row, mle = mle)
     if(options[["bayesFactor"]])
-      row <- cbind(row, bf = .BFsamples(options, result))
+      row <- cbind(row, bf = .BFsamples(options, result, jaspResults))
+
     evaluationTable$addRows(row)
 }
 
@@ -623,19 +590,15 @@
   yLim <- range(yBreaks)
 
   posteriorPointData <- subset(d, d$type == "Posterior")
-  posteriorPointDataY <- posteriorPointData$y[which.min(abs(posteriorPointData$x - options[["materiality"]]))]
+  posteriorPointDataY <- posteriorPointData$y[which.min(abs(posteriorPointData$x - jaspResults[["materiality"]]$object))]
 
-  pointdata <- data.frame(x = options[["materiality"]], y = posteriorPointDataY)
+  pointdata <- data.frame(x = jaspResults[["materiality"]]$object, y = posteriorPointDataY)
 
   p <- ggplot2::ggplot(d, ggplot2::aes(x = x, y = y)) +
       ggplot2::geom_line(ggplot2::aes(x = x, y = y, linetype = type), lwd = 1) +
       ggplot2::scale_linetype_manual(values=c("dashed", "solid"), guide = ggplot2::guide_legend(nrow = 1, byrow = FALSE, title = "", order = 1))
 
-  if(options[["show"]] == "percentage"){
-    p <- p + ggplot2::scale_x_continuous(name = "Error percentage", breaks = xBreaks, limits = xLim, labels = paste0(xBreaks * 100, "%"))
-  } else if(options[["show"]] == "proportion"){
-    p <- p + ggplot2::scale_x_continuous(name = "Error proportion", breaks = xBreaks, limits = xLim)
-  }
+  p <- p + ggplot2::scale_x_continuous(name = "Error percentage", breaks = xBreaks, limits = xLim, labels = paste0(xBreaks * 100, "%"))
 
   if(options[["plotPriorAndPosteriorAdditionalInfo"]]){
     pdata <- data.frame(x = 0, y = 0, l = "1")
@@ -643,11 +606,7 @@
     p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior \nconfidence region"))
     p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 0.25, 1, .5), stroke = 2, color = "black")), order = 2)
 
-    if(options[["statistic"]] == "bound"){
-      p <- p + ggplot2::geom_area(mapping = ggplot2::aes(x = x, y = y), data = subset(subset(d, d$type == "Posterior"), subset(d, d$type == "Posterior")$x <= result[["bound"]]), fill = rgb(0, 0.25, 1, .5))
-    } else if(options[["statistic"]] == "interval") {
-      p <- p + ggplot2::geom_area(mapping = ggplot2::aes(x = x, y = y), data = subset(subset(d, d$type == "Posterior"), subset(d, d$type == "Posterior")$x >= result[["bound"]][1] && subset(d, d$type == "Posterior")$x <= result[["bound"]][2]), fill = rgb(0, 0.25, 1, .5))
-    }
+    p <- p + ggplot2::geom_area(mapping = ggplot2::aes(x = x, y = y), data = subset(subset(d, d$type == "Posterior"), subset(d, d$type == "Posterior")$x <= result[["bound"]]), fill = rgb(0, 0.25, 1, .5))
   }
 
   p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = pointdata, size = 3, shape = 21, stroke = 2, color = "black", fill = "red")

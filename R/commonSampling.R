@@ -1,5 +1,4 @@
-.SimpleRandomSamplingTable          <- function(dataset, options, jaspResults, type, sample, position = 1)
-{
+.SimpleRandomSamplingTable          <- function(dataset, options, jaspResults, type, sample, position = 1){
 
     if(!is.null(jaspResults[["selectionContainer"]][["table"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
@@ -10,7 +9,7 @@
     variables                       <- unlist(options$variables)
 
     duplicates                      <- options$allowDuplicates
-    sampleSize                      <- options$sampleSize
+    sampleSize                      <- jaspResults[["sampleSize"]]$object
     manualSeed                      <- options$seedNumber
 
     if(options[["showSample"]]){
@@ -93,7 +92,7 @@
     variables                       <- unlist(options$variables)
 
     startingPoint                       <- options$startingPoint
-    sampleSize                          <- options$sampleSize
+    sampleSize                          <- jaspResults[["sampleSize"]]$object
     manualSeed                          <- options$seedNumber
     set.seed(manualSeed)
 
@@ -198,7 +197,7 @@
     variables                       <- unlist(options$variables)
 
     startingPoint                       <- options$startingPoint
-    sampleSize                          <- options$sampleSize
+    sampleSize                          <- jaspResults[["sampleSize"]]$object
 
     if(options[["showSample"]]){
       table                               <- createJaspTable("Resulting sample")
@@ -281,66 +280,67 @@
     }
 }
 
-.samplingDescriptivesTable <- function(dataset, options, jaspResults, sample, position = 3)
-{
+.samplingDescriptivesTable <- function(dataset, options, jaspResults, sample, position = 3){
 
     if(!is.null(jaspResults[["selectionContainer"]][["descriptives"]])) return()
 
-    recordVariable                  <- unlist(options$recordNumberVariable)
-    if(recordVariable == "")        recordVariable <- NULL
-    rankingVariable                 <- unlist(options$rankingVariable)
-    if(rankingVariable == "")       rankingVariable <- NULL
-    monetaryVariable                <- unlist(options$monetaryVariable)
-    if(monetaryVariable == "")      monetaryVariable <- NULL
-    variables                       <- unlist(options$variables)
+    if(options[["showDescriptives"]]){
+
+      recordVariable                  <- unlist(options$recordNumberVariable)
+      if(recordVariable == "")        recordVariable <- NULL
+      rankingVariable                 <- unlist(options$rankingVariable)
+      if(rankingVariable == "")       rankingVariable <- NULL
+      monetaryVariable                <- unlist(options$monetaryVariable)
+      if(monetaryVariable == "")      monetaryVariable <- NULL
+      variables                       <- unlist(options$variables)
 
 
-    all.variables                   <- c(rankingVariable, monetaryVariable, variables)
-    descriptives                    <- createJaspTable("Sample Descriptives")
-    jaspResults[["selectionContainer"]][["descriptives"]]   <- descriptives
-    descriptives$transpose          <- TRUE
-    descriptives$position           <- position
+      all.variables                   <- c(rankingVariable, monetaryVariable, variables)
+      descriptives                    <- createJaspTable("Sample Descriptives")
+      jaspResults[["selectionContainer"]][["descriptives"]]   <- descriptives
+      descriptives$transpose          <- TRUE
+      descriptives$position           <- position
 
-    descriptives$dependOnOptions(c("variables", "allowDuplicates", "seed", "sampleSize", "seedNumber",
-                                    "showDescriptives", "mean", "sd", "var", "range", "min", "max", "median", "recordVariable", "rankingVariable",
-                                   "variablesMUS", "recordNumberVariableMUS", "rankingVariableMUS", "monetaryVariableMUS"))
+      descriptives$dependOnOptions(c("variables", "allowDuplicates", "seed", "sampleSize", "seedNumber",
+                                      "showDescriptives", "mean", "sd", "var", "range", "min", "max", "median", "recordVariable", "rankingVariable",
+                                     "variablesMUS", "recordNumberVariableMUS", "rankingVariableMUS", "monetaryVariableMUS"))
 
-                                    descriptives$addColumnInfo(name="name",                        type="string", format="sf:4", title = "")
-                                    descriptives$addColumnInfo(name="Valid cases",                 type="integer")
-    if (options$mean)               descriptives$addColumnInfo(name="Mean",                        type="number", format="sf:4")
-    if (options$median)             descriptives$addColumnInfo(name="Median",                      type="number", format="sf:4")
-    if (options$sd)                 descriptives$addColumnInfo(name="Std. Deviation",              type="number", format="sf:4")
-    if (options$var)                descriptives$addColumnInfo(name="Variance",                    type="number", format="sf:4")
-    if (options$range)              descriptives$addColumnInfo(name="Range",                       type="number", format="sf:4")
-    if (options$min)                descriptives$addColumnInfo(name="Minimum",                     type="number", format="sf:4")
-    if (options$max)                descriptives$addColumnInfo(name="Maximum",                     type="number", format="sf:4")
+                                      descriptives$addColumnInfo(name="name",                        type="string", format="sf:4", title = "")
+                                      descriptives$addColumnInfo(name="Valid cases",                 type="integer")
+      if (options$mean)               descriptives$addColumnInfo(name="Mean",                        type="number", format="sf:4")
+      if (options$median)             descriptives$addColumnInfo(name="Median",                      type="number", format="sf:4")
+      if (options$sd)                 descriptives$addColumnInfo(name="Std. Deviation",              type="number", format="sf:4")
+      if (options$var)                descriptives$addColumnInfo(name="Variance",                    type="number", format="sf:4")
+      if (options$range)              descriptives$addColumnInfo(name="Range",                       type="number", format="sf:4")
+      if (options$min)                descriptives$addColumnInfo(name="Minimum",                     type="number", format="sf:4")
+      if (options$max)                descriptives$addColumnInfo(name="Maximum",                     type="number", format="sf:4")
 
-    if(is.null(sample))
-        return()
+      if(is.null(sample))
+          return()
 
-    for (variable in all.variables)
-    {
-      column    <- sample[[ .v(variable) ]]
-      row <- list()
-
-                                    row[["name"]]                   <- variable
-                                    row[["Valid cases"]]            <- base::length(column)
-      if(!is.factor(column))
+      for (variable in all.variables)
       {
-      if(options$mean)              row[["Mean"]]                   <- base::mean(column, na.rm = TRUE)
-      if(options$sd)                row[["Std. Deviation"]]         <- stats::sd(column, na.rm = TRUE)
-      if(options$var)               row[["Variance"]]               <- stats::var(column, na.rm = TRUE)
-      if(options$median)            row[["Median"]]                 <- stats::median(column, na.rm = TRUE)
-      if(options$range)             row[["Range"]]                  <- base::abs(base::range(column, na.rm = TRUE)[1] - base::range(column, na.rm = TRUE)[2])
-      if(options$min)               row[["Minimum"]]                <- base::min(column, na.rm = TRUE)
-      if(options$max)               row[["Maximum"]]                <- base::max(column, na.rm = TRUE)
+        column    <- sample[[ .v(variable) ]]
+        row <- list()
+
+                                      row[["name"]]                   <- variable
+                                      row[["Valid cases"]]            <- base::length(column)
+        if(!is.factor(column))
+        {
+        if(options$mean)              row[["Mean"]]                   <- base::mean(column, na.rm = TRUE)
+        if(options$sd)                row[["Std. Deviation"]]         <- stats::sd(column, na.rm = TRUE)
+        if(options$var)               row[["Variance"]]               <- stats::var(column, na.rm = TRUE)
+        if(options$median)            row[["Median"]]                 <- stats::median(column, na.rm = TRUE)
+        if(options$range)             row[["Range"]]                  <- base::abs(base::range(column, na.rm = TRUE)[1] - base::range(column, na.rm = TRUE)[2])
+        if(options$min)               row[["Minimum"]]                <- base::min(column, na.rm = TRUE)
+        if(options$max)               row[["Maximum"]]                <- base::max(column, na.rm = TRUE)
+        }
+
+        descriptives$addRows(row)
       }
 
-      descriptives$addRows(row)
-    }
-
-     descriptives$addFootnote(message="Not all statistics are available for <i>Nominal Text</i> variables", symbol="<i>Note.</i>")
-
+       descriptives$addFootnote(message="Not all statistics are available for <i>Nominal Text</i> variables", symbol="<i>Note.</i>")
+   }
 }
 
 .samplingInfoTable <- function(sample, total_data_value, options, jaspResults, position = 1, interval = NULL){
@@ -362,7 +362,7 @@
   message <- paste0("The sample is drawn with <i>seed ", options[["seedNumber"]], "</i>.")
   simpleRandomSamplingInfoTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
-  sampleSize                              <- options$sampleSize
+  sampleSize                              <- jaspResults[["sampleSize"]]$object
   sampleValue                             <- ceiling(sum(sample[, .v(options[["monetaryVariable"]])]))
   percOfTotal                             <- paste0(round(sampleValue / total_data_value * 100, 2), "%")
 
