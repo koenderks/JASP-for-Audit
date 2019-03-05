@@ -3,7 +3,7 @@
 	{
 		"title" : 									"Audit",
 		"description": 							"JASP for Audit (JfA) is an officially supported add-on module that is designed specifically with the auditor in mind. The module provides a workflow for performing a full statistical audit and eliminates the difficulties that arise from programming statistical audit analyses and correctly interpreting their results.",
-		"version":									0.9,
+		"version":									0.1,
 		"author":										"Koen Derks, Jacques de Swart & Ruud Wetzels",
 		"maintainer":								"Koen Derks <k.derks@nyenrode.nl>",
 		"website":									"www.github.com/koenderks/JASP-for-Audit",

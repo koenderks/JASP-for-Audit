@@ -1,7 +1,7 @@
 .SimpleRandomSamplingTable          <- function(dataset, options, jaspResults, type, sample, position = 1)
 {
 
-    if(!is.null(jaspResults[["table"]])) return() #The options for this table didn't change so we don't need to rebuild it
+    if(!is.null(jaspResults[["selectionContainer"]][["table"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
     recordVariable                  <- unlist(options$recordNumberVariable)
     if(recordVariable == "")        recordVariable <- NULL
@@ -15,7 +15,7 @@
 
     if(options[["showSample"]]){
       table                           <- createJaspTable("Resulting sample")
-      jaspResults[["table"]]          <- table
+      jaspResults[["selectionContainer"]][["table"]]          <- table
       table$position                  <- position
 
       table$dependOnOptions(c("variables", "allowDuplicates", "seed", "sampleSize", "seedNumber", "recordNumberVariable",
@@ -82,7 +82,7 @@
 .cellSamplingTable                    <- function(dataset, options, jaspResults, interval, type, sample, position = 2)
 {
 
-    if(!is.null(jaspResults[["table"]])) return() #The options for this table didn't change so we don't need to rebuild it
+    if(!is.null(jaspResults[["selectionContainer"]][["table"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
     recordVariable                  <- unlist(options$recordNumberVariable)
     if(recordVariable == "")        recordVariable <- NULL
@@ -99,7 +99,7 @@
 
     if(options[["showSample"]]){
         table                               <- createJaspTable("Resulting sample")
-        jaspResults[["table"]]              <- table
+        jaspResults[["selectionContainer"]][["table"]]              <- table
         table$position                      <- position
         table$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
                                 "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "showSample",
@@ -187,7 +187,7 @@
 .SystematicSamplingTable            <- function(dataset, options, jaspResults, interval, type, sample, position = 2)
 {
 
-    if(!is.null(jaspResults[["table"]])) return() #The options for this table didn't change so we don't need to rebuild it
+    if(!is.null(jaspResults[["selectionContainer"]][["table"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
     recordVariable                  <- unlist(options$recordNumberVariable)
     if(recordVariable == "")        recordVariable <- NULL
@@ -202,7 +202,7 @@
 
     if(options[["showSample"]]){
       table                               <- createJaspTable("Resulting sample")
-      jaspResults[["table"]]              <- table
+      jaspResults[["selectionContainer"]][["table"]]              <- table
       table$position                      <- position
       table$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
                               "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "showSample",
@@ -284,7 +284,7 @@
 .samplingDescriptivesTable <- function(dataset, options, jaspResults, sample, position = 3)
 {
 
-    if(!is.null(jaspResults[["descriptives"]])) return()
+    if(!is.null(jaspResults[["selectionContainer"]][["descriptives"]])) return()
 
     recordVariable                  <- unlist(options$recordNumberVariable)
     if(recordVariable == "")        recordVariable <- NULL
@@ -297,7 +297,7 @@
 
     all.variables                   <- c(rankingVariable, monetaryVariable, variables)
     descriptives                    <- createJaspTable("Sample Descriptives")
-    jaspResults[["descriptives"]]   <- descriptives
+    jaspResults[["selectionContainer"]][["descriptives"]]   <- descriptives
     descriptives$transpose          <- TRUE
     descriptives$position           <- position
 
@@ -345,10 +345,10 @@
 
 .samplingInfoTable <- function(sample, total_data_value, options, jaspResults, position = 1, interval = NULL){
 
-  if(!is.null(jaspResults[["simpleRandomSamplingInfoTable"]])) return()
+  if(!is.null(jaspResults[["selectionContainer"]][["simpleRandomSamplingInfoTable"]])) return()
 
   simpleRandomSamplingInfoTable                           <- createJaspTable("Sample Information")
-  jaspResults[["simpleRandomSamplingInfoTable"]]          <- simpleRandomSamplingInfoTable
+  jaspResults[["selectionContainer"]][["simpleRandomSamplingInfoTable"]]          <- simpleRandomSamplingInfoTable
   simpleRandomSamplingInfoTable$position                  <- position
   simpleRandomSamplingInfoTable$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType", "samplingMethod",
                                                   "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "N", "seed", "seedNumber"))

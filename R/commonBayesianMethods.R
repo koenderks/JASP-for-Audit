@@ -104,10 +104,10 @@
 
 .bayesianAttributesPlanningTableFullAudit <- function(dataset, options, result, jaspResults, position = 1){
 
-  if(!is.null(jaspResults[["summaryTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
+  if(!is.null(jaspResults[["planningContainer"]][["summaryTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
   summaryTable                        <- createJaspTable("Bayesian Attributes Planning Table")
-  jaspResults[["summaryTable"]]       <- summaryTable
+  jaspResults[["planningContainer"]][["summaryTable"]]       <- summaryTable
   summaryTable$position               <- position
   summaryTable$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "show", "N",
                                   "kPercentageNumber", "kNumberNumber", "expectedBF", "prior", "distribution",
@@ -175,10 +175,13 @@
 
 .priorSampleTable <- function(options, result, jaspResults, position = 3){
 
-  if(!is.null(jaspResults[["sampletable"]])) return() #The options for this table didn't change so we don't need to rebuild it
+  if(!is.null(jaspResults[["planningContainer"]][["sampletable"]])) return() #The options for this table didn't change so we don't need to rebuild it
+
+  if (options[["implicitsample"]] && options[["run"]]){
+      if(is.null(jaspResults[["planningContainer"]][["sampletable"]])){
 
   sampletable                       <- createJaspTable("Implicit Sample Table")
-  jaspResults[["sampletable"]]      <- sampletable
+  jaspResults[["planningContainer"]][["sampletable"]]      <- sampletable
   sampletable$position              <- position
   sampletable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors", "implicitsample", "statistic",
                                 "show", "kPercentageNumber", "kNumberNumber", "distribution", "prior", "N", "materialityValue"))
@@ -208,6 +211,8 @@
     row <- data.frame(implicitn = implicitn, implicitk = implicitk, ciLow = priorBound[1], ciHigh = priorBound[2])
   }
   sampletable$addRows(row)
+    }
+  }
 }
 
 .plotPriorBayesianAttributesPlanningFullAudit <- function(options, result, jaspResults, plotWidth = 600, plotHeight = 450){
@@ -342,10 +347,10 @@
 
 .bayesianAttributesBoundTableFullAudit <- function(options, result, jaspResults, position = 1){
 
-    if(!is.null(jaspResults[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
+    if(!is.null(jaspResults[["evaluationContainer"]][["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
     evaluationTable                       <- createJaspTable("Bayesian Attributes Evaluation Table")
-    jaspResults[["evaluationTable"]]      <- evaluationTable
+    jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
                                       "expected.errors", "kPercentageNumber", "kNumberNumber", "sampleFilter",
@@ -539,10 +544,10 @@
 
 .bayesianMusBoundTableFullAudit <- function(total_data_value, options, result, jaspResults, position = 1){
 
-    if(!is.null(jaspResults[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
+    if(!is.null(jaspResults[["evaluationContainer"]][["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
     evaluationTable                       <- createJaspTable("Bayesian MUS Evaluation Table")
-    jaspResults[["evaluationTable"]]      <- evaluationTable
+    jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
                                       "sampleFilter", "distribution", "mostLikelyError", "N", "correctMUS", "sampleFilterMUS",
                                       "boundMethod", "bayesFactor", "materialityValue", "populationValue", "variableType"))

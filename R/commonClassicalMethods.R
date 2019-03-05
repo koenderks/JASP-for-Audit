@@ -66,10 +66,10 @@
 
 .attributesPlanningTableFullAudit <- function(dataset, options, result, jaspResults, position = 1){
 
-  if(!is.null(jaspResults[["summaryTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
+  if(!is.null(jaspResults[["planningContainer"]][["summaryTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
   summaryTable                              <- createJaspTable("Planning Table")
-  jaspResults[["summaryTable"]]             <- summaryTable
+  jaspResults[["planningContainer"]][["summaryTable"]]             <- summaryTable
   summaryTable$position                     <- position
   summaryTable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "show", "distribution", "N", "recordNumberVariable", "monetaryVariable",
                                   "expected.errors" , "kPercentageNumber", "kNumberNumber", "materialityValue", "auditType", "populationValue"))
@@ -165,10 +165,10 @@
 
 .attributesBoundTableFullAudit <- function(options, result, jaspResults, position = 1){
 
-    if(!is.null(jaspResults[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
+    if(!is.null(jaspResults[["evaluationContainer"]][["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
     evaluationTable                       <- createJaspTable("Attributes Evaluation Table")
-    jaspResults[["evaluationTable"]]      <- evaluationTable
+    jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
                                       "sampleFilter", "distribution", "mostLikelyError", "N", "correctMUS", "sampleFilterMUS",
@@ -260,10 +260,10 @@
 
 .musBoundTableFullAudit <- function(total_data_value, options, result, jaspResults, position = 1){
 
-    if(!is.null(jaspResults[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
+    if(!is.null(jaspResults[["evaluationContainer"]][["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
     evaluationTable                       <- createJaspTable("MUS Evaluation Table")
-    jaspResults[["evaluationTable"]]      <- evaluationTable
+    jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show",
                                       "distribution", "mostLikelyError", "N", "correctMUS", "sampleFilter", "variableType",

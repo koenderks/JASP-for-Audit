@@ -1,6 +1,6 @@
 .ARMformula <- function(options, jaspResults, position = 2){
 
-    if(!is.null(jaspResults[["DR"]])) return()
+    if(!is.null(jaspResults[["ARMcontainer"]][["ARMformula"]])) return()
 
     AR                      <- 1 - options[["confidence"]]
     IR                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
@@ -9,9 +9,9 @@
 
     text <- paste0("Audit risk (", round(AR * 100, 2),"%) = Inherent risk (", round(IR * 100, 2), "%) x Control risk (", round(CR * 100, 2), "%) x Detection risk (", round(DR * 100, 2), "%)")
 
-    jaspResults[["ARMformula"]] <- createJaspHtml(text, "h3")
-    jaspResults[["ARMformula"]]$position <- position
-    jaspResults[["ARMformula"]]$dependOnOptions(c("IR", "CR", "confidence"))
+    jaspResults[["ARMcontainer"]][["ARMformula"]] <- createJaspHtml(text, "h3")
+    jaspResults[["ARMcontainer"]][["ARMformula"]]$position <- position
+    jaspResults[["ARMcontainer"]][["ARMformula"]]$dependOnOptions(c("IR", "CR", "confidence"))
 
     jaspResults[["DR"]]     <- createJaspState(DR)
     jaspResults[["DR"]]     $dependOnOptions(c("IR", "CR", "confidence"))
@@ -20,10 +20,10 @@
 
 .dataTable <- function(dataset, options, jaspResults, position){
 
-  if(!is.null(jaspResults[["dataTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
+  if(!is.null(jaspResults[["procedureContainer"]][["dataTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
   dataTable                        <- createJaspTable("Population Descriptives")
-  jaspResults[["dataTable"]]       <- dataTable
+  jaspResults[["procedureContainer"]][["dataTable"]]       <- dataTable
   dataTable$position               <- position
   dataTable$dependOnOptions(c("monetaryVariable", "recordNumberVariable"))
 
