@@ -24,9 +24,11 @@ classicalAudit <- function(jaspResults, dataset, options){
   dataset <- .readDataClassicalProcedureStage(options, jaspResults)
 
   jaspResults[["figNumber"]]          <- createJaspState(1)
+  jaspResults[["figNumber"]]$dependOnOptions(c("distributionPlot", "plotCriticalErrors"))
 
   jaspResults[["procedureContainer"]] <- createJaspContainer(title= "<u>Procedure</u>")
   jaspResults[["procedureContainer"]]$position <- 1
+  jaspResults[["procedureContainer"]]$dependOnOptions(c("monetaryVariable"))
 
   # Interpretation for the Global Options phase
   if(options[["interpretation"]]){
@@ -57,6 +59,7 @@ classicalAudit <- function(jaspResults, dataset, options){
       jaspResults[["procedureContainer"]][["figure1"]]$position <- 4
       jaspResults[["procedureContainer"]][["figure1"]]$copyDependenciesFromJaspObject(jaspResults[["procedureContainer"]][["valueDistributionPlot"]])
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+      jaspResults[["figNumber"]]$dependOnOptions(c("distributionPlot", "plotCriticalErrors"))
     }
 }
 
@@ -75,7 +78,7 @@ classicalAudit <- function(jaspResults, dataset, options){
   }
   jaspResults[["N"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable"))
   jaspResults[["total_data_value"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable"))
-  jaspResults[["ready"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable"))
+  jaspResults[["ready"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable", "materiality", "materialityValue"))
 
   return(dataset)
 }

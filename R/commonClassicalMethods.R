@@ -336,15 +336,16 @@
         N                       <- jaspResults[["N"]]$object
         b                       <- sample[, .v(options[["monetaryVariable"]])]
         w                       <- sample[, .v(options[["correctMUS"]])]
-        #b1                      <- as.numeric(coef(lm(w ~ b))[2])
-        b1                      <- (sum(b * w) - (sum(b) * sum(w) / n)) / (sum(b^2) - (sum(b)^2 / n))
+        b1                      <- as.numeric(coef(lm(w ~ b))[2])
+        #b1                      <- (sum(b * w) - (sum(b) * sum(w) / n)) / (sum(b^2) - (sum(b)^2 / n))
 
         meanb                   <- mean(b)
         meanw                   <- mean(w)
 
-        mleregression           <- (N * meanw + b1 * (B - N * meanb)) - B
-        upperValue              <- mleregression + qt(p = options[["confidence"]], df = n - 1) * sqrt(1 - cor(b, w)^2) * sd(w) * ( N / sqrt(n)) * sqrt( (N-n) / (N-1) )
-        bound                   <- (upperValue + B) / B
+        mleregression           <- (N * meanw) + (b1 * (B - N * meanb))
+        stand.dev               <- sd(w) * ( N / sqrt(n)) * sqrt( (N-n) / (N-1) ) * sqrt(1 - cor(b, w)^2)
+        upperValue              <- mleregression + qt(p = options[["confidence"]], df = n - 1) * stand.dev
+        bound                   <- (upperValue - B) / B
     }
 
     resultList <- list()

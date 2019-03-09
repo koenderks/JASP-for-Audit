@@ -147,7 +147,7 @@ Form {
     }
 
     // Expander button for the various bounds
-    ExpanderButton {
+    Section {
       visible: true
       title: qsTr("Advanced evaluation options")
       columns: 1

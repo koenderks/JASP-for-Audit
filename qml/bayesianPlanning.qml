@@ -118,7 +118,7 @@ Form {
         }
       }
 
-      ExpanderButton {
+      Section {
           text: qsTr("Advanced planning options")
 
           Flow {

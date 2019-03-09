@@ -27,7 +27,7 @@ Form {
     columns: 1
 
     // Expander button for the Planning phase
-    ExpanderButton {
+    Section {
         text: planningPhase.expanded ? qsTr("<b>1. Planning</b>") : qsTr("1. Planning")
         id: planningPhase
         columns: 1
@@ -111,7 +111,7 @@ Form {
               }
           }
 
-          ExpanderButton {
+          Section {
               text: qsTr("Advanced planning options")
 
               Flow {
@@ -273,7 +273,7 @@ Form {
   }
 
   // Expander button for the Sampling phase
-    ExpanderButton {
+    Section {
         text: samplingPhase.expanded ? qsTr("<b>2. Selection</b>") : qsTr("2. Selection")
         enabled: false
         expanded: false
@@ -315,7 +315,7 @@ Form {
                 validator: IntValidator { bottom: 0 }
             }
 
-            ExpanderButton {
+            Section {
               title: qsTr("Advanced selection options")
               implicitWidth: 260
               id: samplingType
@@ -436,7 +436,7 @@ Form {
     }
 
     // Expander button for the interim-evaluation option phase
-    ExpanderButton {
+    Section {
         text: executionPhase.expanded ? qsTr("<b>3. Execution</b>") : qsTr("3. Execution")
         expanded: false
         enabled: false
@@ -546,7 +546,7 @@ Form {
     }
 
     // Expander button for the Evaluation phase
-    ExpanderButton {
+    Section {
         text: evaluationPhase.expanded ? qsTr("<b>4. Evaluation</b>") : qsTr("4. Evaluation")
         expanded: false
         enabled: false
@@ -637,7 +637,7 @@ Form {
         }
 
         // Expander button for the various bounds
-        ExpanderButton {
+        Section {
           title: qsTr("Advanced evaluation options")
           columns: 1
 

@@ -2,6 +2,7 @@
 
   jaspResults[["ARMcontainer"]] <- createJaspContainer(title= "<u>Audit Risk Model</u>")
   jaspResults[["ARMcontainer"]]$position <- 2
+  jaspResults[["ARMcontainer"]]$dependOnOptions(c("confidence", "IR", "CR", "materiality", "materialityValue"))
 
   #  Audit Risk Model formula
   .ARMformula(options, jaspResults, position = 2)
@@ -268,6 +269,7 @@
 .plotScatterJFA <- function(dataset, options, jaspResults) {
 
     d <- data.frame(xx= dataset[,.v(options[["monetaryVariable"]])], yy= dataset[,.v(options[["correctMUS"]])])
+    co <- cor(d$xx, d$yy)
     d <- na.omit(d)
     d <- ceiling(d)
     xVar <- d$xx
@@ -294,7 +296,7 @@
     yLabs <- vector("character", length(yticks))
     yLabs <- format(yticks, digits= 3, scientific = FALSE)
 
-    co <- round(cor(dataset[,.v(options[["monetaryVariable"]])], dataset[,.v(options[["correctMUS"]])]), 2)
+    co <- round(co, 2)
 
     cols <- rep("gray", nrow(d))
     cols[which(d$xx != d$yy)] <- "red"

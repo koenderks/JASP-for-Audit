@@ -23,7 +23,7 @@ import JASP.Widgets 1.0
 Form {
     id: form
 
-        ExpanderButton {
+        Section {
             expanded: true
             title: samplingMethod.expanded ? qsTr("<b>Sampling method</b>") : qsTr("Sampling method")
             id: samplingMethod
