@@ -28,7 +28,6 @@ classicalAudit <- function(jaspResults, dataset, options){
 
   jaspResults[["procedureContainer"]] <- createJaspContainer(title= "<u>Procedure</u>")
   jaspResults[["procedureContainer"]]$position <- 1
-  jaspResults[["procedureContainer"]]$dependOnOptions(c("monetaryVariable"))
 
   # Interpretation for the Global Options phase
   if(options[["interpretation"]]){
