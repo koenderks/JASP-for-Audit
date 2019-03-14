@@ -24,6 +24,7 @@ bayesianAudit <- function(jaspResults, dataset, options){
   dataset <- .readDataBayesianProcedureStage(options, jaspResults)
 
   jaspResults[["figNumber"]]          <- createJaspState(1)
+  jaspResults[["figNumber"]]$dependOnOptions(c("distributionPlot", "plotCriticalErrors"))
 
   jaspResults[["procedureContainer"]] <- createJaspContainer(title= "<u>Procedure</u>")
   jaspResults[["procedureContainer"]]$position <- 1
@@ -57,6 +58,7 @@ bayesianAudit <- function(jaspResults, dataset, options){
       jaspResults[["procedureContainer"]][["figure1"]]$position <- 4
       jaspResults[["procedureContainer"]][["figure1"]]$copyDependenciesFromJaspObject(jaspResults[["procedureContainer"]][["valueDistributionPlot"]])
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+      jaspResults[["figNumber"]]$dependOnOptions(c("distributionPlot", "plotCriticalErrors"))
     }
 }
 
@@ -238,16 +240,15 @@ bayesianAudit <- function(jaspResults, dataset, options){
 
 .bayesianExecutionStage <- function(options, jaspResults){
 
-  # TODO: Add columns to data instead of replace existing
   if(options[["pasteVariables"]]){
     sampleFilter <- rep(0, jaspResults[["N"]]$object)
-    sampleFilter[jaspResults[["sample"]]$object[,.v(options[["recordNumberVariable"]])]] <- 1
+    sampleFilter[jaspResults[["sample"]]$object[, .v(options[["recordNumberVariable"]])]] <- 1
     sampleFilter <- as.integer(sampleFilter)
     emptyVariable <- rep(NA, jaspResults[["N"]]$object)
-    .setColumnDataAsNominal("sampleFilter", sampleFilter)
-    base::switch(options[["auditType"]],
-                  "attributes" = .setColumnDataAsNominal("errorVariable", base::sample(0:1, size = jaspResults[["N"]]$object, replace = TRUE, prob = c(0.97, 0.03))),
-                  "mus" = .setColumnDataAsScale("TrueValues", base::sample(0:1, size = jaspResults[["N"]]$object, replace = TRUE, prob = c(0.97, 0.03))))
+    .setColumnDataAsNominal(options[["sampleFilterName"]], sampleFilter)
+    base::switch(options[["variableType"]],
+                  "variableTypeCorrect" = .setColumnDataAsNominal(options[["variableName"]], rep(0, jaspResults[["N"]]$object)),
+                  "variableTypeTrueValues" = .setColumnDataAsScale(options[["variableName"]], rep(0, jaspResults[["N"]]$object)))
   }
 }
 

@@ -358,7 +358,11 @@
       return()
     }
 
-    materialityTable      <- paste0(round(jaspResults[["materiality"]]$object, 2) * 100, "%")
+    if(options[["auditType"]] == "attributes"){
+        materialityTable <- paste0(round(jaspResults[["materiality"]]$object, 2) * 100, "%")
+    } else {
+      materialityTable <- options[["materialityValue"]]
+    }
 
     boundTable <- result[["bound"]]
     if(!"." %in% boundTable){

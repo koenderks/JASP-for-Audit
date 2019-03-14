@@ -182,6 +182,7 @@ Form {
                               inputType: "integer"
                               validator: IntValidator { bottom: 0 }
                               Layout.leftMargin: 18
+                              fieldWidth: 40
                           }
                       }
                   }
@@ -313,6 +314,7 @@ Form {
                 name: "seedNumber"
                 id: seedNumber
                 validator: IntValidator { bottom: 0 }
+                fieldWidth: 60
             }
 
             Section {
@@ -368,6 +370,7 @@ Form {
                       validator: IntValidator { bottom: 1 }
                       Layout.leftMargin: 20
                       enabled: systematicsampling.checked
+                      fieldWidth: 60
                   }
               }
           }
@@ -483,6 +486,25 @@ Form {
             }
           }
         }
+        
+        Divider { }
+        
+        GroupBox {
+          ComputedColumnField{
+            name: "sampleFilterName"
+            text: "Filter: "
+            fieldWidth: 60
+            id: sampleFilterName
+            enabled: pasteVariables.checked ? false : true
+          }
+          ComputedColumnField{
+            name: "variableName"
+            text: "Column: "
+            fieldWidth: 60
+            id: variableName
+            enabled: pasteVariables.checked ? false : true
+          }
+        }
 
         Item {
           height: toEvaluation.height
@@ -501,6 +523,7 @@ Form {
             text: qsTr("<b>Add Variables</b>")
             id: pasteButton
             anchors.right: evaluationChecked.left
+            enabled: (variableName.value == "" ? false : (sampleFilterName.value == "" ? false : true))
             onClicked: {
               toEvaluation.enabled = true
               pasteButton.enabled = false

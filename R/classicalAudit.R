@@ -2,7 +2,7 @@ classicalAudit <- function(jaspResults, dataset, options){
     ### TITLE ###
     jaspResults$title   <- "Sampling Process"
     ### PROCEDURE ###
-    .classicalProcedureStage(options, jaspResults)
+    .classicalProcedureStage(dataset, options, jaspResults)
     ### AUDIT RISK MODEL ###
     .auditRiskModel(options, jaspResults)
     ### PLANNING ###
@@ -19,7 +19,7 @@ classicalAudit <- function(jaspResults, dataset, options){
     .classicalConclusionStage(options, jaspResults)
 }
 
-.classicalProcedureStage <- function(options, jaspResults){
+.classicalProcedureStage <- function(dataset, options, jaspResults){
 
   dataset <- .readDataClassicalProcedureStage(options, jaspResults)
 
@@ -63,7 +63,7 @@ classicalAudit <- function(jaspResults, dataset, options){
 }
 
 .readDataClassicalProcedureStage <- function(options, jaspResults){
-
+  
   if(options[["recordNumberVariable"]] != "" && options[["monetaryVariable"]] != ""){
     dataset                             <- .readDataSetToEnd(columns.as.numeric = c(options[["recordNumberVariable"]], options[["monetaryVariable"]]))
     jaspResults[["N"]]                  <- createJaspState(nrow(dataset))
@@ -77,16 +77,18 @@ classicalAudit <- function(jaspResults, dataset, options){
   }
   jaspResults[["N"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable"))
   jaspResults[["total_data_value"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable"))
-  jaspResults[["ready"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable", "materiality", "materialityValue"))
+  jaspResults[["ready"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable"))
 
   return(dataset)
 }
 
 .classicalPlanningStage <- function(dataset, options, jaspResults){
-
-  materiality <- ifelse(options[["auditType"]] == "mus", yes = options[["materialityValue"]] / jaspResults[["total_data_value"]]$object, no = options[["materiality"]])
-  jaspResults[["materiality"]] <- createJaspState(materiality)
-  jaspResults[["materiality"]]$dependOnOptions(c("materialityValue", "materiality", "monetaryVariable", "recordNumberVariable"))
+  
+  if(is.null(jaspResults[["materiality"]]$object)){
+    materiality <- ifelse(options[["auditType"]] == "mus", yes = options[["materialityValue"]] / jaspResults[["total_data_value"]]$object, no = options[["materiality"]])
+    jaspResults[["materiality"]] <- createJaspState(materiality)
+    jaspResults[["materiality"]]$dependOnOptions(c("materialityValue", "materiality", "monetaryVariable", "recordNumberVariable"))
+  }
 
   jaspResults[["planningContainer"]] <- createJaspContainer(title= "<u>Planning</u>")
   jaspResults[["planningContainer"]]$position <- 3
@@ -215,16 +217,15 @@ classicalAudit <- function(jaspResults, dataset, options){
 
 .classicalExecutionStage <- function(options, jaspResults){
 
-  # TODO: Add columns to data instead of replace existing
   if(options[["pasteVariables"]]){
     sampleFilter <- rep(0, jaspResults[["N"]]$object)
-    sampleFilter[jaspResults[["sample"]]$object[,.v(options[["recordNumberVariable"]])]] <- 1
+    sampleFilter[jaspResults[["sample"]]$object[, .v(options[["recordNumberVariable"]])]] <- 1
     sampleFilter <- as.integer(sampleFilter)
     emptyVariable <- rep(NA, jaspResults[["N"]]$object)
-    .setColumnDataAsNominal("sampleFilter", sampleFilter)
-    base::switch(options[["auditType"]],
-                  "attributes" = .setColumnDataAsNominal("errorVariable", base::sample(0:1, size = jaspResults[["N"]]$object, replace = TRUE, prob = c(0.97, 0.03))),
-                  "mus" = .setColumnDataAsScale("TrueValues", base::sample(0:1, size = jaspResults[["N"]]$object, replace = TRUE, prob = c(0.97, 0.03))))
+    .setColumnDataAsNominal(options[["sampleFilterName"]], sampleFilter)
+    base::switch(options[["variableType"]],
+                  "variableTypeCorrect" = .setColumnDataAsNominal(options[["variableName"]], rep(0, jaspResults[["N"]]$object)),
+                  "variableTypeTrueValues" = .setColumnDataAsScale(options[["variableName"]], rep(0, jaspResults[["N"]]$object)))
   }
 }
 

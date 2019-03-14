@@ -193,9 +193,12 @@
     mle <- 0
     if(jaspResults[["N"]]$object != 0)
       mle <- floor(result[["k"]] / result[["n"]] * jaspResults[["N"]]$object)
-
-    materialityTable <- round(options[["materiality"]], 2)
-    materialityTable <- paste0(materialityTable * 100, "%")
+      
+    if(options[["auditType"]] == "attributes"){
+        materialityTable <- paste0(round(jaspResults[["materiality"]]$object, 2) * 100, "%")
+    } else {
+      materialityTable <- options[["materialityValue"]]
+    }
 
     boundTable          <- "."
     if(result[["bound"]] != "."){

@@ -64,8 +64,6 @@
   dataTable$addColumnInfo(name = 'p3',          title = "75%",                    type = 'string', overtitle = "Percentile")
 
   if(!jaspResults[["ready"]]$object){
-    row <- data.frame(popSize = ".", value = ".", mean = ".", sd = ".", p1 = ".", p2 = ".", p3 = ".")
-    dataTable$addRows(row)
     return()
   }
 
