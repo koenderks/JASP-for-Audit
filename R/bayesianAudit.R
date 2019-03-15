@@ -28,11 +28,14 @@ bayesianAudit <- function(jaspResults, dataset, options){
 
   jaspResults[["procedureContainer"]] <- createJaspContainer(title= "<u>Procedure</u>")
   jaspResults[["procedureContainer"]]$position <- 1
+  jaspResults[["procedureContainer"]]$dependOnOptions(c(""))
 
   # Interpretation for the Global Options phase
   if(options[["interpretation"]]){
-    jaspResults[["confidenceLevelLabel"]] <- createJaspState(paste0(round(options[["confidence"]] * 100, 2), "%"))
-    jaspResults[["confidenceLevelLabel"]]$dependOnOptions(c("confidence"))
+    if(is.null(jaspResults[["confidenceLevelLabel"]])){
+      jaspResults[["confidenceLevelLabel"]] <- createJaspState(paste0(round(options[["confidence"]] * 100, 2), "%"))
+      jaspResults[["confidenceLevelLabel"]]$dependOnOptions(c("confidence"))
+    }
 
     jaspResults[["procedureContainer"]][["procedureParagraph"]] <- createJaspHtml(paste0("The objective of a substantive testing procedure is to determine with a specified confidence <b>(", jaspResults[["confidenceLevelLabel"]]$object, ")</b>
                                                                   whether the amount of misstatement in the target population is lower than the specified materiality."), "p")
@@ -147,11 +150,11 @@ bayesianAudit <- function(jaspResults, dataset, options){
       {
           jaspResults[["planningContainer"]][["priorPlot"]] 		<- .plotPriorBayesianAttributesPlanningFullAudit(options, planningResult, jaspResults)
           jaspResults[["planningContainer"]][["priorPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors", "limx",
-                                                           "plotPrior", "plotPriorAdditionalInfo", "show", "prior", "distribution",
-                                                           "statistic", "kPercentageNumber", "kNumberNumber", "N", "materialityValue"))
+                                                                                    "plotPrior", "plotPriorAdditionalInfo", "distribution",
+                                                                                    "statistic", "kPercentageNumber", "kNumberNumber", "N", "materialityValue"))
           jaspResults[["planningContainer"]][["priorPlot"]] 		$position <- 6
       }
-      jaspResults[["planningContainer"]][["figure3"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The prior probability distribution on the percentage of misstatement in the population. The prior parameters are
+      jaspResults[["planningContainer"]][["figure3"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The prior probability distribution <b>(", options[["distribution"]] ,")</b> on the misstatement in the population. The prior parameters are
                                                             derived from the assessments of the inherent and control risk, along with the expected errors."), "p")
       jaspResults[["planningContainer"]][["figure3"]]$position <- 7
       jaspResults[["planningContainer"]][["figure3"]]$copyDependenciesFromJaspObject(jaspResults[["planningContainer"]][["priorPlot"]])

@@ -1,5 +1,5 @@
 .calculateBayesianSampleSize <- function(options, alpha, jaspResults){
-    for(n in 1:5000){
+    for(n in 1:10000){
       impk <- base::switch(options[["expected.errors"]],
                             "kPercentage" = n * options[["kPercentageNumber"]],
                             "kNumber" = options[["kNumberNumber"]])
@@ -26,13 +26,13 @@
 
 .calculateBayesianSampleSizeBetaBinom <- function(options, alpha, jaspResults){
     N <- jaspResults[["N"]]$object
-    for(n in 1:5000){
+    for(n in 1:10000){
       impk <- base::switch(options[["expected.errors"]],
                             "kPercentage" = n * options[["kPercentageNumber"]],
                             "kNumber" = options[["kNumberNumber"]])
         if(impk >= n){ next }
-        x                     <- .qBetaBinom(p = 1 - alpha, N = N, u = 1 + impk, v = 1 + (n - impk))
-        if((x / N) < jaspResults[["materiality"]]$object){
+        x                     <- .qBetaBinom(p = 1 - alpha, N = N, u = 1 + impk, v = 1 + (n - impk)) / N
+        if(x < jaspResults[["materiality"]]$object){
             return(n)
         }
     }
@@ -196,8 +196,11 @@
 
   implicitn <- round(result[["implicitn"]], 2)
   implicitk <- round(result[["implicitk"]], 2)
-
-  priorBound <- round(qbeta(p = options[["confidence"]], shape1 = result[["priorA"]], shape2 = result[["priorB"]]), 3)
+  
+  if(options[["distribution"]] == "beta")
+    priorBound <- round(qbeta(p = options[["confidence"]], shape1 = result[["priorA"]], shape2 = result[["priorB"]]), 3)
+  if(options[["distribution"]] == "beta-binomial")
+    priorBound <- round(.qBetaBinom(p = options[["confidence"]], N = jaspResults[["N"]]$object, u = result[["priorA"]], v = result[["priorB"]]) / jaspResults[["N"]]$object, 3)
 
   priorBound <- paste0(priorBound * 100, "%")
   row <- data.frame(implicitn = implicitn, implicitk = implicitk, priorbound = priorBound)
@@ -207,52 +210,104 @@
 }
 
 .plotPriorBayesianAttributesPlanningFullAudit <- function(options, result, jaspResults, plotWidth = 600, plotHeight = 450){
+  
+  if(options[["distribution"]] == "beta"){
 
-  mle <- floor(result[["k"]] * result[["n"]])
+    mle <- floor(result[["k"]] * result[["n"]])
 
-  xseq <- seq(0, options[["limx"]], 0.001)
-  d <- data.frame(
-      x = rep(xseq, 2),
-      y = dbeta(x = xseq, shape1 = result[["priorA"]], shape2 = result[["priorB"]]),
-      type = c(rep("Prior", length(xseq)))
-  )
+    xseq <- seq(0, options[["limx"]], 0.001)
+    d <- data.frame(
+        x = rep(xseq, 2),
+        y = dbeta(x = xseq, shape1 = result[["priorA"]], shape2 = result[["priorB"]]),
+        type = c(rep("Prior", length(xseq)))
+    )
 
-  xBreaks <- JASPgraphs::getPrettyAxisBreaks(xseq, min.n = 4)
-  xLim <- range(xBreaks)
-  yBreaks <- c(0, 1.2*max(d$y))
-  yLim <- range(yBreaks)
+    xBreaks <- JASPgraphs::getPrettyAxisBreaks(xseq, min.n = 4)
+    xLim <- range(xBreaks)
+    yBreaks <- c(0, 1.2*max(d$y))
+    yLim <- range(yBreaks)
 
-  pointdata <- data.frame(x = jaspResults[["materiality"]]$object, y = dbeta(jaspResults[["materiality"]]$object, result[["priorA"]], result[["priorB"]]))
+    pointdata <- data.frame(x = jaspResults[["materiality"]]$object, y = dbeta(jaspResults[["materiality"]]$object, result[["priorA"]], result[["priorB"]]))
 
-  p <- ggplot2::ggplot(d, ggplot2::aes(x = x, y = y)) +
-      ggplot2::geom_line(ggplot2::aes(x = x, y = y, linetype = type), lwd = 1) +
-      ggplot2::scale_linetype_manual(values=c("dashed"), guide = FALSE)
+    p <- ggplot2::ggplot(d, ggplot2::aes(x = x, y = y)) +
+        ggplot2::geom_line(ggplot2::aes(x = x, y = y, linetype = type), lwd = 1) +
+        ggplot2::scale_linetype_manual(values=c("dashed"), guide = FALSE)
 
-  p <- p + ggplot2::scale_x_continuous(name = "Error percentage", breaks = xBreaks, limits = xLim, labels = paste0(xBreaks * 100, "%"))
+    p <- p + ggplot2::scale_x_continuous(name = "Error percentage", breaks = xBreaks, limits = xLim, labels = paste0(xBreaks * 100, "%"))
 
 
-  if(options[["plotPriorAdditionalInfo"]]){
-      pdata <- data.frame(x = 0, y = 0, l = "1")
-      p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 1, 0.5, 0))
-      p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Prior confidence region"))
-      p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 1, 0.5, .7), stroke = 2, color = "black")))
+    if(options[["plotPriorAdditionalInfo"]]){
+        pdata <- data.frame(x = 0, y = 0, l = "1")
+        p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 1, 0.5, 0))
+        p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Prior confidence region"))
+        p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 1, 0.5, .7), stroke = 2, color = "black")))
 
-      p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["priorA"]], shape2 = result[["priorB"]]),
-                                      xlim = c(0, qbeta(options[["confidence"]], result[["priorA"]], result[["priorB"]])),
-                                      geom = "area", fill = rgb(0, 1, 0.5, .7))
+        p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["priorA"]], shape2 = result[["priorB"]]),
+                                        xlim = c(0, qbeta(options[["confidence"]], result[["priorA"]], result[["priorB"]])),
+                                        geom = "area", fill = rgb(0, 1, 0.5, .7))
+    }
+
+    p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = pointdata, size = 3, shape = 21, stroke = 2, color = "black", fill = "red")
+
+    thm <- ggplot2::theme(
+  		axis.ticks.y = ggplot2::element_blank(),
+  		axis.title.y = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = -5, b = 0, l = 0))
+  	)
+    p <- p +
+    	ggplot2::scale_y_continuous(name = "Density", breaks = yBreaks, labels = c("", ""), limits = yLim) +
+    	ggplot2::theme()
+
+    p <- JASPgraphs::themeJasp(p, legend.position = "top") + thm
+  
+  } else {
+    
+    xseq <- seq(0, jaspResults[["N"]]$object, 1)[1:ceiling(options[["limx"]] * jaspResults[["N"]]$object)]
+    d <- data.frame(
+        x = xseq,
+        y = .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, u = result[["priorA"]], v = result[["priorB"]])[1:ceiling(options[["limx"]] * jaspResults[["N"]]$object)], 
+        type = c(rep("Prior", length(xseq)))
+    )
+    
+    xBreaks <- JASPgraphs::getPrettyAxisBreaks(xseq, min.n = 4)
+    xLim <- range(xBreaks)
+    yBreaks <- c(0, 1.2*max(d$y))
+    yLim <- range(yBreaks)
+
+    pointdata <- data.frame(x = jaspResults[["materiality"]]$object * jaspResults[["N"]]$object, y = .dBetaBinom(ceiling(jaspResults[["materiality"]]$object * jaspResults[["N"]]$object), 
+                          N = jaspResults[["N"]]$object, result[["priorA"]], result[["priorB"]]))
+                          
+    p <- ggplot2::ggplot(d, ggplot2::aes(x = x, y = y)) +
+        ggplot2::geom_line(ggplot2::aes(x = x, y = y, linetype = type), lwd = 1) +
+        ggplot2::scale_linetype_manual(values=c("dashed"), guide = FALSE)
+
+    p <- p + ggplot2::scale_x_continuous(name = "Population errors", breaks = xBreaks, limits = xLim, labels = xBreaks)
+    
+    if(options[["plotPriorAdditionalInfo"]]){
+        pdata <- data.frame(x = 0, y = 0, l = "1")
+        p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 1, 0.5, 0))
+        p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Prior confidence region"))
+        p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 1, 0.5, .7), stroke = 2, color = "black")))
+        
+        df <- data.frame(x = 0:jaspResults[["N"]]$object, y = .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, u = result[["priorA"]], v = result[["priorB"]]))
+        lim <- .qBetaBinom(p = options[["confidence"]], N = jaspResults[["N"]]$object, u = result[["priorA"]], v = result[["priorB"]])    
+        df <- df[1:lim, ]
+        p <- p + ggplot2::geom_bar(data = df, stat="identity", fill = rgb(0, 1, 0.5, .7))
+    }
+
+    
+    p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = pointdata, size = 3, shape = 21, stroke = 2, color = "black", fill = "red")
+
+    thm <- ggplot2::theme(
+      axis.ticks.y = ggplot2::element_blank(),
+      axis.title.y = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = -5, b = 0, l = 0))
+    )
+    p <- p +
+      ggplot2::scale_y_continuous(name = "Density", breaks = yBreaks, labels = c("", ""), limits = yLim) +
+      ggplot2::theme()
+
+    p <- JASPgraphs::themeJasp(p, legend.position = "top") + thm
+    
   }
-
-  p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = pointdata, size = 3, shape = 21, stroke = 2, color = "black", fill = "red")
-
-  thm <- ggplot2::theme(
-		axis.ticks.y = ggplot2::element_blank(),
-		axis.title.y = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = -5, b = 0, l = 0))
-	)
-  p <- p +
-  	ggplot2::scale_y_continuous(name = "Density", breaks = yBreaks, labels = c("", ""), limits = yLim) +
-  	ggplot2::theme()
-
-  p <- JASPgraphs::themeJasp(p, legend.position = "top") + thm
 
   return(createJaspPlot(plot = p, title = "Implied Prior from Risk Assessments", width = plotWidth, height = plotHeight))
 
