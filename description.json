@@ -44,12 +44,6 @@
 					"function":						"classicalPlanning",
 					"usesJaspResults":		true
 				},
-				/* {
-					"title":							"Sampling",
-					"qml":								"classicalSampling.qml",
-					"function":						"classicalSampling",
-					"usesJaspResults":		true
-				}, */
 				{
 					"title":							"Evaluation",
 					"qml":								"classicalEvaluation.qml",

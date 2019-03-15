@@ -28,7 +28,6 @@ bayesianAudit <- function(jaspResults, dataset, options){
 
   jaspResults[["procedureContainer"]] <- createJaspContainer(title= "<u>Procedure</u>")
   jaspResults[["procedureContainer"]]$position <- 1
-  jaspResults[["procedureContainer"]]$dependOnOptions(c(""))
 
   # Interpretation for the Global Options phase
   if(options[["interpretation"]]){
@@ -87,9 +86,11 @@ bayesianAudit <- function(jaspResults, dataset, options){
 
 .bayesianPlanningStage <- function(dataset, options, jaspResults){
 
-  materiality <- ifelse(options[["auditType"]] == "mus", yes = options[["materialityValue"]] / jaspResults[["total_data_value"]]$object, no = options[["materiality"]])
-  jaspResults[["materiality"]] <- createJaspState(materiality)
-  jaspResults[["materiality"]]$dependOnOptions(c("materialityValue", "materiality", "monetaryVariable", "recordNumberVariable"))
+  if(is.null(jaspResults[["materiality"]]$object)){
+    materiality <- ifelse(options[["auditType"]] == "mus", yes = options[["materialityValue"]] / jaspResults[["total_data_value"]]$object, no = options[["materiality"]])
+    jaspResults[["materiality"]] <- createJaspState(materiality)
+    jaspResults[["materiality"]]$dependOnOptions(c("materialityValue", "materiality", "monetaryVariable", "recordNumberVariable"))
+  }
 
   jaspResults[["planningContainer"]] <- createJaspContainer(title= "<u>Planning</u>")
   jaspResults[["planningContainer"]]$position <- 3

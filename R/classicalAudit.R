@@ -31,8 +31,10 @@ classicalAudit <- function(jaspResults, dataset, options){
 
   # Interpretation for the Global Options phase
   if(options[["interpretation"]]){
-    jaspResults[["confidenceLevelLabel"]] <- createJaspState(paste0(round(options[["confidence"]] * 100, 2), "%"))
-    jaspResults[["confidenceLevelLabel"]]$dependOnOptions(c("confidence"))
+    if(is.null(jaspResults[["confidenceLevelLabel"]])){
+      jaspResults[["confidenceLevelLabel"]] <- createJaspState(paste0(round(options[["confidence"]] * 100, 2), "%"))
+      jaspResults[["confidenceLevelLabel"]]$dependOnOptions(c("confidence"))
+    }
 
     jaspResults[["procedureContainer"]][["procedureParagraph"]] <- createJaspHtml(paste0("The objective of a substantive testing procedure is to determine with a specified confidence <b>(", jaspResults[["confidenceLevelLabel"]]$object, ")</b>
                                                                   whether the amount of misstatement in the target population is lower than the specified materiality."), "p")

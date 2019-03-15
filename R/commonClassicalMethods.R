@@ -34,20 +34,21 @@
     cr                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
     alpha                   <- ar / ir / cr
 
-    n                       <- "..."
-    if(options[["distribution"]] == "binomial"){
-      n                     <- .calc.n.binomial(options, alpha, jaspResults)
-    } else if(options[["distribution"]] == "hypergeometric"){
-      if(jaspResults[["N"]]$object != 0){
-        n                   <- .calc.n.hypergeometric(options, alpha, jaspResults)
-      } else {
-        n                   <- 1
+    n                       <- 0
+    k                       <- 0
+    if(jaspResults[["ready"]]$object){
+      if(options[["distribution"]] == "binomial"){
+        n                     <- .calc.n.binomial(options, alpha, jaspResults)
+      } else if(options[["distribution"]] == "hypergeometric"){
+        if(jaspResults[["N"]]$object != 0){
+          n                   <- .calc.n.hypergeometric(options, alpha, jaspResults)
+        } else {
+          n                   <- 1
+        }
       }
-    }
 
-    k <- base::switch(options[["expected.errors"]],
-                      "kPercentage" = options[["kPercentageNumber"]],
-                      "kNumber" = options[["kNumberNumber"]] / n)
+      k <- base::switch(options[["expected.errors"]], "kPercentage" = options[["kPercentageNumber"]], "kNumber" = options[["kNumberNumber"]] / n)                      
+    }
 
     resultList <- list()
     resultList[["n"]]             <- n
