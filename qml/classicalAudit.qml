@@ -109,6 +109,7 @@ Form {
                 singleVariable: true
                 allowedColumns: ["scale"]
                 id: monetaryVariable
+                enabled: mus.checked
             }
         }
 
@@ -193,7 +194,7 @@ Form {
                 id: distribution
 
                 RadioButton { text: qsTr("With replacement")            ; name: "binomial" ; checked: true}
-                RadioButton { text: qsTr("Without replacement")         ; name: "hypergeometric" ; id: hyperDist}
+                RadioButton { text: qsTr("Without replacement")         ; name: "hypergeometric" ; id: hyperDist; enabled: attributes.checked}
             }
           }
     }
@@ -205,15 +206,14 @@ Form {
           title: qsTr("<b>Plots</b>")
 
           CheckBox {
-              enabled: (recordNumberVariable.count > 0 && monetaryVariable.count > 0)
+             text: qsTr("Decision plot")
+             name: "plotCriticalErrors"
+           }
+          CheckBox {
+              enabled: mus.checked
               text: qsTr("Population distribution")
               name: "distributionPlot"
               id: distributionPlot
-            }
-           CheckBox {
-              text: qsTr("Decision plot")
-              name: "plotCriticalErrors"
-              enabled: mus.checked ? (recordNumberVariable.count > 0 && monetaryVariable.count > 0) : true
             }
         }
       }
@@ -238,7 +238,7 @@ Form {
         }
         Button {
           id: toSampling
-          enabled: attributes.checked ? (materiality.value == "0" ? false : (recordNumberVariable.count > 0 && monetaryVariable.count > 0)) : (materialityValue.value == "0" ? false : (recordNumberVariable.count > 0 && monetaryVariable.count > 0))
+          enabled: attributes.checked ? (materiality.value == "0" ? false : (recordNumberVariable.count > 0)) : (materialityValue.value == "0" ? false : (recordNumberVariable.count > 0 && monetaryVariable.count > 0))
           anchors.right: parent.right
           text: qsTr("<b>To Selection</b>")
 
@@ -309,7 +309,7 @@ Form {
                             id: samplingMethod
 
                             RowLayout {
-                              RadioButton { text: qsTr("Monetary Unit Sampling")      ; name: "mussampling" ; id: mussampling; checked: true}
+                              RadioButton { text: qsTr("Monetary Unit Sampling")      ; name: "mussampling" ; id: mussampling; enabled: (mus.checked ? true : false); checked: mus.checked}
                               MenuButton
                               {
                                 width:				20
@@ -320,7 +320,7 @@ Form {
                               }
                             }
                             RowLayout {
-                              RadioButton { text: qsTr("Record Sampling")             ; name: "recordsampling" ; id: recordsampling}
+                              RadioButton { text: qsTr("Record Sampling")             ; name: "recordsampling" ; id: recordsampling; enabled: true; checked: attributes.checked}
                               MenuButton
                               {
                                 width:				20
@@ -336,8 +336,7 @@ Form {
                             title: qsTr("<b>Selection method</b>")
                             name: "samplingType"
 
-                            RadioButton { text: qsTr("Simple random sampling")                 ; name: "simplerandomsampling" ; id: simplerandomsampling; checked: true}
-                            CheckBox { text: qsTr("Allow duplicate records")                   ; name: "allowDuplicates"; Layout.leftMargin: 20; enabled: simplerandomsampling.checked }
+                            RadioButton { text: qsTr("Random sampling")                 ; name: "simplerandomsampling" ; id: simplerandomsampling; checked: true}
                             RadioButton { text: qsTr("Cell sampling")                   ; name: "cellsampling" ; id: cellsampling}
 
                             RadioButton { text: qsTr("Systematic sampling")             ; name: "systematicsampling" ; id: systematicsampling}
@@ -363,8 +362,9 @@ Form {
                         id: samplingTables
 
                         CheckBox { text: qsTr("Display sample")       ; name: "showSample"}
-                        CheckBox { text: qsTr("Sample descriptives")  ; name: "showDescriptives" ; id: descriptives}
+                        CheckBox { text: qsTr("Sample descriptives")  ; name: "showDescriptives" ; id: descriptives; enabled: mus.checked}
                         Flow {
+                          enabled: mus.checked
                           Layout.leftMargin: 20
                             ColumnLayout {
                               spacing: 5
@@ -442,7 +442,7 @@ Form {
                 spacing: 150
 
                 RowLayout {
-                  RadioButton { text: qsTr("Audit values")                 ; name: "variableTypeTrueValues" ; id: variableTypeTrueValues; checked: true }
+                  RadioButton { text: qsTr("Audit values")                 ; name: "variableTypeTrueValues" ; id: variableTypeTrueValues; checked: mus.checked; enabled: mus.checked }
                   MenuButton
                   {
                     width:				20
@@ -453,7 +453,7 @@ Form {
                   }
                 }
                 RowLayout {
-                  RadioButton { text: qsTr("Correct / Incorrect")                     ; name: "variableTypeCorrect" ; id: variableTypeCorrect }
+                  RadioButton { text: qsTr("Correct / Incorrect")                     ; name: "variableTypeCorrect" ; id: variableTypeCorrect; checked: attributes.checked; enabled: attributes.checked }
                   MenuButton
                   {
                     width:				20
@@ -472,13 +472,13 @@ Form {
               ComputedColumnField{
                 name: "sampleFilterName"
                 text: "Filter: "
-                fieldWidth: 60
+                fieldWidth: 120
                 enabled: pasteVariables.checked ? false : true
               }
               ComputedColumnField{
                 name: "variableName"
                 text: "Column: "
-                fieldWidth: 60
+                fieldWidth: 120
                 enabled: pasteVariables.checked ? false : true
               }
             }
@@ -565,20 +565,20 @@ Form {
                     id: sampleFilter
                 }
                 AssignedVariablesList {
-                    visible: variableTypeCorrect.checked
-                    name: "correctID"
-                    title: qsTr("Error variable")
-                    singleVariable: true
-                    allowedColumns: ["nominal"]
-                    id: correctID
-                }
-                AssignedVariablesList {
-                    visible: variableTypeTrueValues.checked
+                    enabled: variableTypeTrueValues.checked
                     name: "correctMUS"
                     title: qsTr("Audit values")
                     singleVariable: true
                     allowedColumns: ["scale"]
                     id: correctMUS
+                }
+                AssignedVariablesList {
+                    enabled: variableTypeCorrect.checked
+                    name: "correctID"
+                    title: qsTr("Error variable")
+                    singleVariable: true
+                    allowedColumns: ["nominal"]
+                    id: correctID
                 }
             }
 
@@ -632,7 +632,15 @@ Form {
                   id: binomialBound
                   visible: variableTypeCorrect.checked
                   enabled: variableTypeCorrect.checked
-                  checked: variableTypeCorrect.checked
+                  checked: variableTypeCorrect.checked ? (binomial.checked ? true : false) : false
+                }
+                RadioButton {
+                  name: "hyperBound"
+                  text: qsTr("Hypergeometric")
+                  id: hyperBound
+                  visible: variableTypeCorrect.checked
+                  enabled: variableTypeCorrect.checked
+                  checked: variableTypeCorrect.checked ? (binomial.checked ? false : true) : false
                 }
                 RadioButton {
                   name: "regressionBound"

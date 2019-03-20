@@ -25,7 +25,19 @@
   }
 }
 
-.attributesPlanningFullAudit <- function(options, jaspResults){
+.calc.n.gamma <- function(options, alpha, jaspResults){
+  for(n in 1:10000){
+    k <- base::switch(options[["expected.errors"]],
+                          "kPercentage" = (n * options[["kPercentageNumber"]] * jaspResults[["materiality"]]$object),
+                          "kNumber" = (options[["kNumberNumber"]] * jaspResults[["materiality"]]$object))
+    x <- pgamma(jaspResults[["materiality"]]$object, shape = 1 + k, scale = 1 / n)
+    if(x >= (1 - alpha)){
+     return(n)
+   }
+ }
+}
+
+.classicalPlanningHelper <- function(options, jaspResults){
 
     if(!is.null(jaspResults[["planningResult"]])) return()
 
@@ -36,16 +48,21 @@
 
     n                       <- 0
     k                       <- 0
+    
     if(jaspResults[["ready"]]$object){
-      if(options[["distribution"]] == "binomial"){
-        n                     <- .calc.n.binomial(options, alpha, jaspResults)
-      } else if(options[["distribution"]] == "hypergeometric"){
-        if(jaspResults[["N"]]$object != 0){
-          n                   <- .calc.n.hypergeometric(options, alpha, jaspResults)
-        } else {
-          n                   <- 1
+      if(options[["auditType"]] == "attributes"){
+        if(options[["distribution"]] == "binomial"){
+          n                     <- .calc.n.binomial(options, alpha, jaspResults)
+        } else if(options[["distribution"]] == "hypergeometric"){
+          if(jaspResults[["N"]]$object != 0){
+            n                   <- .calc.n.hypergeometric(options, alpha, jaspResults)
+          } else {
+            n                   <- 1
+          }
+        } 
+      } else if(options[["auditType"]] == "mus"){
+          n                     <- .calc.n.gamma(options, alpha, jaspResults)
         }
-      }
 
       k <- base::switch(options[["expected.errors"]], "kPercentage" = options[["kPercentageNumber"]], "kNumber" = options[["kNumberNumber"]] / n)                      
     }
@@ -65,36 +82,49 @@
 
 }
 
-.attributesPlanningTableFullAudit <- function(dataset, options, result, jaspResults, position = 1){
+.classicalPlanningTable <- function(dataset, options, result, jaspResults, position = 1){
 
   if(!is.null(jaspResults[["planningContainer"]][["summaryTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
   summaryTable                              <- createJaspTable("Planning Table")
   jaspResults[["planningContainer"]][["summaryTable"]]             <- summaryTable
   summaryTable$position                     <- position
-  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "show", "distribution", "N", "recordNumberVariable", "monetaryVariable",
-                                  "expected.errors" , "kPercentageNumber", "kNumberNumber", "materialityValue", "auditType", "populationValue"))
+  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "distribution", "N", "recordNumberVariable",
+                                  "expected.errors" , "kPercentageNumber", "kNumberNumber", "materialityValue", "auditType"))
 
   summaryTable$addColumnInfo(name = 'materiality',          title = "Materiality",          type = 'string')
+  if(options[["auditType"]] == "mus")
+    summaryTable$addColumnInfo(name = 'p',                    title = "% of value",           type = 'string')
   summaryTable$addColumnInfo(name = 'IR',                   title = "Inherent risk",        type = 'string')
   summaryTable$addColumnInfo(name = 'CR',                   title = "Control risk",         type = 'string')
   summaryTable$addColumnInfo(name = 'DR',                   title = "Detection risk",       type = 'string')
   summaryTable$addColumnInfo(name = 'k',                    title = "Allowed errors",       type = 'string')
   summaryTable$addColumnInfo(name = 'n',                    title = "Required sample size", type = 'string')
 
-  message <- base::switch(options[["distribution"]],
-                          "binomial" =  "The sample size is calculated using the <b>binomial</b> distribution.",
-                          "hypergeometric" = paste0("The sample size is calculated using the <b>hypergeometric</b> distribution (N = ", jaspResults[["N"]]$object ,")."))
+  if(options[["auditType"]] == "attributes"){
+    message <- base::switch(options[["distribution"]],
+                            "binomial" =  "The sample size is calculated using the <b>binomial</b> distribution.",
+                            "hypergeometric" = paste0("The sample size is calculated using the <b>hypergeometric</b> distribution (N = ", jaspResults[["N"]]$object ,")."))
+  } else {
+    message <- "The sample size is calculated using the <b>gamma</b> distribution."
+  }
   summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
-
-  ktable <- base::switch(options[["expected.errors"]],
-                          "kPercentage" = ceiling(result[["k"]] * result[["n"]]),
-                          "kNumber" = options[["kNumberNumber"]])
+  if(options[["auditType"]] == "attributes"){
+    ktable <- base::switch(options[["expected.errors"]],
+                            "kPercentage" = floor(result[["k"]] * result[["n"]]),
+                            "kNumber" = options[["kNumberNumber"]])
+  } else {
+    ktable <- base::switch(options[["expected.errors"]],
+                            "kPercentage" = round(result[["k"]] * result[["n"]], 2),
+                            "kNumber" = options[["kNumberNumber"]])
+  }
   DRtable <- paste0(round(result[["alpha"]], 3) * 100, "%")
 
   if(jaspResults[["materiality"]]$object == 0){
     row <- data.frame(materiality = ".", IR = result[["IR"]], CR = result[["CR"]], DR = DRtable, k = 0, n = ".")
+      if(options[["auditType"]] == "mus")
+        row <- cbind(row, p = ".")
     summaryTable$addRows(row)
     return()
   }
@@ -108,27 +138,32 @@
                                 "attributes" = materialityTitle,
                                 "mus" = materialityValue)
 
-  if(!jaspResults[["ready"]]$object && options[["auditType"]] == "mus"){
+  if(!jaspResults[["ready"]]$object){
     row <- data.frame(materiality           = materiality,
                       IR                    = result[["IR"]],
                       CR                    = result[["CR"]],
                       DR                    = DRtable,
                       k                     = ktable,
                       n                     = ".")
+    if(options[["auditType"]] == "mus")
+      row <- cbind(row, p = ".")
     summaryTable$addRows(row)
     return()
   }
 
+  percOfTotal <- paste0(round( materialityValue / jaspResults[["total_data_value"]]$object * 100, 2), "%")
   row <- data.frame(materiality           = materiality,
                     IR                    = result[["IR"]],
                     CR                    = result[["CR"]],
                     DR                    = DRtable,
                     k                     = ktable,
                     n                     = result[["n"]])
+  if(options[["auditType"]] == "mus")
+    row <- cbind(row, p = percOfTotal)                    
   summaryTable$addRows(row)
 }
 
-.attributesBoundFullAudit <- function(dataset, options, jaspResults){
+.attributesBound <- function(dataset, options, jaspResults){
 
   ar                      <- 1 - options[["confidence"]]
   ir                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
@@ -139,15 +174,45 @@
   k                       <- 0
   bound                   <- "."
 
-  if(options[["correctID"]] != "" && options[["sampleFilter"]] != ""){
-    n                     <- nrow(dataset)
-    k                     <- length(which(dataset[,.v(options[["correctID"]])] == 1))
-    binomResult <- binom.test(x = k,
-                              n = n,
-                              p = jaspResults[["materiality"]]$object,
-                              alternative = "less",
-                              conf.level = (1 - alpha))
-    bound                 <- binomResult$conf.int[2]
+  if(jaspResults[["runEvaluation"]]$object){
+    if(options[["distribution"]] == "binomial"){
+      n                     <- nrow(dataset)
+      k                     <- length(which(dataset[,.v(options[["correctID"]])] == 1))
+      binomResult <- binom.test(x = k,
+                                n = n,
+                                p = jaspResults[["materiality"]]$object,
+                                alternative = "less",
+                                conf.level = (1 - alpha))
+      bound                 <- binomResult$conf.int[2]
+    } else if(options[["distribution"]] == "hypergeometric"){
+      
+      level <- options[["confidence"]]
+      N <- jaspResults[["N"]]$object
+      n <- nrow(dataset)
+      k <- length(which(dataset[,.v(options[["correctID"]])] == 1))
+      p <- k/n
+      q <- qnorm(c(0, level))
+
+      var <- p * (1 - p)/n * (n/(n - 1)) * (N - n)/N
+      ugrh <- p - q * sqrt(var)
+      ogrh <- p + q * sqrt(var)
+      hynv.anteil <- c(ugrh, ogrh)
+      hynv.anzahl = c(ceiling(ugrh * N), floor(ogrh * N))
+      ugrex <- k
+      while (phyper(k - 1, ugrex, N - ugrex, n) > (level + 1)/2) {
+          ugrex = ugrex + 1
+      }
+      ugrex = ugrex - 1
+      ogrex = N - (n - k)
+      while (phyper(k, ogrex, N - ogrex, n) < (1 - level)/2) {
+          ogrex = ogrex - 1
+      }
+      ogrex = ogrex + 1
+      exact.anteil = c(ugrex/N, ogrex/N)
+      exact.anzahl = c(ugrex, ogrex)
+      ci <- list(approx = hynv.anteil, exact = exact.anteil)
+      bound <- ci[["exact"]][2]
+    }
   }
 
   resultList <- list()
@@ -164,7 +229,7 @@
 
 }
 
-.attributesBoundTableFullAudit <- function(options, result, jaspResults, position = 1){
+.attributesBoundTable <- function(options, result, jaspResults, position = 1){
 
     if(!is.null(jaspResults[["evaluationContainer"]][["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
@@ -177,19 +242,19 @@
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",          type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",          type = 'string')
-    evaluationTable$addColumnInfo(name = 'k',             title = "Full errors",          type = 'string')
+    evaluationTable$addColumnInfo(name = 'k',             title = "Errors",          type = 'string')
     evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
     if(options[["mostLikelyError"]])
       evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                  type = 'string')
+      
+    message <- base::switch(options[["boundMethod"]],
+                              "binomialBound" = "The confidence bound is calculated according to the <b>binomial</b> distributon.",
+                              "hyperBound" = "The confidence bound is calculated according to the <b>hypergeometric</b> distribution.")
+    evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
     # Return empty table
-    if(options[["correctID"]] == "" || options[["sampleFilter"]] == ""){
-      row <- data.frame(materiality = ".", n = ".", k = ".", bound = ".")
-      if(options[["mostLikelyError"]])
-        row <- cbind(row, mle = ".")
-      evaluationTable$addRows(row)
+    if(!jaspResults[["runEvaluation"]]$object)
       return()
-    }
 
     mle <- 0
     if(jaspResults[["N"]]$object != 0)
@@ -210,7 +275,6 @@
     row <- data.frame(materiality = materialityTable, n = result[["n"]], k = result[["k"]], bound = boundTable)
     if(options[["mostLikelyError"]])
       row <- cbind(row, mle = mle)
-
     evaluationTable$addRows(row)
 }
 
@@ -260,7 +324,7 @@
                                               "auditType", "boundMethod", "monetaryVariableMUS", "materialityValue"))
 }
 
-.musBoundTableFullAudit <- function(total_data_value, options, result, jaspResults, position = 1){
+.musBoundTable <- function(total_data_value, options, result, jaspResults, position = 1){
 
     if(!is.null(jaspResults[["evaluationContainer"]][["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
@@ -315,7 +379,7 @@
     evaluationTable$addRows(row)
 }
 
-.regressionEstimator <- function(dataset, options, total_data_value, jaspResults){
+.regressionBound <- function(dataset, options, total_data_value, jaspResults){
 
     ar                      <- 1 - options[["confidence"]]
     ir                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
