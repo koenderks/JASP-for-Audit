@@ -1,6 +1,6 @@
 classicalAudit <- function(jaspResults, dataset, options){
     ### TITLE ###
-    jaspResults$title                         <- "Sampling Process"
+    jaspResults$title                         <- "Sampling Workflow"
     ### PROCEDURE ###
     .classicalProcedure(dataset, options, jaspResults)
     ### AUDIT RISK MODEL ###
@@ -36,8 +36,9 @@ classicalAudit <- function(jaspResults, dataset, options){
       jaspResults[["confidenceLevelLabel"]]$dependOnOptions(c("confidence"))
     }
     criterion <- base::switch(options[["auditType"]], "attributes" = "<b>proportion</b>", "mus" = "<b>amount</b>")
-    jaspResults[["procedureContainer"]][["procedureParagraph"]] <- createJaspHtml(paste0("The objective of a substantive testing procedure is to determine with a specified confidence <b>(", jaspResults[["confidenceLevelLabel"]]$object, ")</b>
-                                                                  whether the ", criterion ," of misstatement in the target population is lower than the specified materiality."), "p")
+    materialityLabel <- base::switch(options[["auditType"]], "attributes" = paste0(round(options[["materiality"]] * 100, 2), "%"), "mus" = paste0(format(options[["materialityValue"]], scientific = FALSE), " monetary units"))
+    jaspResults[["procedureContainer"]][["procedureParagraph"]] <- createJaspHtml(paste0("The objective of a substantive testing procedure is to determine with a specified confidence <b>(", jaspResults[["confidenceLevelLabel"]]$object, ")</b> whether the ", criterion ," of 
+                                                                                          misstatement in the target population is lower than the specified materiality of <b>", materialityLabel, "</b>."), "p")
     jaspResults[["procedureContainer"]][["procedureParagraph"]]$position <- 1
     jaspResults[["procedureContainer"]][["procedureParagraph"]]$dependOnOptions(c("interpretation", "confidence"))
   }
@@ -126,7 +127,7 @@ classicalAudit <- function(jaspResults, dataset, options){
   if(options[["interpretation"]]){
     materialityLevelLabel           <- base::switch(options[["auditType"]],
                                                     "attributes" = paste0(round(jaspResults[["materiality"]]$object, 4) * 100, "%"),
-                                                    "mus" = round(options[["materialityValue"]], 10))
+                                                    "mus" = format(options[["materialityValue"]], scientific = FALSE))
     if(options[["auditType"]] == "mus"){
       distribution <- "gamma"
     } else {
@@ -210,37 +211,37 @@ classicalAudit <- function(jaspResults, dataset, options){
   # Perform the sampling and draw the outcome tables
   if(options[["samplingType"]] == "simplerandomsampling"){
     if(options[["auditType"]] == "attributes"){
-      .SimpleRandomSamplingTable(dataset, options, jaspResults, type = "attributes", sample = jaspResults[["sample"]]$object, position = 4)
-      .samplingInfoTable(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2)
+      .randomSampling(dataset, options, jaspResults, type = "attributes", sample = jaspResults[["sample"]]$object, position = 4)
+      .samplingInfo(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2)
     } else {
-      .SimpleRandomSamplingTable(dataset, options, jaspResults, type = "mus", sample = jaspResults[["sample"]]$object, position = 4)
-      .samplingInfoTable(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2)
+      .randomSampling(dataset, options, jaspResults, type = "mus", sample = jaspResults[["sample"]]$object, position = 4)
+      .samplingInfo(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2)
     }
   } else if(options[["samplingType"]] == "systematicsampling"){
     if(options[["auditType"]] == "attributes"){
       interval <- ceiling(nrow(dataset) / jaspResults[["sampleSize"]]$object)
-      .SystematicSamplingTable(dataset, options, jaspResults, interval, type = "attributes", sample = jaspResults[["sample"]]$object, position = 4)
-      .samplingInfoTable(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2, interval = interval)
+      .systematicSampling(dataset, options, jaspResults, interval, type = "attributes", sample = jaspResults[["sample"]]$object, position = 4)
+      .samplingInfo(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2, interval = interval)
     } else {
       interval <- ceiling(sum(dataset[, .v(monetaryVariable)]) / jaspResults[["sampleSize"]]$object)
-      .SystematicSamplingTable(dataset, options, jaspResults, interval, type = "mus", sample = jaspResults[["sample"]]$object, position = 4)
-      .samplingInfoTable(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2, interval = interval)
+      .systematicSampling(dataset, options, jaspResults, interval, type = "mus", sample = jaspResults[["sample"]]$object, position = 4)
+      .samplingInfo(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2, interval = interval)
     }
   } else if(options[["samplingType"]] == "cellsampling"){
     if(options[["auditType"]] == "attributes"){
       interval <- ceiling(nrow(dataset) / jaspResults[["sampleSize"]]$object)
-      .cellSamplingTable(dataset, options, jaspResults, interval, type = "attributes", sample = jaspResults[["sample"]]$object, position = 4)
-      .samplingInfoTable(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2, interval = interval)
+      .cellSampling(dataset, options, jaspResults, interval, type = "attributes", sample = jaspResults[["sample"]]$object, position = 4)
+      .samplingInfo(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2, interval = interval)
     } else {
       interval <- ceiling(sum(dataset[, .v(monetaryVariable)]) / jaspResults[["sampleSize"]]$object)
-      .cellSamplingTable(dataset, options, jaspResults, interval, type = "mus", sample = jaspResults[["sample"]]$object, position = 4)
-      .samplingInfoTable(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2, interval = interval)
+      .cellSampling(dataset, options, jaspResults, interval, type = "mus", sample = jaspResults[["sample"]]$object, position = 4)
+      .samplingInfo(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2, interval = interval)
     }
   }
   # Store the sample
   sample                          <- jaspResults[["sample"]]$object
   # Descriptives table
-  .samplingDescriptivesTable(dataset, options, jaspResults, sample, position = 3)
+  .sampleDescriptives(dataset, options, jaspResults, sample, position = 3)
 }
 
 .classicalExecution <- function(options, jaspResults){
@@ -281,7 +282,7 @@ classicalAudit <- function(jaspResults, dataset, options){
 
 .classicalEvaluation <- function(options, jaspResults){
 
-  dataset <- .readDataBayesianEvaluationStage(options, jaspResults)
+  dataset <- .readDataBayesianEvaluation(options, jaspResults)
 
   total_data_value              <- jaspResults[["total_data_value"]]$object
   planningResult                <- jaspResults[["planningResult"]]$object
@@ -341,6 +342,10 @@ classicalAudit <- function(jaspResults, dataset, options){
         jaspResults[["evaluationContainer"]][["figure4"]]$position <- 4
         jaspResults[["evaluationContainer"]][["figure4"]]$copyDependenciesFromJaspObject(jaspResults[["evaluationContainer"]][["confidenceBoundPlot"]])
         jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+    } else if(options[["plotBound"]]){
+        errorPlot <- createJaspPlot(plot = NULL, title = "Evaluation Information")
+        errorPlot$setError(errorMessage = "Plotting not possible: Please specify your variables.")
+        jaspResults[["evaluationContainer"]][["confidenceBoundPlot"]] <- errorPlot
     }
 
     # Correlation plot
@@ -358,6 +363,10 @@ classicalAudit <- function(jaspResults, dataset, options){
         jaspResults[["evaluationContainer"]][["figure6"]]$position <- 8
         jaspResults[["evaluationContainer"]][["figure6"]]$copyDependenciesFromJaspObject(jaspResults[["evaluationContainer"]][["correlationPlot"]])
         jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+    } else if(options[["plotCorrelation"]]){
+        errorPlot <- createJaspPlot(plot = NULL, title = "Correlation Plot")
+        errorPlot$setError(errorMessage = "Plotting not possible: Please specify your variables.")
+        jaspResults[["evaluationContainer"]][["correlationPlot"]] <- errorPlot
     }
 }
 

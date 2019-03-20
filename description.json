@@ -15,18 +15,18 @@
 	"ribbonEntries":
 	[
 		{
-			"title": 									"Sampling Process",
+			"title": 									"Sampling",
 			"icon": 									"audit-fullaudit.svg",
 			"analyses":
 			[
 				{
-					"title":							"Sampling Process",
+					"title":							"Sampling Workflow",
 					"qml":								"classicalAudit.qml",
 					"function":						"classicalAudit",
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Bayesian Sampling Process",
+					"title":							"Bayesian Sampling Workflow",
 					"qml":								"bayesianAudit.qml",
 					"function":						"bayesianAudit",
 					"usesJaspResults":		true

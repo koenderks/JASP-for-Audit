@@ -11,7 +11,7 @@
   # Create labels for the materiality
   materialityLevelLabel           <- base::switch(options[["auditType"]],
                                                   "attributes" = paste0(round(options[["materiality"]], 10) * 100, "%"),
-                                                  "mus" = round(options[["materialityValue"]], 10))
+                                                  "mus" = format(options[["materialityValue"]], scientific = FALSE))
 
   # Interpretation before the planning table
   if(options[["interpretation"]]){

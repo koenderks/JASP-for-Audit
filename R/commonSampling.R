@@ -1,4 +1,4 @@
-.SimpleRandomSamplingTable          <- function(dataset, options, jaspResults, type, sample, position = 1){
+.randomSampling <- function(dataset, options, jaspResults, type, sample, position = 1){
 
     if(!is.null(jaspResults[["selectionContainer"]][["table"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
@@ -78,7 +78,7 @@
     }
 }
 
-.cellSamplingTable                    <- function(dataset, options, jaspResults, interval, type, sample, position = 2)
+.cellSampling <- function(dataset, options, jaspResults, interval, type, sample, position = 2)
 {
 
     if(!is.null(jaspResults[["selectionContainer"]][["table"]])) return() #The options for this table didn't change so we don't need to rebuild it
@@ -182,7 +182,7 @@
     }
 }
 
-.SystematicSamplingTable            <- function(dataset, options, jaspResults, interval, type, sample, position = 2)
+.systematicSampling <- function(dataset, options, jaspResults, interval, type, sample, position = 2)
 {
 
     if(!is.null(jaspResults[["selectionContainer"]][["table"]])) return() #The options for this table didn't change so we don't need to rebuild it
@@ -279,7 +279,7 @@
     }
 }
 
-.samplingDescriptivesTable <- function(dataset, options, jaspResults, sample, position = 3){
+.sampleDescriptives <- function(dataset, options, jaspResults, sample, position = 3){
 
     if(!is.null(jaspResults[["selectionContainer"]][["descriptives"]])) return()
 
@@ -342,7 +342,7 @@
    }
 }
 
-.samplingInfoTable <- function(sample, total_data_value, options, jaspResults, position = 1, interval = NULL){
+.samplingInfo <- function(sample, total_data_value, options, jaspResults, position = 1, interval = NULL){
 
   if(!is.null(jaspResults[["selectionContainer"]][["simpleRandomSamplingInfoTable"]])) return()
 

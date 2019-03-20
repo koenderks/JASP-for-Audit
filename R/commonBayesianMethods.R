@@ -1,4 +1,4 @@
-.calculateBayesianSampleSize <- function(options, alpha, jaspResults){
+.calc.n.beta <- function(options, alpha, jaspResults){
     for(n in 1:10000){
       impk <- base::switch(options[["expected.errors"]],
                             "kPercentage" = n * options[["kPercentageNumber"]],
@@ -24,7 +24,7 @@
     return(sapply(p, function(x) sum(pp < x)))
 }
 
-.calculateBayesianSampleSizeBetaBinom <- function(options, alpha, jaspResults){
+.calc.n.betabinom <- function(options, alpha, jaspResults){
     N <- jaspResults[["N"]]$object
     for(n in 1:10000){
       impk <- base::switch(options[["expected.errors"]],
@@ -38,7 +38,7 @@
     }
 }
 
-.bayesianAttributesPlanningFullAudit <- function(options, jaspResults){
+.bayesianPlanningHelper <- function(options, jaspResults){
 
     if(!is.null(jaspResults[["planningResult"]])) return()
 
@@ -57,11 +57,11 @@
     } else {
 
       if(options[["distribution"]] == "beta"){
-        n_noprior               <- .calculateBayesianSampleSize(options, 1 - options[["confidence"]], jaspResults)
-        n_withprior             <- .calculateBayesianSampleSize(options, alpha, jaspResults)
+        n_noprior               <- .calc.n.beta(options, 1 - options[["confidence"]], jaspResults)
+        n_withprior             <- .calc.n.beta(options, alpha, jaspResults)
       } else if(options[["distribution"]] == "beta-binomial"){
-        n_noprior               <- .calculateBayesianSampleSizeBetaBinom(options, 1 - options[["confidence"]], jaspResults)
-        n_withprior             <- .calculateBayesianSampleSizeBetaBinom(options, alpha, jaspResults)
+        n_noprior               <- .calc.n.betabinom(options, 1 - options[["confidence"]], jaspResults)
+        n_withprior             <- .calc.n.betabinom(options, alpha, jaspResults)
       }
 
       pk                      <- 0
@@ -99,22 +99,23 @@
     jaspResults[["planningResult"]] <- createJaspState(resultList)
     jaspResults[["planningResult"]]$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "kPercentageNumber",
                                                       "kNumberNumber", "distribution", "N", "materialityValue", "recordNumberVariable",
-                                                      "monetaryVariable", "populationValue"))
+                                                      "monetaryVariable"))
 
 }
 
-.bayesianAttributesPlanningTableFullAudit <- function(dataset, options, result, jaspResults, position = 1){
+.bayesianPlanningTable <- function(dataset, options, result, jaspResults, position = 1){
 
   if(!is.null(jaspResults[["planningContainer"]][["summaryTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-  summaryTable                                                <- createJaspTable("Bayesian Attributes Planning Table")
+  summaryTable                                                <- createJaspTable("Planning Summary")
   jaspResults[["planningContainer"]][["summaryTable"]]        <- summaryTable
   summaryTable$position                                       <- position
-  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "show", "N",
-                                  "kPercentageNumber", "kNumberNumber", "expectedBF", "prior", "distribution",
-                                  "materialityValue", "recordNumberVariable", "monetaryVariable", "populationValue", "auditType"))
+  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "show", "N", "kPercentageNumber", "kNumberNumber", "expectedBF", 
+                                  "distribution", "materialityValue", "recordNumberVariable", "monetaryVariable", "populationValue", "auditType"))
 
   summaryTable$addColumnInfo(name = 'materiality',          title = "Materiality",          type = 'string')
+  if(options[["auditType"]] == "mus")
+    summaryTable$addColumnInfo(name = 'p',                    title = "% of value",           type = 'string')
   summaryTable$addColumnInfo(name = 'IR',                   title = "Inherent risk",        type = 'string')
   summaryTable$addColumnInfo(name = 'CR',                   title = "Control risk",         type = 'string')
   summaryTable$addColumnInfo(name = 'DR',                   title = "Detection risk",       type = 'string')
@@ -126,15 +127,24 @@
   message <- base::switch(options[["distribution"]],
                             "beta" = "The sample size is calculated using the <b>beta</b> distribution.",
                             "beta-binomial" = paste0("The sample size is calculated using the <b>beta-binomial</b> distribution (N = ", jaspResults[["N"]]$object ,")."))
+                              
   summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
-  ktable <- base::switch(options[["expected.errors"]],
-                          "kPercentage" = floor(result[["k"]] * result[["n"]]),
-                          "kNumber" = options[["kNumberNumber"]])
+  if(options[["auditType"]] == "attributes"){
+    ktable <- base::switch(options[["expected.errors"]],
+                            "kPercentage" = floor(result[["k"]] * result[["n"]]),
+                            "kNumber" = options[["kNumberNumber"]])
+  } else {
+    ktable <- base::switch(options[["expected.errors"]],
+                            "kPercentage" = round(result[["k"]] * result[["n"]], 2),
+                            "kNumber" = options[["kNumberNumber"]])
+  }
   DRtable <- paste0(round(result[["alpha"]], 3) * 100, "%")
 
   if(jaspResults[["materiality"]]$object == 0){
     row <- data.frame(materiality = ".", IR = result[["IR"]], CR = result[["CR"]], DR = DRtable, k = 0, n = ".")
+    if(options[["auditType"]] == "mus")
+      row <- cbind(row, p = ".")
     if(options[["expectedBF"]])
       row <- cbind(row, expBF = ".")
     summaryTable$addRows(row)
@@ -150,25 +160,30 @@
                                 "attributes" = materialityTitle,
                                 "mus" = materialityValue)
 
-  if(!jaspResults[["ready"]]$object && options[["auditType"]] == "mus"){
+  if(!jaspResults[["ready"]]$object){
     row <- data.frame(materiality           = materiality,
                       IR                    = result[["IR"]],
                       CR                    = result[["CR"]],
                       DR                    = DRtable,
                       k                     = ktable,
                       n                     = ".")
+  if(options[["auditType"]] == "mus")
+    row <- cbind(row, p = ".")
   if(options[["expectedBF"]])
     row <- cbind(row, expBF = ".")
     summaryTable$addRows(row)
     return()
   }
 
+  percOfTotal <- paste0(round( materialityValue / jaspResults[["total_data_value"]]$object * 100, 2), "%")
   row <- data.frame(materiality           = materiality,
                     IR                    = result[["IR"]],
                     CR                    = result[["CR"]],
                     DR                    = DRtable,
                     k                     = ktable,
                     n                     = result[["n"]])
+  if(options[["auditType"]] == "mus")
+    row <- cbind(row, p = percOfTotal) 
   if(options[["expectedBF"]])
     row <- cbind(row, expBF = .expectedBF(options, result, ktable, jaspResults))
   summaryTable$addRows(row)
@@ -181,7 +196,7 @@
   if (options[["implicitsample"]] && jaspResults[["ready"]]$object){
       if(is.null(jaspResults[["planningContainer"]][["sampletable"]])){
 
-  sampletable                       <- createJaspTable("Implicit Sample Table")
+  sampletable                       <- createJaspTable("Implicit Sample")
   jaspResults[["planningContainer"]][["sampletable"]]      <- sampletable
   sampletable$position              <- position
   sampletable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors", "implicitsample", "statistic",
@@ -209,7 +224,7 @@
   }
 }
 
-.plotPriorBayesianAttributesPlanningFullAudit <- function(options, result, jaspResults, plotWidth = 600, plotHeight = 450){
+.plotPrior <- function(options, result, jaspResults, plotWidth = 600, plotHeight = 450){
   
   if(options[["distribution"]] == "beta"){
 
@@ -313,7 +328,7 @@
 
 }
 
-.bayesianAttributesBoundFullAudit <- function(dataset, options, jaspResults){
+.bayesianAttributesBound <- function(dataset, options, jaspResults){
 
     ar                        <- 1 - options[["confidence"]]
     ir                        <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
@@ -321,11 +336,11 @@
     alpha                     <- ar / ir / cr
 
     if(options[["distribution"]] == "beta"){
-      n_noprior               <- .calculateBayesianSampleSize(options, 1 - options[["confidence"]], jaspResults)
-      n_withprior             <- .calculateBayesianSampleSize(options, alpha, jaspResults)
+      n_noprior               <- .calc.n.beta(options, 1 - options[["confidence"]], jaspResults)
+      n_withprior             <- .calc.n.beta(options, alpha, jaspResults)
     } else if(options[["distribution"]] == "beta-binomial"){
-      n_noprior               <- .calculateBayesianSampleSizeBetaBinom(options, 1 - options[["confidence"]], jaspResults)
-      n_withprior             <- .calculateBayesianSampleSizeBetaBinom(options, alpha, jaspResults)
+      n_noprior               <- .calc.n.betabinom(options, 1 - options[["confidence"]], jaspResults)
+      n_withprior             <- .calc.n.betabinom(options, alpha, jaspResults)
     }
 
     pk                        <- 0
@@ -355,7 +370,10 @@
 
     bound <- "."
     if(n != 0 && k <= n){
-      bound             <- qbeta(p = options[["confidence"]], shape1 = priorA + k, shape2 = priorB + (n - k), lower.tail = TRUE)
+      if(options[["boundMethod"]] == "betaBound")
+        bound             <- qbeta(p = options[["confidence"]], shape1 = priorA + k, shape2 = priorB + (n - k), lower.tail = TRUE)
+      if(options[["boundMethod"]] == "betabinomialBound")
+        bound             <- .qBetaBinom(p = options[["confidence"]], N = jaspResults[["N"]]$object, u = priorA + k, v = priorB + (n - k)) / jaspResults[["N"]]$object
     }
 
     resultList <- list()
@@ -380,17 +398,15 @@
                                                     "distribution", "N", "materialityValue", "populationValue", "variableType"))
 }
 
-.bayesianAttributesBoundTableFullAudit <- function(options, result, jaspResults, position = 1){
+.bayesianAttributesBoundTable <- function(options, result, jaspResults, position = 1){
 
     if(!is.null(jaspResults[["evaluationContainer"]][["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-    evaluationTable                       <- createJaspTable("Bayesian Attributes Evaluation Table")
+    evaluationTable                       <- createJaspTable("Evaluation Summary")
     jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
-    evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
-                                      "expected.errors", "kPercentageNumber", "kNumberNumber", "sampleFilter",
-                                      "mostLikelyError", "bayesFactor", "N", "n", "k", "prior", "distribution",
-                                      "prior", "materialityValue", "populationValue", "variableType"))
+    evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID", "expected.errors", "kPercentageNumber", "kNumberNumber", 
+                                      "sampleFilter", "mostLikelyError", "bayesFactor", "distribution", "materialityValue", "variableType", "boundMethod"))
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",        type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",        type = 'string')
@@ -400,8 +416,13 @@
       evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                type = 'string')
     if(options[["bayesFactor"]])
       evaluationTable$addColumnInfo(name = 'bf',          title = "BF\u208B\u208A",     type = 'string')
+      
+    message <- base::switch(options[["boundMethod"]],
+                              "betaBound" = "The confidence bound is calculated according to the <b>beta</b> distribution.",
+                              "betabinomialBound" = "The confidence bound is calculated according to the <b>beta-binomial</b> distribution.")
+    evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
-    mle <- ceiling( (result[["posteriorA"]] - 1) / (result[["posteriorA"]] + result[["posteriorB"]] - 2) * options[["N"]] )
+    mle <- ceiling( (result[["posteriorA"]] - 1) / (result[["posteriorA"]] + result[["posteriorB"]] - 2) * jaspResults[["N"]]$object )
 
     if(options[["correctID"]] == ""){
       row                   <- data.frame(materiality = ".", n = ".", k = ".", bound = ".")
@@ -414,7 +435,7 @@
     }
 
     if(options[["auditType"]] == "attributes"){
-        materialityTable <- paste0(round(jaspResults[["materiality"]]$object, 2) * 100, "%")
+      materialityTable <- paste0(round(jaspResults[["materiality"]]$object, 2) * 100, "%")
     } else {
       materialityTable <- options[["materialityValue"]]
     }
@@ -434,7 +455,7 @@
     evaluationTable$addRows(row)
 }
 
-.plotPriorAndPosteriorBayesianAttributesBoundFullAudit <- function(options, result, jaspResults, plotWidth = 600, plotHeight = 450){
+.priorAndPosteriorBayesianAttributes <- function(options, result, jaspResults, plotWidth = 600, plotHeight = 450){
 
   xseq <- seq(0, options[["limx_backup"]], 0.001)
   d <- data.frame(
@@ -536,11 +557,11 @@
 
       prior_part_1            <- (0 + priorA) / (0 + priorB)
       prior_part_2            <- ((priorMu * (priorB - 1)) + (0 * 0)) / (0 + (priorA / priorPi))
-      prior                   <- prior_part_1 * prior_part_2 * stats::rf(n = 1e5, df1 = (2 * (0 + priorA)), df2 = ( 2 *(0 + priorB)))
+      prior                   <- prior_part_1 * prior_part_2 * stats::rf(n = 1e6, df1 = (2 * (0 + priorA)), df2 = ( 2 *(0 + priorB)))
 
       posterior_part_1        <- (M + priorA) / (M + priorB)
       posterior_part_2        <- ((priorMu * (priorB - 1)) + (M * z_bar)) / (n + (priorA / priorPi))
-      posterior               <- posterior_part_1 * posterior_part_2 * stats::rf(n = 1e5, df1 = (2 * (M + priorA)), df2 = ( 2 *(M + priorB)))
+      posterior               <- posterior_part_1 * posterior_part_2 * stats::rf(n = 1e6, df1 = (2 * (M + priorA)), df2 = ( 2 *(M + priorB)))
 
       bound <- as.numeric(quantile(posterior, probs = (1 - alpha), na.rm = TRUE))
     }
@@ -564,18 +585,16 @@
     resultList[["posterior"]]   <- posterior
 
     jaspResults[["result"]] <- createJaspState(resultList)
-    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilter",
-                                              "auditType", "boundMethod", "monetaryVariable"))
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilter", "auditType", "boundMethod", "monetaryVariable"))
 }
 
-.bayesianMusBoundTableFullAudit <- function(total_data_value, options, result, jaspResults, position = 1){
+.bayesianMusBoundTable <- function(total_data_value, options, result, jaspResults, position = 1){
 
     if(!is.null(jaspResults[["evaluationContainer"]][["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-    evaluationTable                       <- createJaspTable("Bayesian MUS Evaluation Table")
+    evaluationTable                       <- createJaspTable("Evaluation Summary")
     jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
-    evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
-                                      "sampleFilter", "distribution", "mostLikelyError", "N", "correctMUS", "sampleFilterMUS",
+    evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "correctID", "sampleFilter", "distribution", "mostLikelyError", "correctMUS", "sampleFilterMUS",
                                       "boundMethod", "bayesFactor", "materialityValue", "populationValue", "variableType"))
     evaluationTable$position <- position
 
@@ -630,10 +649,10 @@
     evaluationTable$addRows(row)
 }
 
-.plotPriorAndPosteriorBayesianMUSBoundFullAudit <- function(options, result, jaspResults, plotWidth = 600, plotHeight = 450){
+.priorAndPosteriorBayesianMUS <- function(options, result, jaspResults, plotWidth = 600, plotHeight = 450){
 
-  prior <- density(result[["prior"]], from = 0, to = options[["limx_backup"]])
-  posterior <- density(result[["posterior"]], from = 0, to = options[["limx_backup"]])
+  prior <- density(result[["prior"]], from = 0, to = options[["limx_backup"]], n = 2^10)
+  posterior <- density(result[["posterior"]], from = 0, to = options[["limx_backup"]], n = 2^10)
 
   d <- data.frame(
       x = c(prior$x, posterior$x),
@@ -733,11 +752,11 @@
     resultList[["alpha"]]       <- alpha
 
     jaspResults[["result"]] <- createJaspState(resultList)
-    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilterMUS", "populationValue",
-                                              "auditType", "boundMethod", "monetaryVariable", "materialityValue", "N", "variableType"))
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilterMUS", "auditType", "boundMethod", "monetaryVariable", "materialityValue", 
+                                              "variableType"))
 }
 
-.bayesfit<-function(lmfit,N){
+.bayesfit <- function(lmfit, N){
     QR<-lmfit$qr
     df.residual<-lmfit$df.residual
     R<-qr.R(QR) ## R component

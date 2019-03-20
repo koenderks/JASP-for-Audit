@@ -86,7 +86,7 @@
 
   if(!is.null(jaspResults[["planningContainer"]][["summaryTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-  summaryTable                              <- createJaspTable("Planning Table")
+  summaryTable                              <- createJaspTable("Planning Summary")
   jaspResults[["planningContainer"]][["summaryTable"]]             <- summaryTable
   summaryTable$position                     <- position
   summaryTable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "distribution", "N", "recordNumberVariable",
@@ -186,32 +186,15 @@
       bound                 <- binomResult$conf.int[2]
     } else if(options[["distribution"]] == "hypergeometric"){
       
-      level <- options[["confidence"]]
       N <- jaspResults[["N"]]$object
       n <- nrow(dataset)
       k <- length(which(dataset[,.v(options[["correctID"]])] == 1))
-      p <- k/n
-      q <- qnorm(c(0, level))
-
-      var <- p * (1 - p)/n * (n/(n - 1)) * (N - n)/N
-      ugrh <- p - q * sqrt(var)
-      ogrh <- p + q * sqrt(var)
-      hynv.anteil <- c(ugrh, ogrh)
-      hynv.anzahl = c(ceiling(ugrh * N), floor(ogrh * N))
-      ugrex <- k
-      while (phyper(k - 1, ugrex, N - ugrex, n) > (level + 1)/2) {
-          ugrex = ugrex + 1
+      for(K in 1000:1){
+       x <- phyper(k, K, N - K, n)
+       if(x >= 0.05)
+           break
       }
-      ugrex = ugrex - 1
-      ogrex = N - (n - k)
-      while (phyper(k, ogrex, N - ogrex, n) < (1 - level)/2) {
-          ogrex = ogrex - 1
-      }
-      ogrex = ogrex + 1
-      exact.anteil = c(ugrex/N, ogrex/N)
-      exact.anzahl = c(ugrex, ogrex)
-      ci <- list(approx = hynv.anteil, exact = exact.anteil)
-      bound <- ci[["exact"]][2]
+      bound <- K / N
     }
   }
 
@@ -233,7 +216,7 @@
 
     if(!is.null(jaspResults[["evaluationContainer"]][["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-    evaluationTable                       <- createJaspTable("Attributes Evaluation Table")
+    evaluationTable                       <- createJaspTable("Evaluation Summary")
     jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
@@ -328,7 +311,7 @@
 
     if(!is.null(jaspResults[["evaluationContainer"]][["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-    evaluationTable                       <- createJaspTable("MUS Evaluation Table")
+    evaluationTable                       <- createJaspTable("Evaluation Summary")
     jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show",

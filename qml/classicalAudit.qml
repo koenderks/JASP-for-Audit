@@ -23,28 +23,39 @@ import JASP.Widgets 1.0
 
 
 Form {
-    id: form
     columns: 1
 
-    // Expander button for the Planning phase
+    // Expander button for the Planning stage
     Section {
+        id: planningPhase
         text: planningPhase.expanded ? qsTr("<b>1. Planning</b>") : qsTr("1. Planning")
         expanded: true
-        enabled: true
-        id: planningPhase
         columns: 1
 
         Flow {
           Layout.leftMargin: 20
-          spacing: 150
+          spacing: 100
 
             RadioButtonGroup{
+              id: auditProcedure
               name: "auditType"
               title: qsTr("<b>Materiality</b>")
-              id: auditProcedure
 
               RowLayout {
-                RadioButton { text: qsTr("Absolute")          ; name: "mus"; id: mus; checked: true}
+                MenuButton
+                {
+                  width:				20
+                  iconSource:		"qrc:/images/info-button.png"
+                  toolTip:			"Enter your materiality as a monetary value"
+                  radius:				20
+                  Layout.alignment: Qt.AlignLeft
+                }
+                RadioButton { 
+                  id: mus
+                  name: "mus"
+                  text: qsTr("Absolute")
+                  checked: true
+                }
                 TextField {
                   id: materialityValue
                   visible: mus.checked
@@ -56,7 +67,19 @@ Form {
                 }
               }
               RowLayout {
-                RadioButton { text: qsTr("Relative")          ; name: "attributes" ; id: attributes}
+                MenuButton
+                {
+                  width:				20
+                  iconSource:		"qrc:/images/info-button.png"
+                  toolTip:			"Enter your materiality as a percentage"
+                  radius:				20
+                  Layout.alignment: Qt.AlignLeft
+                }
+                RadioButton { 
+                  id: attributes
+                  name: "attributes" 
+                  text: qsTr("Relative")         
+                }
                 PercentField {
                     id: materiality
                     visible: attributes.checked
@@ -69,13 +92,12 @@ Form {
 
             GroupBox {
                 title: qsTr("<b>Audit risk</b>")
-                id: auditRisk
 
                 PercentField {
+                    name: "confidence"
                     label: qsTr("Confidence")
                     decimals: 1
                     defaultValue: 95
-                    name: "confidence"
                 }
             }
           }
@@ -89,7 +111,7 @@ Form {
             Layout.leftMargin: 200
         }
 
-        // Variables form for planning
+        // Variables form for planning stage
         VariablesForm {
             id: variablesFormPreparation
             implicitHeight: 110
@@ -292,7 +314,7 @@ Form {
                         text: qsTr("Seed")
                         name: "seedNumber"
                         id: seedNumber
-                        validator: IntValidator { bottom: 0 }
+                        validator: IntValidator { bottom: 1 }
                         fieldWidth: 60
                     }
 
@@ -514,7 +536,6 @@ Form {
                   variablesFormSampling.enabled = false
                   seedNumber.enabled = false
                   samplingType.enabled = false
-                  evaluationChecked.checked = true
                   pasteButton.enabled = false
                   variablesFormPreparation.enabled = false
                   samplingMethod.enabled = false
@@ -539,6 +560,7 @@ Form {
                   executionPhase.expanded = false
                   evaluationPhase.expanded = true
                   evaluationPhase.enabled = true
+                  evaluationChecked.checked = true
                 }
               }
             }
