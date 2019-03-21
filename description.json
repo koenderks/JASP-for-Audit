@@ -15,7 +15,7 @@
 	"ribbonEntries":
 	[
 		{
-			"title": 									"Sampling",
+			"title": 									"Audit",
 			"icon": 									"audit-fullaudit.svg",
 			"analyses":
 			[
@@ -26,19 +26,6 @@
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Bayesian Sampling Workflow",
-					"qml":								"bayesianAudit.qml",
-					"function":						"bayesianAudit",
-					"usesJaspResults":		true
-				}
-			]
-		},
-		{
-			"title": 									"Explore",
-			"icon": 									"audit-sampling.svg",
-			"analyses":
-			[
-				{
 					"title":							"Planning",
 					"qml":								"classicalPlanning.qml",
 					"function":						"classicalPlanning",
@@ -48,6 +35,12 @@
 					"title":							"Evaluation",
 					"qml":								"classicalEvaluation.qml",
 					"function":						"classicalEvaluation",
+					"usesJaspResults":		true
+				},
+				{
+					"title":							"Bayesian Sampling Workflow",
+					"qml":								"bayesianAudit.qml",
+					"function":						"bayesianAudit",
 					"usesJaspResults":		true
 				},
 				{
