@@ -157,7 +157,7 @@ Form {
                   RowLayout {
                     CheckBox {
                       id: interpretationOn
-                      text: interpretationOn.checked ? qsTr("Enabled") : qsTr("Disabled")
+                      text: qsTr("Enable")
                       name: "interpretation"
                       checked: true
                       }
@@ -220,25 +220,29 @@ Form {
             }
           }
     }
-
-    Flow {
-      spacing: 60
-
-       GroupBox {
-          title: qsTr("<b>Plots</b>")
-
-          CheckBox {
-             text: qsTr("Decision plot")
-             name: "plotCriticalErrors"
-           }
-          CheckBox {
-              enabled: mus.checked
-              text: qsTr("Population distribution")
-              name: "distributionPlot"
-              id: distributionPlot
-            }
+    
+    Section {
+      title: qsTr("Tables and plots")
+    
+      Flow {
+        spacing: 60
+  
+         GroupBox {
+            title: qsTr("<b>Plots</b>")
+  
+            CheckBox {
+               text: qsTr("Decision plot")
+               name: "plotCriticalErrors"
+             }
+            CheckBox {
+                enabled: mus.checked
+                text: qsTr("Book value distribution")
+                name: "distributionPlot"
+                id: distributionPlot
+              }
+          }
         }
-      }
+    }
 
     Item {
       height: toSampling.height
@@ -290,121 +294,120 @@ Form {
 
                 AssignedVariablesList {
                     name: "rankingVariable"
-                    title: qsTr("Ranking variable (optional)")
+                    title: qsTr("Optional ranking variable")
                     singleVariable: true
                     allowedColumns: ["scale"]
                     }
                 AssignedVariablesList {
                     name: "variables"
-                    title: qsTr("Additional variables (optional)")
+                    title: qsTr("Optional additional variables")
                     singleVariable: false
                     height: 140
                     allowedColumns: ["scale", "ordinal", "nominal"]
                 }
             }
+            
+            Section {
+              title: qsTr("Advanced selection options")
+              id: samplingType
 
-            Flow {
-                Layout.leftMargin: 10
-                spacing: 60
+              Flow {
+                spacing: 20
 
-                ColumnLayout {
+                RadioButtonGroup {
+                  title: qsTr("<b>Selection type</b>")
+                  name: "samplingMethod"
+                  id: samplingMethod
 
-                    TextField {
-                        value: "1"
-                        text: qsTr("Seed")
-                        name: "seedNumber"
-                        id: seedNumber
-                        validator: IntValidator { bottom: 1 }
-                        fieldWidth: 60
+                  RowLayout {
+                    RadioButton { text: qsTr("Monetary Unit Sampling")      ; name: "mussampling" ; id: mussampling; enabled: (mus.checked ? true : false); checked: mus.checked}
+                    MenuButton
+                    {
+                      width:				20
+                      iconSource:		"qrc:/images/info-button.png"
+                      toolTip:			"Select observations with probability proportional to their value"
+                      radius:				20
+                      Layout.alignment: Qt.AlignRight
                     }
-
-                      Section {
-                        title: qsTr("Advanced selection options")
-                        implicitWidth: 260
-                        id: samplingType
-
-                        ColumnLayout {
-
-                          RadioButtonGroup {
-                            title: qsTr("<b>Selection type</b>")
-                            name: "samplingMethod"
-                            id: samplingMethod
-
-                            RowLayout {
-                              RadioButton { text: qsTr("Monetary Unit Sampling")      ; name: "mussampling" ; id: mussampling; enabled: (mus.checked ? true : false); checked: mus.checked}
-                              MenuButton
-                              {
-                                width:				20
-                                iconSource:		"qrc:/images/info-button.png"
-                                toolTip:			"Select observations with probability proportional to their value"
-                                radius:				20
-                                Layout.alignment: Qt.AlignRight
-                              }
-                            }
-                            RowLayout {
-                              RadioButton { text: qsTr("Record Sampling")             ; name: "recordsampling" ; id: recordsampling; enabled: true; checked: attributes.checked}
-                              MenuButton
-                              {
-                                width:				20
-                                iconSource:		"qrc:/images/info-button.png"
-                                toolTip:			"Select observations with equal probability"
-                                radius:				20
-                                Layout.alignment: Qt.AlignRight
-                              }
-                            }
-                          }
-
-                          RadioButtonGroup {
-                            title: qsTr("<b>Selection method</b>")
-                            name: "samplingType"
-
-                            RadioButton { text: qsTr("Random sampling")                 ; name: "simplerandomsampling" ; id: simplerandomsampling; checked: true}
-                            RadioButton { text: qsTr("Cell sampling")                   ; name: "cellsampling" ; id: cellsampling}
-
-                            RadioButton { text: qsTr("Systematic sampling")             ; name: "systematicsampling" ; id: systematicsampling}
-                            TextField {
-                                text: qsTr("Interval starting point")
-                                value: "1"
-                                name: "startingPoint"
-                                inputType: "integer"
-                                validator: IntValidator { bottom: 1 }
-                                Layout.leftMargin: 20
-                                enabled: systematicsampling.checked
-                                fieldWidth: 60
-                            }
-                        }
+                  }
+                  RowLayout {
+                    RadioButton { text: qsTr("Record Sampling")             ; name: "recordsampling" ; id: recordsampling; enabled: true; checked: attributes.checked}
+                    MenuButton
+                    {
+                      width:				20
+                      iconSource:		"qrc:/images/info-button.png"
+                      toolTip:			"Select observations with equal probability"
+                      radius:				20
+                      Layout.alignment: Qt.AlignRight
                     }
                   }
                 }
 
-                ColumnLayout {
+                RadioButtonGroup {
+                  title: qsTr("<b>Selection method</b>")
+                  name: "samplingType"
 
-                    GroupBox {
-                        title: qsTr("<b>Tables</b>")
-                        id: samplingTables
+                  RadioButton { text: qsTr("Random sampling")                 ; name: "simplerandomsampling" ; id: simplerandomsampling; checked: true}
+                  RadioButton { text: qsTr("Cell sampling")                   ; name: "cellsampling" ; id: cellsampling}
 
-                        CheckBox { text: qsTr("Display sample")       ; name: "showSample"}
-                        CheckBox { text: qsTr("Sample descriptives")  ; name: "showDescriptives" ; id: descriptives; enabled: mus.checked}
-                        Flow {
-                          enabled: mus.checked
-                          Layout.leftMargin: 20
-                            ColumnLayout {
-                              spacing: 5
-                              CheckBox { text: qsTr("Mean")                 ; name: "mean"; enabled: descriptives.checked ; checked: true}
-                              CheckBox { text: qsTr("Median")               ; name: "median"; enabled: descriptives.checked ; checked: true}
-                              CheckBox { text: qsTr("Std. deviation")       ; name: "sd"; enabled: descriptives.checked ; checked: true}
-                              CheckBox { text: qsTr("Variance")             ; name: "var"; enabled: descriptives.checked}
-                            }
-                            ColumnLayout {
-                              spacing: 5
-                              CheckBox { text: qsTr("Minimum")              ; name: "min"; enabled: descriptives.checked}
-                              CheckBox { text: qsTr("Maximum")              ; name: "max"; enabled: descriptives.checked}
-                              CheckBox { text: qsTr("Range")                ; name: "range"; enabled: descriptives.checked}
-                            }
-                        }
-                    }
-                }
-            }
+                  RadioButton { text: qsTr("Systematic sampling")             ; name: "systematicsampling" ; id: systematicsampling}
+                  TextField {
+                      text: qsTr("Interval starting point")
+                      value: "1"
+                      name: "startingPoint"
+                      inputType: "integer"
+                      validator: IntValidator { bottom: 1 }
+                      Layout.leftMargin: 20
+                      enabled: systematicsampling.checked
+                      fieldWidth: 60
+                  }
+              }
+              
+              TextField {
+                  value: "1"
+                  text: qsTr("Seed")
+                  name: "seedNumber"
+                  id: seedNumber
+                  validator: IntValidator { bottom: 1 }
+                  fieldWidth: 60
+              }
+          }
+        }
+        
+        Section {
+          title: qsTr("Tables and plots")
+          
+          Flow {
+
+              ColumnLayout {
+
+                  GroupBox {
+                      title: qsTr("<b>Tables</b>")
+                      id: samplingTables
+
+                      CheckBox { text: qsTr("Display sample")       ; name: "showSample"}
+                      CheckBox { text: qsTr("Sample descriptives")  ; name: "showDescriptives" ; id: descriptives; enabled: mus.checked}
+                      Flow {
+                        enabled: mus.checked
+                        Layout.leftMargin: 20
+                          ColumnLayout {
+                            spacing: 5
+                            CheckBox { text: qsTr("Mean")                 ; name: "mean"; enabled: descriptives.checked ; checked: true}
+                            CheckBox { text: qsTr("Median")               ; name: "median"; enabled: descriptives.checked ; checked: true}
+                            CheckBox { text: qsTr("Std. deviation")       ; name: "sd"; enabled: descriptives.checked ; checked: true}
+                            CheckBox { text: qsTr("Variance")             ; name: "var"; enabled: descriptives.checked}
+                          }
+                          ColumnLayout {
+                            spacing: 5
+                            CheckBox { text: qsTr("Minimum")              ; name: "min"; enabled: descriptives.checked}
+                            CheckBox { text: qsTr("Maximum")              ; name: "max"; enabled: descriptives.checked}
+                            CheckBox { text: qsTr("Range")                ; name: "range"; enabled: descriptives.checked}
+                          }
+                      }
+                  }
+              }
+          }
+        }
 
             Item {
               height: toExecution.height
@@ -493,13 +496,13 @@ Form {
             GroupBox {
               ComputedColumnField{
                 name: "sampleFilterName"
-                text: "Filter: "
+                text: "Column name selection result: "
                 fieldWidth: 120
                 enabled: pasteVariables.checked ? false : true
               }
               ComputedColumnField{
                 name: "variableName"
-                text: "Column: "
+                text: "Column name audit result: "
                 fieldWidth: 120
                 enabled: pasteVariables.checked ? false : true
               }
@@ -603,34 +606,7 @@ Form {
                     id: correctID
                 }
             }
-
-            Flow{
-              Layout.leftMargin: 10
-              spacing: 140
-
-              GroupBox {
-                title: qsTr("<b>Statistics</b>")
-
-                CheckBox {
-                    text: qsTr("Most Likely Error (MLE)")
-                    name: "mostLikelyError"
-                    checked: false
-                }
-              }
-                GroupBox {
-                    title: qsTr("<b>Plots</b>")
-                    CheckBox {
-                      text: qsTr("Evaluation information")
-                      name: "plotBound"
-                    }
-                    CheckBox {
-                      text: qsTr("Correlation plot")
-                      name: "plotCorrelation"
-                      visible: variableTypeTrueValues.checked
-                    }
-                }
-            }
-
+            
             // Expander button for the various bounds
             Section {
               title: qsTr("Advanced evaluation options")
@@ -672,6 +648,36 @@ Form {
                   enabled: variableTypeTrueValues.checked ? (mussampling.checked ? false : true) : false
                   checked: variableTypeTrueValues.checked ? (mussampling.checked ? false : true) : false
                 }
+              }
+            }
+            
+            Section {
+              title: qsTr("Tables and plots")
+              
+              Flow{
+                spacing: 140
+  
+                GroupBox {
+                  title: qsTr("<b>Statistics</b>")
+  
+                  CheckBox {
+                      text: qsTr("Most Likely Error (MLE)")
+                      name: "mostLikelyError"
+                      checked: false
+                  }
+                }
+                  GroupBox {
+                      title: qsTr("<b>Plots</b>")
+                      CheckBox {
+                        text: qsTr("Evaluation information")
+                        name: "plotBound"
+                      }
+                      CheckBox {
+                        text: qsTr("Correlation plot")
+                        name: "plotCorrelation"
+                        visible: variableTypeTrueValues.checked
+                      }
+                  }
               }
             }
 

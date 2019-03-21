@@ -162,6 +162,7 @@
       }
 
       sample                  <- as.data.frame(dataset[sample.rows, ])
+      colnames(sample)[1] <- .v(options[["recordNumberVariable"]])
 
       jaspResults[["sample"]] <- createJaspState(sample)
       jaspResults[["sample"]]$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
@@ -260,6 +261,7 @@
           }
       }
       sample                  <- as.data.frame(dataset[sample.rows, ])
+      colnames(sample)[1] <- .v(options[["recordNumberVariable"]])
       jaspResults[["sample"]] <- createJaspState(sample)
       jaspResults[["sample"]]$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
                               "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "samplingMethod"))
