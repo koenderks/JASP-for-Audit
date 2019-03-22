@@ -53,7 +53,7 @@
   dataTable                                                 <- createJaspTable("Population Descriptives")
   jaspResults[["procedureContainer"]][["dataTable"]]        <- dataTable
   dataTable$position                                        <- position
-  dataTable$dependOnOptions(c("monetaryVariable", "recordNumberVariable"))
+  dataTable$dependOnOptions(c("monetaryVariable", "recordNumberVariable", "descriptivesTable"))
 
   dataTable$addColumnInfo(name = 'popSize',     title = "Population size",        type = 'string')
   dataTable$addColumnInfo(name = 'value',       title = "Total value",            type = 'string')

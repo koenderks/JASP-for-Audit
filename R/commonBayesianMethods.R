@@ -119,7 +119,7 @@
   summaryTable$addColumnInfo(name = 'IR',                   title = "Inherent risk",        type = 'string')
   summaryTable$addColumnInfo(name = 'CR',                   title = "Control risk",         type = 'string')
   summaryTable$addColumnInfo(name = 'DR',                   title = "Detection risk",       type = 'string')
-  summaryTable$addColumnInfo(name = 'k',                    title = "Allowed errors",       type = 'string')
+  summaryTable$addColumnInfo(name = 'k',                    title = "Expected errors",       type = 'string')
   summaryTable$addColumnInfo(name = 'n',                    title = "Required sample size", type = 'string')
   if(options[["expectedBF"]])
     summaryTable$addColumnInfo(name = 'expBF',              title = "Expected BF\u208B\u208A", type = 'string')

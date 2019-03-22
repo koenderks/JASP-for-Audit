@@ -184,12 +184,12 @@ Form {
                   RadioButtonGroup {
                       name: "expected.errors"
                       id: expectedErrors
-                      title: qsTr("<b>Allowed errors</b>")
+                      title: qsTr("<b>Expected errors</b>")
 
                       RowLayout {
                           RadioButton { text: qsTr("Percentage")            ; name: "kPercentage" ; checked: true; id: expkPercentage}
                           PercentField {
-                              decimals: 1
+                              decimals: 2
                               defaultValue: 0
                               fieldWidth: 40
                               name: "kPercentageNumber"
@@ -236,7 +236,8 @@ Form {
                  }
                  GroupBox {
                      title: qsTr("<b>Tables</b>")
-        
+                     
+                     CheckBox { text: qsTr("Book value descriptives"); name: "descriptivesTable"; enabled: mus.checked}  
                      CheckBox {      text: qsTr("Implicit sample") ; name: "implicitsample"}
                   }
               }

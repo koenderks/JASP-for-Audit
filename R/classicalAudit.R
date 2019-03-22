@@ -43,7 +43,7 @@ classicalAudit <- function(jaspResults, dataset, options){
     jaspResults[["procedureContainer"]][["procedureParagraph"]]$dependOnOptions(c("interpretation", "confidence"))
   }
   
-  if(options[["auditType"]] == "mus")
+  if(options[["descriptivesTable"]])
     .dataTable(dataset, options, jaspResults, position = 2)
 
   # Population distribution plot
