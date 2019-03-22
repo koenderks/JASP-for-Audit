@@ -16,9 +16,8 @@
       jaspResults[["selectionContainer"]][["table"]]          <- table
       table$position                  <- position
 
-      table$dependOnOptions(c("variables", "allowDuplicates", "seed", "sampleSize", "seedNumber", "recordNumberVariable",
-                              "samplingType", "auditType", "recordNumberVariableMUS", "monetaryVariableMUS", "variablesMUS",
-                              "showSample", "samplingMethod"))
+      table$dependOnOptions(c("variables", "sampleSize", "seedNumber", "recordNumberVariable", "monetaryVariable", "samplingType", "auditType",
+                              "showSample", "samplingMethod", "expected.errors", "kNumberNumber", "kPercentageNumber"))
 
       table$addColumnInfo(name="number", title ="", type = "string")
       table$addColumnInfo(name="recordNumber", title ="Record Number", type = "string")
@@ -57,8 +56,8 @@
           colnames(sample)[1] <- .v(options[["recordNumberVariable"]])
       }
       jaspResults[["sample"]] <- createJaspState(sample)
-      jaspResults[["sample"]]$dependOnOptions(c("variables", "allowDuplicates", "seed", "sampleSize", "seedNumber", "recordNumberVariable",
-                              "samplingType", "recordNumberVariableMUS", "monetaryVariableMUS", "variablesMUS", "samplingMethod"))
+      jaspResults[["sample"]]$dependOnOptions(c("variables", "seedNumber", "sampleSize", "recordNumberVariable", "monetaryVariable", "samplingMethod", "samplingType", "auditType", "startingPoint",
+                                                  "expected.errors", "kNumberNumber", "kPercentageNumber", "distribution", "IR", "CR"))
     }
 
     if(options[["showSample"]]){
@@ -101,9 +100,8 @@
         table                               <- createJaspTable("Resulting sample")
         jaspResults[["selectionContainer"]][["table"]]              <- table
         table$position                      <- position
-        table$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
-                                "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "showSample",
-                              "samplingMethod"))
+        table$dependOnOptions(c("variables", "sampleSize", "seedNumber", "recordNumberVariable", "monetaryVariable", "samplingType", "auditType",
+                                "showSample", "samplingMethod", "expected.errors", "kNumberNumber", "kPercentageNumber", "startingPoint", "rankingVariable"))
 
         table$addColumnInfo(name="number",          title ="", type = "string")
         table$addColumnInfo(name="recordNumber",    title ="Record Number", type = "string")
@@ -165,8 +163,8 @@
       colnames(sample)[1] <- .v(options[["recordNumberVariable"]])
 
       jaspResults[["sample"]] <- createJaspState(sample)
-      jaspResults[["sample"]]$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
-                                                "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "samplingMethod"))
+      jaspResults[["sample"]]$dependOnOptions(c("variables", "seedNumber", "sampleSize", "recordNumberVariable", "monetaryVariable", "samplingMethod", "samplingType", "auditType", "startingPoint",
+                                                  "expected.errors", "kNumberNumber", "kPercentageNumber", "distribution", "IR", "CR"))
     }
 
     if(options[["showSample"]]){
@@ -203,9 +201,8 @@
       table                               <- createJaspTable("Resulting sample")
       jaspResults[["selectionContainer"]][["table"]]              <- table
       table$position                      <- position
-      table$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
-                              "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "showSample",
-                            "samplingMethod"))
+      table$dependOnOptions(c("variables", "sampleSize", "seedNumber", "recordNumberVariable", "monetaryVariable", "samplingType", "auditType",
+                              "showSample", "samplingMethod", "expected.errors", "kNumberNumber", "kPercentageNumber", "startingPoint", "rankingVariable"))
 
       table$addColumnInfo(name="number",          title ="", type = "string")
       table$addColumnInfo(name="recordNumber",    title ="Record Number", type = "string")
@@ -263,8 +260,8 @@
       sample                  <- as.data.frame(dataset[sample.rows, ])
       colnames(sample)[1] <- .v(options[["recordNumberVariable"]])
       jaspResults[["sample"]] <- createJaspState(sample)
-      jaspResults[["sample"]]$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType",
-                              "variablesMUS", "rankingVariableMUS", "recordNumberVariableMUS", "monetaryVariableMUS", "samplingMethod"))
+      jaspResults[["sample"]]$dependOnOptions(c("variables", "seedNumber", "sampleSize", "recordNumberVariable", "monetaryVariable", "samplingMethod", "samplingType", "auditType", "startingPoint",
+                                                  "expected.errors", "kNumberNumber", "kPercentageNumber", "distribution", "IR", "CR"))
     }
 
     if(options[["showSample"]]){
@@ -367,7 +364,7 @@
   message <- paste0("The sample is drawn with <i>seed ", options[["seedNumber"]], "</i>.")
   simpleRandomSamplingInfoTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
-  sampleSize                              <- jaspResults[["sampleSize"]]$object
+  sampleSize                              <- length(unique(sample[, .v(options[["recordNumberVariable"]])]))
   if(options[["auditType"]] == "mus"){
     sampleValue                             <- ceiling(sum(sample[, .v(options[["monetaryVariable"]])]))
     percOfTotal                             <- paste0(round(sampleValue / total_data_value * 100, 2), "%")

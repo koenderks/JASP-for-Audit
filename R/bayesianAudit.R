@@ -269,8 +269,12 @@ bayesianAudit <- function(jaspResults, dataset, options){
 .bayesianExecution <- function(options, jaspResults){
 
   if(options[["pasteVariables"]]){
+    
+    dataset <- .readDataSetToEnd(columns.as.numeric = options[["recordNumberVariable"]])
+    
     sampleFilter <- rep(0, jaspResults[["N"]]$object)
-    sampleFilter[jaspResults[["sample"]]$object[, .v(options[["recordNumberVariable"]])]] <- 1
+    index <- which(dataset[, .v(options[["recordNumberVariable"]])] %in% jaspResults[["sample"]]$object[, .v(options[["recordNumberVariable"]])])
+    sampleFilter[index] <- 1
     sampleFilter <- as.integer(sampleFilter)
     emptyVariable <- rep(NA, jaspResults[["N"]]$object)
     .setColumnDataAsNominal(options[["sampleFilterName"]], sampleFilter)

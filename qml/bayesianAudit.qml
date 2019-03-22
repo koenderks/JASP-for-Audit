@@ -370,10 +370,10 @@ Form {
               title: qsTr("<b>Selection method</b>")
               name: "samplingType"
 
-              RadioButton { text: qsTr("Random sampling")                 ; name: "simplerandomsampling" ; id: simplerandomsampling; checked: true}
+              RadioButton { text: qsTr("Random sampling")                 ; name: "simplerandomsampling" ; id: simplerandomsampling}
               RadioButton { text: qsTr("Cell sampling")                   ; name: "cellsampling" ; id: cellsampling}
 
-              RadioButton { text: qsTr("Systematic sampling")             ; name: "systematicsampling" ; id: systematicsampling}
+              RadioButton { text: qsTr("Systematic sampling")             ; name: "systematicsampling" ; id: systematicsampling; checked: true}
               TextField {
                   text: qsTr("Interval starting point")
                   value: "1"
