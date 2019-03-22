@@ -28,8 +28,8 @@
 .calc.n.gamma <- function(options, alpha, jaspResults){
   for(n in 1:10000){
     k <- base::switch(options[["expected.errors"]],
-                          "kPercentage" = (n * options[["kPercentageNumber"]] * jaspResults[["materiality"]]$object),
-                          "kNumber" = (options[["kNumberNumber"]] * jaspResults[["materiality"]]$object))
+                          "kPercentage" = (n * options[["kPercentageNumber"]]),
+                          "kNumber" = (options[["kNumberNumber"]]))
     x <- pgamma(jaspResults[["materiality"]]$object, shape = 1 + k, scale = 1 / n)
     if(x >= (1 - alpha)){
      return(n)
