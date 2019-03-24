@@ -219,33 +219,34 @@
 
   materiality     <- jaspResults[["materiality"]]$object
   bound           <- result[["bound"]]
-  if(is.null(options[["expected.errors"]])){
-    expected.errors <- NULL
-  } else {
-    expected.errors <- base::switch(options[["expected.errors"]],
-                                        "kPercentage" = options[["kPercentageNumber"]],
-                                        "kNumber" = options[["kNumberNumber"]] / result[["n"]])
-  }
+  proj.misstatement <- bound * jaspResults[["total_data_value"]]$object
+  
+  expected.errors <- base::switch(options[["expected.errors"]],
+                                      "kPercentage" = options[["kPercentageNumber"]],
+                                      "kNumber" = options[["kNumberNumber"]] / result[["n"]])
 
-  if(options[["auditType"]] == "attributes"){
+  if(options[["variableType"]] == "variableTypeCorrect"){
     found.errors    <- result[["k"]] / result[["n"]]
   } else {
     found.errors    <- sum(result[["z"]]) / result[["n"]]
   }
 
-  if(is.null(expected.errors)){
-    name <- rev(c("Materiality", "Maximum Error", "Most Likely Error"))
-    column <- rev(c(materiality, bound, found.errors))
-    boundColor <- ifelse(bound < materiality, yes = rgb(0,1,.7,1), no = rgb(1,0,0,1))
-    fillUp <- rev(c("#1380A1", boundColor, "#1380A1"))
-  } else {
-    name <- rev(c("Materiality", "Maximum Error", "Most Likely Error", "Expected Error"))
-    column <- rev(c(materiality, bound, found.errors, expected.errors))
-    boundColor <- ifelse(bound < materiality, yes = rgb(0,1,.7,1), no = rgb(1,0,0,1))
-    fillUp <- rev(c("#1380A1", boundColor, "#1380A1" ,"#1380A1"))
+  name <- rev(c("Materiality", "Maximum Error", "Most Likely Error", "Expected Error"))
+  column <- rev(c(materiality, bound, found.errors, expected.errors))
+  x.title <- "Error percentage"
+  if(options[["auditType"]] == "mus" && options[["variableType"]] == "variableTypeTrueValues"){
+    column <- column * jaspResults[["total_data_value"]]$object
+    x.title <- "Error amount"
   }
+  boundColor <- ifelse(bound < materiality, yes = rgb(0,1,.7,1), no = rgb(1,0,0,1))
+  fillUp <- rev(c("#1380A1", boundColor, "#1380A1" ,"#1380A1"))
 
-  yBreaks <- JASPgraphs::getPrettyAxisBreaks(c(0,column, bound), min.n = 4)
+  yBreaks <- JASPgraphs::getPrettyAxisBreaks(c(0, column, bound), min.n = 4)
+  
+  x.labels <- paste0(round(yBreaks,2) * 100, "%")
+  if(options[["auditType"]] == "mus" && options[["variableType"]] == "variableTypeTrueValues"){
+      x.labels <- format(yBreaks, scientific = TRUE)
+  }
 
   tb <- data.frame(x = name, column = column)
   tb$x <- factor(tb$x, levels = tb$x)
@@ -253,9 +254,9 @@
       ggplot2::geom_bar(stat = "identity", col = "black", size = 1, fill = fillUp) +
       ggplot2::coord_flip() +
       ggplot2::xlab(NULL) +
-      ggplot2::ylab("Error percentage") +
+      ggplot2::ylab(x.title) +
       ggplot2::theme(axis.ticks.x = ggplot2::element_blank(),axis.ticks.y = ggplot2::element_blank()) +
-      ggplot2::scale_y_continuous(breaks = yBreaks, labels = paste0(round(yBreaks,2) * 100, "%"))
+      ggplot2::scale_y_continuous(breaks = yBreaks, labels = x.labels)
 
   # JASP theme
   p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE)
@@ -266,7 +267,7 @@
 
 .plotScatterJFA <- function(dataset, options, jaspResults) {
 
-    d <- data.frame(xx= dataset[,.v(options[["monetaryVariable"]])], yy= dataset[,.v(options[["correctMUS"]])])
+    d <- data.frame(xx= dataset[,.v(options[["monetaryVariable"]])], yy= dataset[,.v(options[["correctID"]])])
     co <- cor(d$xx, d$yy)
     d <- na.omit(d)
     d <- ceiling(d)

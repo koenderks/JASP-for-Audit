@@ -29,14 +29,12 @@ Form {
         GridLayout { columns: 2
             RadioButtonGroup { id: auditType; name: "auditType"; title: qsTr("<b>Materiality</b>")
               RowLayout {
-                MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Enter your materiality as a monetary value"; radius: 20; Layout.alignment: Qt.AlignLeft }
-                RadioButton { id: mus; name: "mus"; text: qsTr("Absolute"); checked: true }
-                DoubleField { id: materialityValue; visible: mus.checked; name: "materialityValue"; defaultValue: 0; min: 0; fieldWidth: 90; decimals: 2 }
+                RadioButton { id: mus; name: "mus"; text: qsTr("Absolute"); checked: true; childrenOnSameRow: true
+                  DoubleField { id: materialityValue; visible: mus.checked; name: "materialityValue"; defaultValue: 0; min: 0; fieldWidth: 90; decimals: 2 } }
               }
               RowLayout {
-                MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Enter your materiality as a percentage"; radius: 20; Layout.alignment: Qt.AlignLeft }
-                RadioButton { id: attributes; name: "attributes"; text: qsTr("Relative") }
-                PercentField { id: materiality; visible: attributes.checked; decimals: 2; defaultValue: 0; name: "materiality"; fieldWidth: 50 }
+                RadioButton { id: attributes; name: "attributes"; text: qsTr("Relative"); childrenOnSameRow: true
+                  PercentField { id: materiality; visible: attributes.checked; decimals: 2; defaultValue: 0; name: "materiality"; fieldWidth: 50 } }
               }
             }
             GroupBox { title: qsTr("<b>Audit risk</b>")
@@ -48,7 +46,7 @@ Form {
         VariablesForm { id: variablesFormPreparation; implicitHeight: 110
             AvailableVariablesList { name: "variablesFormPlanning" }
             AssignedVariablesList { name: "recordNumberVariable"; title: qsTr("Record numbers"); singleVariable: true; allowedColumns: ["nominal", "ordinal", "scale"]; id: recordNumberVariable }
-            AssignedVariablesList { name: "monetaryVariable"; title: qsTr("Book values"); singleVariable: true; allowedColumns: ["scale"]; id: monetaryVariable; enabled: mus.checked }
+            AssignedVariablesList { name: "monetaryVariable"; title: mus.checked ? qsTr("Book values") : qsTr("Book values (optional)"); singleVariable: true; allowedColumns: ["scale"]; id: monetaryVariable }
         }
         Section { text: qsTr("Advanced planning options")
           GridLayout { columns: 3
@@ -79,23 +77,24 @@ Form {
                     RadioButton { text: qsTr("Low") ; name: "Low" }
                 }
                 RadioButtonGroup {
-                    title: qsTr("<b>Sampling model</b>")
+                    title: qsTr("<b>Sampling distribution</b>")
                     name: "distribution"
                     id: distribution
-
-                    RadioButton { text: qsTr("With replacement")            ; name: "binomial" ; checked: true}
-                    RadioButton { text: qsTr("Without replacement")         ; name: "hypergeometric" ; id: hyperDist; enabled: attributes.checked}
+                    
+                    RadioButton { text: qsTr("Gamma")                       ; name: "gamma" ; checked: true; id: gamma}
+                    RadioButton { text: qsTr("Binomial")                    ; name: "binomial"; id: binomial}
+                    RadioButton { text: qsTr("Hypergeometric")              ; name: "hypergeometric" ; id: hyperDist}
                 }
           }
       }
       Section { title: qsTr("Tables and plots")
         GridLayout { columns: 2  
           GroupBox { title: qsTr("<b>Tables</b>")  
-            CheckBox { text: qsTr("Book value descriptives"); name: "descriptivesTable"; enabled: mus.checked }  
+            CheckBox { text: qsTr("Book value descriptives"); name: "descriptivesTable"; enabled: monetaryVariable.count > 0  }  
           }
           GroupBox { title: qsTr("<b>Plots</b>")
+            CheckBox { enabled: monetaryVariable.count > 0 ; text: qsTr("Book value distribution"); name: "distributionPlot"; id: distributionPlot }
             CheckBox { text: qsTr("Decision plot"); name: "plotCriticalErrors" }
-            CheckBox { enabled: mus.checked; text: qsTr("Book value distribution"); name: "distributionPlot"; id: distributionPlot }
           }
         }
       }
@@ -117,18 +116,18 @@ Form {
     Section { text: samplingPhase.expanded ? qsTr("<b>2. Selection</b>") : qsTr("2. Selection"); enabled: false; expanded: false; id: samplingPhase; columns: 1
         VariablesForm { id: variablesFormSampling; implicitHeight: 200
           AvailableVariablesList { name: "variablesFormSampling"}
-          AssignedVariablesList { name: "rankingVariable"; title: qsTr("Optional ranking variable"); singleVariable: true; allowedColumns: ["scale"] }
-          AssignedVariablesList { name: "variables"; title: qsTr("Optional additional variables"); singleVariable: false; height: 140; allowedColumns: ["scale", "ordinal", "nominal"] }
+          AssignedVariablesList { name: "rankingVariable"; title: qsTr("Ranking variable (optional)"); singleVariable: true; allowedColumns: ["scale"] }
+          AssignedVariablesList { name: "variables"; title: qsTr("Additional variables (optional)"); singleVariable: false; height: 140; allowedColumns: ["scale", "ordinal", "nominal"] }
         }        
         Section { title: qsTr("Advanced selection options")
               GridLayout { columns: 3
                 RadioButtonGroup { title: qsTr("<b>Selection type</b>"); name: "samplingMethod"; id: samplingMethod
                   RowLayout {
-                    RadioButton { text: qsTr("Monetary Unit Sampling") ; name: "mussampling" ; id: mussampling; enabled: (mus.checked ? true : false); checked: mus.checked}
+                    RadioButton { text: qsTr("Monetary Unit Sampling") ; name: "mussampling" ; id: mussampling; enabled: (monetaryVariable.count > 0 ? true : false); checked: (monetaryVariable.count > 0 ? true : false)}
                     MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Select observations with probability proportional to their value"; radius: 20; Layout.alignment: Qt.AlignRight }
                   }
                   RowLayout {
-                    RadioButton { text: qsTr("Record Sampling") ; name: "recordsampling" ; id: recordsampling; enabled: true; checked: attributes.checked}
+                    RadioButton { text: qsTr("Record Sampling") ; name: "recordsampling" ; id: recordsampling; enabled: true; checked: (monetaryVariable.count > 0 ? false : true)}
                     MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Select observations with equal probability"; radius: 20; Layout.alignment: Qt.AlignRight }
                   }
                 }
@@ -145,8 +144,8 @@ Form {
           GridLayout {
               GroupBox { title: qsTr("<b>Tables</b>"); id: samplingTables
                   CheckBox { text: qsTr("Display sample")       ; name: "showSample"}
-                      CheckBox { text: qsTr("Sample descriptives")  ; name: "showDescriptives" ; id: descriptives; enabled: mus.checked}
-                      GridLayout { enabled: mus.checked; Layout.leftMargin: 20
+                      CheckBox { text: qsTr("Sample descriptives")  ; name: "showDescriptives" ; id: descriptives}
+                      GridLayout { Layout.leftMargin: 20
                           ColumnLayout { spacing: 5
                             CheckBox { text: qsTr("Mean")                 ; name: "mean"; enabled: descriptives.checked ; checked: true}
                             CheckBox { text: qsTr("Median")               ; name: "median"; enabled: descriptives.checked ; checked: true}
@@ -176,11 +175,11 @@ Form {
           RadioButtonGroup { Layout.leftMargin: 50; name: "variableType"; id: variableType; title: qsTr("")
               RowLayout { spacing: 150
                 RowLayout {
-                  RadioButton { text: qsTr("Audit values") ; name: "variableTypeTrueValues" ; id: variableTypeTrueValues; checked: mus.checked; enabled: mus.checked }
+                  RadioButton { text: qsTr("Audit values") ; name: "variableTypeTrueValues" ; id: variableTypeTrueValues; checked: (monetaryVariable.count > 0 ? true : false); enabled: (monetaryVariable.count > 0 ? true : false) }
                   MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Adds a column to specify the audit value of the observations"; radius: 20; Layout.alignment: Qt.AlignRight }
                 }
                 RowLayout {
-                  RadioButton { text: qsTr("Correct / Incorrect") ; name: "variableTypeCorrect" ; id: variableTypeCorrect; checked: attributes.checked; enabled: attributes.checked }
+                  RadioButton { text: qsTr("Correct / Incorrect") ; name: "variableTypeCorrect" ; id: variableTypeCorrect; checked: (monetaryVariable.count > 0 ? false : true); enabled: true }
                   MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip:	"Adds a column to specify the observations as correct (0) or incorrect (1)"; radius: 20; Layout.alignment: Qt.AlignRight }
                 }
               }
@@ -210,14 +209,15 @@ Form {
             VariablesForm { implicitHeight: 200
               AvailableVariablesList { name: "evaluationVariables"}
               AssignedVariablesList { name: "sampleFilter"; title: qsTr("Selection result"); singleVariable: true; allowedColumns: ["nominal"]; id: sampleFilter }
-              AssignedVariablesList { enabled: variableTypeTrueValues.checked; name: "correctMUS"; title: qsTr("Audit values"); singleVariable: true; allowedColumns: ["scale"]; id: correctMUS }
-              AssignedVariablesList { enabled: variableTypeCorrect.checked; name: "correctID"; title: qsTr("Error variable"); singleVariable: true; allowedColumns: ["nominal"]; id: correctID }
+              AssignedVariablesList { name: "correctID"; title: qsTr("Audit result"); singleVariable: true; allowedColumns: ["nominal", "scale"]; id: correctID }
             }
             Section { title: qsTr("Advanced evaluation options"); columns: 1
               GridLayout { columns: 2
                 RadioButtonGroup { title: qsTr("<b>Estimator</b>"); name: "boundMethod"
                   RadioButton { name: "stringerBound"; text: qsTr("Stringer"); id: stringerBound; visible: variableTypeTrueValues.checked ? (mussampling.checked ? true : false) : false
                     enabled: variableTypeTrueValues.checked ? (mussampling.checked ? true : false) : false; checked: variableTypeTrueValues.checked ? (mussampling.checked ? true : false) : false }
+                  RadioButton { name: "gammaBound"; text: qsTr("Gamma"); id: gammaBound; visible: variableTypeCorrect.checked; enabled: variableTypeCorrect.checked
+                    checked: variableTypeCorrect.checked ? (gamma.checked ? true : false) : false }
                   RadioButton { name: "binomialBound"; text: qsTr("Binomial"); id: binomialBound; visible: variableTypeCorrect.checked; enabled: variableTypeCorrect.checked
                     checked: variableTypeCorrect.checked ? (binomial.checked ? true : false) : false }
                   RadioButton { name: "hyperBound"; text: qsTr("Hypergeometric"); id: hyperBound; visible: variableTypeCorrect.checked; enabled: variableTypeCorrect.checked
@@ -240,7 +240,7 @@ Form {
             }
             Item { height: toInterpretation.height; Layout.fillWidth: true
               Button { id: toInterpretation; anchors.right: parent.right; text: qsTr("<b>Download Report</b>")
-                enabled: variableTypeCorrect.checked ? (sampleFilter.count > 0 && correctID.count > 0) : (sampleFilter.count > 0 && correctMUS.count > 0)
+                enabled: sampleFilter.count > 0 && correctID.count > 0
                 onClicked: { evaluationPhase.expanded = false; interpretationPhase.expanded = true; interpretationPhase.enabled = true }
               }
             }

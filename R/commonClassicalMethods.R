@@ -1,5 +1,5 @@
 .calc.n.binomial <- function(options, alpha, jaspResults){
-    for(n in 1:10000){
+    for(n in 1:5000){
       impk <- base::switch(options[["expected.errors"]],
                             "kPercentage" = ceiling(n * options[["kPercentageNumber"]]),
                             "kNumber" = options[["kNumberNumber"]])
@@ -13,7 +13,7 @@
 }
 
 .calc.n.hypergeometric <- function(options, alpha, jaspResults){
-    for(n in 1:10000){
+    for(n in 1:5000){
       k <- base::switch(options[["expected.errors"]],
                             "kPercentage" = ceiling(n * options[["kPercentageNumber"]]),
                             "kNumber" = options[["kNumberNumber"]])
@@ -26,7 +26,7 @@
 }
 
 .calc.n.gamma <- function(options, alpha, jaspResults){
-  for(n in 1:10000){
+  for(n in 1:5000){
     k <- base::switch(options[["expected.errors"]],
                           "kPercentage" = (n * options[["kPercentageNumber"]]),
                           "kNumber" = (options[["kNumberNumber"]]))
@@ -50,20 +50,13 @@
     k                       <- 0
     
     if(jaspResults[["ready"]]$object){
-      if(options[["auditType"]] == "attributes"){
-        if(options[["distribution"]] == "binomial"){
-          n                     <- .calc.n.binomial(options, alpha, jaspResults)
-        } else if(options[["distribution"]] == "hypergeometric"){
-          if(jaspResults[["N"]]$object != 0){
-            n                   <- .calc.n.hypergeometric(options, alpha, jaspResults)
-          } else {
-            n                   <- 1
-          }
-        } 
-      } else if(options[["auditType"]] == "mus"){
-          n                     <- .calc.n.gamma(options, alpha, jaspResults)
-        }
-
+      if(options[["distribution"]] == "gamma"){
+        n                     <- .calc.n.gamma(options, alpha, jaspResults)
+      } else if(options[["distribution"]] == "binomial"){
+        n                     <- .calc.n.binomial(options, alpha, jaspResults)
+      } else if(options[["distribution"]] == "hypergeometric"){
+        n                   <- .calc.n.hypergeometric(options, alpha, jaspResults)
+      }  
       k <- base::switch(options[["expected.errors"]], "kPercentage" = options[["kPercentageNumber"]], "kNumber" = options[["kNumberNumber"]] / n)                      
     }
 
@@ -93,21 +86,16 @@
                                   "expected.errors" , "kPercentageNumber", "kNumberNumber", "materialityValue", "auditType"))
 
   summaryTable$addColumnInfo(name = 'materiality',          title = "Materiality",          type = 'string')
-  if(options[["auditType"]] == "mus")
-    summaryTable$addColumnInfo(name = 'p',                    title = "% of value",           type = 'string')
   summaryTable$addColumnInfo(name = 'IR',                   title = "Inherent risk",        type = 'string')
   summaryTable$addColumnInfo(name = 'CR',                   title = "Control risk",         type = 'string')
   summaryTable$addColumnInfo(name = 'DR',                   title = "Detection risk",       type = 'string')
   summaryTable$addColumnInfo(name = 'k',                    title = "Expected errors",       type = 'string')
   summaryTable$addColumnInfo(name = 'n',                    title = "Required sample size", type = 'string')
 
-  if(options[["auditType"]] == "attributes"){
-    message <- base::switch(options[["distribution"]],
-                            "binomial" =  "The sample size is calculated using the <b>binomial</b> distribution.",
-                            "hypergeometric" = paste0("The sample size is calculated using the <b>hypergeometric</b> distribution (N = ", jaspResults[["N"]]$object ,")."))
-  } else {
-    message <- "The sample size is calculated using the <b>gamma</b> distribution."
-  }
+  message <- base::switch(options[["distribution"]],
+                          "gamma" = "The sample size is calculated using the <b>gamma</b> distribution.",
+                          "binomial" =  "The sample size is calculated using the <b>binomial</b> distribution.",
+                          "hypergeometric" = paste0("The sample size is calculated using the <b>hypergeometric</b> distribution (N = ", jaspResults[["N"]]$object ,")."))
   summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
   if(options[["auditType"]] == "attributes"){
@@ -123,8 +111,6 @@
 
   if(jaspResults[["materiality"]]$object == 0){
     row <- data.frame(materiality = ".", IR = result[["IR"]], CR = result[["CR"]], DR = DRtable, k = 0, n = ".")
-      if(options[["auditType"]] == "mus")
-        row <- cbind(row, p = ".")
     summaryTable$addRows(row)
     return()
   }
@@ -145,21 +131,16 @@
                       DR                    = DRtable,
                       k                     = ktable,
                       n                     = ".")
-    if(options[["auditType"]] == "mus")
-      row <- cbind(row, p = ".")
     summaryTable$addRows(row)
     return()
   }
 
-  percOfTotal <- paste0(round( materialityValue / jaspResults[["total_data_value"]]$object * 100, 2), "%")
   row <- data.frame(materiality           = materiality,
                     IR                    = result[["IR"]],
                     CR                    = result[["CR"]],
                     DR                    = DRtable,
                     k                     = ktable,
-                    n                     = result[["n"]])
-  if(options[["auditType"]] == "mus")
-    row <- cbind(row, p = percOfTotal)                    
+                    n                     = result[["n"]])                  
   summaryTable$addRows(row)
 }
 
@@ -175,7 +156,7 @@
   bound                   <- "."
 
   if(jaspResults[["runEvaluation"]]$object){
-    if(options[["distribution"]] == "binomial"){
+    if(options[["boundMethod"]] == "binomialBound"){
       n                     <- nrow(dataset)
       k                     <- length(which(dataset[,.v(options[["correctID"]])] == 1))
       binomResult <- binom.test(x = k,
@@ -184,7 +165,7 @@
                                 alternative = "less",
                                 conf.level = (1 - alpha))
       bound                 <- binomResult$conf.int[2]
-    } else if(options[["distribution"]] == "hypergeometric"){
+    } else if(options[["boundMethod"]] == "hyperBound"){
       
       N <- jaspResults[["N"]]$object
       n <- nrow(dataset)
@@ -195,6 +176,10 @@
            break
       }
       bound <- K / N
+    } else if(options[["boundMethod"]] == "gammaBound"){
+      n <- nrow(dataset)
+      k <- length(which(dataset[,.v(options[["correctID"]])] == 1))
+      bound <- qgamma(p = (1 - alpha), shape = 1 + k, scale = 1 / n)
     }
   }
 
@@ -226,28 +211,42 @@
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",          type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",          type = 'string')
     evaluationTable$addColumnInfo(name = 'k',             title = "Errors",          type = 'string')
-    evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
+    if(options[["variableType"]] == "variableTypeCorrect"){
+        evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
+        if(options[["auditType"]] == "mus" && options[["monetaryVariable"]] != "")
+        evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
+    } else {
+      evaluationTable$addColumnInfo(name = 'projm',         title = "Maximum Misstatement",           type = 'string')
+    }
     if(options[["mostLikelyError"]])
       evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                  type = 'string')
       
     message <- base::switch(options[["boundMethod"]],
+                              "gammaBound" = "The confidence bound is calculated according to the <b>gamma</b> distributon.",
                               "binomialBound" = "The confidence bound is calculated according to the <b>binomial</b> distributon.",
                               "hyperBound" = "The confidence bound is calculated according to the <b>hypergeometric</b> distribution.")
     evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
-
-    # Return empty table
-    if(!jaspResults[["runEvaluation"]]$object)
-      return()
-
-    mle <- 0
-    if(jaspResults[["N"]]$object != 0)
-      mle <- floor(result[["k"]] / result[["n"]] * jaspResults[["N"]]$object)
-      
+    
     if(options[["auditType"]] == "attributes"){
         materialityTable <- paste0(round(jaspResults[["materiality"]]$object, 2) * 100, "%")
     } else {
       materialityTable <- options[["materialityValue"]]
     }
+
+    # Return empty table
+    if(!jaspResults[["runEvaluation"]]$object){
+      row <- data.frame(materiality = materialityTable, n = ".", k = ".")
+      if(options[["variableType"]] == "variableTypeCorrect")
+        row <- cbind(row, bound = ".")
+      if(options[["auditType"]] == "mus" && options[["monetaryVariable"]] != "")
+        row <- cbind(row, projm = ".")
+      evaluationTable$addRows(row)
+      return()
+    }
+
+    mle <- 0
+    if(jaspResults[["N"]]$object != 0)
+      mle <- floor(result[["k"]] / result[["n"]] * jaspResults[["N"]]$object)
 
     boundTable          <- "."
     if(result[["bound"]] != "."){
@@ -255,7 +254,11 @@
         boundTable <- paste0(boundTable * 100, "%")
     }
 
-    row <- data.frame(materiality = materialityTable, n = result[["n"]], k = result[["k"]], bound = boundTable)
+    row <- data.frame(materiality = materialityTable, n = result[["n"]], k = result[["k"]])
+    if(options[["variableType"]] == "variableTypeCorrect")
+      row <- cbind(row, bound = boundTable)
+    if(options[["auditType"]] == "mus")
+      row <- cbind(row, projm = round(result[["bound"]] * jaspResults[["total_data_value"]]$object, 2))
     if(options[["mostLikelyError"]])
       row <- cbind(row, mle = mle)
     evaluationTable$addRows(row)
@@ -274,10 +277,10 @@
     z                       <- 0
     bound                   <- "."
 
-    if(options[["correctMUS"]] != "" && options[["sampleFilter"]] != "" && options[["monetaryVariable"]] != ""){
-      sample                  <- dataset[, c(.v(options[["monetaryVariable"]]), .v(options[["correctMUS"]]))]
+    if(jaspResults[["runEvaluation"]]$object){
+      sample                  <- dataset[, c(.v(options[["monetaryVariable"]]), .v(options[["correctID"]]))]
       n                       <- nrow(sample)
-      t                       <- sample[, .v(options[["monetaryVariable"]])] - sample[, .v(options[["correctMUS"]])]
+      t                       <- sample[, .v(options[["monetaryVariable"]])] - sample[, .v(options[["correctID"]])]
       z                       <- t / sample[, .v(options[["monetaryVariable"]])]
       zplus                   <- sort(subset(z, z > 0), decreasing = TRUE)
       M                       <- length(zplus)
@@ -303,27 +306,31 @@
     resultList[["alpha"]]       <- alpha
 
     jaspResults[["result"]] <- createJaspState(resultList)
-    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilterMUS", "variableType",
-                                              "auditType", "boundMethod", "monetaryVariableMUS", "materialityValue"))
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "variableType", "correctID",
+                                              "auditType", "boundMethod", "materialityValue", "materiality"))
 }
 
-.musBoundTable <- function(total_data_value, options, result, jaspResults, position = 1){
+.musBoundTable <- function(options, result, jaspResults, position = 1){
 
     if(!is.null(jaspResults[["evaluationContainer"]][["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
     evaluationTable                       <- createJaspTable("Evaluation Summary")
     jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
-    evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show",
-                                      "distribution", "mostLikelyError", "N", "correctMUS", "sampleFilter", "variableType",
-                                      "boundMethod", "monetaryVariable", "materialityValue", "populationValue"))
+    evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "correctID", "distribution", "mostLikelyError", "sampleFilter", "variableType",
+                                      "boundMethod", "monetaryVariable", "materialityValue"))
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",                      type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",                      type = 'string')
     evaluationTable$addColumnInfo(name = 'fk',            title = "Errors",                           type = 'string')
     evaluationTable$addColumnInfo(name = 'k',             title = "Total tainting",                   type = 'string')
-    evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
-    evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
+    if(options[["variableType"]] == "variableTypeCorrect"){
+        evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
+        if(options[["auditType"]] == "mus")
+        evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
+    } else {
+      evaluationTable$addColumnInfo(name = 'projm',         title = "Maximum Misstatement",           type = 'string')
+    }
     if(options[["mostLikelyError"]])
       evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                              type = 'string')
 
@@ -331,22 +338,34 @@
                               "stringerBound" = "The confidence bound is calculated according to the <b>Stringer</b> method.",
                               "regressionBound" = "The confidence bound is calculated according to the <b>Regression</b> method.")
     evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
+    
+    if(options[["auditType"]] == "mus"){
+        materialityTable <- ceiling(options[["materialityValue"]])
+    } else {
+      materialityTable <- paste0(round(options[["materiality"]] * 100, 2) , "%")
+    }
 
-    # Return empty table
-    if(options[["correctMUS"]] == "" || options[["sampleFilter"]] == ""){
-      row <- data.frame(materiality = ".", n = ".", fk = ".", k = ".", bound = ".", projm = ".")
-      if(options[["mostLikelyError"]])
-        row <- cbind(row, mle = ".")
+    # Return empty table with materiality
+    if(!jaspResults[["runEvaluation"]]$object){
+      row <- data.frame(materiality = materialityTable, n = ".", fk = ".", k = ".")
+      if(options[["variableType"]] == "variableTypeCorrect")
+        row <- cbind(row, bound = ".")
+      if(options[["auditType"]] == "mus")
+        row <- cbind(row, projm = ".")
       evaluationTable$addRows(row)
       return()
     }
+    
+    total_data_value <- jaspResults[["total_data_value"]]$object
 
     mle <- 0
-    if(jaspResults[["N"]]$object != 0)
-      mle <- ceiling( sum(result[["z"]]) / result[["n"]] * total_data_value )
+    if(options[["boundMethod"]] == "stringerBound"){
+        mle <- ceiling( sum(result[["z"]]) / result[["n"]] * total_data_value )
+    } else if(options[["boundMethod"]] == "regressionBound"){
+      mle <- round(result[["mle"]], 2)
+    }
 
     errors <- round(sum(result[["z"]]), 2)
-    materialityTable <- ceiling(options[["materialityValue"]])
 
     boundTable          <- "."
     projectedMisstatement <- "."
@@ -356,13 +375,18 @@
         boundTable <- paste0(boundTable * 100, "%")
     }
 
-    row <- data.frame(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable, projm = projectedMisstatement)
+    row <- data.frame(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors)
+    if(options[["auditType"]] == "attributes"){
+      row <- cbind(row, bound = boundTable)
+    } else {
+      row <- cbind(row, projm = projectedMisstatement)
+    }
     if(options[["mostLikelyError"]])
       row <- cbind(row, mle = mle)
     evaluationTable$addRows(row)
 }
 
-.regressionBound <- function(dataset, options, total_data_value, jaspResults){
+.regressionBound <- function(dataset, options, jaspResults){
 
     ar                      <- 1 - options[["confidence"]]
     ir                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
@@ -373,27 +397,28 @@
     M                       <- 0
     z                       <- 0
     bound                   <- "."
+    mleregression           <- 0
 
-    if(options[["correctMUS"]] != "" && options[["sampleFilter"]] != "" && options[["monetaryVariable"]] != ""){
-        sample                  <- dataset[, c(.v(options[["monetaryVariable"]]), .v(options[["correctMUS"]]))]
+    if(jaspResults[["runEvaluation"]]$object){
+      
+        sample                  <- dataset[, c(.v(options[["monetaryVariable"]]), .v(options[["correctID"]]))]
         n                       <- nrow(sample)
 
-        t                       <- sample[, .v(options[["monetaryVariable"]])] - sample[, .v(options[["correctMUS"]])]
+        t                       <- sample[, .v(options[["monetaryVariable"]])] - sample[, .v(options[["correctID"]])]
         z                       <- t / sample[, .v(options[["monetaryVariable"]])]
-        zplus                   <- sort(subset(z, z > 0), decreasing = TRUE)
         M                       <- length(which(t != 0))
 
-        B                       <- total_data_value
+        B                       <- jaspResults[["total_data_value"]]$object
         N                       <- jaspResults[["N"]]$object
         b                       <- sample[, .v(options[["monetaryVariable"]])]
-        w                       <- sample[, .v(options[["correctMUS"]])]
-        b1                      <- as.numeric(coef(lm(w ~ b))[2])
+        w                       <- sample[, .v(options[["correctID"]])]
+        b1                      <- as.numeric(coef(lm(b ~ w))[2])
         #b1                      <- (sum(b * w) - (sum(b) * sum(w) / n)) / (sum(b^2) - (sum(b)^2 / n))
 
         meanb                   <- mean(b)
         meanw                   <- mean(w)
 
-        mleregression           <- (N * meanw) + (b1 * (B - N * meanb))
+        mleregression           <- (N * meanw) + (b1 * (B - N * meanb)) - B
         stand.dev               <- sd(w) * ( N / sqrt(n)) * sqrt( (N-n) / (N-1) ) * sqrt(1 - cor(b, w)^2)
         upperValue              <- mleregression + qt(p = options[["confidence"]], df = n - 1) * stand.dev
         bound                   <- (upperValue - B) / B
@@ -408,8 +433,9 @@
     resultList[["confidence"]]  <- options[["confidence"]]
     resultList[["bound"]]       <- bound
     resultList[["alpha"]]       <- alpha
+    resultList[["mle"]]         <- mleregression
 
     jaspResults[["result"]] <- createJaspState(resultList)
-    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilterMUS", "populationValue",
-                                              "auditType", "boundMethod", "monetaryVariable", "materialityValue", "N", "variableType"))
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctID", "populationValue", "sampleFilter",
+                                              "auditType", "boundMethod", "monetaryVariable", "materialityValue", "variableType"))
 }

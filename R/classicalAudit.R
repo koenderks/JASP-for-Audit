@@ -71,35 +71,39 @@ classicalAudit <- function(jaspResults, dataset, options){
 
 .readDataClassicalProcedure <- function(options, jaspResults){
   
-  if(options[["auditType"]] == "mus"){
-    if(options[["recordNumberVariable"]] != "" && options[["monetaryVariable"]] != ""){
-      dataset                             <- .readDataSetToEnd(columns.as.numeric = c(options[["recordNumberVariable"]], options[["monetaryVariable"]]))
+  recordNumberVariable <- options[["recordNumberVariable"]]
+  if(recordNumberVariable == "")  recordNumberVariable <- NULL 
+  monetaryVariable <- options[["monetaryVariable"]]
+  if(monetaryVariable == "")  monetaryVariable <- NULL 
+  
+  if(!is.null(recordNumberVariable)){
+    variables <- recordNumberVariable
+    if(!is.null(monetaryVariable)){
+      variables <- c(variables, monetaryVariable)
+      dataset <- .readDataSetToEnd(columns.as.numeric = variables)
       jaspResults[["N"]]                  <- createJaspState(nrow(dataset))
-      jaspResults[["total_data_value"]]   <- createJaspState( ceiling(sum(dataset[, .v(options[["monetaryVariable"]])])))
+      jaspResults[["total_data_value"]]   <- createJaspState( ceiling(sum(dataset[, .v(monetaryVariable)])))
       jaspResults[["ready"]]              <- createJaspState(TRUE) # Ready for analysis
     } else {
+      dataset <- .readDataSetToEnd(columns.as.numeric = variables)
+      jaspResults[["N"]]                  <- createJaspState(nrow(dataset))
+      jaspResults[["total_data_value"]]   <- createJaspState(0.01)
+      if(options[["auditType"]] == "attributes"){
+        jaspResults[["ready"]]              <- createJaspState(TRUE) # Ready for analysis
+      } else {
+        jaspResults[["ready"]]              <- createJaspState(FALSE) # Ready for analysis
+      }
+    }
+  } else {
       dataset                             <- NULL
       jaspResults[["N"]]                  <- createJaspState(0)
       jaspResults[["total_data_value"]]   <- createJaspState(0.01)
       jaspResults[["ready"]]              <- createJaspState(FALSE)
-    }
-  } else if(options[["auditType"]] == "attributes"){
-    if(options[["recordNumberVariable"]] != ""){
-      dataset                             <- .readDataSetToEnd(columns.as.numeric = options[["recordNumberVariable"]])
-      jaspResults[["N"]]                  <- createJaspState(nrow(dataset))
-      jaspResults[["total_data_value"]]   <- createJaspState(0.01)
-      jaspResults[["ready"]]              <- createJaspState(TRUE) # Ready for analysis
-    } else {
-      dataset                             <- NULL
-      jaspResults[["N"]]                  <- createJaspState(0)
-      jaspResults[["total_data_value"]]   <- createJaspState(0.01)
-      jaspResults[["ready"]]              <- createJaspState(FALSE)
-    }
   }
-
+  
   jaspResults[["N"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable"))
   jaspResults[["total_data_value"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable"))
-  jaspResults[["ready"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable"))
+  jaspResults[["ready"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable", "auditType"))
 
   return(dataset)
 }
@@ -109,7 +113,7 @@ classicalAudit <- function(jaspResults, dataset, options){
   if(is.null(jaspResults[["materiality"]]$object)){
     materiality <- ifelse(options[["auditType"]] == "mus", yes = options[["materialityValue"]] / jaspResults[["total_data_value"]]$object, no = options[["materiality"]])
     jaspResults[["materiality"]] <- createJaspState(materiality)
-    jaspResults[["materiality"]]$dependOnOptions(c("materialityValue", "materiality", "monetaryVariable", "recordNumberVariable"))
+    jaspResults[["materiality"]]$dependOnOptions(c("materialityValue", "materiality", "monetaryVariable", "recordNumberVariable", "auditType"))
   }
 
   jaspResults[["planningContainer"]] <- createJaspContainer(title= "<u>Planning</u>")
@@ -128,11 +132,8 @@ classicalAudit <- function(jaspResults, dataset, options){
     materialityLevelLabel           <- base::switch(options[["auditType"]],
                                                     "attributes" = paste0(round(jaspResults[["materiality"]]$object, 4) * 100, "%"),
                                                     "mus" = format(options[["materialityValue"]], scientific = FALSE))
-    if(options[["auditType"]] == "mus"){
-      distribution <- "gamma"
-    } else {
-      distribution <- options[["distribution"]]
-    }
+
+    distribution <- options[["distribution"]]
     jaspResults[["materialityLevelLabel"]] <- createJaspState(materialityLevelLabel)
     jaspResults[["planningContainer"]][["priorKnowledgeParagraph"]] <- createJaspHtml(paste0("As prior knowledge, the most likely error in the data was specified to be <b>", expected.errors ,"</b>. The sample size that is required to prove an upper
                                                                       confidence bound of <b>", materialityLevelLabel ,"</b>, assuming the sample contains <b>", expected.errors ,"</b> full errors, is <b>", planningResult[["n"]] ,"</b>. This sample size is calculated according to the
@@ -210,38 +211,15 @@ classicalAudit <- function(jaspResults, dataset, options){
 
   # Perform the sampling and draw the outcome tables
   if(options[["samplingType"]] == "simplerandomsampling"){
-    if(options[["auditType"]] == "attributes"){
-      .randomSampling(dataset, options, jaspResults, type = "attributes", sample = jaspResults[["sample"]]$object, position = 4)
-      .samplingInfo(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2)
-    } else {
-      .randomSampling(dataset, options, jaspResults, type = "mus", sample = jaspResults[["sample"]]$object, position = 4)
-      .samplingInfo(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2)
-    }
+      .randomSampling(dataset, options, jaspResults, position = 4)
   } else if(options[["samplingType"]] == "systematicsampling"){
-    if(options[["auditType"]] == "attributes"){
-      interval <- ceiling(nrow(dataset) / jaspResults[["sampleSize"]]$object)
-      .systematicSampling(dataset, options, jaspResults, interval, type = "attributes", sample = jaspResults[["sample"]]$object, position = 4)
-      .samplingInfo(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2, interval = interval)
-    } else {
-      interval <- ceiling(sum(dataset[, .v(monetaryVariable)]) / jaspResults[["sampleSize"]]$object)
-      .systematicSampling(dataset, options, jaspResults, interval, type = "mus", sample = jaspResults[["sample"]]$object, position = 4)
-      .samplingInfo(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2, interval = interval)
-    }
+      .systematicSampling(dataset, options, jaspResults, position = 4)
   } else if(options[["samplingType"]] == "cellsampling"){
-    if(options[["auditType"]] == "attributes"){
-      interval <- ceiling(nrow(dataset) / jaspResults[["sampleSize"]]$object)
-      .cellSampling(dataset, options, jaspResults, interval, type = "attributes", sample = jaspResults[["sample"]]$object, position = 4)
-      .samplingInfo(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2, interval = interval)
-    } else {
-      interval <- ceiling(sum(dataset[, .v(monetaryVariable)]) / jaspResults[["sampleSize"]]$object)
-      .cellSampling(dataset, options, jaspResults, interval, type = "mus", sample = jaspResults[["sample"]]$object, position = 4)
-      .samplingInfo(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2, interval = interval)
-    }
+      .cellSampling(dataset, options, jaspResults, position = 4)
   }
-  # Store the sample
-  sample                          <- jaspResults[["sample"]]$object
+  .samplingInfo(dataset, options, jaspResults, position = 2)
   # Descriptives table
-  .sampleDescriptives(dataset, options, jaspResults, sample, position = 3)
+  .sampleDescriptives(dataset, options, jaspResults, position = 3)
 }
 
 .classicalExecution <- function(options, jaspResults){
@@ -262,31 +240,28 @@ classicalAudit <- function(jaspResults, dataset, options){
   }
 }
 
-.readDataClassicalEvaluationStage <- function(options, jaspResults){
+.readDataClassicalEvaluation <- function(options, jaspResults){
 
   recordVariable                  <- unlist(options$recordNumberVariable)
   if(recordVariable == "")        recordVariable <- NULL
-  rankingVariable                 <- unlist(options$rankingVariable)
-  if(rankingVariable == "")       rankingVariable <- NULL
   monetaryVariable                <- unlist(options$monetaryVariable)
   if(monetaryVariable == "")      monetaryVariable <- NULL
-  variables                       <- unlist(options$variables)
   sampleFilter                    <- unlist(options$sampleFilter)
   if(sampleFilter == "")          sampleFilter <- NULL
-  correctID                       <- base::switch(options[["variableType"]], "variableTypeCorrect" = unlist(options$correctID), "variableTypeTrueValues" = unlist(options$correctMUS))
+  correctID                       <- unlist(options$correctID)
   if(correctID == "")             correctID <- NULL
-  variables.to.read               <- c(recordVariable, variables, rankingVariable, correctID, sampleFilter, monetaryVariable)
+  variables.to.read               <- c(recordVariable, correctID, sampleFilter, monetaryVariable)
   dataset                         <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
 
   jaspResults[["runEvaluation"]] <- createJaspState( (!is.null(correctID) && !is.null(sampleFilter)) )
-  jaspResults[["runEvaluation"]]$dependOnOptions(c("correctID", "sampleFilter", "correctMUS"))
+  jaspResults[["runEvaluation"]]$dependOnOptions(c("correctID", "sampleFilter"))
 
   return(dataset)
 }
 
 .classicalEvaluation <- function(options, jaspResults){
 
-  dataset <- .readDataBayesianEvaluation(options, jaspResults)
+  dataset <- .readDataClassicalEvaluation(options, jaspResults)
 
   total_data_value              <- jaspResults[["total_data_value"]]$object
   planningResult                <- jaspResults[["planningResult"]]$object
@@ -296,7 +271,7 @@ classicalAudit <- function(jaspResults, dataset, options){
   jaspResults[["evaluationContainer"]]$position <- 5
 
   # Apply the sample filter
-  if(options[["sampleFilter"]] != ""){
+  if(jaspResults[["runEvaluation"]]$object){
       dataset <- subset(dataset, dataset[, .v(options[["sampleFilter"]])] == 1)
   }
 
@@ -310,10 +285,10 @@ classicalAudit <- function(jaspResults, dataset, options){
     if(options[["boundMethod"]] == "stringerBound"){
       .stringerBound(dataset, options, jaspResults)
     } else if(options[["boundMethod"]] == "regressionBound"){
-      .regressionBound(dataset, options, total_data_value, jaspResults)
+      .regressionBound(dataset, options, jaspResults)
     }
     result                                       <- jaspResults[["result"]]$object
-    .musBoundTable(total_data_value, options, result, jaspResults, position = 2)
+    .musBoundTable(options, result, jaspResults, position = 2)
   }
 
   # Interpretation before the evalution table
