@@ -114,8 +114,6 @@
                                   "distribution", "materialityValue", "recordNumberVariable", "monetaryVariable", "populationValue", "auditType"))
 
   summaryTable$addColumnInfo(name = 'materiality',          title = "Materiality",          type = 'string')
-  if(options[["auditType"]] == "mus")
-    summaryTable$addColumnInfo(name = 'p',                    title = "% of value",           type = 'string')
   summaryTable$addColumnInfo(name = 'IR',                   title = "Inherent risk",        type = 'string')
   summaryTable$addColumnInfo(name = 'CR',                   title = "Control risk",         type = 'string')
   summaryTable$addColumnInfo(name = 'DR',                   title = "Detection risk",       type = 'string')
@@ -130,21 +128,13 @@
                               
   summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
-  if(options[["auditType"]] == "attributes"){
-    ktable <- base::switch(options[["expected.errors"]],
-                            "kPercentage" = floor(result[["k"]] * result[["n"]]),
-                            "kNumber" = options[["kNumberNumber"]])
-  } else {
-    ktable <- base::switch(options[["expected.errors"]],
-                            "kPercentage" = round(result[["k"]] * result[["n"]], 2),
-                            "kNumber" = options[["kNumberNumber"]])
-  }
+  ktable <- base::switch(options[["expected.errors"]],
+                          "kPercentage" = round(result[["k"]] * result[["n"]], 2),
+                          "kNumber" = options[["kNumberNumber"]])
   DRtable <- paste0(round(result[["alpha"]], 3) * 100, "%")
 
   if(jaspResults[["materiality"]]$object == 0){
     row <- data.frame(materiality = ".", IR = result[["IR"]], CR = result[["CR"]], DR = DRtable, k = 0, n = ".")
-    if(options[["auditType"]] == "mus")
-      row <- cbind(row, p = ".")
     if(options[["expectedBF"]])
       row <- cbind(row, expBF = ".")
     summaryTable$addRows(row)
@@ -167,23 +157,18 @@
                       DR                    = DRtable,
                       k                     = ktable,
                       n                     = ".")
-  if(options[["auditType"]] == "mus")
-    row <- cbind(row, p = ".")
   if(options[["expectedBF"]])
     row <- cbind(row, expBF = ".")
     summaryTable$addRows(row)
     return()
   }
 
-  percOfTotal <- paste0(round( materialityValue / jaspResults[["total_data_value"]]$object * 100, 2), "%")
   row <- data.frame(materiality           = materiality,
                     IR                    = result[["IR"]],
                     CR                    = result[["CR"]],
                     DR                    = DRtable,
                     k                     = ktable,
                     n                     = result[["n"]])
-  if(options[["auditType"]] == "mus")
-    row <- cbind(row, p = percOfTotal) 
   if(options[["expectedBF"]])
     row <- cbind(row, expBF = .expectedBF(options, result, ktable, jaspResults))
   summaryTable$addRows(row)
@@ -540,14 +525,16 @@
     n                         <- 0
     M                         <- 0
     z                         <- 0
-    bound                     <- NULL
+    bound                     <- 0
     prior                     <- NULL
     posterior                 <- NULL
     alpha                     <- 1 - options[["confidence"]]
-    if(options[["correctMUS"]] != "" && options[["monetaryVariable"]] != ""){
-      sample                  <- dataset[, c(.v(options[["monetaryVariable"]]), .v(options[["correctMUS"]]))]
+    
+    if(jaspResults[["runEvaluation"]]$object){
+      
+      sample                  <- dataset[, c(.v(options[["monetaryVariable"]]), .v(options[["correctID"]]))]
       n                       <- nrow(sample)
-      t                       <- sample[, .v(options[["monetaryVariable"]])] - sample[, .v(options[["correctMUS"]])]
+      t                       <- sample[, .v(options[["monetaryVariable"]])] - sample[, .v(options[["correctID"]])]
       z                       <- t / sample[, .v(options[["monetaryVariable"]])]
       z                       <- subset(z, z > 0)
       M                       <- length(z)
@@ -585,10 +572,10 @@
     resultList[["posterior"]]   <- posterior
 
     jaspResults[["result"]] <- createJaspState(resultList)
-    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilter", "auditType", "boundMethod", "monetaryVariable"))
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctID", "sampleFilter", "auditType", "boundMethod", "monetaryVariable"))
 }
 
-.bayesianMusBoundTable <- function(total_data_value, options, result, jaspResults, position = 1){
+.bayesianMusBoundTable <- function(options, result, jaspResults, position = 1){
 
     if(!is.null(jaspResults[["evaluationContainer"]][["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
@@ -602,9 +589,9 @@
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",            type = 'string')
     evaluationTable$addColumnInfo(name = 'fk',            title = "Errors",                 type = 'string')
     evaluationTable$addColumnInfo(name = 'k',             title = "Total tainting",         type = 'string')
-
-    evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"),  type = 'string')
-    evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement", type = 'string')
+    evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
+    if(options[["monetaryVariable"]] != "")
+        evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
     if(options[["mostLikelyError"]])
       evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                    type = 'string')
     if(options[["bayesFactor"]])
@@ -614,23 +601,32 @@
                                       "coxAndSnellBound" = "The confidence bound is calculated according to the <b>Cox and Snell</b> method.",
                                       "regressionBound" = "The confidence bound is calculated according to the <b>Regression</b> method.")
     evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
+    
+    if(options[["auditType"]] == "mus"){
+        materialityTable <- ceiling(options[["materialityValue"]])
+    } else {
+      materialityTable <- paste0(round(options[["materiality"]] * 100, 2) , "%")
+    }
 
-    if(options[["correctMUS"]] == "" || options[["sampleFilter"]] == ""){
-      row                   <- data.frame(materiality = ".", n = ".", k = ".", bound = ".", projm = ".")
-      if(options[["mostLikelyError"]])
-        row                 <- cbind(row, mle = ".")
-      if(options[["bayesFactor"]])
-        row                 <- cbind(row, bf = ".")
+    # Return empty table with materiality
+    if(!jaspResults[["runEvaluation"]]$object){
+      row <- data.frame(materiality = materialityTable, n = ".", fk = ".", k = ".", bound = ".")
+      if(options[["monetaryVariable"]] != "")
+        row <- cbind(row, projm = ".")
       evaluationTable$addRows(row)
       return()
     }
+    
+    total_data_value <- jaspResults[["total_data_value"]]$object
 
     errors                  <- round(sum(result[["z"]]), 2)
     mle                     <- 0
-    if(jaspResults[["N"]]$object != 0)
-      mle <- floor( sum(result[["z"]]) / result[["n"]] * jaspResults[["N"]]$object )
-
-    materialityTable <- ceiling(options[["materialityValue"]])
+    
+    if(options[["boundMethod"]] == "coxAndSnellBound"){
+        mle <- ceiling( sum(result[["z"]]) / result[["n"]] * total_data_value )
+    } else if(options[["boundMethod"]] == "regressionBound"){
+      mle <- round(result[["mle"]], 2)
+    }
 
     boundTable <- result[["bound"]]
     projectedMisstatement <- "."
@@ -640,7 +636,9 @@
       boundTable            <- paste0(boundTable * 100, "%")
     }
 
-    row <- data.frame(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable, projm = projectedMisstatement)
+    row <- data.frame(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable)
+    if(options[["monetaryVariable"]] != "")
+      row <- cbind(row, projm = projectedMisstatement)
     if(options[["mostLikelyError"]])
       row <- cbind(row, mle = mle)
     if(options[["bayesFactor"]])

@@ -92,6 +92,9 @@
 
       if(options[["samplingMethod"]] == "recordsampling"){
         
+        if(is.null(rankingVariable) && options[["monetaryVariable"]] != "")
+          dataset             <- dataset[order(dataset[, .v(monetaryVariable)]), ]
+        
           interval <- ceiling(nrow(dataset) / jaspResults[["sampleSize"]]$object)
         
           recordColumnIndex   <- which(colnames(dataset) == .v(recordVariable))
@@ -106,6 +109,9 @@
           colnames(sample)[1] <- .v(options[["recordNumberVariable"]])
           
       } else {
+        
+        if(is.null(rankingVariable) && options[["monetaryVariable"]] != "")
+          dataset             <- dataset[order(dataset[, .v(monetaryVariable)]), ]
         
           interval <- ceiling(sum(dataset[, .v(monetaryVariable)]) / jaspResults[["sampleSize"]]$object)
         
@@ -187,6 +193,9 @@
 
       if(options[["samplingMethod"]] == "recordsampling"){
         
+        if(is.null(rankingVariable) && options[["monetaryVariable"]] != "")
+          dataset             <- dataset[order(dataset[, .v(monetaryVariable)]), ]
+        
         interval <- ceiling(nrow(dataset) / jaspResults[["sampleSize"]]$object)
         
         recordColumnIndex   <- which(colnames(dataset) == .v(recordVariable))
@@ -197,6 +206,9 @@
         colnames(sample)[1] <- .v(options[["recordNumberVariable"]])
           
       } else {
+        
+        if(is.null(rankingVariable) && options[["monetaryVariable"]] != "")
+          dataset             <- dataset[order(dataset[, .v(monetaryVariable)]), ]
         
         interval <- ceiling(sum(dataset[, .v(monetaryVariable)]) / jaspResults[["sampleSize"]]$object)
         

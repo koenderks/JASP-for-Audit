@@ -50,7 +50,7 @@
 
   if(!is.null(jaspResults[["procedureContainer"]][["dataTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-  dataTable                                                 <- createJaspTable("Population Descriptives")
+  dataTable                                                 <- createJaspTable("Book value Descriptives")
   jaspResults[["procedureContainer"]][["dataTable"]]        <- dataTable
   dataTable$position                                        <- position
   dataTable$dependOnOptions(c("monetaryVariable", "recordNumberVariable", "descriptivesTable"))
@@ -137,7 +137,7 @@
 
     p <- JASPgraphs::themeJasp(p, legend.position = "top")
 
-    return(createJaspPlot(plot = p, title = "Population Distribution", width = 600, height = 300))
+    return(createJaspPlot(plot = p, title = "Book Value Distribution", width = 600, height = 300))
 }
 
 .plotMarginalJfA <- function(column, variableName, rugs = FALSE, displayDensity = FALSE) {
@@ -340,4 +340,95 @@
     plot <- plot + ggplot2::geom_line(data = data.frame(x, predY),mapping = ggplot2::aes(x = x, y = predY), size=lwd, lty = 1)
     return(plot)
   }
+}
+
+.readDataProcedure <- function(options, jaspResults){
+  
+  recordNumberVariable <- options[["recordNumberVariable"]]
+  if(recordNumberVariable == "")  recordNumberVariable <- NULL 
+  monetaryVariable <- options[["monetaryVariable"]]
+  if(monetaryVariable == "")  monetaryVariable <- NULL 
+  
+  if(!is.null(recordNumberVariable)){
+    variables <- recordNumberVariable
+    if(!is.null(monetaryVariable)){
+      variables <- c(variables, monetaryVariable)
+      dataset <- .readDataSetToEnd(columns.as.numeric = variables)
+      jaspResults[["N"]]                  <- createJaspState(nrow(dataset))
+      jaspResults[["total_data_value"]]   <- createJaspState( ceiling(sum(dataset[, .v(monetaryVariable)])))
+      jaspResults[["ready"]]              <- createJaspState(TRUE) # Ready for analysis
+    } else {
+      dataset <- .readDataSetToEnd(columns.as.numeric = variables)
+      jaspResults[["N"]]                  <- createJaspState(nrow(dataset))
+      jaspResults[["total_data_value"]]   <- createJaspState(0.01)
+      if(options[["auditType"]] == "attributes"){
+        jaspResults[["ready"]]              <- createJaspState(TRUE) # Ready for analysis
+      } else {
+        jaspResults[["ready"]]              <- createJaspState(FALSE) # Ready for analysis
+      }
+    }
+  } else {
+      dataset                             <- NULL
+      jaspResults[["N"]]                  <- createJaspState(0)
+      jaspResults[["total_data_value"]]   <- createJaspState(0.01)
+      jaspResults[["ready"]]              <- createJaspState(FALSE)
+  }
+  
+  jaspResults[["N"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable"))
+  jaspResults[["total_data_value"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable"))
+  jaspResults[["ready"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable", "auditType"))
+
+  return(dataset)
+}
+
+.readDataSelection <- function(options){
+
+  recordVariable                  <- unlist(options[["recordNumberVariable"]])
+  if(recordVariable == "")        recordVariable <- NULL
+  rankingVariable                 <- unlist(options[["rankingVariable"]])
+  if(rankingVariable == "")       rankingVariable <- NULL
+  monetaryVariable                <- unlist(options[["monetaryVariable"]])
+  if(monetaryVariable == "")      monetaryVariable <- NULL
+  variables                       <- unlist(options[["variables"]])
+  variables.to.read               <- c(recordVariable, variables, rankingVariable, monetaryVariable)
+  dataset                         <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
+
+  return(dataset)
+}
+
+.execution <- function(options, jaspResults){
+
+  if(options[["pasteVariables"]]){
+    
+    dataset <- .readDataSetToEnd(columns.as.numeric = options[["recordNumberVariable"]])
+    
+    sampleFilter <- rep(0, jaspResults[["N"]]$object)
+    index <- which(dataset[, .v(options[["recordNumberVariable"]])] %in% jaspResults[["sample"]]$object[, .v(options[["recordNumberVariable"]])])
+    sampleFilter[index] <- 1
+    sampleFilter <- as.integer(sampleFilter)
+    emptyVariable <- rep(NA, jaspResults[["N"]]$object)
+    .setColumnDataAsNominal(options[["sampleFilterName"]], sampleFilter)
+    base::switch(options[["variableType"]],
+                  "variableTypeCorrect" = .setColumnDataAsNominal(options[["variableName"]], rep(0, jaspResults[["N"]]$object)),
+                  "variableTypeTrueValues" = .setColumnDataAsScale(options[["variableName"]], rep(0, jaspResults[["N"]]$object)))
+  }
+}
+
+.readDataEvaluation <- function(options, jaspResults){
+
+  recordVariable                  <- unlist(options$recordNumberVariable)
+  if(recordVariable == "")        recordVariable <- NULL
+  monetaryVariable                <- unlist(options$monetaryVariable)
+  if(monetaryVariable == "")      monetaryVariable <- NULL
+  sampleFilter                    <- unlist(options$sampleFilter)
+  if(sampleFilter == "")          sampleFilter <- NULL
+  correctID                       <- unlist(options$correctID)
+  if(correctID == "")             correctID <- NULL
+  variables.to.read               <- c(recordVariable, correctID, sampleFilter, monetaryVariable)
+  dataset                         <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
+
+  jaspResults[["runEvaluation"]] <- createJaspState( (!is.null(correctID) && !is.null(sampleFilter)) )
+  jaspResults[["runEvaluation"]]$dependOnOptions(c("correctID", "sampleFilter"))
+
+  return(dataset)
 }

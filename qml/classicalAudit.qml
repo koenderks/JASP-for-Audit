@@ -77,13 +77,13 @@ Form {
                     RadioButton { text: qsTr("Low") ; name: "Low" }
                 }
                 RadioButtonGroup {
-                    title: qsTr("<b>Sampling distribution</b>")
+                    title: qsTr("<b>Sampling model</b>")
                     name: "distribution"
                     id: distribution
                     
-                    RadioButton { text: qsTr("Gamma")                       ; name: "gamma" ; checked: true; id: gamma}
-                    RadioButton { text: qsTr("Binomial")                    ; name: "binomial"; id: binomial}
-                    RadioButton { text: qsTr("Hypergeometric")              ; name: "hypergeometric" ; id: hyperDist}
+                    RadioButton { text: qsTr("Monetary units")                       ; name: "gamma" ; checked: true; id: gamma}
+                    RadioButton { text: qsTr("With replacement")                    ; name: "binomial"; id: binomial}
+                    RadioButton { text: qsTr("Without replacement")                 ; name: "hypergeometric" ; id: hyperDist}
                 }
           }
       }
@@ -209,7 +209,7 @@ Form {
             VariablesForm { implicitHeight: 200
               AvailableVariablesList { name: "evaluationVariables"}
               AssignedVariablesList { name: "sampleFilter"; title: qsTr("Selection result"); singleVariable: true; allowedColumns: ["nominal"]; id: sampleFilter }
-              AssignedVariablesList { name: "correctID"; title: qsTr("Audit result"); singleVariable: true; allowedColumns: ["nominal", "scale"]; id: correctID }
+              AssignedVariablesList { name: "correctID"; title: qsTr("Audit result"); singleVariable: true; allowedColumns: ["nominal" ,"scale"]; id: correctID }
             }
             Section { title: qsTr("Advanced evaluation options"); columns: 1
               GridLayout { columns: 2

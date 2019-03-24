@@ -11,7 +11,7 @@ bayesianAudit <- function(jaspResults, dataset, options){
     if(!options[["samplingChecked"]])         return() # Stop if button is not pressed
     .bayesianSelection(options, jaspResults)
     ### EXECUTION ###
-    .bayesianExecution(options, jaspResults)
+    .execution(options, jaspResults)
     ### EVALUATION ###
     if(!options[["evaluationChecked"]])       return() # Stop if button is not pressed
     .bayesianEvaluation(options, jaspResults)
@@ -21,7 +21,7 @@ bayesianAudit <- function(jaspResults, dataset, options){
 
 .bayesianProcedure <- function(options, jaspResults){
 
-  dataset <- .readDataBayesianProcedure(options, jaspResults)
+  dataset <- .readDataProcedure(options, jaspResults)
 
   jaspResults[["figNumber"]]          <- createJaspState(1)
   jaspResults[["figNumber"]]$dependOnOptions(c("distributionPlot", "plotCriticalErrors"))
@@ -67,40 +67,6 @@ bayesianAudit <- function(jaspResults, dataset, options){
         errorPlot$setError(errorMessage = "Plotting not possible: Please specify all  your variables.")
         jaspResults[["procedureContainer"]][["valueDistributionPlot"]] <- errorPlot
     }
-}
-
-.readDataBayesianProcedure <- function(options, jaspResults){
-
-  if(options[["auditType"]] == "mus"){
-    if(options[["recordNumberVariable"]] != "" && options[["monetaryVariable"]] != ""){
-      dataset                             <- .readDataSetToEnd(columns.as.numeric = c(options[["recordNumberVariable"]], options[["monetaryVariable"]]))
-      jaspResults[["N"]]                  <- createJaspState(nrow(dataset))
-      jaspResults[["total_data_value"]]   <- createJaspState( ceiling(sum(dataset[, .v(options[["monetaryVariable"]])])))
-      jaspResults[["ready"]]              <- createJaspState(TRUE) # Ready for analysis
-    } else {
-      dataset                             <- NULL
-      jaspResults[["N"]]                  <- createJaspState(0)
-      jaspResults[["total_data_value"]]   <- createJaspState(0.01)
-      jaspResults[["ready"]]              <- createJaspState(FALSE)
-    }
-  } else if(options[["auditType"]] == "attributes"){
-    if(options[["recordNumberVariable"]] != ""){
-      dataset                             <- .readDataSetToEnd(columns.as.numeric = options[["recordNumberVariable"]])
-      jaspResults[["N"]]                  <- createJaspState(nrow(dataset))
-      jaspResults[["total_data_value"]]   <- createJaspState(0.01)
-      jaspResults[["ready"]]              <- createJaspState(TRUE) # Ready for analysis
-    } else {
-      dataset                             <- NULL
-      jaspResults[["N"]]                  <- createJaspState(0)
-      jaspResults[["total_data_value"]]   <- createJaspState(0.01)
-      jaspResults[["ready"]]              <- createJaspState(FALSE)
-    }
-  }
-  jaspResults[["N"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable"))
-  jaspResults[["total_data_value"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable"))
-  jaspResults[["ready"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable"))
-
-  return(dataset)
 }
 
 .bayesianPlanning <- function(dataset, options, jaspResults){
@@ -189,21 +155,6 @@ bayesianAudit <- function(jaspResults, dataset, options){
   }
 }
 
-.readDataBayesianSelection <- function(options){
-
-  recordVariable                  <- unlist(options[["recordNumberVariable"]])
-  if(recordVariable == "")        recordVariable <- NULL
-  rankingVariable                 <- unlist(options[["rankingVariable"]])
-  if(rankingVariable == "")       rankingVariable <- NULL
-  monetaryVariable                <- unlist(options[["monetaryVariable"]])
-  if(monetaryVariable == "")      monetaryVariable <- NULL
-  variables                       <- unlist(options[["variables"]])
-  variables.to.read               <- c(recordVariable, variables, rankingVariable, monetaryVariable)
-  dataset                         <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
-
-  return(dataset)
-}
-
 .bayesianSelection <- function(options, jaspResults){
 
   total_data_value              <- jaspResults[["total_data_value"]]$object
@@ -211,7 +162,7 @@ bayesianAudit <- function(jaspResults, dataset, options){
   jaspResults[["sampleSize"]]   <- createJaspState(planningResult[["n"]])
   monetaryVariable              <- unlist(options[["monetaryVariable"]])
 
-  dataset <- .readDataBayesianSelection(options)
+  dataset <- .readDataSelection(options)
 
   jaspResults[["selectionContainer"]] <- createJaspContainer(title= "<u>Selection</u>")
   jaspResults[["selectionContainer"]]$position <- 4
@@ -224,7 +175,7 @@ bayesianAudit <- function(jaspResults, dataset, options){
                                 "cellsampling" = "cell")
     technique <- base::switch(options[["samplingMethod"]],
                                 "recordsampling" = paste(technique, "record sampling"),
-                                "mussampling" = paste(technique, "MUS sampling"))
+                                "mussampling" = paste(technique, "monetary unit sampling"))
       jaspResults[["selectionContainer"]][["samplingParagraph"]] <- createJaspHtml(paste0("From the population of <b>", jaspResults[["N"]]$object, "</b> observations, <b>", planningResult[["n"]], "</b> samples were drawn using a <b>", technique, "</b> method."), "p")
       jaspResults[["selectionContainer"]][["samplingParagraph"]]$position <- 1
       jaspResults[["selectionContainer"]][["samplingParagraph"]]$dependOnOptions(c("sampleSize", "N", "samplingType", "samplingMethod"))
@@ -232,56 +183,15 @@ bayesianAudit <- function(jaspResults, dataset, options){
   
   # Perform the sampling and draw the outcome tables
   if(options[["samplingType"]] == "simplerandomsampling"){
-    if(options[["auditType"]] == "attributes"){
-      .randomSampling(dataset, options, jaspResults, type = "attributes", sample = jaspResults[["sample"]]$object, position = 4)
-      .samplingInfo(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2)
-    } else {
-      .randomSampling(dataset, options, jaspResults, type = "mus", sample = jaspResults[["sample"]]$object, position = 4)
-      .samplingInfo(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2)
-    }
+      .randomSampling(dataset, options, jaspResults, position = 4)
   } else if(options[["samplingType"]] == "systematicsampling"){
-    if(options[["auditType"]] == "attributes"){
-      interval <- ceiling(nrow(dataset) / jaspResults[["sampleSize"]]$object)
-      .systematicSampling(dataset, options, jaspResults, interval, type = "attributes", sample = jaspResults[["sample"]]$object, position = 4)
-      .samplingInfo(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2, interval = interval)
-    } else {
-      interval <- ceiling(sum(dataset[, .v(monetaryVariable)]) / jaspResults[["sampleSize"]]$object)
-      .systematicSampling(dataset, options, jaspResults, interval, type = "mus", sample = jaspResults[["sample"]]$object, position = 4)
-      .samplingInfo(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2, interval = interval)
-    }
+      .systematicSampling(dataset, options, jaspResults, position = 4)
   } else if(options[["samplingType"]] == "cellsampling"){
-    if(options[["auditType"]] == "attributes"){
-      interval <- ceiling(nrow(dataset) / jaspResults[["sampleSize"]]$object)
-      .cellSampling(dataset, options, jaspResults, interval, type = "attributes", sample = jaspResults[["sample"]]$object, position = 4)
-      .samplingInfo(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2, interval = interval)
-    } else {
-      interval <- ceiling(sum(dataset[, .v(monetaryVariable)]) / jaspResults[["sampleSize"]]$object)
-      .cellSampling(dataset, options, jaspResults, interval, type = "mus", sample = jaspResults[["sample"]]$object, position = 4)
-      .samplingInfo(jaspResults[["sample"]]$object, total_data_value, options, jaspResults, position = 2, interval = interval)
-    }
+      .cellSampling(dataset, options, jaspResults, position = 4)
   }
-  # Store the sample
-  sample                          <- jaspResults[["sample"]]$object
+  .samplingInfo(dataset, options, jaspResults, position = 2)
   # Descriptives table
-  .sampleDescriptives(dataset, options, jaspResults, sample, position = 3)
-}
-
-.bayesianExecution <- function(options, jaspResults){
-
-  if(options[["pasteVariables"]]){
-    
-    dataset <- .readDataSetToEnd(columns.as.numeric = options[["recordNumberVariable"]])
-    
-    sampleFilter <- rep(0, jaspResults[["N"]]$object)
-    index <- which(dataset[, .v(options[["recordNumberVariable"]])] %in% jaspResults[["sample"]]$object[, .v(options[["recordNumberVariable"]])])
-    sampleFilter[index] <- 1
-    sampleFilter <- as.integer(sampleFilter)
-    emptyVariable <- rep(NA, jaspResults[["N"]]$object)
-    .setColumnDataAsNominal(options[["sampleFilterName"]], sampleFilter)
-    base::switch(options[["variableType"]],
-                  "variableTypeCorrect" = .setColumnDataAsNominal(options[["variableName"]], rep(0, jaspResults[["N"]]$object)),
-                  "variableTypeTrueValues" = .setColumnDataAsScale(options[["variableName"]], rep(0, jaspResults[["N"]]$object)))
-  }
+  .sampleDescriptives(dataset, options, jaspResults, position = 3)
 }
 
 .readDataBayesianEvaluation <- function(options, jaspResults){
@@ -308,7 +218,7 @@ bayesianAudit <- function(jaspResults, dataset, options){
 
 .bayesianEvaluation <- function(options, jaspResults){
 
-  dataset <- .readDataBayesianEvaluation(options, jaspResults)
+  dataset <- .readDataEvaluation(options, jaspResults)
 
   total_data_value              <- jaspResults[["total_data_value"]]$object
   planningResult                <- jaspResults[["planningResult"]]$object
@@ -318,7 +228,7 @@ bayesianAudit <- function(jaspResults, dataset, options){
   jaspResults[["evaluationContainer"]]$position <- 5
 
   # Apply the sample filter
-  if(options[["sampleFilter"]] != ""){
+  if(jaspResults[["runEvaluation"]]$object){
       dataset <- subset(dataset, dataset[, .v(options[["sampleFilter"]])] == 1)
   }
 
@@ -332,9 +242,11 @@ bayesianAudit <- function(jaspResults, dataset, options){
     if(options[["boundMethod"]] == "coxAndSnellBound"){
       # Prior parameters for pi and mu are recommendations from the paper
       .coxAndSnellBound(dataset, options, jaspResults, priorPi = 0.1, priorMu = 0.4, priorA = planningResult[["priorA"]], priorB = planningResult[["priorB"]])
+    } else if(options[["boundMethod"]] == "regressionBound"){
+      
     }
     result                                       <- jaspResults[["result"]]$object
-    .bayesianMusBoundTable(total_data_value, options, result, jaspResults, position = 2)
+    .bayesianMusBoundTable(options, result, jaspResults, position = 2)
   }
 
   # Interpretation before the evalution table

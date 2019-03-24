@@ -11,7 +11,7 @@ classicalAudit <- function(jaspResults, dataset, options){
     if(!options[["samplingChecked"]])         return() # Stop if button is not pressed
     .classicalSelection(options, jaspResults)
     ### EXECUTION ###
-    .classicalExecution(options, jaspResults)
+    .execution(options, jaspResults)
     ### EVALUATION ###
     if(!options[["evaluationChecked"]])       return() # Stop if button is not pressed
     .classicalEvaluation(options, jaspResults)
@@ -21,7 +21,7 @@ classicalAudit <- function(jaspResults, dataset, options){
 
 .classicalProcedure <- function(dataset, options, jaspResults){
 
-  dataset <- .readDataClassicalProcedure(options, jaspResults)
+  dataset <- .readDataProcedure(options, jaspResults)
 
   jaspResults[["figNumber"]]          <- createJaspState(1)
   jaspResults[["figNumber"]]$dependOnOptions(c("distributionPlot", "plotCriticalErrors"))
@@ -67,45 +67,6 @@ classicalAudit <- function(jaspResults, dataset, options){
         errorPlot$setError(errorMessage = "Plotting not possible: Please specify all  your variables.")
         jaspResults[["procedureContainer"]][["valueDistributionPlot"]] <- errorPlot
     }
-}
-
-.readDataClassicalProcedure <- function(options, jaspResults){
-  
-  recordNumberVariable <- options[["recordNumberVariable"]]
-  if(recordNumberVariable == "")  recordNumberVariable <- NULL 
-  monetaryVariable <- options[["monetaryVariable"]]
-  if(monetaryVariable == "")  monetaryVariable <- NULL 
-  
-  if(!is.null(recordNumberVariable)){
-    variables <- recordNumberVariable
-    if(!is.null(monetaryVariable)){
-      variables <- c(variables, monetaryVariable)
-      dataset <- .readDataSetToEnd(columns.as.numeric = variables)
-      jaspResults[["N"]]                  <- createJaspState(nrow(dataset))
-      jaspResults[["total_data_value"]]   <- createJaspState( ceiling(sum(dataset[, .v(monetaryVariable)])))
-      jaspResults[["ready"]]              <- createJaspState(TRUE) # Ready for analysis
-    } else {
-      dataset <- .readDataSetToEnd(columns.as.numeric = variables)
-      jaspResults[["N"]]                  <- createJaspState(nrow(dataset))
-      jaspResults[["total_data_value"]]   <- createJaspState(0.01)
-      if(options[["auditType"]] == "attributes"){
-        jaspResults[["ready"]]              <- createJaspState(TRUE) # Ready for analysis
-      } else {
-        jaspResults[["ready"]]              <- createJaspState(FALSE) # Ready for analysis
-      }
-    }
-  } else {
-      dataset                             <- NULL
-      jaspResults[["N"]]                  <- createJaspState(0)
-      jaspResults[["total_data_value"]]   <- createJaspState(0.01)
-      jaspResults[["ready"]]              <- createJaspState(FALSE)
-  }
-  
-  jaspResults[["N"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable"))
-  jaspResults[["total_data_value"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable"))
-  jaspResults[["ready"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable", "auditType"))
-
-  return(dataset)
 }
 
 .classicalPlanning <- function(dataset, options, jaspResults){
@@ -168,21 +129,6 @@ classicalAudit <- function(jaspResults, dataset, options){
     }
 }
 
-.readDataClassicalSelection <- function(options){
-
-  recordVariable                  <- unlist(options[["recordNumberVariable"]])
-  if(recordVariable == "")        recordVariable <- NULL
-  rankingVariable                 <- unlist(options[["rankingVariable"]])
-  if(rankingVariable == "")       rankingVariable <- NULL
-  monetaryVariable                <- unlist(options[["monetaryVariable"]])
-  if(monetaryVariable == "")      monetaryVariable <- NULL
-  variables                       <- unlist(options[["variables"]])
-  variables.to.read               <- c(recordVariable, variables, rankingVariable, monetaryVariable)
-  dataset                         <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
-
-  return(dataset)
-}
-
 .classicalSelection <- function(options, jaspResults){
 
   total_data_value              <- jaspResults[["total_data_value"]]$object
@@ -190,7 +136,7 @@ classicalAudit <- function(jaspResults, dataset, options){
   jaspResults[["sampleSize"]]   <- createJaspState(planningResult[["n"]])
   monetaryVariable              <- unlist(options[["monetaryVariable"]])
 
-  dataset <- .readDataClassicalSelection(options)
+  dataset <- .readDataSelection(options)
 
   jaspResults[["selectionContainer"]] <- createJaspContainer(title= "<u>Selection</u>")
   jaspResults[["selectionContainer"]]$position <- 4
@@ -203,7 +149,7 @@ classicalAudit <- function(jaspResults, dataset, options){
                                 "cellsampling" = "cell")
     technique <- base::switch(options[["samplingMethod"]],
                                 "recordsampling" = paste(technique, "record sampling"),
-                                "mussampling" = paste(technique, "MUS sampling"))
+                                "mussampling" = paste(technique, "monetary unit sampling"))
       jaspResults[["selectionContainer"]][["samplingParagraph"]] <- createJaspHtml(paste0("From the population of <b>", jaspResults[["N"]]$object, "</b> observations, <b>", planningResult[["n"]], "</b> samples were drawn using a <b>", technique, "</b> method."), "p")
       jaspResults[["selectionContainer"]][["samplingParagraph"]]$position <- 1
       jaspResults[["selectionContainer"]][["samplingParagraph"]]$dependOnOptions(c("sampleSize", "N", "samplingType", "samplingMethod"))
@@ -222,46 +168,9 @@ classicalAudit <- function(jaspResults, dataset, options){
   .sampleDescriptives(dataset, options, jaspResults, position = 3)
 }
 
-.classicalExecution <- function(options, jaspResults){
-
-  if(options[["pasteVariables"]]){
-    
-    dataset <- .readDataSetToEnd(columns.as.numeric = options[["recordNumberVariable"]])
-    
-    sampleFilter <- rep(0, jaspResults[["N"]]$object)
-    index <- which(dataset[, .v(options[["recordNumberVariable"]])] %in% jaspResults[["sample"]]$object[, .v(options[["recordNumberVariable"]])])
-    sampleFilter[index] <- 1
-    sampleFilter <- as.integer(sampleFilter)
-    emptyVariable <- rep(NA, jaspResults[["N"]]$object)
-    .setColumnDataAsNominal(options[["sampleFilterName"]], sampleFilter)
-    base::switch(options[["variableType"]],
-                  "variableTypeCorrect" = .setColumnDataAsNominal(options[["variableName"]], rep(0, jaspResults[["N"]]$object)),
-                  "variableTypeTrueValues" = .setColumnDataAsScale(options[["variableName"]], rep(0, jaspResults[["N"]]$object)))
-  }
-}
-
-.readDataClassicalEvaluation <- function(options, jaspResults){
-
-  recordVariable                  <- unlist(options$recordNumberVariable)
-  if(recordVariable == "")        recordVariable <- NULL
-  monetaryVariable                <- unlist(options$monetaryVariable)
-  if(monetaryVariable == "")      monetaryVariable <- NULL
-  sampleFilter                    <- unlist(options$sampleFilter)
-  if(sampleFilter == "")          sampleFilter <- NULL
-  correctID                       <- unlist(options$correctID)
-  if(correctID == "")             correctID <- NULL
-  variables.to.read               <- c(recordVariable, correctID, sampleFilter, monetaryVariable)
-  dataset                         <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
-
-  jaspResults[["runEvaluation"]] <- createJaspState( (!is.null(correctID) && !is.null(sampleFilter)) )
-  jaspResults[["runEvaluation"]]$dependOnOptions(c("correctID", "sampleFilter"))
-
-  return(dataset)
-}
-
 .classicalEvaluation <- function(options, jaspResults){
 
-  dataset <- .readDataClassicalEvaluation(options, jaspResults)
+  dataset <- .readDataEvaluation(options, jaspResults)
 
   total_data_value              <- jaspResults[["total_data_value"]]$object
   planningResult                <- jaspResults[["planningResult"]]$object

@@ -98,7 +98,7 @@
                           "hypergeometric" = paste0("The sample size is calculated using the <b>hypergeometric</b> distribution (N = ", jaspResults[["N"]]$object ,")."))
   summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
-  if(options[["auditType"]] == "attributes"){
+  if(options[["distribution"]] != "gamma"){
     ktable <- base::switch(options[["expected.errors"]],
                             "kPercentage" = floor(result[["k"]] * result[["n"]]),
                             "kNumber" = options[["kNumberNumber"]])
@@ -324,13 +324,9 @@
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",                      type = 'string')
     evaluationTable$addColumnInfo(name = 'fk',            title = "Errors",                           type = 'string')
     evaluationTable$addColumnInfo(name = 'k',             title = "Total tainting",                   type = 'string')
-    if(options[["variableType"]] == "variableTypeCorrect"){
-        evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
-        if(options[["auditType"]] == "mus")
+    evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
+    if(options[["monetaryVariable"]] != "")
         evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
-    } else {
-      evaluationTable$addColumnInfo(name = 'projm',         title = "Maximum Misstatement",           type = 'string')
-    }
     if(options[["mostLikelyError"]])
       evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                              type = 'string')
 
@@ -347,10 +343,8 @@
 
     # Return empty table with materiality
     if(!jaspResults[["runEvaluation"]]$object){
-      row <- data.frame(materiality = materialityTable, n = ".", fk = ".", k = ".")
-      if(options[["variableType"]] == "variableTypeCorrect")
-        row <- cbind(row, bound = ".")
-      if(options[["auditType"]] == "mus")
+      row <- data.frame(materiality = materialityTable, n = ".", fk = ".", k = ".", bound = ".")
+      if(options[["monetaryVariable"]] != "")
         row <- cbind(row, projm = ".")
       evaluationTable$addRows(row)
       return()
@@ -375,12 +369,9 @@
         boundTable <- paste0(boundTable * 100, "%")
     }
 
-    row <- data.frame(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors)
-    if(options[["auditType"]] == "attributes"){
-      row <- cbind(row, bound = boundTable)
-    } else {
+    row <- data.frame(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable)
+    if(options[["monetaryVariable"]] != "")
       row <- cbind(row, projm = projectedMisstatement)
-    }
     if(options[["mostLikelyError"]])
       row <- cbind(row, mle = mle)
     evaluationTable$addRows(row)
