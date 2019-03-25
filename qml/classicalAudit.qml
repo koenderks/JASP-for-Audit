@@ -57,12 +57,12 @@ Form {
                 }
                 RadioButtonGroup { name: "expected.errors"; id: expectedErrors; title: qsTr("<b>Expected errors</b>")
                   RowLayout {
-                      RadioButton { text: qsTr("Percentage") ; name: "kPercentage" ; checked: true; id: expkPercentage}
-                      PercentField { name: "kPercentageNumber"; enabled: expkPercentage.checked; decimals: 2; defaultValue: 0; fieldWidth: 40 }
+                      RadioButton { text: qsTr("Absolute"); name: "kNumber"; id: expkNumber}
+                      DoubleField { name: "kNumberNumber"; enabled: expkNumber.checked; defaultValue: 0; min: 0; max: 9999; decimals: 2; visible: expkNumber.checked; fieldWidth: 60 }
                   }
                   RowLayout {
-                      RadioButton { text: qsTr("Number"); name: "kNumber"; id: expkNumber}
-                      IntegerField { name: "kNumberNumber"; enabled: expkNumber.checked; defaultValue: 0; min: 0; max: 9999; fieldWidth: 40; Layout.leftMargin: 18 }
+                      RadioButton { text: qsTr("Relative") ; name: "kPercentage" ; checked: true; id: expkPercentage}
+                      PercentField { name: "kPercentageNumber"; enabled: expkPercentage.checked; decimals: 2; defaultValue: 0; visible: expkPercentage.checked; fieldWidth: 60  }
                   }
                 }
                 GroupBox { title: qsTr("<b>Explanatory text</b>")
@@ -109,6 +109,10 @@ Form {
             samplingPhase.expanded = true
             samplingPhase.enabled = true
             samplingChecked.checked = true
+            if (monetaryVariable.count == 0 & !recordsampling.checked) recordsampling.toggle()
+            if (monetaryVariable.count > 0 & !mussampling.checked) mussampling.toggle()
+            if (monetaryVariable.count == 0) variableTypeCorrect.toggle()
+            if (monetaryVariable.count > 0 & !variableTypeTrueValues.checked) variableTypeTrueValues.toggle()
           }
         }
       }
@@ -123,11 +127,11 @@ Form {
               GridLayout { columns: 3
                 RadioButtonGroup { title: qsTr("<b>Selection type</b>"); name: "samplingMethod"; id: samplingMethod
                   RowLayout {
-                    RadioButton { text: qsTr("Monetary Unit Sampling") ; name: "mussampling" ; id: mussampling; enabled: (monetaryVariable.count > 0 ? true : false); checked: (monetaryVariable.count > 0 ? true : false)}
+                    RadioButton { text: qsTr("Monetary Unit Sampling") ; name: "mussampling" ; id: mussampling; enabled: (monetaryVariable.count > 0 ? true : false); checked: true }
                     MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Select observations with probability proportional to their value"; radius: 20; Layout.alignment: Qt.AlignRight }
                   }
                   RowLayout {
-                    RadioButton { text: qsTr("Record Sampling") ; name: "recordsampling" ; id: recordsampling; enabled: true; checked: (monetaryVariable.count > 0 ? false : true)}
+                    RadioButton { text: qsTr("Record Sampling") ; name: "recordsampling" ; id: recordsampling }
                     MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Select observations with equal probability"; radius: 20; Layout.alignment: Qt.AlignRight }
                   }
                 }
@@ -166,7 +170,13 @@ Form {
                   anchors.right: executionChecked.left; text: qsTr("<b>Download Report</b>") }
           CheckBox { anchors.right: toExecution.left; width: height; visible: false; name: "executionChecked"; id: executionChecked; checked: false }
           Button { id: toExecution; anchors.right: parent.right; text: qsTr("<b>To Execution</b>")
-                    onClicked: { samplingPhase.expanded = false; executionPhase.expanded = true; executionPhase.enabled = true }
+                    onClicked: { 
+                      samplingPhase.expanded = false
+                      executionPhase.expanded = true
+                      executionPhase.enabled = true 
+                      if (monetaryVariable.count == 0 & !variableTypeCorrect.checked) variableTypeCorrect.toggle()
+                      if (monetaryVariable.count > 0 & !variableTypeTrueValues.checked) variableTypeTrueValues.toggle()
+                  }
             }
           }
       }
@@ -175,11 +185,11 @@ Form {
           RadioButtonGroup { Layout.leftMargin: 50; name: "variableType"; id: variableType; title: qsTr("")
               RowLayout { spacing: 150
                 RowLayout {
-                  RadioButton { text: qsTr("Audit values") ; name: "variableTypeTrueValues" ; id: variableTypeTrueValues; checked: (monetaryVariable.count > 0 ? true : false); enabled: (monetaryVariable.count > 0 ? true : false) }
+                  RadioButton { text: qsTr("Audit values") ; name: "variableTypeTrueValues" ; id: variableTypeTrueValues; checked: true; enabled: (monetaryVariable.count > 0 ? true : false) }
                   MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Adds a column to specify the audit value of the observations"; radius: 20; Layout.alignment: Qt.AlignRight }
                 }
                 RowLayout {
-                  RadioButton { text: qsTr("Correct / Incorrect") ; name: "variableTypeCorrect" ; id: variableTypeCorrect; checked: (monetaryVariable.count > 0 ? false : true); enabled: true }
+                  RadioButton { text: qsTr("Correct / Incorrect") ; name: "variableTypeCorrect" ; id: variableTypeCorrect; checked: false; enabled: true }
                   MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip:	"Adds a column to specify the observations as correct (0) or incorrect (1)"; radius: 20; Layout.alignment: Qt.AlignRight }
                 }
               }
@@ -193,15 +203,40 @@ Form {
               CheckBox { anchors.right: pasteButton.left; width: height; visible: false; name: "pasteVariables"; id: pasteVariables; checked: false }
               Button { text: qsTr("<b>Add Variables</b>"); id: pasteButton; anchors.right: evaluationChecked.left
                 onClicked: {
-                  toEvaluation.enabled = true; pasteButton.enabled = false; pasteVariables.checked = true; variableType.enabled = false
-                  auditType.enabled = false; auditRisk.enabled = false; ir.enabled = false; cr.enabled = false; distribution.enabled = false
-                  expectedErrors.enabled = false; variablesFormSampling.enabled = false; seedNumber.enabled = false; samplingType.enabled = false
-                  pasteButton.enabled = false; variablesFormPreparation.enabled = false; samplingMethod.enabled = false
+                  toEvaluation.enabled = true
+                  pasteButton.enabled = false
+                  pasteVariables.checked = true
+                  variableType.enabled = false
+                  auditType.enabled = false
+                  auditRisk.enabled = false
+                  ir.enabled = false
+                  cr.enabled = false
+                  distribution.enabled = false
+                  expectedErrors.enabled = false
+                  variablesFormSampling.enabled = false
+                  seedNumber.enabled = false
+                  samplingType.enabled = false
+                  pasteButton.enabled = false
+                  variablesFormPreparation.enabled = false
+                  samplingMethod.enabled = false
                 }
               }
               CheckBox { anchors.right: toEvaluation.left; width: height; visible: false; name: "evaluationChecked"; id: evaluationChecked; checked: false }
               Button { enabled: false; id: toEvaluation; anchors.right: parent.right; text: qsTr("<b>To Evaluation</b>")
-                onClicked: { executionPhase.expanded = false; evaluationPhase.expanded = true; evaluationPhase.enabled = true; evaluationChecked.checked = true }
+                onClicked: { 
+                  executionPhase.expanded = false
+                  evaluationPhase.expanded = true
+                  evaluationPhase.enabled = true
+                  evaluationChecked.checked = true
+                  if (mussampling.checked & variableTypeTrueValues.checked) stringerBound.toggle() 
+                  if (mussampling.checked & variableTypeTrueValues.checked) stringerBound.visible = true 
+                  if (recordsampling.checked & variableTypeTrueValues.checked) regressionBound.toggle() 
+                  if (recordsampling.checked & variableTypeTrueValues.checked) regressionBound.visible = true 
+                  if (variableTypeCorrect.checked) gammaBound.toggle() 
+                  if (variableTypeCorrect.checked) gammaBound.visible = true 
+                  if (variableTypeCorrect.checked) binomialBound.visible = true 
+                  if (variableTypeCorrect.checked) hyperBound.visible = true 
+                }
               }
             }
         }
@@ -214,16 +249,11 @@ Form {
             Section { title: qsTr("Advanced evaluation options"); columns: 1
               GridLayout { columns: 2
                 RadioButtonGroup { title: qsTr("<b>Estimator</b>"); name: "boundMethod"
-                  RadioButton { name: "stringerBound"; text: qsTr("Stringer"); id: stringerBound; visible: variableTypeTrueValues.checked ? (mussampling.checked ? true : false) : false
-                    enabled: variableTypeTrueValues.checked ? (mussampling.checked ? true : false) : false; checked: variableTypeTrueValues.checked ? (mussampling.checked ? true : false) : false }
-                  RadioButton { name: "gammaBound"; text: qsTr("Gamma"); id: gammaBound; visible: variableTypeCorrect.checked; enabled: variableTypeCorrect.checked
-                    checked: variableTypeCorrect.checked ? (gamma.checked ? true : false) : false }
-                  RadioButton { name: "binomialBound"; text: qsTr("Binomial"); id: binomialBound; visible: variableTypeCorrect.checked; enabled: variableTypeCorrect.checked
-                    checked: variableTypeCorrect.checked ? (binomial.checked ? true : false) : false }
-                  RadioButton { name: "hyperBound"; text: qsTr("Hypergeometric"); id: hyperBound; visible: variableTypeCorrect.checked; enabled: variableTypeCorrect.checked
-                    checked: variableTypeCorrect.checked ? (binomial.checked ? false : true) : false }
-                  RadioButton { name: "regressionBound"; text: qsTr("Regression"); id: regressionBound; visible: variableTypeTrueValues.checked ? (mussampling.checked ? false : true) : false
-                    enabled: variableTypeTrueValues.checked ? (mussampling.checked ? false : true) : false; checked: variableTypeTrueValues.checked ? (mussampling.checked ? false : true) : false }
+                  RadioButton { name: "stringerBound"; text: qsTr("Stringer"); id: stringerBound; visible: false }
+                  RadioButton { name: "regressionBound"; text: qsTr("Regression"); id: regressionBound; visible: false }
+                  RadioButton { name: "gammaBound"; text: qsTr("Gamma"); id: gammaBound; visible: false }
+                  RadioButton { name: "binomialBound"; text: qsTr("Binomial"); id: binomialBound; visible: false }
+                  RadioButton { name: "hyperBound"; text: qsTr("Hypergeometric"); id: hyperBound; visible: false }
                 }
               }
             }        
