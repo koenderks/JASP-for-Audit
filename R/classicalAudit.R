@@ -30,8 +30,8 @@ classicalAudit <- function(jaspResults, dataset, options){
   jaspResults[["procedureContainer"]]$position <- 1
 
   # Interpretation for the Global Options phase
-  if(options[["interpretation"]]){
-    if(is.null(jaspResults[["confidenceLevelLabel"]])){
+  if(options[["interpretation"]] && is.null(jaspResults[["procedureContainer"]][["procedureParagraph"]])){
+    if(is.null(jaspResults[["confidenceLevelLabel"]]$object)){
       jaspResults[["confidenceLevelLabel"]] <- createJaspState(paste0(round(options[["confidence"]] * 100, 2), "%"))
       jaspResults[["confidenceLevelLabel"]]$dependOnOptions(c("confidence"))
     }
@@ -40,7 +40,7 @@ classicalAudit <- function(jaspResults, dataset, options){
     jaspResults[["procedureContainer"]][["procedureParagraph"]] <- createJaspHtml(paste0("The objective of a substantive testing procedure is to determine with a specified confidence <b>(", jaspResults[["confidenceLevelLabel"]]$object, ")</b> whether the ", criterion ," of 
                                                                                           misstatement in the target population is lower than the specified materiality of <b>", materialityLabel, "</b>."), "p")
     jaspResults[["procedureContainer"]][["procedureParagraph"]]$position <- 1
-    jaspResults[["procedureContainer"]][["procedureParagraph"]]$dependOnOptions(c("interpretation", "confidence"))
+    jaspResults[["procedureContainer"]][["procedureParagraph"]]$dependOnOptions(c("interpretation", "confidence", "auditType", "materiality", "materialityValue"))
   }
   
   if(options[["descriptivesTable"]])
@@ -64,7 +64,7 @@ classicalAudit <- function(jaspResults, dataset, options){
       jaspResults[["figNumber"]]$dependOnOptions(c("distributionPlot", "plotCriticalErrors"))
     } else if(options[["distributionPlot"]]){
         errorPlot <- createJaspPlot(plot = NULL, title = "Population Distribution")
-        errorPlot$setError(errorMessage = "Plotting not possible: Please specify all  your variables.")
+        errorPlot$setError("Plotting not possible: Please specify all  your variables.")
         jaspResults[["procedureContainer"]][["valueDistributionPlot"]] <- errorPlot
     }
 }
@@ -84,25 +84,30 @@ classicalAudit <- function(jaspResults, dataset, options){
   .classicalPlanningHelper(options, jaspResults)
   planningResult              <- jaspResults[["planningResult"]]$object
   .classicalPlanningTable(dataset, options, planningResult, jaspResults, position = 2)
-
+  
+  requiredSampleSize <- ifelse(is.null(jaspResults[["planningResult"]]$object), yes = 0, no = planningResult[["n"]])
   expected.errors   <- ifelse(options[["expected.errors"]] == "kPercentage", yes = paste0(round(options[["kPercentageNumber"]] * 100, 2), "%"), no = options[["kNumberNumber"]])
-  max.errors        <- ifelse(options[["expected.errors"]] == "kPercentage", yes = floor(options[["kPercentageNumber"]] * planningResult[["n"]]) + 1, no = options[["kNumberNumber"]] + 1)
+  if(options[["distribution"]] == "gamma"){
+    max.errors        <- ifelse(options[["expected.errors"]] == "kPercentage", yes = round(options[["kPercentageNumber"]] * requiredSampleSize, 2), no = options[["kNumberNumber"]])
+  } else {
+    max.errors        <- ifelse(options[["expected.errors"]] == "kPercentage", yes = floor(options[["kPercentageNumber"]] * requiredSampleSize) + 1, no = options[["kNumberNumber"]] + 1)
+  }
 
   # Interpretation after the planning table
-  if(options[["interpretation"]]){
+  if(options[["interpretation"]] && is.null(jaspResults[["planningContainer"]][["priorKnowledgeParagraph"]])){
     materialityLevelLabel           <- base::switch(options[["auditType"]],
                                                     "attributes" = paste0(round(jaspResults[["materiality"]]$object, 4) * 100, "%"),
                                                     "mus" = format(options[["materialityValue"]], scientific = FALSE))
-
-    distribution <- options[["distribution"]]
+    distribution <- ifelse(options[["distribution"]] == "gamma", yes = "poisson", no = options[["distribution"]])
+    
     jaspResults[["materialityLevelLabel"]] <- createJaspState(materialityLevelLabel)
     jaspResults[["planningContainer"]][["priorKnowledgeParagraph"]] <- createJaspHtml(paste0("As prior knowledge, the most likely error in the data was specified to be <b>", expected.errors ,"</b>. The sample size that is required to prove an upper
-                                                                      confidence bound of <b>", materialityLevelLabel ,"</b>, assuming the sample contains <b>", expected.errors ,"</b> full errors, is <b>", planningResult[["n"]] ,"</b>. This sample size is calculated according to the
-                                                                      <b>", distribution , "</b> distribution. Consequently, if <b>", max.errors ,"</b> or more full errors are found in the sample, the projected misstatement exceeds
+                                                                      confidence bound of <b>", materialityLevelLabel ,"</b>, assuming the sample contains <b>", expected.errors ,"</b> full errors, is <b>", requiredSampleSize ,"</b>. This sample size is calculated according to the
+                                                                      <b>", distribution , "</b> distribution. Consequently, if the proportion of errors in the sample exceeds <b>", max.errors ,"</b>, the projected misstatement is more than
                                                                       the materiality and the population cannot be approved."), "p")
       jaspResults[["planningContainer"]][["priorKnowledgeParagraph"]]$position <- 1
       jaspResults[["planningContainer"]][["priorKnowledgeParagraph"]]$dependOnOptions(c("kPercentageNumber", "expected.errors", "kNumberNumber", "distribution", "IR", "CR", "materiality", "N",
-                                                              "confidence", "materialityValue"))
+                                                                                          "confidence", "materialityValue"))
   }
   # Decision plot
   if(options[['plotCriticalErrors']] && jaspResults[["ready"]]$object)
@@ -124,7 +129,7 @@ classicalAudit <- function(jaspResults, dataset, options){
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)    
     } else if(options[["plotCriticalErrors"]]){
         errorPlot <- createJaspPlot(plot = NULL, title = "Decision Plot")
-        errorPlot$setError(errorMessage = "Plotting not possible: Please specify your variables.")
+        errorPlot$setError("Plotting not possible: Please specify your variables.")
         jaspResults[["planningContainer"]][["criticalErrorPlot"]] <- errorPlot
     }
 }
@@ -232,7 +237,7 @@ classicalAudit <- function(jaspResults, dataset, options){
         jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
     } else if(options[["plotBound"]]){
         errorPlot <- createJaspPlot(plot = NULL, title = "Evaluation Information")
-        errorPlot$setError(errorMessage = "Plotting not possible: Please specify your variables.")
+        errorPlot$setError("Plotting not possible: Please specify your variables.")
         jaspResults[["evaluationContainer"]][["confidenceBoundPlot"]] <- errorPlot
     }
 
@@ -253,7 +258,7 @@ classicalAudit <- function(jaspResults, dataset, options){
         jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
     } else if(options[["plotCorrelation"]]){
         errorPlot <- createJaspPlot(plot = NULL, title = "Correlation Plot")
-        errorPlot$setError(errorMessage = "Plotting not possible: Please specify your variables.")
+        errorPlot$setError("Plotting not possible: Please specify your variables.")
         jaspResults[["evaluationContainer"]][["correlationPlot"]] <- errorPlot
     }
 }
@@ -275,7 +280,6 @@ classicalAudit <- function(jaspResults, dataset, options){
                                                                 lower than materiality, in this case <b>", jaspResults[["materialityLevelLabel"]]$object ,"</b>. For the current data, the confidence bound is <b>", above_below ,"</b> than materiality.
                                                                 The conclusion for these data is that the data contain ", approve ,"."), "p")
     jaspResults[["conclusionContainer"]][["conclusionParagraph"]]$position <- 1
-    jaspResults[["conclusionContainer"]][["conclusionParagraph"]]$dependOnOptions(c("IR", "CR", "confidence", "correctID", "plotBound", "materiality",
-                                                             "method", "materialityValue", "correctMUS"))
+    jaspResults[["conclusionContainer"]][["conclusionParagraph"]]$dependOnOptions(c("IR", "CR", "confidence", "correctID", "materiality", "boundMethod", "materialityValue", "sampleFilter"))
   }
 }

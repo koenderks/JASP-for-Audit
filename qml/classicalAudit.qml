@@ -37,7 +37,7 @@ Form {
                   PercentField { id: materiality; visible: attributes.checked; decimals: 2; defaultValue: 0; name: "materiality"; fieldWidth: 50 } }
               }
             }
-            GroupBox { title: qsTr("<b>Audit risk</b>")
+            GroupBox { title: qsTr("<b>Audit risk</b>"); id: auditRisk
                 PercentField { name: "confidence"; label: qsTr("Confidence"); decimals: 2; defaultValue: 95 }
             }
         }

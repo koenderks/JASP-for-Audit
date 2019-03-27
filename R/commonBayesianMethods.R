@@ -40,7 +40,7 @@
 
 .bayesianPlanningHelper <- function(options, jaspResults){
 
-    if(!is.null(jaspResults[["planningResult"]])) return()
+    if(!is.null(jaspResults[["planningResult"]]$object)) return()
 
     ar                      <- 1 - options[["confidence"]]
     ir                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
@@ -123,8 +123,8 @@
     summaryTable$addColumnInfo(name = 'expBF',              title = "Expected BF\u208B\u208A", type = 'string')
 
   message <- base::switch(options[["distribution"]],
-                            "beta" = "The sample size is calculated using the <b>beta</b> distribution.",
-                            "beta-binomial" = paste0("The sample size is calculated using the <b>beta-binomial</b> distribution (N = ", jaspResults[["N"]]$object ,")."))
+                            "beta" = "The sample size is based on the <b>beta</b> distribution.",
+                            "beta-binomial" = paste0("The sample size is based on the <b>beta-binomial</b> distribution (N = ", jaspResults[["N"]]$object ,")."))
                               
   summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
@@ -151,24 +151,14 @@
                                 "mus" = materialityValue)
 
   if(!jaspResults[["ready"]]$object){
-    row <- data.frame(materiality           = materiality,
-                      IR                    = result[["IR"]],
-                      CR                    = result[["CR"]],
-                      DR                    = DRtable,
-                      k                     = ktable,
-                      n                     = ".")
-  if(options[["expectedBF"]])
-    row <- cbind(row, expBF = ".")
+    row <- data.frame(materiality = materiality, IR = result[["IR"]],CR = result[["CR"]], DR = DRtable, k = ktable, n = ".")
+    if(options[["expectedBF"]])
+      row <- cbind(row, expBF = ".")
     summaryTable$addRows(row)
     return()
   }
 
-  row <- data.frame(materiality           = materiality,
-                    IR                    = result[["IR"]],
-                    CR                    = result[["CR"]],
-                    DR                    = DRtable,
-                    k                     = ktable,
-                    n                     = result[["n"]])
+  row <- data.frame(materiality = materiality, IR  = result[["IR"]], CR = result[["CR"]], DR = DRtable, k = ktable, n = result[["n"]])
   if(options[["expectedBF"]])
     row <- cbind(row, expBF = .expectedBF(options, result, ktable, jaspResults))
   summaryTable$addRows(row)
@@ -441,49 +431,101 @@
 }
 
 .priorAndPosteriorBayesianAttributes <- function(options, result, jaspResults, plotWidth = 600, plotHeight = 450){
+  
+  if(options[["boundMethod"]] == "betaBound"){
 
-  xseq <- seq(0, options[["limx_backup"]], 0.001)
-  d <- data.frame(
-      x = rep(xseq, 2),
-      y = c(dbeta(x = xseq, shape1 = result[["priorA"]], shape2 = result[["priorB"]]), dbeta(x = xseq, shape1 = result[["posteriorA"]], shape2 = result[["posteriorB"]])),
-      type = c(rep("Prior", length(xseq)), rep("Posterior", length(xseq)))
-  )
-  # Reorder factor levels to display in legend
-  d$type = factor(d$type,levels(d$type)[c(2,1)])
+    xseq <- seq(0, options[["limx_backup"]], 0.001)
+    d <- data.frame(
+        x = rep(xseq, 2),
+        y = c(dbeta(x = xseq, shape1 = result[["priorA"]], shape2 = result[["priorB"]]), dbeta(x = xseq, shape1 = result[["posteriorA"]], shape2 = result[["posteriorB"]])),
+        type = c(rep("Prior", length(xseq)), rep("Posterior", length(xseq)))
+    )
+    # Reorder factor levels to display in legend
+    d$type = factor(d$type,levels(d$type)[c(2,1)])
 
-  xBreaks <- JASPgraphs::getPrettyAxisBreaks(xseq, min.n = 4)
-  xLim <- range(xBreaks)
-  yBreaks <- c(0, 1.2*max(d$y))
-  yLim <- range(yBreaks)
+    xBreaks <- JASPgraphs::getPrettyAxisBreaks(xseq, min.n = 4)
+    xLim <- range(xBreaks)
+    yBreaks <- c(0, 1.2*max(d$y))
+    yLim <- range(yBreaks)
 
-  pointdata <- data.frame(x = jaspResults[["materiality"]]$object, y = dbeta(jaspResults[["materiality"]]$object, result[["posteriorA"]], result[["posteriorB"]]))
+    pointdata <- data.frame(x = jaspResults[["materiality"]]$object, y = dbeta(jaspResults[["materiality"]]$object, result[["posteriorA"]], result[["posteriorB"]]))
 
-  p <- ggplot2::ggplot(d, ggplot2::aes(x = x, y = y)) +
-      ggplot2::geom_line(ggplot2::aes(x = x, y = y, linetype = type), lwd = 1) +
-      ggplot2::scale_linetype_manual(values=c("dashed", "solid"), guide = ggplot2::guide_legend(nrow = 1, byrow = FALSE, title = "", order = 1))
+    p <- ggplot2::ggplot(d, ggplot2::aes(x = x, y = y)) +
+        ggplot2::geom_line(ggplot2::aes(x = x, y = y, linetype = type), lwd = 1) +
+        ggplot2::scale_linetype_manual(values=c("dashed", "solid"), guide = ggplot2::guide_legend(nrow = 1, byrow = FALSE, title = "", order = 1))
 
-  p <- p + ggplot2::scale_x_continuous(name = "Error percentage", breaks = xBreaks, limits = xLim, labels = paste0(xBreaks * 100, "%"))
+    p <- p + ggplot2::scale_x_continuous(name = "Error percentage", breaks = xBreaks, limits = xLim, labels = paste0(xBreaks * 100, "%"))
 
-  if(options[["plotPriorAndPosteriorAdditionalInfo"]]){
-    pdata <- data.frame(x = 0, y = 0, l = "1")
-    p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 0.25, 1, 0))
-    p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior \nconfidence region"))
-    p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 0.25, 1, .5), stroke = 2, color = "black")), order = 2)
+    if(options[["plotPriorAndPosteriorAdditionalInfo"]]){
+      pdata <- data.frame(x = 0, y = 0, l = "1")
+      p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 0.25, 1, 0))
+      p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior \nconfidence region"))
+      p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 0.25, 1, .5), stroke = 2, color = "black")), order = 2)
 
-      p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["posteriorA"]], shape2 = result[["posteriorB"]]), xlim = c(0, result[["bound"]]),
-                                      geom = "area", fill = rgb(0, 0.25, 1, .5))
-  }
+        p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["posteriorA"]], shape2 = result[["posteriorB"]]), xlim = c(0, result[["bound"]]),
+                                        geom = "area", fill = rgb(0, 0.25, 1, .5))
+    }
 
-  p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = pointdata, size = 3, shape = 21, stroke = 2, color = "black", fill = "red")
+    p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = pointdata, size = 3, shape = 21, stroke = 2, color = "black", fill = "red")
 
-  thm <- ggplot2::theme(
-		axis.ticks.y = ggplot2::element_blank(),
-		axis.title.y = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = -5, b = 0, l = 0))
-	)
-  p <- p + ggplot2::scale_y_continuous(name = "Density", breaks = yBreaks, labels = c("", ""), limits = yLim) +
-  	       ggplot2::theme()
+    thm <- ggplot2::theme(
+  		axis.ticks.y = ggplot2::element_blank(),
+  		axis.title.y = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = -5, b = 0, l = 0))
+  	)
+    p <- p + ggplot2::scale_y_continuous(name = "Density", breaks = yBreaks, labels = c("", ""), limits = yLim) +
+    	       ggplot2::theme()
 
-  p <- JASPgraphs::themeJasp(p, legend.position = "top") + thm
+    p <- JASPgraphs::themeJasp(p, legend.position = "top") + thm
+    
+  } else if(options[["boundMethod"]] == "betabinomialBound"){
+      
+      xseq <- seq(0, jaspResults[["N"]]$object, 1)[1:ceiling(options[["limx_backup"]] * jaspResults[["N"]]$object)]
+      d <- data.frame(
+          x = rep(xseq, 2),
+          y = c(.dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, u = result[["priorA"]], v = result[["priorB"]])[1:ceiling(options[["limx_backup"]] * jaspResults[["N"]]$object)], 
+                .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, u = result[["posteriorA"]], v = result[["posteriorB"]])[1:ceiling(options[["limx_backup"]] * jaspResults[["N"]]$object)]),
+          type = c(rep("Prior", length(xseq)), rep("Posterior", length(xseq)))
+      )
+      
+      xBreaks <- JASPgraphs::getPrettyAxisBreaks(xseq, min.n = 4)
+      xLim <- range(xBreaks)
+      yBreaks <- c(0, 1.2*max(d$y))
+      yLim <- range(yBreaks)
+  
+      pointdata <- data.frame(x = jaspResults[["materiality"]]$object * jaspResults[["N"]]$object, y = .dBetaBinom(ceiling(jaspResults[["materiality"]]$object * jaspResults[["N"]]$object), 
+                            N = jaspResults[["N"]]$object, result[["posteriorA"]], result[["posteriorB"]]))
+                            
+      p <- ggplot2::ggplot(d, ggplot2::aes(x = x, y = y)) +
+          ggplot2::geom_line(ggplot2::aes(x = x, y = y, linetype = type), lwd = 1) +
+          ggplot2::scale_linetype_manual(values=c("dashed", "solid"), guide = FALSE)
+  
+      p <- p + ggplot2::scale_x_continuous(name = "Population errors", breaks = xBreaks, limits = xLim, labels = xBreaks)
+      
+      if(options[["plotPriorAdditionalInfo"]]){
+          pdata <- data.frame(x = 0, y = 0, l = "1")
+          p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 1, 0.5, 0))
+          p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior confidence region"))
+          p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 1, 0.5, .7), stroke = 2, color = "black")))
+          
+          df <- data.frame(x = 0:jaspResults[["N"]]$object, y = .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, u = result[["posteriorA"]], v = result[["posteriorB"]]))
+          lim <- .qBetaBinom(p = options[["confidence"]], N = jaspResults[["N"]]$object, u = result[["posteriorA"]], v = result[["posteriorB"]])    
+          df <- df[1:lim, ]
+          p <- p + ggplot2::geom_bar(data = df, stat="identity", fill = rgb(0, 1, 0.5, .7))
+      }
+        
+      p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = pointdata, size = 3, shape = 21, stroke = 2, color = "black", fill = "red")
+  
+      thm <- ggplot2::theme(
+        axis.ticks.y = ggplot2::element_blank(),
+        axis.title.y = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = -5, b = 0, l = 0))
+      )
+      p <- p +
+        ggplot2::scale_y_continuous(name = "Density", breaks = yBreaks, labels = c("", ""), limits = yLim) +
+        ggplot2::theme()
+  
+      p <- JASPgraphs::themeJasp(p, legend.position = "top") + thm
+      
+    }
 
   return(createJaspPlot(plot = p, title = "Prior and Posterior Plot", width = plotWidth, height = plotHeight))
 

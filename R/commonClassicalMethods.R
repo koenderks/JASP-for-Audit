@@ -39,7 +39,7 @@
 
 .classicalPlanningHelper <- function(options, jaspResults){
 
-    if(!is.null(jaspResults[["planningResult"]])) return()
+    if(!is.null(jaspResults[["planningResult"]]$object)) return()
 
     ar                      <- 1 - options[["confidence"]]
     ir                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
@@ -69,9 +69,8 @@
     resultList[["confidence"]]    <- options[["confidence"]]
 
     jaspResults[["planningResult"]] <- createJaspState(resultList)
-    jaspResults[["planningResult"]]$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "distribution",
-                                                      "N", "kPercentageNumber", "kNumberNumber", "materialityValue", "auditType",
-                                                      "recordNumberVariable", "monetaryVariable", "populationValue"))
+    jaspResults[["planningResult"]]$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "distribution", "kPercentageNumber", "kNumberNumber", "materialityValue", "auditType",
+                                                      "recordNumberVariable", "monetaryVariable"))
 
 }
 
@@ -82,7 +81,7 @@
   summaryTable                              <- createJaspTable("Planning Summary")
   jaspResults[["planningContainer"]][["summaryTable"]]             <- summaryTable
   summaryTable$position                     <- position
-  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "distribution", "N", "recordNumberVariable",
+  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "distribution", "recordNumberVariable", "monetaryVariable",
                                   "expected.errors" , "kPercentageNumber", "kNumberNumber", "materialityValue", "auditType"))
 
   summaryTable$addColumnInfo(name = 'materiality',          title = "Materiality",          type = 'string')
@@ -93,10 +92,15 @@
   summaryTable$addColumnInfo(name = 'n',                    title = "Required sample size", type = 'string')
 
   message <- base::switch(options[["distribution"]],
-                          "gamma" = "The sample size is calculated using the <b>gamma</b> distribution.",
-                          "binomial" =  "The sample size is calculated using the <b>binomial</b> distribution.",
-                          "hypergeometric" = paste0("The sample size is calculated using the <b>hypergeometric</b> distribution (N = ", jaspResults[["N"]]$object ,")."))
+                          "gamma" = "The sample size is based on the <b>poisson</b> distribution.",
+                          "binomial" =  "The sample size is based on the <b>binomial</b> distribution.",
+                          "hypergeometric" = paste0("The sample size is based on the <b>hypergeometric</b> distribution (N = ", jaspResults[["N"]]$object ,")."))
   summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
+  
+  if(options[["distribution"]] != "gamma" && options[["expected.errors"]] == "kNumber" && options[["kNumberNumber"]]%%1 != 0){
+    summaryTable$setError("Expected errors should be a whole number in this sampling model.")
+    return()
+  }
 
   if(options[["distribution"]] != "gamma"){
     ktable <- base::switch(options[["expected.errors"]],
@@ -125,22 +129,12 @@
                                 "mus" = materialityValue)
 
   if(!jaspResults[["ready"]]$object){
-    row <- data.frame(materiality           = materiality,
-                      IR                    = result[["IR"]],
-                      CR                    = result[["CR"]],
-                      DR                    = DRtable,
-                      k                     = ktable,
-                      n                     = ".")
+    row <- data.frame(materiality = materiality, IR = result[["IR"]], CR = result[["CR"]], DR = DRtable, k = ktable, n = ".")
     summaryTable$addRows(row)
     return()
   }
 
-  row <- data.frame(materiality           = materiality,
-                    IR                    = result[["IR"]],
-                    CR                    = result[["CR"]],
-                    DR                    = DRtable,
-                    k                     = ktable,
-                    n                     = result[["n"]])                  
+  row <- data.frame(materiality = materiality, IR = result[["IR"]], CR = result[["CR"]], DR = DRtable, k = ktable, n = result[["n"]])                  
   summaryTable$addRows(row)
 }
 
