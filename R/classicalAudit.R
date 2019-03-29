@@ -1,4 +1,4 @@
-classicalAudit <- function(jaspResults, dataset, options){
+classicalAudit <- function(jaspResults, dataset, options, ...){
     ### TITLE ###
     jaspResults$title                         <- "Sampling Workflow"
     ### PROCEDURE ###

@@ -24,11 +24,6 @@ import JASP.Widgets 1.0
 
 Form {
       GridLayout { columns: 3
-        GroupBox {
-            title: qsTr("<b>Population</b>")
-            IntegerField { id: populationSize; name: "populationSize"; text: qsTr("Size"); fieldWidth: 100; defaultValue: 0  }
-            DoubleField { id: populationValue; name: "populationValue"; text: qsTr("Value"); defaultValue: 0; enabled: mus.checked; fieldWidth: 100 }
-          }
           RadioButtonGroup { id: auditType; name: "auditType"; title: qsTr("<b>Materiality</b>")
             RowLayout {
               RadioButton { id: mus; name: "mus"; text: qsTr("Absolute"); checked: true; childrenOnSameRow: true
@@ -39,6 +34,11 @@ Form {
                 PercentField { id: materiality; visible: attributes.checked; decimals: 2; defaultValue: 0; name: "materiality"; fieldWidth: 50 } }
             }
           }
+          GroupBox {
+              title: qsTr("<b>Population</b>")
+              IntegerField { id: populationSize; name: "populationSize"; text: qsTr("Size"); fieldWidth: 100; defaultValue: 0  }
+              DoubleField { id: populationValue; name: "populationValue"; text: qsTr("Value"); defaultValue: 0; enabled: mus.checked; fieldWidth: 100 }
+            }
           GroupBox { title: qsTr("<b>Audit risk</b>"); id: auditRisk
               PercentField { name: "confidence"; label: qsTr("Confidence"); decimals: 2; defaultValue: 95 }
           }

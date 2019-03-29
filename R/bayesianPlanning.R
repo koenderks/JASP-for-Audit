@@ -1,4 +1,4 @@
-bayesianPlanning <- function(jaspResults, dataset, options, state=NULL){
+bayesianPlanning <- function(jaspResults, dataset, options, ...){
 
   jaspResults$title <- "Bayesian Planning"
   

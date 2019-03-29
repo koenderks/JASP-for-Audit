@@ -1,4 +1,4 @@
-bayesianAudit <- function(jaspResults, dataset, options){
+bayesianAudit <- function(jaspResults, dataset, options, ...){
     ### TITLE ###
     jaspResults$title <- "Bayesian Sampling Workflow"
     ### PROCEDURE ###
