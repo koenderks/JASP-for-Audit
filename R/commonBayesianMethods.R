@@ -497,7 +497,7 @@
                             
       p <- ggplot2::ggplot(d, ggplot2::aes(x = x, y = y)) +
           ggplot2::geom_line(ggplot2::aes(x = x, y = y, linetype = type), lwd = 1) +
-          ggplot2::scale_linetype_manual(values=c("dashed", "solid"), guide = FALSE)
+          ggplot2::scale_linetype_manual(values=c("solid", "dashed"), guide = FALSE)
   
       p <- p + ggplot2::scale_x_continuous(name = "Population errors", breaks = xBreaks, limits = xLim, labels = xBreaks)
       
@@ -510,7 +510,7 @@
           df <- data.frame(x = 0:jaspResults[["N"]]$object, y = .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, u = result[["posteriorA"]], v = result[["posteriorB"]]))
           lim <- .qBetaBinom(p = options[["confidence"]], N = jaspResults[["N"]]$object, u = result[["posteriorA"]], v = result[["posteriorB"]])    
           df <- df[1:lim, ]
-          p <- p + ggplot2::geom_bar(data = df, stat="identity", fill = rgb(0, 1, 0.5, .7))
+          p <- p + ggplot2::geom_bar(data = df, stat="identity", fill = rgb(0, 0.25, 1, .5))
       }
         
       p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = pointdata, size = 3, shape = 21, stroke = 2, color = "black", fill = "red")

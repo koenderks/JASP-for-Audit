@@ -399,7 +399,7 @@
 
 .execution <- function(options, jaspResults){
 
-  if(options[["pasteVariables"]]){
+  if(options[["pasteVariables"]] && is.null(jaspResults[["pastingDone"]]$object)){
     
     dataset <- .readDataSetToEnd(columns.as.numeric = options[["recordNumberVariable"]])
     
@@ -410,8 +410,9 @@
     emptyVariable <- rep(NA, jaspResults[["N"]]$object)
     .setColumnDataAsNominal(options[["sampleFilterName"]], sampleFilter)
     base::switch(options[["variableType"]],
-                  "variableTypeCorrect" = .setColumnDataAsNominal(options[["variableName"]], rep(0, jaspResults[["N"]]$object)),
-                  "variableTypeTrueValues" = .setColumnDataAsScale(options[["variableName"]], rep(0, jaspResults[["N"]]$object)))
+                  "variableTypeCorrect" = .setColumnDataAsNominal(options[["variableName"]], emptyVariable),
+                  "variableTypeTrueValues" = .setColumnDataAsScale(options[["variableName"]], emptyVariable))
+    jaspResults[["pastingDone"]] <- createJaspState(TRUE)                
   }
 }
 

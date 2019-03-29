@@ -99,6 +99,11 @@ Form {
         }
       }
     Item { height: toSampling.height; Layout.fillWidth: true
+      Button { anchors.left: parent.left; text: qsTr("<b>Reset Workflow</b>");
+                onClicked: {
+                
+                }
+              }
       Button { id: downloadReportPlanning; anchors.right: samplingChecked.left; text: qsTr("<b>Download Report</b>")
         enabled: attributes.checked ? (materiality.value == "0" ? false : true) : (materialityValue.value == "0" ? false : (recordNumberVariable.count > 0 && monetaryVariable.count > 0)) }
       CheckBox { anchors.right: toSampling.left; width: height; visible: false; name: "samplingChecked"; id: samplingChecked; checked: false }
@@ -109,10 +114,10 @@ Form {
             samplingPhase.expanded = true
             samplingPhase.enabled = true
             samplingChecked.checked = true
-            if (monetaryVariable.count == 0 & !recordsampling.checked) recordsampling.toggle()
-            if (monetaryVariable.count > 0 & !mussampling.checked) mussampling.toggle()
-            if (monetaryVariable.count == 0) variableTypeCorrect.toggle()
-            if (monetaryVariable.count > 0 & !variableTypeTrueValues.checked) variableTypeTrueValues.toggle()
+            if (monetaryVariable.count == 0) recordsampling.click()
+            if (monetaryVariable.count > 0) mussampling.click()
+            if (monetaryVariable.count == 0) variableTypeCorrect.click()
+            if (monetaryVariable.count > 0) variableTypeTrueValues.click()
           }
         }
       }
@@ -166,6 +171,11 @@ Form {
           }
         }
         Item { height: toExecution.height; Layout.fillWidth: true
+          Button { anchors.left: parent.left; text: qsTr("<b>Reset Workflow</b>");
+                    onClicked: {
+                    
+                    }
+                  }
           Button { id: downloadReportSelection; enabled: attributes.checked ? (materiality.value == "0" ? false : true) : (materialityValue.value == "0" ? false : true)
                   anchors.right: executionChecked.left; text: qsTr("<b>Download Report</b>") }
           CheckBox { anchors.right: toExecution.left; width: height; visible: false; name: "executionChecked"; id: executionChecked; checked: false }
@@ -173,9 +183,9 @@ Form {
                     onClicked: { 
                       samplingPhase.expanded = false
                       executionPhase.expanded = true
-                      executionPhase.enabled = true 
-                      if (monetaryVariable.count == 0 & !variableTypeCorrect.checked) variableTypeCorrect.toggle()
-                      if (monetaryVariable.count > 0 & !variableTypeTrueValues.checked) variableTypeTrueValues.toggle()
+                      executionPhase.enabled = true
+                      if (monetaryVariable.count == 0) variableTypeCorrect.click()
+                      if (monetaryVariable.count > 0) variableTypeTrueValues.click()
                   }
             }
           }
@@ -200,6 +210,11 @@ Form {
               ComputedColumnField { name: "variableName"; text: "Column name audit result: "; fieldWidth: 120; enabled: pasteVariables.checked ? false : true }
             }
             Item { height: toEvaluation.height; Layout.fillWidth: true
+              Button { anchors.left: parent.left; text: qsTr("<b>Reset Workflow</b>");
+                        onClicked: {
+                        
+                        }
+                      }
               CheckBox { anchors.right: pasteButton.left; width: height; visible: false; name: "pasteVariables"; id: pasteVariables; checked: false }
               Button { text: qsTr("<b>Add Variables</b>"); id: pasteButton; anchors.right: evaluationChecked.left
                 onClicked: {
@@ -228,14 +243,14 @@ Form {
                   evaluationPhase.expanded = true
                   evaluationPhase.enabled = true
                   evaluationChecked.checked = true
-                  if (mussampling.checked & variableTypeTrueValues.checked) stringerBound.toggle() 
+                  if (mussampling.checked & variableTypeTrueValues.checked) stringerBound.click() 
                   if (mussampling.checked & variableTypeTrueValues.checked) stringerBound.visible = true 
-                  if (recordsampling.checked & variableTypeTrueValues.checked) directBound.toggle() 
+                  if (recordsampling.checked & variableTypeTrueValues.checked) directBound.click() 
                   if (recordsampling.checked & variableTypeTrueValues.checked) directBound.visible = true 
                   if (recordsampling.checked & variableTypeTrueValues.checked) differenceBound.visible = true 
                   if (recordsampling.checked & variableTypeTrueValues.checked) ratioBound.visible = true 
                   if (recordsampling.checked & variableTypeTrueValues.checked) regressionBound.visible = true 
-                  if (variableTypeCorrect.checked) gammaBound.toggle() 
+                  if (variableTypeCorrect.checked) gammaBound.click() 
                   if (variableTypeCorrect.checked) gammaBound.visible = true 
                   if (variableTypeCorrect.checked) binomialBound.visible = true 
                   if (variableTypeCorrect.checked) hyperBound.visible = true 
@@ -277,7 +292,7 @@ Form {
             Item { height: toInterpretation.height; Layout.fillWidth: true
               Button { id: toInterpretation; anchors.right: parent.right; text: qsTr("<b>Download Report</b>")
                 enabled: sampleFilter.count > 0 && correctID.count > 0
-                onClicked: { evaluationPhase.expanded = false; interpretationPhase.expanded = true; interpretationPhase.enabled = true }
+                onClicked: { evaluationPhase.expanded = false }
               }
             }
           }
