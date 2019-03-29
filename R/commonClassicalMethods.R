@@ -326,7 +326,10 @@
 
     message <- base::switch(options[["boundMethod"]],
                               "stringerBound" = "The confidence bound is calculated according to the <b>Stringer</b> method.",
-                              "regressionBound" = "The confidence bound is calculated according to the <b>Regression</b> method.")
+                              "regressionBound" = "The confidence bound is calculated according to the <b>regression</b> method.",
+                              "directBound" = "The confidence bound is calculated according to the <b>direct</b> method.",
+                              "differenceBound" = "The confidence bound is calculated according to the <b>difference</b> method.",
+                              "ratioBound" = "The confidence bound is calculated according to the <b>ratio</b> method.")
     evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
     
     if(options[["auditType"]] == "mus"){
@@ -345,11 +348,11 @@
     }
     
     total_data_value <- jaspResults[["total_data_value"]]$object
-
+    
     mle <- 0
     if(options[["boundMethod"]] == "stringerBound"){
         mle <- ceiling( sum(result[["z"]]) / result[["n"]] * total_data_value )
-    } else if(options[["boundMethod"]] == "regressionBound"){
+    } else {
       mle <- round(result[["mle"]], 2)
     }
 
@@ -369,6 +372,165 @@
     if(options[["mostLikelyError"]])
       row <- cbind(row, mle = mle)
     evaluationTable$addRows(row)
+}
+
+.directBound <- function(dataset, options, jaspResults){
+
+    ar                      <- 1 - options[["confidence"]]
+    ir                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+    cr                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+    alpha                   <- ar / ir / cr
+
+    n                       <- 0
+    M                       <- 0
+    z                       <- 0
+    bound                   <- "."
+    mle                     <- 0
+
+    if(jaspResults[["runEvaluation"]]$object){
+      
+        sample                  <- dataset[, c(.v(options[["monetaryVariable"]]), .v(options[["correctID"]]))]
+        n                       <- nrow(sample)
+
+        t                       <- sample[, .v(options[["monetaryVariable"]])] - sample[, .v(options[["correctID"]])]
+        z                       <- t / sample[, .v(options[["monetaryVariable"]])]
+        M                       <- length(which(t != 0))
+        B                       <- jaspResults[["total_data_value"]]$object
+
+        N                       <- jaspResults[["N"]]$object
+        w                       <- sample[, .v(options[["correctID"]])]
+        meanw                   <- mean(w)
+
+        mle                     <- N * meanw
+        stand.dev               <- sd(w) * (N / sqrt(n)) * sqrt( (N-n) / (N-1) )
+        upperValue              <- mle + qt(p = options[["confidence"]], df = n - 1) * stand.dev
+        bound                   <- (upperValue - B) / B
+    }
+
+    resultList <- list()
+    resultList[["n"]]           <- n
+    resultList[["k"]]           <- M
+    resultList[["z"]]           <- z
+    resultList[["IR"]]          <- options[["IR"]]
+    resultList[["CR"]]          <- options[["CR"]]
+    resultList[["confidence"]]  <- options[["confidence"]]
+    resultList[["bound"]]       <- bound
+    resultList[["alpha"]]       <- alpha
+    resultList[["mle"]]         <- mle
+
+    jaspResults[["result"]] <- createJaspState(resultList)
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctID", "populationValue", "sampleFilter",
+                                              "auditType", "boundMethod", "monetaryVariable", "materialityValue", "variableType"))
+}
+
+.differenceBound <- function(dataset, options, jaspResults){
+
+    ar                      <- 1 - options[["confidence"]]
+    ir                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+    cr                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+    alpha                   <- ar / ir / cr
+
+    n                       <- 0
+    M                       <- 0
+    z                       <- 0
+    bound                   <- "."
+    mle                     <- 0
+
+    if(jaspResults[["runEvaluation"]]$object){
+      
+        sample                  <- dataset[, c(.v(options[["monetaryVariable"]]), .v(options[["correctID"]]))]
+        n                       <- nrow(sample)
+
+        t                       <- sample[, .v(options[["monetaryVariable"]])] - sample[, .v(options[["correctID"]])]
+        z                       <- t / sample[, .v(options[["monetaryVariable"]])]
+        M                       <- length(which(t != 0))
+        B                       <- jaspResults[["total_data_value"]]$object
+
+        N                       <- jaspResults[["N"]]$object
+        w                       <- sample[, .v(options[["correctID"]])]
+        meanw                   <- mean(w)
+        meant                   <- mean(t)
+
+        mle                     <- N * meant
+        stand.dev               <- sd(t) * (N / sqrt(n)) * sqrt( (N-n) / (N-1) )
+        upperValue              <- mle + qt(p = options[["confidence"]], df = n - 1) * stand.dev
+        if(upperValue == 0){
+          bound                 <- 0
+        } else {
+          bound                 <- (upperValue - B) / B
+        }
+    }
+
+    resultList <- list()
+    resultList[["n"]]           <- n
+    resultList[["k"]]           <- M
+    resultList[["z"]]           <- z
+    resultList[["IR"]]          <- options[["IR"]]
+    resultList[["CR"]]          <- options[["CR"]]
+    resultList[["confidence"]]  <- options[["confidence"]]
+    resultList[["bound"]]       <- bound
+    resultList[["alpha"]]       <- alpha
+    resultList[["mle"]]         <- mle
+
+    jaspResults[["result"]] <- createJaspState(resultList)
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctID", "populationValue", "sampleFilter",
+                                              "auditType", "boundMethod", "monetaryVariable", "materialityValue", "variableType"))
+}
+
+.ratioBound <- function(dataset, options, jaspResults){
+
+    ar                      <- 1 - options[["confidence"]]
+    ir                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+    cr                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+    alpha                   <- ar / ir / cr
+
+    n                       <- 0
+    M                       <- 0
+    z                       <- 0
+    bound                   <- "."
+    mle                     <- 0
+
+    if(jaspResults[["runEvaluation"]]$object){
+      
+        sample                  <- dataset[, c(.v(options[["monetaryVariable"]]), .v(options[["correctID"]]))]
+        n                       <- nrow(sample)
+
+        t                       <- sample[, .v(options[["monetaryVariable"]])] - sample[, .v(options[["correctID"]])]
+        z                       <- t / sample[, .v(options[["monetaryVariable"]])]
+        M                       <- length(which(t != 0))
+        B                       <- jaspResults[["total_data_value"]]$object
+
+        N                       <- jaspResults[["N"]]$object
+        w                       <- sample[, .v(options[["correctID"]])]
+        b                       <- sample[, .v(options[["monetaryVariable"]])]
+        meanw                   <- mean(w)
+        meanb                   <- mean(b)
+        q                       <- meanw / meanb
+
+        mle                     <- q * B
+        stand.dev               <- sqrt( sd(w)^2 - 2*q*cor(b, w)*sd(b)*sd(w) + q^2*sd(b)^2 ) * (N / sqrt(n)) * sqrt( (N-n) / (N-1) )
+        upperValue              <- mle + qt(p = options[["confidence"]], df = n - 1) * stand.dev
+        if(upperValue == 0){
+          bound                 <- 0
+        } else {
+          bound                 <- (upperValue - B) / B
+        }
+    }
+
+    resultList <- list()
+    resultList[["n"]]           <- n
+    resultList[["k"]]           <- M
+    resultList[["z"]]           <- z
+    resultList[["IR"]]          <- options[["IR"]]
+    resultList[["CR"]]          <- options[["CR"]]
+    resultList[["confidence"]]  <- options[["confidence"]]
+    resultList[["bound"]]       <- bound
+    resultList[["alpha"]]       <- alpha
+    resultList[["mle"]]         <- mle
+
+    jaspResults[["result"]] <- createJaspState(resultList)
+    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctID", "populationValue", "sampleFilter",
+                                              "auditType", "boundMethod", "monetaryVariable", "materialityValue", "variableType"))
 }
 
 .regressionBound <- function(dataset, options, jaspResults){
@@ -406,7 +568,11 @@
         mleregression           <- (N * meanw) + (b1 * (B - N * meanb)) - B
         stand.dev               <- sd(w) * ( N / sqrt(n)) * sqrt( (N-n) / (N-1) ) * sqrt(1 - cor(b, w)^2)
         upperValue              <- mleregression + qt(p = options[["confidence"]], df = n - 1) * stand.dev
-        bound                   <- (upperValue - B) / B
+        if(upperValue == 0){
+          bound                 <- 0
+        } else {
+          bound                 <- (upperValue - B) / B
+        }
     }
 
     resultList <- list()

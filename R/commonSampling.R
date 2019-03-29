@@ -331,7 +331,7 @@
 
   if(!is.null(jaspResults[["selectionContainer"]][["simpleRandomSamplingInfoTable"]])) return()
 
-  simpleRandomSamplingInfoTable                           <- createJaspTable("Sample Information")
+  simpleRandomSamplingInfoTable                           <- createJaspTable("Selection Summary")
   jaspResults[["selectionContainer"]][["simpleRandomSamplingInfoTable"]]          <- simpleRandomSamplingInfoTable
   simpleRandomSamplingInfoTable$position                  <- position
   simpleRandomSamplingInfoTable$dependOnOptions(c("variables", "startingPoint", "sampleSize", "recordNumberVariable", "rankingVariable", "samplingType", "samplingMethod",

@@ -230,7 +230,10 @@ Form {
                   evaluationChecked.checked = true
                   if (mussampling.checked & variableTypeTrueValues.checked) stringerBound.toggle() 
                   if (mussampling.checked & variableTypeTrueValues.checked) stringerBound.visible = true 
-                  if (recordsampling.checked & variableTypeTrueValues.checked) regressionBound.toggle() 
+                  if (recordsampling.checked & variableTypeTrueValues.checked) directBound.toggle() 
+                  if (recordsampling.checked & variableTypeTrueValues.checked) directBound.visible = true 
+                  if (recordsampling.checked & variableTypeTrueValues.checked) differenceBound.visible = true 
+                  if (recordsampling.checked & variableTypeTrueValues.checked) ratioBound.visible = true 
                   if (recordsampling.checked & variableTypeTrueValues.checked) regressionBound.visible = true 
                   if (variableTypeCorrect.checked) gammaBound.toggle() 
                   if (variableTypeCorrect.checked) gammaBound.visible = true 
@@ -250,6 +253,9 @@ Form {
               GridLayout { columns: 2
                 RadioButtonGroup { title: qsTr("<b>Estimator</b>"); name: "boundMethod"
                   RadioButton { name: "stringerBound"; text: qsTr("Stringer"); id: stringerBound; visible: false }
+                  RadioButton { name: "directBound"; text: qsTr("Direct"); id: directBound; visible: false }
+                  RadioButton { name: "differenceBound"; text: qsTr("Difference"); id: differenceBound; visible: false }
+                  RadioButton { name: "ratioBound"; text: qsTr("Ratio"); id: ratioBound; visible: false }
                   RadioButton { name: "regressionBound"; text: qsTr("Regression"); id: regressionBound; visible: false }
                   RadioButton { name: "gammaBound"; text: qsTr("Gamma"); id: gammaBound; visible: false }
                   RadioButton { name: "binomialBound"; text: qsTr("Binomial"); id: binomialBound; visible: false }

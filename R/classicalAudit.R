@@ -200,6 +200,12 @@ classicalAudit <- function(jaspResults, dataset, options){
       .stringerBound(dataset, options, jaspResults)
     } else if(options[["boundMethod"]] == "regressionBound"){
       .regressionBound(dataset, options, jaspResults)
+    } else if(options[["boundMethod"]] == "directBound"){
+      .directBound(dataset, options, jaspResults)
+    } else if(options[["boundMethod"]] == "differenceBound"){
+      .differenceBound(dataset, options, jaspResults)
+    } else if(options[["boundMethod"]] == "ratioBound"){
+      .ratioBound(dataset, options, jaspResults)
     }
     result                                       <- jaspResults[["result"]]$object
     .musBoundTable(options, result, jaspResults, position = 2)
