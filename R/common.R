@@ -2,7 +2,7 @@
 
   jaspResults[["ARMcontainer"]] <- createJaspContainer(title= "<u>Audit Risk Model</u>")
   jaspResults[["ARMcontainer"]]$position <- 2
-  jaspResults[["ARMcontainer"]]$dependOnOptions(c("confidence", "IR", "CR", "materiality", "materialityValue"))
+  jaspResults[["ARMcontainer"]]$dependOnOptions(c("confidence", "IR", "CR", "materiality", "materialityValue", "auditType"))
 
   #  Audit Risk Model formula
   .ARMformula(options, jaspResults, position = 2)
