@@ -48,7 +48,7 @@ Form {
             AssignedVariablesList { name: "recordNumberVariable"; title: qsTr("Record numbers"); singleVariable: true; allowedColumns: ["nominal", "ordinal", "scale"]; id: recordNumberVariable }
             AssignedVariablesList { name: "monetaryVariable"; title: mus.checked ? qsTr("Book values") : qsTr("Book values (optional)"); singleVariable: true; allowedColumns: ["scale"]; id: monetaryVariable }
         }
-        Section { text: qsTr("Advanced planning options")
+        Section { text: qsTr("Advanced options")
           GridLayout { columns: 3
               RadioButtonGroup { title: qsTr("<b>Inherent risk</b>"); name: "IR"; id: ir
                     RadioButton { text: qsTr("High") ; name: "High" ; checked: true}
@@ -128,7 +128,7 @@ Form {
           AssignedVariablesList { name: "rankingVariable"; title: qsTr("Ranking variable (optional)"); singleVariable: true; allowedColumns: ["scale"] }
           AssignedVariablesList { name: "variables"; title: qsTr("Additional variables (optional)"); singleVariable: false; height: 140; allowedColumns: ["scale", "ordinal", "nominal"] }
         }        
-        Section { title: qsTr("Advanced selection options")
+        Section { title: qsTr("Advanced options")
               GridLayout { columns: 3
                 RadioButtonGroup { title: qsTr("<b>Selection type</b>"); name: "samplingMethod"; id: samplingMethod
                   RowLayout {
@@ -264,7 +264,7 @@ Form {
               AssignedVariablesList { name: "sampleFilter"; title: qsTr("Selection result"); singleVariable: true; allowedColumns: ["nominal"]; id: sampleFilter }
               AssignedVariablesList { name: "correctID"; title: qsTr("Audit result"); singleVariable: true; allowedColumns: ["nominal" ,"scale"]; id: correctID }
             }
-            Section { title: qsTr("Advanced evaluation options"); columns: 1
+            Section { title: qsTr("Advanced options"); columns: 1
               GridLayout { columns: 2
                 RadioButtonGroup { title: qsTr("<b>Estimator</b>"); name: "boundMethod"
                   RadioButton { name: "stringerBound"; text: qsTr("Stringer"); id: stringerBound; visible: false }

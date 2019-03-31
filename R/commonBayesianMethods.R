@@ -167,9 +167,8 @@
 .priorSampleTable <- function(options, result, jaspResults, position = 3){
 
   if(!is.null(jaspResults[["planningContainer"]][["sampletable"]])) return() #The options for this table didn't change so we don't need to rebuild it
-
-  if (options[["implicitsample"]] && jaspResults[["ready"]]$object){
-      if(is.null(jaspResults[["planningContainer"]][["sampletable"]])){
+  
+  if(options[["implicitsample"]]){
 
   sampletable                       <- createJaspTable("Implicit Sample")
   jaspResults[["planningContainer"]][["sampletable"]]      <- sampletable
@@ -183,6 +182,9 @@
 
   message <- paste0("Sample sizes shown are implicit sample sizes derived from the ARM risk assessments: IR = <b>", options[["IR"]], "</b> and CR = <b>", options[["CR"]], "</b>.")
   sampletable$addFootnote(message = message, symbol="<i>Note.</i>")
+  
+  if(!jaspResults[["ready"]]$object)
+    return()
 
   implicitn <- round(result[["implicitn"]], 2)
   implicitk <- round(result[["implicitk"]], 2)
@@ -195,7 +197,6 @@
   priorBound <- paste0(priorBound * 100, "%")
   row <- data.frame(implicitn = implicitn, implicitk = implicitk, priorbound = priorBound)
   sampletable$addRows(row)
-    }
   }
 }
 
