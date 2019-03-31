@@ -132,6 +132,8 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
   
   jaspResults[["N"]] <- createJaspState(options[["populationSize"]])
   jaspResults[["N"]]$dependOnOptions(c("populationSize"))
+  
+  if(is.null(jaspResults[["planningResult"]]$object)){
     if(options[["distribution"]] == "beta"){
       n_noprior               <- .calc.n.beta(options, 1 - options[["confidence"]], jaspResults)
       n_withprior             <- .calc.n.beta(options, alpha, jaspResults)
@@ -169,6 +171,12 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
   resultList[["priorB"]]      <- priorB
   resultList[["alpha"]]       <- alpha
   resultList[["confidence"]]  <- options[["confidence"]]
+  jaspResults[["planningResult"]] <- createJaspState(resultList)
+  jaspResults[["planningResult"]]$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "populationSize", "kPercentageNumber", "kNumberNumber", 
+                                  "distribution", "materialityValue", "populationValue", "auditType"))
+  } 
+  
+  resultList <- jaspResults[["planningResult"]]$object
   
   ktable <- base::switch(options[["expected.errors"]],
                           "kPercentage" = round(resultList[["k"]] * resultList[["n"]], 2),

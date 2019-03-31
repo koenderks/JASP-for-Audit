@@ -121,7 +121,7 @@ Form {
 
       Button {
         id: downloadReportPlanning
-        enabled: attributes.checked ? (materiality.value == "0" ? false : true) : (materialityValue.value == "0" ? false : (recordNumberVariable.count > 0 && monetaryVariable.count > 0))
+        enabled: attributes.checked ? (populationSize.value != 0 & materiality.value != 0) : (populationSize.value != 0 & materialityValue.value != 0 & populationValue.value != 0)
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         text: qsTr("<b>Download Report</b>")

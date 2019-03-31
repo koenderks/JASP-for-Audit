@@ -7,23 +7,24 @@
   #  Audit Risk Model formula
   .ARMformula(options, jaspResults, position = 2)
   DR                          <- jaspResults[["DR"]]$object
-
-  # Create labels for the materiality
-  materialityLevelLabel           <- base::switch(options[["auditType"]],
-                                                  "attributes" = paste0(round(options[["materiality"]], 10) * 100, "%"),
-                                                  "mus" = format(options[["materialityValue"]], scientific = FALSE))
-
-  # Interpretation before the planning table
-  if(options[["interpretation"]]){
-
-    auditRiskLabel          <- paste0(round((1 - options[["confidence"]]) * 100, 2), "%")
-    dectectionRiskLabel     <- paste0(round(DR * 100, 2), "%")
-
-    jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]] <- createJaspHtml(paste0("Prior to the substantive testing phase, the inherent risk was determined to be <b>", options[["IR"]] ,"</b>. The internal control risk was determined
-                                                                    to be <b>", options[["CR"]] ,"</b>. According to the Audit Risk Model, the required detection risk to then maintain an audit risk of <b>", auditRiskLabel, "</b> for a materiality
-                                                                    of <b>", materialityLevelLabel ,"</b> should be <b>", dectectionRiskLabel , "</b>."), "p")
-    jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]]$position <- 1
-    jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]]$dependOnOptions(c("confidence", "IR", "CR", "materiality", "materialityValue"))
+  
+  if(!is.null(jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]])){
+    return()
+  } else {
+    if(options[["interpretation"]]){
+      materialityLevelLabel           <- base::switch(options[["auditType"]],
+                                                      "attributes" = paste0(round(options[["materiality"]], 10) * 100, "%"),
+                                                      "mus" = format(options[["materialityValue"]], scientific = FALSE))
+  
+      auditRiskLabel          <- paste0(round((1 - options[["confidence"]]) * 100, 2), "%")
+      dectectionRiskLabel     <- paste0(round(DR * 100, 2), "%")
+  
+      jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]] <- createJaspHtml(paste0("Prior to the substantive testing phase, the inherent risk was determined to be <b>", options[["IR"]] ,"</b>. The internal control risk was determined
+                                                                      to be <b>", options[["CR"]] ,"</b>. According to the Audit Risk Model, the required detection risk to then maintain an audit risk of <b>", auditRiskLabel, "</b> for a materiality
+                                                                      of <b>", materialityLevelLabel ,"</b> should be <b>", dectectionRiskLabel , "</b>."), "p")
+      jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]]$position <- 1
+      jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]]$dependOnOptions(c("confidence", "IR", "CR", "materiality", "materialityValue"))
+    }
   }
 }
 

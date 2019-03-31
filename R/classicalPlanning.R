@@ -102,8 +102,8 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   
   jaspResults[["N"]] <- createJaspState(options[["populationSize"]])
   jaspResults[["N"]]$dependOnOptions(c("populationSize"))
-  
-  if(jaspResults[["ready"]]$object){
+
+  if(is.null(jaspResults[["planningResult"]]$object)){
     if(options[["distribution"]] == "gamma"){
       n                     <- .calc.n.gamma(options, alpha, jaspResults)
     } else if(options[["distribution"]] == "binomial"){
@@ -111,11 +111,7 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
     } else if(options[["distribution"]] == "hypergeometric"){
       n                     <- .calc.n.hypergeometric(options, alpha, jaspResults)
     }  
-    k <- base::switch(options[["expected.errors"]], "kPercentage" = options[["kPercentageNumber"]], "kNumber" = options[["kNumberNumber"]] / n)
-  } else {
-    n <- 0
-    k <-0
-  }                      
+    k <- base::switch(options[["expected.errors"]], "kPercentage" = options[["kPercentageNumber"]], "kNumber" = options[["kNumberNumber"]] / n)                   
 
   resultList <- list()
   resultList[["n"]]             <- n
@@ -124,6 +120,12 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   resultList[["CR"]]            <- options[["CR"]]
   resultList[["alpha"]]         <- alpha
   resultList[["confidence"]]    <- options[["confidence"]]
+  jaspResults[["planningResult"]] <- createJaspState(resultList)
+  jaspResults[["planningResult"]]$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "populationSize", "kPercentageNumber", "kNumberNumber", 
+                                  "distribution", "materialityValue", "populationValue", "auditType"))
+  } 
+
+  resultList <- jaspResults[["planningResult"]]$object
   
   if(options[["distribution"]] != "gamma" && options[["expected.errors"]] == "kNumber" && options[["kNumberNumber"]]%%1 != 0){
     summaryTable$setError("Expected errors should be a whole number in this sampling model.")
