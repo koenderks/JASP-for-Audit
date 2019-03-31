@@ -205,13 +205,29 @@
   if(options[["distribution"]] == "beta"){
 
     mle <- floor(result[["k"]] * result[["n"]])
-
-    xseq <- seq(0, options[["limx"]], 0.001)
-    d <- data.frame(
-        x = rep(xseq, 2),
-        y = dbeta(x = xseq, shape1 = result[["priorA"]], shape2 = result[["priorB"]]),
-        type = c(rep("Prior", length(xseq)))
-    )
+    
+    if(!options[["expectedPosterior"]]){
+      
+      xseq <- seq(0, options[["limx"]], 0.001)
+      d <- data.frame(
+          x = rep(xseq, 2),
+          y = dbeta(x = xseq, shape1 = result[["priorA"]], shape2 = result[["priorB"]]),
+          type = c(rep("Prior", length(xseq)))
+      )
+      
+    } else {
+      
+      k   <- ifelse(options[["expected.errors"]] == "kPercentage", yes = round(options[["kPercentageNumber"]] * result[["n"]], 2), no = options[["kNumberNumber"]])
+      
+      xseq <- seq(0, options[["limx"]], 0.001)
+      d <- data.frame(
+          x = rep(xseq, 2),
+          y = c(dbeta(x = xseq, shape1 = result[["priorA"]], shape2 = result[["priorB"]]), dbeta(x = xseq, shape1 = result[["priorA"]] + k, shape2 = result[["priorB"]] + (result[["n"]] - k))),
+          type = c(rep("Prior", length(xseq)), rep("Posterior", length(xseq)))
+      )
+      # Reorder factor levels to display in legend
+      d$type = factor(d$type,levels(d$type)[c(2,1)])
+    }
 
     xBreaks <- JASPgraphs::getPrettyAxisBreaks(xseq, min.n = 4)
     xLim <- range(xBreaks)
@@ -219,10 +235,18 @@
     yLim <- range(yBreaks)
 
     pointdata <- data.frame(x = jaspResults[["materiality"]]$object, y = dbeta(jaspResults[["materiality"]]$object, result[["priorA"]], result[["priorB"]]))
+    
+    if(!options[["expectedPosterior"]]){
+      scaleValues <- c("dashed")
+      guide <- FALSE
+    } else {
+      scaleValues <- c("dashed", "dotted")
+      guide <- ggplot2::guide_legend(nrow = 1, byrow = FALSE, title = "", order = 1)
+    }
 
     p <- ggplot2::ggplot(d, ggplot2::aes(x = x, y = y)) +
         ggplot2::geom_line(ggplot2::aes(x = x, y = y, linetype = type), lwd = 1) +
-        ggplot2::scale_linetype_manual(values=c("dashed"), guide = FALSE)
+        ggplot2::scale_linetype_manual(values=scaleValues, guide = guide)
 
     p <- p + ggplot2::scale_x_continuous(name = "Error percentage", breaks = xBreaks, limits = xLim, labels = paste0(xBreaks * 100, "%"))
 
@@ -252,12 +276,29 @@
   
   } else {
     
-    xseq <- seq(0, jaspResults[["N"]]$object, 1)[1:ceiling(options[["limx"]] * jaspResults[["N"]]$object)]
-    d <- data.frame(
-        x = xseq,
-        y = .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, u = result[["priorA"]], v = result[["priorB"]])[1:ceiling(options[["limx"]] * jaspResults[["N"]]$object)], 
-        type = c(rep("Prior", length(xseq)))
-    )
+    if(!options[["expectedPosterior"]]){
+      
+      xseq <- seq(0, jaspResults[["N"]]$object, 1)[1:ceiling(options[["limx"]] * jaspResults[["N"]]$object)]
+      d <- data.frame(
+          x = xseq,
+          y = .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, u = result[["priorA"]], v = result[["priorB"]])[1:ceiling(options[["limx"]] * jaspResults[["N"]]$object)], 
+          type = c(rep("Prior", length(xseq)))
+      )
+      
+    } else {
+        
+        k   <- ifelse(options[["expected.errors"]] == "kPercentage", yes = round(options[["kPercentageNumber"]] * result[["n"]], 2), no = options[["kNumberNumber"]])
+        
+        xseq <- seq(0, jaspResults[["N"]]$object, 1)[1:ceiling(options[["limx"]] * jaspResults[["N"]]$object)]
+        d <- data.frame(
+            x = rep(xseq, 2),
+            y = c(.dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, u = result[["priorA"]], v = result[["priorB"]])[1:ceiling(options[["limx"]] * jaspResults[["N"]]$object)] ,
+                  .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, u = result[["priorA"]] + k, v = result[["priorB"]] + (result[["n"]] - k))[1:ceiling(options[["limx"]] * jaspResults[["N"]]$object)]),
+            type = c(rep("Prior", length(xseq)), rep("Posterior", length(xseq)))
+        )
+        # Reorder factor levels to display in legend
+        d$type = factor(d$type,levels(d$type)[c(2,1)])
+    }
     
     xBreaks <- JASPgraphs::getPrettyAxisBreaks(xseq, min.n = 4)
     xLim <- range(xBreaks)
@@ -267,9 +308,17 @@
     pointdata <- data.frame(x = jaspResults[["materiality"]]$object * jaspResults[["N"]]$object, y = .dBetaBinom(ceiling(jaspResults[["materiality"]]$object * jaspResults[["N"]]$object), 
                           N = jaspResults[["N"]]$object, result[["priorA"]], result[["priorB"]]))
                           
+    if(!options[["expectedPosterior"]]){
+      scaleValues <- c("dashed")
+      guide <- FALSE
+    } else {
+      scaleValues <- c("dashed", "dotted")
+      guide <- ggplot2::guide_legend(nrow = 1, byrow = FALSE, title = "", order = 1)
+    }
+                          
     p <- ggplot2::ggplot(d, ggplot2::aes(x = x, y = y)) +
         ggplot2::geom_line(ggplot2::aes(x = x, y = y, linetype = type), lwd = 1) +
-        ggplot2::scale_linetype_manual(values=c("dashed"), guide = FALSE)
+        ggplot2::scale_linetype_manual(values = scaleValues, guide = guide)
 
     p <- p + ggplot2::scale_x_continuous(name = "Population errors", breaks = xBreaks, limits = xLim, labels = xBreaks)
     

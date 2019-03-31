@@ -75,7 +75,7 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
         {
             jaspResults[["planningContainer"]][["priorPlot"]] 		<- .plotPrior(options, planningResult, jaspResults)
             jaspResults[["planningContainer"]][["priorPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors", "limx", "plotPrior", "plotPriorAdditionalInfo", 
-                                                                                      "distribution", "kPercentageNumber", "kNumberNumber", "materialityValue"))
+                                                                                      "distribution", "kPercentageNumber", "kNumberNumber", "materialityValue", "expectedPosterior"))
             jaspResults[["planningContainer"]][["priorPlot"]] 		$position <- 6
         }
         jaspResults[["planningContainer"]][["figure3"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The prior probability distribution <b>(", options[["distribution"]] ,")</b> on the misstatement in the population. The prior parameters are

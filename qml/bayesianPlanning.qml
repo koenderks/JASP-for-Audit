@@ -110,6 +110,7 @@ Form {
                 }
                PercentField {  text: qsTr("x-axis limit")                   ; name: "limx" ; defaultValue: 100; Layout.leftMargin: 20; enabled: plotPrior.checked}
                CheckBox {      text: qsTr("Additional info")                ; name: "plotPriorAdditionalInfo" ; Layout.leftMargin: 20; checked: true; enabled: plotPrior.checked}
+               CheckBox { text: qsTr("Expected posterior") ; name: "expectedPosterior" ; Layout.leftMargin: 20; checked: false; enabled: plotPrior.checked }
             }
     }
     }
