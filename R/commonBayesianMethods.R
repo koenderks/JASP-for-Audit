@@ -223,7 +223,7 @@
       d <- data.frame(
           x = rep(xseq, 2),
           y = c(dbeta(x = xseq, shape1 = result[["priorA"]], shape2 = result[["priorB"]]), dbeta(x = xseq, shape1 = result[["priorA"]] + k, shape2 = result[["priorB"]] + (result[["n"]] - k))),
-          type = c(rep("Prior", length(xseq)), rep("Posterior", length(xseq)))
+          type = c(rep("Prior", length(xseq)), rep("Expected posterior", length(xseq)))
       )
       # Reorder factor levels to display in legend
       d$type = factor(d$type,levels(d$type)[c(2,1)])
@@ -254,7 +254,11 @@
     if(options[["plotPriorAdditionalInfo"]]){
         pdata <- data.frame(x = 0, y = 0, l = "1")
         p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 1, 0.5, 0))
-        p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Prior confidence region"))
+        if(options[["expectedPosterior"]]){
+          p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Prior \nconfidence region"))
+        } else {
+          p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Prior confidence region"))
+        }
         p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 1, 0.5, .7), stroke = 2, color = "black")))
 
         p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["priorA"]], shape2 = result[["priorB"]]),
