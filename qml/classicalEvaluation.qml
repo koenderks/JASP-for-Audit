@@ -22,10 +22,10 @@ import JASP.Widgets 1.0
 
 Form {
 
-    VariablesForm { implicitHeight: 200
+    VariablesForm { implicitHeight: 150
       AvailableVariablesList { name: "evaluationVariables"}
-      AssignedVariablesList { name: "sampleFilter"; title: qsTr("Selection result"); singleVariable: true; allowedColumns: ["nominal"]; id: sampleFilter }
       AssignedVariablesList { name: "correctID"; title: qsTr("Audit result"); singleVariable: true; allowedColumns: ["nominal" ,"scale"]; id: correctID }
+      AssignedVariablesList { name: "monetaryVariable"; title: qsTr("Book values (optional)"); singleVariable: true; allowedColumns: ["scale"]; id: monetaryVariable }
     }
 
     GridLayout { columns: 3
@@ -73,7 +73,6 @@ Form {
             RadioButton { text: qsTr("Medium")      ; name: "Medium" }
             RadioButton { text: qsTr("Low")         ; name: "Low" }
         }
-
         RadioButtonGroup {
           title: qsTr("<b>Estimator</b>")
           name: "boundMethod"
@@ -81,10 +80,10 @@ Form {
           RadioButton { name: "stringerBound"; text: qsTr("Stringer"); id: stringerBound }
           RadioButton { name: "directBound"; text: qsTr("Direct"); id: directBound }
           RadioButton { name: "differenceBound"; text: qsTr("Difference"); id: differenceBound }
-          RadioButton { name: "ratioBound"; text: qsTr("Ratio"); id: ratioBound; visible: false }
+          RadioButton { name: "ratioBound"; text: qsTr("Ratio"); id: ratioBound }
           RadioButton { name: "regressionBound"; text: qsTr("Regression"); id: regressionBound }
-          RadioButton { name: "gammaBound"; text: qsTr("Gamma"); id: gammaBound; visible: false }
-          RadioButton { name: "binomialBound"; text: qsTr("Binomial"); id: binomialBound }
+          RadioButton { name: "gammaBound"; text: qsTr("Gamma"); id: gammaBound }
+          RadioButton { name: "binomialBound"; text: qsTr("Binomial"); id: binomialBound; checked: true }
           RadioButton { name: "hyperBound"; text: qsTr("Hypergeometric"); id: hyperBound }
         }
         GroupBox { title: qsTr("<b>Explanatory text</b>")

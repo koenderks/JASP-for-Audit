@@ -1,5 +1,5 @@
 classicalPlanning <- function(jaspResults, dataset, options, ...){
-
+  ### TITLE ###
   jaspResults$title <- "Planning"
   
   jaspResults[["procedureContainer"]] <- createJaspContainer(title= "<u>Procedure</u>")

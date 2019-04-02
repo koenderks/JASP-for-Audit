@@ -437,6 +437,8 @@
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",        type = 'string')
     evaluationTable$addColumnInfo(name = 'k',             title = "Full errors",        type = 'string')
     evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
+    if(options[["auditType"]] == "mus" && options[["monetaryVariable"]] != "")
+      evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
     if(options[["mostLikelyError"]])
       evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                type = 'string')
     if(options[["bayesFactor"]])
@@ -451,6 +453,8 @@
 
     if(options[["correctID"]] == ""){
       row                   <- data.frame(materiality = ".", n = ".", k = ".", bound = ".")
+      if(options[["auditType"]] == "mus" && options[["monetaryVariable"]] != "")
+        row <- cbind(row, projm = ".")
       if(options[["mostLikelyError"]])
         row                 <- cbind(row, mle = ".")
       if(options[["bayesFactor"]])
@@ -473,6 +477,8 @@
   }
 
     row                     <- data.frame(materiality = materialityTable, n = result[["n"]], k = result[["k"]], bound = boundTable)
+    if(options[["auditType"]] == "mus")
+      row <- cbind(row, projm = round(result[["bound"]] * jaspResults[["total_data_value"]]$object, 2))
     if(options[["mostLikelyError"]])
       row                   <- cbind(row, mle = mle)
     if(options[["bayesFactor"]])

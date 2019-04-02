@@ -1,5 +1,5 @@
 bayesianPlanning <- function(jaspResults, dataset, options, ...){
-
+  ### TITLE ###
   jaspResults$title <- "Bayesian Planning"
   
   jaspResults[["figNumber"]]          <- createJaspState(1)

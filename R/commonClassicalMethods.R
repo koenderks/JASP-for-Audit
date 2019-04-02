@@ -198,20 +198,15 @@
     evaluationTable                       <- createJaspTable("Evaluation Summary")
     jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
-    evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID",
-                                      "sampleFilter", "distribution", "mostLikelyError", "N", "correctMUS", "sampleFilterMUS",
-                                      "materialityValue"))
+    evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "correctID",
+                                      "sampleFilter", "distribution", "mostLikelyError", "materialityValue"))
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",          type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",          type = 'string')
     evaluationTable$addColumnInfo(name = 'k',             title = "Errors",          type = 'string')
-    if(options[["variableType"]] == "variableTypeCorrect"){
-        evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
-        if(options[["auditType"]] == "mus" && options[["monetaryVariable"]] != "")
-        evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
-    } else {
-      evaluationTable$addColumnInfo(name = 'projm',         title = "Maximum Misstatement",           type = 'string')
-    }
+    evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
+    if(options[["auditType"]] == "mus" && options[["monetaryVariable"]] != "")
+      evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
     if(options[["mostLikelyError"]])
       evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                  type = 'string')
       
@@ -229,9 +224,7 @@
 
     # Return empty table
     if(!jaspResults[["runEvaluation"]]$object){
-      row <- data.frame(materiality = materialityTable, n = ".", k = ".")
-      if(options[["variableType"]] == "variableTypeCorrect")
-        row <- cbind(row, bound = ".")
+      row <- data.frame(materiality = materialityTable, n = ".", k = ".", bound = ".")
       if(options[["auditType"]] == "mus" && options[["monetaryVariable"]] != "")
         row <- cbind(row, projm = ".")
       evaluationTable$addRows(row)
@@ -248,9 +241,7 @@
         boundTable <- paste0(boundTable * 100, "%")
     }
 
-    row <- data.frame(materiality = materialityTable, n = result[["n"]], k = result[["k"]])
-    if(options[["variableType"]] == "variableTypeCorrect")
-      row <- cbind(row, bound = boundTable)
+    row <- data.frame(materiality = materialityTable, n = result[["n"]], k = result[["k"]], bound = boundTable)
     if(options[["auditType"]] == "mus")
       row <- cbind(row, projm = round(result[["bound"]] * jaspResults[["total_data_value"]]$object, 2))
     if(options[["mostLikelyError"]])

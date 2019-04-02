@@ -22,10 +22,10 @@ import JASP.Widgets 1.0
 
 Form {
 
-      VariablesForm { implicitHeight: 200
+      VariablesForm { implicitHeight: 150
         AvailableVariablesList { name: "evaluationVariables"}
-        AssignedVariablesList { name: "sampleFilter"; title: qsTr("Selection result"); singleVariable: true; allowedColumns: ["nominal"]; id: sampleFilter }
         AssignedVariablesList { name: "correctID"; title: qsTr("Audit result"); singleVariable: true; allowedColumns: ["nominal" ,"scale"]; id: correctID }
+        AssignedVariablesList { name: "monetaryVariable"; title: qsTr("Book values (optional)"); singleVariable: true; allowedColumns: ["scale"]; id: monetaryVariable }
       }
 
       GridLayout { columns: 3
