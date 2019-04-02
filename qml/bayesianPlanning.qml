@@ -43,7 +43,7 @@ Form {
               PercentField { name: "confidence"; label: qsTr("Confidence"); decimals: 2; defaultValue: 95 }
           }
       }
-      Section { text: qsTr("Advanced planning options")
+      Section { text: qsTr("Advanced options")
         GridLayout { columns: 3
             RadioButtonGroup { title: qsTr("<b>Inherent risk</b>"); name: "IR"; id: ir
                   RadioButton { text: qsTr("High") ; name: "High" ; checked: true}
