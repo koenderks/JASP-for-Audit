@@ -394,7 +394,7 @@
 
         mle                     <- N * meanw
         stand.dev               <- sd(w) * (N / sqrt(n)) * sqrt( (N-n) / (N-1) )
-        upperValue              <- mle + qt(p = options[["confidence"]], df = n - 1) * stand.dev
+        upperValue              <- mle + qt(p = 1 - alpha, df = n - 1) * stand.dev
         bound                   <- (upperValue - B) / B
     }
 
@@ -442,9 +442,9 @@
         meanw                   <- mean(w)
         meant                   <- mean(t)
 
-        mle                     <- N * meant
+        mle                     <- B - N * meant
         stand.dev               <- sd(t) * (N / sqrt(n)) * sqrt( (N-n) / (N-1) )
-        upperValue              <- mle + qt(p = options[["confidence"]], df = n - 1) * stand.dev
+        upperValue              <- mle + qt(p = 1 - alpha, df = n - 1) * stand.dev
         if(upperValue == 0){
           bound                 <- 0
         } else {
@@ -496,11 +496,13 @@
         b                       <- sample[, .v(options[["monetaryVariable"]])]
         meanw                   <- mean(w)
         meanb                   <- mean(b)
-        q                       <- meanw / meanb
+        sumw                    <- sum(w)
+        sumb                    <- sum(b)
+        q                       <- sumw / sumb
 
         mle                     <- q * B
-        stand.dev               <- sqrt( sd(w)^2 - 2*q*cor(b, w)*sd(b)*sd(w) + q^2*sd(b)^2 ) * (N / sqrt(n)) * sqrt( (N-n) / (N-1) )
-        upperValue              <- mle + qt(p = options[["confidence"]], df = n - 1) * stand.dev
+        stand.dev               <- sqrt( ( sum(t^2) - 2 * (1-q) * sum(b*t) + (1 - q)^2 * sum(b^2) ) / (n - 1)) * (N / sqrt(n)) * sqrt( (N-n) / (N-1) )
+        upperValue              <- mle + qt(p = 1 - alpha, df = n - 1) * stand.dev
         if(upperValue == 0){
           bound                 <- 0
         } else {
@@ -556,9 +558,9 @@
         meanb                   <- mean(b)
         meanw                   <- mean(w)
 
-        mleregression           <- (N * meanw) + (b1 * (B - N * meanb)) - B
-        stand.dev               <- sd(w) * ( N / sqrt(n)) * sqrt( (N-n) / (N-1) ) * sqrt(1 - cor(b, w)^2)
-        upperValue              <- mleregression + qt(p = options[["confidence"]], df = n - 1) * stand.dev
+        mleregression           <- N * meanw + b1 * (B - N * meanb)
+        stand.dev               <- sd(w) * sqrt(1 - cor(b, w)^2) * ( N / sqrt(n)) * sqrt( (N-n) / (N-1) )
+        upperValue              <- mleregression + qt(p = 1 - alpha, df = n - 1) * stand.dev
         if(upperValue == 0){
           bound                 <- 0
         } else {

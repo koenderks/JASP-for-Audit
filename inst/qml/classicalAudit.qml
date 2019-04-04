@@ -245,7 +245,7 @@ Form {
                   evaluationChecked.checked = true
                   if (mussampling.checked & variableTypeTrueValues.checked) stringerBound.click() 
                   if (mussampling.checked & variableTypeTrueValues.checked) stringerBound.visible = true 
-                  if (recordsampling.checked & variableTypeTrueValues.checked) directBound.click() 
+                  if (recordsampling.checked & variableTypeTrueValues.checked) regressionBound.click() 
                   if (recordsampling.checked & variableTypeTrueValues.checked) directBound.visible = true 
                   if (recordsampling.checked & variableTypeTrueValues.checked) differenceBound.visible = true 
                   if (recordsampling.checked & variableTypeTrueValues.checked) ratioBound.visible = true 
