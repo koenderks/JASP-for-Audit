@@ -82,7 +82,7 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   summaryTable$addColumnInfo(name = 'n',                    title = "Required sample size", type = 'string')
   
   message <- base::switch(options[["distribution"]],
-                            "gamma" = "The sample size is based on the <b>poisson</b> distribution.",
+                            "gamma" = "The sample size is based on the <b>Poisson</b> distribution.",
                             "binomial" = "The sample size is based on the <b>binomial</b> distribution.",
                             "hypergeometric" = paste0("The sample size is based on the <b>hypergeometric</b> distribution (N = ", options[["populationSize"]] ,")."))
                               

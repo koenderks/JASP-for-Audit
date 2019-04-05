@@ -62,7 +62,7 @@ Form {
               }
               GroupBox { title: qsTr("<b>Explanatory text</b>")
                 RowLayout {
-                  CheckBox { id: interpretationOn; text: qsTr("Enable"); name: "interpretation"; checked: true }
+                  CheckBox { id: interpretationOn; text: qsTr("Enable"); name: "interpretation"; checked: false }
                   MenuButton { width:	20; iconSource: "qrc:/images/info-button.png"; toolTip: "Show explanatory text at each step of the analysis"; radius: 20; Layout.alignment: Qt.AlignRight }
                 }
               }
