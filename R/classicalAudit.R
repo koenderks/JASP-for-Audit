@@ -64,7 +64,7 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
       jaspResults[["figNumber"]]$dependOnOptions(c("distributionPlot", "plotCriticalErrors"))
     } else if(options[["distributionPlot"]]){
         errorPlot <- createJaspPlot(plot = NULL, title = "Population Distribution")
-        errorPlot$setError("Plotting not possible: Please specify all  your variables.")
+        errorPlot$setError("Plotting not possible: No analysis has been run.")
         jaspResults[["procedureContainer"]][["valueDistributionPlot"]] <- errorPlot
     }
 }
@@ -98,13 +98,13 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
     materialityLevelLabel           <- base::switch(options[["auditType"]],
                                                     "attributes" = paste0(round(jaspResults[["materiality"]]$object, 4) * 100, "%"),
                                                     "mus" = format(options[["materialityValue"]], scientific = FALSE))
-    distribution <- ifelse(options[["distribution"]] == "gamma", yes = "poisson", no = options[["distribution"]])
+    distribution <- ifelse(options[["distribution"]] == "gamma", yes = "Poisson", no = options[["distribution"]])
     
     jaspResults[["materialityLevelLabel"]] <- createJaspState(materialityLevelLabel)
-    jaspResults[["planningContainer"]][["priorKnowledgeParagraph"]] <- createJaspHtml(paste0("As prior knowledge, the most likely error in the data was specified to be <b>", expected.errors ,"</b>. The sample size that is required to prove an upper
-                                                                      confidence bound of <b>", materialityLevelLabel ,"</b>, assuming the sample contains <b>", expected.errors ,"</b> full errors, is <b>", requiredSampleSize ,"</b>. This sample size is calculated according to the
-                                                                      <b>", distribution , "</b> distribution. Consequently, if the proportion of errors in the sample exceeds <b>", max.errors ,"</b>, the projected misstatement is more than
-                                                                      the materiality and the population cannot be approved."), "p")
+    jaspResults[["planningContainer"]][["priorKnowledgeParagraph"]] <- createJaspHtml(paste0("The most likely error in the data was expected to be <b>", expected.errors ,"</b>. The sample size that is required to prove a materiality of <b>", materialityLevelLabel ,"</b>, assuming 
+                                                                                              the sample contains <b>", expected.errors ,"</b> full errors, is <b>", requiredSampleSize ,"</b>. This sample size is based on the <b>", distribution , "</b> distribution, the inherent risk <b>(", options[["IR"]] , ")</b>, the 
+                                                                                              control risk <b>(", options[["CR"]] , ")</b> and the expected errors. Consequently, if the sum of errors from the audited observations exceeds <b>", max.errors ,"</b>, the 
+                                                                                              projected misstatement exceeds materiality and the population cannot be approved."), "p")
       jaspResults[["planningContainer"]][["priorKnowledgeParagraph"]]$position <- 1
       jaspResults[["planningContainer"]][["priorKnowledgeParagraph"]]$dependOnOptions(c("kPercentageNumber", "expected.errors", "kNumberNumber", "distribution", "IR", "CR", "materiality", "N",
                                                                                           "confidence", "materialityValue"))
@@ -213,13 +213,12 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
 
   # Interpretation before the evalution table
   if(options[["interpretation"]]){
-    boundLabel <- base::switch(runEvaluation,
-                                "TRUE" = paste0(round(result[["bound"]] * 100, 2), "%"),
-                                "FALSE" = "...%")
-    jaspResults[["evaluationContainer"]][["resultParagraph"]] <- createJaspHtml(paste0("The sample consisted of <b>", nrow(dataset) , "</b> observations, <b>", result[["k"]] , "</b> of which were found to contain an error. The knowledge from these data, com-
-                                                          bined with the prior knowledge results in an <b>", jaspResults[["confidenceLevelLabel"]]$object , "%</b> upper confidence bound of <b>", boundLabel ,"</b>. The cumulative knowledge states that there
-                                                          is a <b>", jaspResults[["confidenceLevelLabel"]]$object , "</b> probability that, when one would repeaditly sample from this population, the maximum error is calculated to be lower
-                                                          than <b>", boundLabel ,"</b>."), "p")
+    boundLabel      <- ifelse(jaspResults[["runEvaluation"]]$object, yes = paste0(round(result[["bound"]] * 100, 2), "%"), no = ".....")  
+    sampleSizeLabel <- ifelse(options[["correctID"]] == "", yes = ".....", no = nrow(dataset))       
+    jaspResults[["evaluationContainer"]][["resultParagraph"]] <- createJaspHtml(paste0("The sample consisted of <b>", sampleSizeLabel , "</b> observations, <b>", result[["k"]] , "</b> of which were found to contain an error. The knowledge from these data, com-
+                                                                                        bined with the prior knowledge results in an <b>", jaspResults[["confidenceLevelLabel"]]$object , "%</b> upper confidence bound of <b>", boundLabel ,"</b>. The cumulative knowledge states that there
+                                                                                        is a <b>", jaspResults[["confidenceLevelLabel"]]$object , "</b> probability that, when one would repeaditly sample from this population, the maximum misstatement is calculated to be lower
+                                                                                        than <b>", boundLabel ,"</b>."), "p")
     jaspResults[["evaluationContainer"]][["resultParagraph"]]$position <- 1
     jaspResults[["evaluationContainer"]][["resultParagraph"]]$dependOnOptions(c("IR", "CR", "confidence", "correctID", "plotBound", "materiality",
                                                              "method", "materialityValue"))

@@ -470,7 +470,7 @@
     mle <- ceiling( (result[["posteriorA"]] - 1) / (result[["posteriorA"]] + result[["posteriorB"]] - 2) * jaspResults[["N"]]$object )
 
     if(options[["correctID"]] == ""){
-      row                   <- data.frame(materiality = ".", n = ".", k = ".", bound = ".")
+      row                   <- data.frame(materiality = ".", n = ".", k = ".")
       if(!options[["displayCredibleInterval"]]){
         row <- cbind(row, bound = ".")
         if(options[["monetaryVariable"]] != "")
