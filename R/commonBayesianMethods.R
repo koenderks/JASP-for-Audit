@@ -398,11 +398,14 @@
     priorB                  <- 1 + (pn - pk)
 
     bound <- "."
+    interval <- c(".", ".")
     if(n != 0 && k <= n){
       if(options[["boundMethod"]] == "betaBound")
         bound             <- qbeta(p = options[["confidence"]], shape1 = priorA + k, shape2 = priorB + (n - k), lower.tail = TRUE)
+        interval          <- qbeta(p = c((1 - options[["confidence"]])/2, 1 - (1 - options[["confidence"]])/2), shape1 = priorA + k, shape2 = priorB + (n - k), lower.tail = TRUE)
       if(options[["boundMethod"]] == "betabinomialBound")
         bound             <- .qBetaBinom(p = options[["confidence"]], N = jaspResults[["N"]]$object, u = priorA + k, v = priorB + (n - k)) / jaspResults[["N"]]$object
+        interval          <- .qBetaBinom(p = c((1 - options[["confidence"]])/2, 1 - (1 - options[["confidence"]])/2), N = jaspResults[["N"]]$object, u = priorA + k, v = priorB + (n - k)) / jaspResults[["N"]]$object
     }
 
     resultList <- list()
@@ -415,6 +418,7 @@
     resultList[["alpha"]]       <- alpha
     resultList[["confidence"]]  <- options[["confidence"]]
     resultList[["bound"]]       <- bound
+    resultList[["interval"]]    <- interval
     resultList[["priorA"]]      <- priorA
     resultList[["priorB"]]      <- priorB
     resultList[["posteriorA"]]  <- priorA + k
@@ -435,14 +439,24 @@
     jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "statistic", "materiality", "show", "correctID", "expected.errors", "kPercentageNumber", "kNumberNumber", 
-                                      "sampleFilter", "mostLikelyError", "bayesFactor", "distribution", "materialityValue", "variableType", "boundMethod"))
+                                      "sampleFilter", "mostLikelyError", "bayesFactor", "distribution", "materialityValue", "variableType", "boundMethod", "displayCredibleInterval"))
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",        type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",        type = 'string')
     evaluationTable$addColumnInfo(name = 'k',             title = "Full errors",        type = 'string')
-    evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
-    if(options[["auditType"]] == "mus" && options[["monetaryVariable"]] != "")
-      evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
+    if(!options[["displayCredibleInterval"]]){
+      evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
+      if(options[["monetaryVariable"]] != "")
+          evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
+    } else {
+      intervalTitles <- paste0(round(c((1 - options[["confidence"]])/2, 1 - (1 - options[["confidence"]])/2) * 100, 3), "%")
+      evaluationTable$addColumnInfo(name = 'cilow',          title = intervalTitles[1], type = 'string', overtitle = paste0(result[["confidence"]] * 100,"% Credible interval"))
+      evaluationTable$addColumnInfo(name = 'cihigh',         title = intervalTitles[2], type = 'string', overtitle = paste0(result[["confidence"]] * 100,"% Credible interval"))
+      if(options[["monetaryVariable"]] != ""){
+        evaluationTable$addColumnInfo(name = 'projectedlow',         title = "Lower",           type = 'string', overtitle = "Projected misstatement")
+        evaluationTable$addColumnInfo(name = 'projectedhigh',         title = "Upper",           type = 'string', overtitle = "Projected misstatement")
+      }
+    }
     if(options[["mostLikelyError"]])
       evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                type = 'string')
     if(options[["bayesFactor"]])
@@ -457,8 +471,15 @@
 
     if(options[["correctID"]] == ""){
       row                   <- data.frame(materiality = ".", n = ".", k = ".", bound = ".")
-      if(options[["auditType"]] == "mus" && options[["monetaryVariable"]] != "")
-        row <- cbind(row, projm = ".")
+      if(!options[["displayCredibleInterval"]]){
+        row <- cbind(row, bound = ".")
+        if(options[["monetaryVariable"]] != "")
+          row <- cbind(row, projm = ".")
+      } else {
+        row <- cbind(row, cilow = ".", cihigh = ".")
+        if(options[["monetaryVariable"]] != "")
+          row <- cbind(row, projectedlow = ".", projectedhigh = ".")
+      }
       if(options[["mostLikelyError"]])
         row                 <- cbind(row, mle = ".")
       if(options[["bayesFactor"]])
@@ -472,17 +493,30 @@
     } else {
       materialityTable <- options[["materialityValue"]]
     }
-
-    boundTable <- result[["bound"]]
-    if(!"." %in% boundTable){
-      boundTable            <- round(result[["bound"]], 4)
-
-    boundTable          <- paste0(round(result[["bound"]], 4) * 100, "%")
-  }
-
-    row                     <- data.frame(materiality = materialityTable, n = result[["n"]], k = result[["k"]], bound = boundTable)
-    if(options[["auditType"]] == "mus")
-      row <- cbind(row, projm = round(result[["bound"]] * jaspResults[["total_data_value"]]$object, 2))
+    
+    if(!options[["displayCredibleInterval"]]){
+      boundTable <- result[["bound"]]
+      projectedMisstatement <- "."
+      if(!"." %in% boundTable){
+        boundTable            <- round(result[["bound"]], 4)
+        projectedMisstatement <- ceiling(result[["bound"]] * jaspResults[["total_data_value"]]$object)
+        boundTable            <- paste0(boundTable * 100, "%")
+      }  
+      row <- data.frame(materiality = materialityTable, n = result[["n"]], k = result[["k"]], bound = boundTable)
+      if(options[["monetaryVariable"]] != "")
+        row <- cbind(row, projm = projectedMisstatement)
+    } else {
+      intervalTable <- result[["interval"]]
+      projectedMisstatement <- "."
+      if(!"." %in% intervalTable){
+        intervalTable             <- round(result[["interval"]], 4)
+        projectedMisstatement     <- ceiling(result[["interval"]] * jaspResults[["total_data_value"]]$object)
+        intervalTable             <- paste0(intervalTable * 100, "%")
+      }
+      row <- data.frame(materiality = materialityTable, n = result[["n"]], k = result[["k"]], cilow = intervalTable[1], cihigh = intervalTable[2])
+      if(options[["monetaryVariable"]] != "")
+        row <- cbind(row, projectedlow = projectedMisstatement[1], projectedhigh = projectedMisstatement[2])
+    }
     if(options[["mostLikelyError"]])
       row                   <- cbind(row, mle = mle)
     if(options[["bayesFactor"]])
@@ -521,9 +555,14 @@
       p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 0.25, 1, 0))
       p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior \nconfidence region"))
       p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 0.25, 1, .5), stroke = 2, color = "black")), order = 2)
-
+      
+      if(!options[["displayCredibleInterval"]]){
         p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["posteriorA"]], shape2 = result[["posteriorB"]]), xlim = c(0, result[["bound"]]),
-                                        geom = "area", fill = rgb(0, 0.25, 1, .5))
+                                        geom = "area", fill = rgb(0, 0.25, 1, .5))  
+      } else {
+        p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = result[["posteriorA"]], shape2 = result[["posteriorB"]]), xlim = result[["interval"]],
+                                        geom = "area", fill = rgb(0, 0.25, 1, .5))  
+      }
     }
 
     p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = pointdata, size = 3, shape = 21, stroke = 2, color = "black", fill = "red")
@@ -565,12 +604,18 @@
           pdata <- data.frame(x = 0, y = 0, l = "1")
           p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 1, 0.5, 0))
           p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior confidence region"))
-          p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 1, 0.5, .7), stroke = 2, color = "black")))
+          p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 0.25, 1, .5), stroke = 2, color = "black")))
           
           df <- data.frame(x = 0:jaspResults[["N"]]$object, y = .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, u = result[["posteriorA"]], v = result[["posteriorB"]]))
-          lim <- .qBetaBinom(p = options[["confidence"]], N = jaspResults[["N"]]$object, u = result[["posteriorA"]], v = result[["posteriorB"]])    
-          df <- df[1:lim, ]
-          p <- p + ggplot2::geom_bar(data = df, stat="identity", fill = rgb(0, 0.25, 1, .5))
+          if(!options[["displayCredibleInterval"]]){
+            lim <- .qBetaBinom(p = options[["confidence"]], N = jaspResults[["N"]]$object, u = result[["posteriorA"]], v = result[["posteriorB"]])    
+            df <- df[1:lim, ]
+            p <- p + ggplot2::geom_bar(data = df, stat="identity", fill = rgb(0, 0.25, 1, .5))
+          } else {
+            lim <- .qBetaBinom(p = c((1 - options[["confidence"]])/2, 1 - (1 - options[["confidence"]])/2), N = jaspResults[["N"]]$object, u = result[["posteriorA"]], v = result[["posteriorB"]])    
+            df <- df[lim[1]:lim[2], ]
+            p <- p + ggplot2::geom_bar(data = df, stat="identity", fill = rgb(0, 0.25, 1, .5))
+          }
       }
         
       p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = pointdata, size = 3, shape = 21, stroke = 2, color = "black", fill = "red")
@@ -628,6 +673,7 @@
     M                         <- 0
     z                         <- 0
     bound                     <- 0
+    interval                  <- c(0, 0)
     prior                     <- NULL
     posterior                 <- NULL
     alpha                     <- 1 - options[["confidence"]]
@@ -652,7 +698,8 @@
       posterior_part_2        <- ((priorMu * (priorB - 1)) + (M * z_bar)) / (n + (priorA / priorPi))
       posterior               <- posterior_part_1 * posterior_part_2 * stats::rf(n = 1e6, df1 = (2 * (M + priorA)), df2 = ( 2 *(M + priorB)))
 
-      bound <- as.numeric(quantile(posterior, probs = (1 - alpha), na.rm = TRUE))
+      bound                   <- as.numeric(quantile(posterior, probs = options[["confidence"]], na.rm = TRUE))
+      interval                <- as.numeric(quantile(posterior, probs = c((1 - options[["confidence"]])/2, 1 - (1 - options[["confidence"]])/2), na.rm = TRUE))
     }
 
     resultList <- list()
@@ -663,6 +710,7 @@
     resultList[["CR"]]          <- options[["CR"]]
     resultList[["confidence"]]  <- options[["confidence"]]
     resultList[["bound"]]       <- bound
+    resultList[["interval"]]    <- interval
     resultList[["alpha"]]       <- alpha
     resultList[["priorA"]]      <- priorA
     resultList[["priorB"]]      <- priorB
@@ -684,16 +732,28 @@
     evaluationTable                       <- createJaspTable("Evaluation Summary")
     jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "materiality", "correctID", "sampleFilter", "distribution", "mostLikelyError", "correctMUS", "sampleFilterMUS",
-                                      "boundMethod", "bayesFactor", "materialityValue", "populationValue", "variableType"))
+                                      "boundMethod", "bayesFactor", "materialityValue", "populationValue", "variableType", "displayCredibleInterval"))
     evaluationTable$position <- position
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",            type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",            type = 'string')
     evaluationTable$addColumnInfo(name = 'fk',            title = "Errors",                 type = 'string')
     evaluationTable$addColumnInfo(name = 'k',             title = "Total tainting",         type = 'string')
-    evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
-    if(options[["monetaryVariable"]] != "")
-        evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
+    
+    if(!options[["displayCredibleInterval"]]){
+      evaluationTable$addColumnInfo(name = 'bound',         title = paste0(result[["confidence"]] * 100,"% Confidence bound"), type = 'string')
+      if(options[["monetaryVariable"]] != "")
+          evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
+    } else {
+      intervalTitles <- paste0(round(c((1 - options[["confidence"]])/2, 1 - (1 - options[["confidence"]])/2) * 100, 3), "%")
+      evaluationTable$addColumnInfo(name = 'cilow',          title = intervalTitles[1], type = 'string', overtitle = paste0(result[["confidence"]] * 100,"% Credible interval"))
+      evaluationTable$addColumnInfo(name = 'cihigh',         title = intervalTitles[2], type = 'string', overtitle = paste0(result[["confidence"]] * 100,"% Credible interval"))
+      if(options[["monetaryVariable"]] != ""){
+        evaluationTable$addColumnInfo(name = 'projectedlow',         title = "Lower",           type = 'string', overtitle = "Projected misstatement")
+        evaluationTable$addColumnInfo(name = 'projectedhigh',         title = "Upper",           type = 'string', overtitle = "Projected misstatement")
+      }
+    }
+    
     if(options[["mostLikelyError"]])
       evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                    type = 'string')
     if(options[["bayesFactor"]])
@@ -712,9 +772,16 @@
 
     # Return empty table with materiality
     if(!jaspResults[["runEvaluation"]]$object){
-      row <- data.frame(materiality = materialityTable, n = ".", fk = ".", k = ".", bound = ".")
-      if(options[["monetaryVariable"]] != "")
-        row <- cbind(row, projm = ".")
+      row <- data.frame(materiality = materialityTable, n = ".", fk = ".", k = ".")
+      if(!options[["displayCredibleInterval"]]){
+        row <- cbind(row, bound = ".")
+        if(options[["monetaryVariable"]] != "")
+          row <- cbind(row, projm = ".")
+      } else {
+        row <- cbind(row, cilow = ".", cihigh = ".")
+        if(options[["monetaryVariable"]] != "")
+          row <- cbind(row, projectedlow = ".", projectedhigh = ".")
+      }
       evaluationTable$addRows(row)
       return()
     }
@@ -727,25 +794,36 @@
     if(options[["boundMethod"]] == "coxAndSnellBound"){
         mle <- ceiling( sum(result[["z"]]) / result[["n"]] * total_data_value )
     } else if(options[["boundMethod"]] == "regressionBound"){
-      mle <- round(result[["mle"]], 2)
+        mle <- round(result[["mle"]], 2)
     }
-
-    boundTable <- result[["bound"]]
-    projectedMisstatement <- "."
-    if(!"." %in% boundTable){
-      boundTable            <- round(result[["bound"]], 4)
-      projectedMisstatement <- ceiling(result[["bound"]] * total_data_value)
-      boundTable            <- paste0(boundTable * 100, "%")
+    
+    if(!options[["displayCredibleInterval"]]){
+      boundTable <- result[["bound"]]
+      projectedMisstatement <- "."
+      if(!"." %in% boundTable){
+        boundTable            <- round(result[["bound"]], 4)
+        projectedMisstatement <- ceiling(result[["bound"]] * total_data_value)
+        boundTable            <- paste0(boundTable * 100, "%")
+      }  
+      row <- data.frame(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable)
+      if(options[["monetaryVariable"]] != "")
+        row <- cbind(row, projm = projectedMisstatement)
+    } else {
+      intervalTable <- result[["interval"]]
+      projectedMisstatement <- "."
+      if(!"." %in% intervalTable){
+        intervalTable             <- round(result[["interval"]], 4)
+        projectedMisstatement     <- ceiling(result[["interval"]] * total_data_value)
+        intervalTable             <- paste0(intervalTable * 100, "%")
+      }
+      row <- data.frame(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, cilow = intervalTable[1], cihigh = intervalTable[2])
+      if(options[["monetaryVariable"]] != "")
+        row <- cbind(row, projectedlow = projectedMisstatement[1], projectedhigh = projectedMisstatement[2])
     }
-
-    row <- data.frame(materiality = materialityTable, n = result[["n"]], fk = result[["k"]], k = errors, bound = boundTable)
-    if(options[["monetaryVariable"]] != "")
-      row <- cbind(row, projm = projectedMisstatement)
     if(options[["mostLikelyError"]])
       row <- cbind(row, mle = mle)
     if(options[["bayesFactor"]])
       row <- cbind(row, bf = .BFsamples(options, result, jaspResults))
-
     evaluationTable$addRows(row)
 }
 
@@ -783,8 +861,13 @@
     p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 0.25, 1, 0))
     p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior \nconfidence region"))
     p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 0.25, 1, .5), stroke = 2, color = "black")), order = 2)
-
-    p <- p + ggplot2::geom_area(mapping = ggplot2::aes(x = x, y = y), data = subset(subset(d, d$type == "Posterior"), subset(d, d$type == "Posterior")$x <= result[["bound"]]), fill = rgb(0, 0.25, 1, .5))
+    if(!options[["displayCredibleInterval"]]){
+        p <- p + ggplot2::geom_area(mapping = ggplot2::aes(x = x, y = y), data = subset(subset(d, d$type == "Posterior"), subset(d, d$type == "Posterior")$x <= result[["bound"]]), fill = rgb(0, 0.25, 1, .5))
+    } else {
+      subset1 <- subset(subset(d, d$type == "Posterior"), subset(d, d$type == "Posterior")$x <= result[["interval"]][2])
+      subset2 <- subset(subset1, subset1$x >= result[["interval"]][1])
+      p <- p + ggplot2::geom_area(mapping = ggplot2::aes(x = x, y = y), data = subset2, fill = rgb(0, 0.25, 1, .5))
+    }
   }
 
   p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = pointdata, size = 3, shape = 21, stroke = 2, color = "black", fill = "red")

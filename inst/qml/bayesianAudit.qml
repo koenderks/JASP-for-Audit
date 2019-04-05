@@ -277,9 +277,14 @@ Form {
         }      
         Section { title: qsTr("Tables and plots")
           GridLayout { columns: 2
-            GroupBox { title: qsTr("<b>Statistics</b>")
-              CheckBox { text: qsTr("Most Likely Error (MLE)"); name: "mostLikelyError" }
-              CheckBox { text: qsTr("Bayes factor\u208B\u208A"); name: "bayesFactor" }
+            ColumnLayout {
+              GroupBox { title: qsTr("<b>Statistics</b>")
+                CheckBox { text: qsTr("Most Likely Error (MLE)"); name: "mostLikelyError" }
+                CheckBox { text: qsTr("Bayes factor\u208B\u208A"); name: "bayesFactor" }
+              }
+              GroupBox { title: qsTr("<b>Tables</b>")
+                CheckBox { text: qsTr("Credible interval"); name: "displayCredibleInterval" }
+              }
             }
             GroupBox { title: qsTr("<b>Plots</b>")
               CheckBox { text: qsTr("Evaluation information"); name: "plotBound" }

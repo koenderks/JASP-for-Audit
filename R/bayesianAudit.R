@@ -240,7 +240,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
   } else {
     # Perform the mus evaluation
     if(options[["boundMethod"]] == "coxAndSnellBound"){
-      # Prior parameters for pi and mu are recommendations from the paper
+      # Prior parameters for pi and mu are recommendations from the Cox and Snell paper that yield good coverage
       .coxAndSnellBound(dataset, options, jaspResults, priorPi = 0.1, priorMu = 0.4, priorA = planningResult[["priorA"]], priorB = planningResult[["priorB"]])
     } else if(options[["boundMethod"]] == "regressionBound"){
       
@@ -297,7 +297,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
           jaspResults[["evaluationContainer"]][["priorAndPosteriorPlot"]]		$dependOnOptions(c("IR", "CR", "confidence", "limx_backup", "plotPriorAndPosterior",
                                                                      "plotPriorAndPosteriorAdditionalInfo", "materiality", "correctID",
                                                                      "expected.errors", "kPercentageNumber", "kNumberNumber", "prior", "sampleFilter",
-                                                                     "distribution", "N", "correctMUS", "sampleFilterMUS", "materialityValue"))
+                                                                     "distribution", "N", "correctMUS", "sampleFilterMUS", "materialityValue", "displayCredibleInterval"))
           jaspResults[["evaluationContainer"]][["priorAndPosteriorPlot"]] 		$position <- 5
         }
         jaspResults[["evaluationContainer"]][["figure5"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The prior and posterior probability distrubution on the percentage of misstatement in the population. The red dot
