@@ -20,7 +20,7 @@
 			"analyses":
 			[
 				{
-					"title":							"Sampling Workflow",
+					"title":							"Audit Workflow",
 					"qml":								"classicalAudit.qml",
 					"function":						"classicalAudit",
 					"usesJaspResults":		true
@@ -38,7 +38,7 @@
 					"usesJaspResults":		true
 				},
 				{
-					"title":							"Bayesian Sampling Workflow",
+					"title":							"Bayesian Audit Workflow",
 					"qml":								"bayesianAudit.qml",
 					"function":						"bayesianAudit",
 					"usesJaspResults":		true

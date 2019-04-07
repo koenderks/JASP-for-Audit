@@ -6,60 +6,59 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   jaspResults[["procedureContainer"]]$position <- 1
   
   # Interpretation for the Global Options phase
-  if(options[["interpretation"]] && is.null(jaspResults[["procedureContainer"]][["procedureParagraph"]])){
+  if(options[["explanatoryText"]] && is.null(jaspResults[["procedureContainer"]][["procedureParagraph"]])){
     if(is.null(jaspResults[["confidenceLevelLabel"]]$object)){
       jaspResults[["confidenceLevelLabel"]] <- createJaspState(paste0(round(options[["confidence"]] * 100, 2), "%"))
       jaspResults[["confidenceLevelLabel"]]$dependOnOptions(c("confidence"))
     }
-    criterion <- base::switch(options[["auditType"]], "attributes" = "<b>proportion</b>", "mus" = "<b>amount</b>")
-    materialityLabel <- base::switch(options[["auditType"]], "attributes" = paste0(round(options[["materiality"]] * 100, 2), "%"), "mus" = paste0(format(options[["materialityValue"]], scientific = FALSE), " monetary units"))
+    criterion <- base::switch(options[["materiality"]], "materialityRelative" = "<b>percentage</b>", "materialityAbsolute" = "<b>amount</b>")
+    materialityLabel <- base::switch(options[["materiality"]], "materialityRelative" = paste0(round(options[["materialityPercentage"]] * 100, 2), "%"), "materialityAbsolute" = paste0(format(options[["materialityValue"]], scientific = FALSE), " monetary units"))
     jaspResults[["procedureContainer"]][["procedureParagraph"]] <- createJaspHtml(paste0("The objective of a substantive testing procedure is to determine with a specified confidence <b>(", jaspResults[["confidenceLevelLabel"]]$object, ")</b> whether the ", criterion ," of 
                                                                                           misstatement in the target population is lower than the specified materiality of <b>", materialityLabel, "</b>."), "p")
     jaspResults[["procedureContainer"]][["procedureParagraph"]]$position <- 1
-    jaspResults[["procedureContainer"]][["procedureParagraph"]]$dependOnOptions(c("interpretation", "confidence"))
+    jaspResults[["procedureContainer"]][["procedureParagraph"]]$dependOnOptions(c("explanatoryText", "confidence"))
   }
   
   .auditRiskModel(options, jaspResults)
   
-  if(options[["auditType"]] == "mus"){
+  if(options[["materiality"]] == "materialityAbsolute"){
     jaspResults[["ready"]] <- createJaspState(options[["materialityValue"]] != 0 && options[["populationSize"]] != 0 && options[["populationValue"]] != 0)
   } else {
-    jaspResults[["ready"]] <- createJaspState(options[["materiality"]] != 0 && options[["populationSize"]] != 0)
+    jaspResults[["ready"]] <- createJaspState(options[["materialityPercentage"]] != 0 && options[["populationSize"]] != 0)
   }
-  jaspResults[["ready"]]$dependOnOptions(c("materialityValue", "materiality", "populationSize", "populationValue", "auditType"))
+  jaspResults[["ready"]]$dependOnOptions(c("materialityValue", "materialityPercentage", "populationSize", "populationValue", "materiality"))
   
   if(is.null(jaspResults[["materiality"]]$object) && jaspResults[["ready"]]$object){
     if(options[["populationValue"]] == 0) { populationValue <- 0.01 } else { populationValue <- options[["populationValue"]] }
-    materiality <- ifelse(options[["auditType"]] == "mus", yes = options[["materialityValue"]] / populationValue, no = options[["materiality"]])
+    materiality <- ifelse(options[["materiality"]] == "materialityAbsolute", yes = options[["materialityValue"]] / populationValue, no = options[["materialityPercentage"]])
     jaspResults[["materiality"]] <- createJaspState(materiality)
-    jaspResults[["materiality"]]$dependOnOptions(c("materialityValue", "materiality", "populationSize", "populationValue", "auditType"))
+    jaspResults[["materiality"]]$dependOnOptions(c("materialityValue", "materialityPercentage", "populationSize", "populationValue", "materiality"))
   }
   
   planningResult <- .classicalPlanningManual(options, jaspResults)
   
-  expected.errors   <- ifelse(options[["expected.errors"]] == "kPercentage", yes = paste0(round(options[["kPercentageNumber"]] * 100, 2), "%"), no = options[["kNumberNumber"]])
-  max.errors        <- ifelse(options[["expected.errors"]] == "kPercentage", yes = floor(options[["kPercentageNumber"]] * planningResult[["n"]]) + 1, no = options[["kNumberNumber"]] + 1)
+  expected.errors   <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = paste0(round(options[["expectedPercentage"]] * 100, 2), "%"), no = options[["expectedNumber"]])
+  max.errors        <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = floor(options[["expectedPercentage"]] * planningResult[["n"]]) + 1, no = options[["expectedNumber"]] + 1)
 
   # Decision plot
-  if(options[['plotCriticalErrors']] && jaspResults[["ready"]]$object)
+  if(options[['decisionPlot']] && jaspResults[["ready"]]$object)
   {
-      if(is.null(jaspResults[["planningContainer"]][["criticalErrorPlot"]]))
+      if(is.null(jaspResults[["planningContainer"]][["decisionPlot"]]))
       {
           allowed.errors <- 0:(max.errors - 1)
           reject.errors <- max.errors : (max.errors + 2)
-          jaspResults[["planningContainer"]][["criticalErrorPlot"]] 		<- .plotCriticalErrorsPrior(allowed.errors, reject.errors, jaspResults)
-          jaspResults[["planningContainer"]][["criticalErrorPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence", "materiality", "expected.errors",
-                                                                      "show", "statistic", "kPercentageNumber", "kNumberNumber", "plotCriticalErrors",
-                                                                      "distribution", "N", "materialityValue"))
-          jaspResults[["planningContainer"]][["criticalErrorPlot"]] 		$position <- 4
+          jaspResults[["planningContainer"]][["decisionPlot"]] 		<- .decisionPlot(allowed.errors, reject.errors, jaspResults)
+          jaspResults[["planningContainer"]][["decisionPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "expectedPercentage", "expectedNumber", "decisionPlot",
+                                                                                        "planningModel", "materialityValue", "materiality"))
+          jaspResults[["planningContainer"]][["decisionPlot"]] 		$position <- 4
       }
       jaspResults[["planningContainer"]][["figure2"]] <- createJaspHtml(paste0("<b>Figure 1.</b> The number of full errors that are allowed in the sample before rejecting the population are displayed in green.
                                                         Whenever more than this number of full errors is found, displayed in red, the population should be rejected."), "p")
       jaspResults[["planningContainer"]][["figure2"]]$position <- 5
-    } else if(options[["plotCriticalErrors"]]){
+    } else if(options[["decisionPlot"]]){
         errorPlot <- createJaspPlot(plot = NULL, title = "Decision plot")
         errorPlot$setError("Plotting not possible: Please specify all  your variables.")
-        jaspResults[["planningContainer"]][["criticalErrorPlot"]] <- errorPlot
+        jaspResults[["planningContainer"]][["decisionPlot"]] <- errorPlot
     }
 }
 
@@ -71,8 +70,8 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   summaryTable                                                <- createJaspTable("Planning Summary")
   jaspResults[["planningContainer"]][["summaryTable"]]        <- summaryTable
   summaryTable$position                                       <- 1
-  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "show", "populationSize", "kPercentageNumber", "kNumberNumber", "expectedBF", 
-                                  "distribution", "materialityValue", "populationValue", "auditType"))
+  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "expectedErrors", "materialityPercentage", "populationSize", "expectedPercentage", "expectedNumber", "expectedBF", 
+                                  "planningModel", "materialityValue", "populationValue", "materiality"))
 
   summaryTable$addColumnInfo(name = 'materiality',          title = "Materiality",          type = 'string')
   summaryTable$addColumnInfo(name = 'IR',                   title = "Inherent risk",        type = 'string')
@@ -81,8 +80,8 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   summaryTable$addColumnInfo(name = 'k',                    title = "Expected errors",       type = 'string')
   summaryTable$addColumnInfo(name = 'n',                    title = "Required sample size", type = 'string')
   
-  message <- base::switch(options[["distribution"]],
-                            "gamma" = "The sample size is based on the <b>Poisson</b> distribution.",
+  message <- base::switch(options[["planningModel"]],
+                            "Poisson" = "The sample size is based on the <b>Poisson</b> distribution.",
                             "binomial" = "The sample size is based on the <b>binomial</b> distribution.",
                             "hypergeometric" = paste0("The sample size is based on the <b>hypergeometric</b> distribution (N = ", options[["populationSize"]] ,")."))
                               
@@ -104,14 +103,11 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   jaspResults[["N"]]$dependOnOptions(c("populationSize"))
 
   if(is.null(jaspResults[["planningResult"]]$object)){
-    if(options[["distribution"]] == "gamma"){
-      n                     <- .calc.n.gamma(options, alpha, jaspResults)
-    } else if(options[["distribution"]] == "binomial"){
-      n                     <- .calc.n.binomial(options, alpha, jaspResults)
-    } else if(options[["distribution"]] == "hypergeometric"){
-      n                     <- .calc.n.hypergeometric(options, alpha, jaspResults)
-    }  
-    k <- base::switch(options[["expected.errors"]], "kPercentage" = options[["kPercentageNumber"]], "kNumber" = options[["kNumberNumber"]] / n)                   
+    n <- base::switch(options[["planningModel"]],
+                        "Poisson"         = .calc.n.poisson(options, alpha, jaspResults),
+                        "binomial"        = .calc.n.binomial(options, alpha, jaspResults),
+                        "hypergeometric"  = .calc.n.hypergeometric(options, alpha, jaspResults)) 
+    k <- base::switch(options[["expectedErrors"]], "expectedRelative" = options[["expectedPercentage"]], "expectedAbsolute" = options[["expectedNumber"]] / n)                   
 
   resultList <- list()
   resultList[["n"]]             <- n
@@ -121,35 +117,26 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   resultList[["alpha"]]         <- alpha
   resultList[["confidence"]]    <- options[["confidence"]]
   jaspResults[["planningResult"]] <- createJaspState(resultList)
-  jaspResults[["planningResult"]]$dependOnOptions(c("IR", "CR", "confidence", "expected.errors", "materiality", "populationSize", "kPercentageNumber", "kNumberNumber", 
-                                  "distribution", "materialityValue", "populationValue", "auditType"))
+  jaspResults[["planningResult"]]$dependOnOptions(c("IR", "CR", "confidence", "expectedErrors", "materialityPercentage", "populationSize", "expectedPercentage", "expectedNumber", 
+                                                      "planningModel", "materialityValue", "populationValue", "materiality"))
   } 
 
   resultList <- jaspResults[["planningResult"]]$object
   
-  if(options[["distribution"]] != "gamma" && options[["expected.errors"]] == "kNumber" && options[["kNumberNumber"]]%%1 != 0){
+  if(options[["planningModel"]] != "Poisson" && options[["expectedErrors"]] == "expectedAbsolute" && options[["expectedNumber"]]%%1 != 0){
     summaryTable$setError("Expected errors should be a whole number in this sampling model.")
     return()
   }
 
-  if(options[["distribution"]] != "gamma"){
-    ktable <- base::switch(options[["expected.errors"]],
-                            "kPercentage" = floor(resultList[["k"]] * resultList[["n"]]),
-                            "kNumber" = options[["kNumberNumber"]])
+  if(options[["planningModel"]] != "Poisson"){
+    ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = floor(resultList[["k"]] * resultList[["n"]]), "expectedAbsolute" = options[["expectedNumber"]])
   } else {
-    ktable <- base::switch(options[["expected.errors"]],
-                            "kPercentage" = round(resultList[["k"]] * resultList[["n"]], 2),
-                            "kNumber" = options[["kNumberNumber"]])
+    ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = round(resultList[["k"]] * resultList[["n"]], 2), "expectedAbsolute" = options[["expectedNumber"]])
   }
 
   materialityTitle <- paste0(round(jaspResults[["materiality"]]$object * 100, 2), "%")
-  materialityValue <- base::switch(options[["auditType"]],
-                                    "attributes" = ceiling(jaspResults[["materiality"]]$object * options[["populationValue"]]),
-                                    "mus" = options[["materialityValue"]])
-
-  materiality <- base::switch(options[["auditType"]],
-                                "attributes" = materialityTitle,
-                                "mus" = materialityValue)
+  materialityValue <- base::switch(options[["materiality"]], "materialityRelative" = ceiling(jaspResults[["materiality"]]$object * options[["populationValue"]]), "materialityAbsolute" = options[["materialityValue"]])
+  materiality <- base::switch(options[["materiality"]], "materialityRelative" = materialityTitle, "materialityAbsolute" = materialityValue)
 
   row <- data.frame(materiality = materiality, IR = resultList[["IR"]], CR = resultList[["CR"]], DR = DRtable, k = ktable, n = resultList[["n"]])                  
   summaryTable$addRows(row)

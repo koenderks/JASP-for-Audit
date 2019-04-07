@@ -2,7 +2,7 @@
 
   jaspResults[["ARMcontainer"]] <- createJaspContainer(title= "<u>Audit Risk Model</u>")
   jaspResults[["ARMcontainer"]]$position <- 2
-  jaspResults[["ARMcontainer"]]$dependOnOptions(c("confidence", "IR", "CR", "materiality", "materialityValue", "auditType"))
+  jaspResults[["ARMcontainer"]]$dependOnOptions(c("confidence", "IR", "CR", "materialityPercentage", "materialityValue", "materiality"))
 
   #  Audit Risk Model formula
   .ARMformula(options, jaspResults, position = 2)
@@ -11,19 +11,16 @@
   if(!is.null(jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]])){
     return()
   } else {
-    if(options[["interpretation"]]){
-      materialityLevelLabel           <- base::switch(options[["auditType"]],
-                                                      "attributes" = paste0(round(options[["materiality"]], 10) * 100, "%"),
-                                                      "mus" = format(options[["materialityValue"]], scientific = FALSE))
-  
-      auditRiskLabel          <- paste0(round((1 - options[["confidence"]]) * 100, 2), "%")
-      dectectionRiskLabel     <- paste0(round(DR * 100, 2), "%")
+    if(options[["explanatoryText"]]){
+      materialityLevelLabel <- base::switch(options[["materiality"]], "materialityRelative" = paste0(round(options[["materialityPercentage"]], 10) * 100, "%"), "materialityAbsolute" = format(options[["materialityValue"]], scientific = FALSE))
+      auditRiskLabel        <- paste0(round((1 - options[["confidence"]]) * 100, 2), "%")
+      dectectionRiskLabel   <- paste0(round(DR * 100, 2), "%")
   
       jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]] <- createJaspHtml(paste0("Prior to the substantive testing phase, the inherent risk was determined to be <b>", options[["IR"]] ,"</b>. The internal control risk was determined
                                                                       to be <b>", options[["CR"]] ,"</b>. According to the Audit Risk Model, the required detection risk to maintain an audit risk of <b>", auditRiskLabel, "</b> for a materiality
                                                                       of <b>", materialityLevelLabel ,"</b> should be <b>", dectectionRiskLabel , "</b>."), "p")
       jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]]$position <- 1
-      jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]]$dependOnOptions(c("confidence", "IR", "CR", "materiality", "materialityValue"))
+      jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]]$dependOnOptions(c("confidence", "IR", "CR", "materialityPercentage", "materialityValue"))
     }
   }
 }
@@ -47,14 +44,14 @@
     jaspResults[["ARMcontainer"]][["ARMformula"]]$dependOnOptions(c("IR", "CR", "confidence"))
 }
 
-.dataTable <- function(dataset, options, jaspResults, position){
+.bookValueDescriptives <- function(dataset, options, jaspResults, position){
 
-  if(!is.null(jaspResults[["procedureContainer"]][["dataTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
+  if(!is.null(jaspResults[["procedureContainer"]][["bookValueDescriptives"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
   dataTable                                                 <- createJaspTable("Book value Descriptives")
-  jaspResults[["procedureContainer"]][["dataTable"]]        <- dataTable
+  jaspResults[["procedureContainer"]][["bookValueDescriptives"]]        <- dataTable
   dataTable$position                                        <- position
-  dataTable$dependOnOptions(c("monetaryVariable", "recordNumberVariable", "descriptivesTable"))
+  dataTable$dependOnOptions(c("monetaryVariable", "recordNumberVariable", "bookValueDescriptives"))
 
   dataTable$addColumnInfo(name = 'popSize',     title = "Population size",        type = 'string')
   dataTable$addColumnInfo(name = 'value',       title = "Total value",            type = 'string')
@@ -79,7 +76,7 @@
   dataTable$addRows(row)
 }
 
-.plotCriticalErrorsPrior <- function(allowed.errors, reject.errors, jaspResults){
+.decisionPlot <- function(allowed.errors, reject.errors, jaspResults){
 
   errorrange <- 0:max(reject.errors)
   errors <- c(allowed.errors, reject.errors)
@@ -112,7 +109,7 @@
 
 }
 
-.plotValueDistribution <- function(dataset, options, jaspResults){
+.bookValueDistribution <- function(dataset, options, jaspResults){
 
     values <- dataset[, .v(options[["monetaryVariable"]])]
 
@@ -217,59 +214,45 @@
   return(p)
 }
 
-.plotConfidenceBounds <- function(options, result, jaspResults){
+.evaluationInformation <- function(options, evaluationResult, jaspResults){
+  
+  print(evaluationResult)
 
-  materiality     <- jaspResults[["materiality"]]$object
-  bound           <- result[["bound"]]
+  materiality       <- jaspResults[["materiality"]]$object
+  bound             <- evaluationResult[["bound"]]
   proj.misstatement <- bound * jaspResults[["total_data_value"]]$object
-  
-  expected.errors <- base::switch(options[["expected.errors"]],
-                                      "kPercentage" = options[["kPercentageNumber"]],
-                                      "kNumber" = options[["kNumberNumber"]] / result[["n"]])
-
-  if(options[["variableType"]] == "variableTypeCorrect"){
-    found.errors    <- result[["k"]] / result[["n"]]
+  expected.errors   <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = options[["expectedPercentage"]], no = options[["expectedNumber"]] / evaluationResult[["n"]])
+  mle               <- ifelse(options[["variableType"]] == "variableTypeCorrect", yes = evaluationResult[["k"]] / evaluationResult[["n"]], no = sum(evaluationResult[["z"]]) / evaluationResult[["n"]])
+  label             <- rev(c("Materiality", "Maximum Error", "Most Likely Error", "Expected Error"))
+  values            <- rev(c(materiality, bound, mle, expected.errors))
+  if(options[["variableType"]] == "variableTypeAuditValues" && options[["materiality"]] == "materialityAbsolute")
+    values          <- values * jaspResults[["total_data_value"]]$object
+  boundColor        <- ifelse(bound < materiality, yes = rgb(0,1,.7,1), no = rgb(1,0,0,1))
+  fillUp            <- rev(c("#1380A1", boundColor, "#1380A1" ,"#1380A1"))
+  yBreaks           <- as.numeric(JASPgraphs::getPrettyAxisBreaks(c(0, values), min.n = 4))
+  if(options[["variableType"]] == "variableTypeAuditValues" && options[["materiality"]] == "materialityAbsolute"){
+    x.labels        <- format(yBreaks, scientific = TRUE)
+    x.title         <- "Error amount"
   } else {
-    found.errors    <- sum(result[["z"]]) / result[["n"]]
+    x.labels        <- paste0(round(yBreaks * 100, 4), "%")
+    x.title         <- "Error percentage"
   }
-
-  name <- rev(c("Materiality", "Maximum Error", "Most Likely Error", "Expected Error"))
-  column <- rev(c(materiality, bound, found.errors, expected.errors))
-  x.title <- "Error percentage"
-  if(options[["auditType"]] == "mus" && options[["variableType"]] == "variableTypeTrueValues"){
-    column <- column * jaspResults[["total_data_value"]]$object
-    x.title <- "Error amount"
-  }
-  boundColor <- ifelse(bound < materiality, yes = rgb(0,1,.7,1), no = rgb(1,0,0,1))
-  fillUp <- rev(c("#1380A1", boundColor, "#1380A1" ,"#1380A1"))
-
-  yBreaks <- JASPgraphs::getPrettyAxisBreaks(c(0, column, bound), min.n = 4)
-  
-  x.labels <- paste0(round(yBreaks,2) * 100, "%")
-  if(options[["auditType"]] == "mus" && options[["variableType"]] == "variableTypeTrueValues"){
-      x.labels <- format(yBreaks, scientific = TRUE)
-  }
-
-  tb <- data.frame(x = name, column = column)
-  tb$x <- factor(tb$x, levels = tb$x)
-  p  <- ggplot2::ggplot(data = data.frame(x = tb[, 1], y = tb[, 2]), ggplot2::aes(x = x, y = y)) +
-      ggplot2::geom_bar(stat = "identity", col = "black", size = 1, fill = fillUp) +
-      ggplot2::coord_flip() +
-      ggplot2::xlab(NULL) +
-      ggplot2::ylab(x.title) +
-      ggplot2::theme(axis.ticks.x = ggplot2::element_blank(),axis.ticks.y = ggplot2::element_blank()) +
-      ggplot2::scale_y_continuous(breaks = yBreaks, labels = x.labels)
-
-  # JASP theme
-  p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE)
-
+  tb                <- data.frame(x = label, values = values)
+  tb$x              <- factor(tb$x, levels = tb$x)
+  p                 <- ggplot2::ggplot(data = data.frame(x = tb[, 1], y = tb[, 2]), ggplot2::aes(x = x, y = y)) +
+                        ggplot2::geom_bar(stat = "identity", col = "black", size = 1, fill = fillUp) +
+                        ggplot2::coord_flip() +
+                        ggplot2::xlab(NULL) +
+                        ggplot2::ylab(x.title) +
+                        ggplot2::theme(axis.ticks.x = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank()) +
+                        ggplot2::scale_y_continuous(breaks = yBreaks, labels = x.labels)
+  p                 <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE)
   return(createJaspPlot(plot = p, title = "Evaluation Information", width = 600, height = 300))
-
 }
 
-.plotScatterJFA <- function(dataset, options, jaspResults) {
+.correlationPlot <- function(dataset, options, jaspResults) {
 
-    d <- data.frame(xx= dataset[,.v(options[["monetaryVariable"]])], yy= dataset[,.v(options[["correctID"]])])
+    d <- data.frame(xx= dataset[,.v(options[["monetaryVariable"]])], yy= dataset[,.v(options[["auditResult"]])])
     co <- cor(d$xx, d$yy)
     d <- na.omit(d)
     d <- ceiling(d)
@@ -307,12 +290,8 @@
     p <- .poly.predJfA(fit[[bestModel]], plot = p, line= TRUE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd = 1)
     p <- p + ggplot2::annotate("text", x = xticks[1], y = yticks[length(yticks)],
                                 label = paste0("italic(r) == ", co), size = 8, parse = TRUE, hjust = -0.5, vjust = 0.5)
-
-    # JASP theme
     p <- JASPgraphs::themeJasp(p)
-
     return(createJaspPlot(plot = p, title = "Correlation Plot", width = 500, height = 400))
-
 }
 
 .poly.predJfA <- function(fit, plot = NULL, line=FALSE, xMin, xMax, lwd) {
@@ -346,13 +325,13 @@
 
 .readDataProcedure <- function(options, jaspResults){
   
-  recordNumberVariable <- options[["recordNumberVariable"]]
-  if(recordNumberVariable == "")  recordNumberVariable <- NULL 
-  monetaryVariable <- options[["monetaryVariable"]]
-  if(monetaryVariable == "")  monetaryVariable <- NULL 
+  recordNumberVariable                    <- options[["recordNumberVariable"]]
+  if(recordNumberVariable == "")          recordNumberVariable <- NULL 
+  monetaryVariable                        <- options[["monetaryVariable"]]
+  if(monetaryVariable == "")              monetaryVariable <- NULL 
   
   if(!is.null(recordNumberVariable)){
-    variables <- recordNumberVariable
+    variables                             <- recordNumberVariable
     if(!is.null(monetaryVariable)){
       variables <- c(variables, monetaryVariable)
       dataset <- .readDataSetToEnd(columns.as.numeric = variables)
@@ -363,10 +342,10 @@
       dataset <- .readDataSetToEnd(columns.as.numeric = variables)
       jaspResults[["N"]]                  <- createJaspState(nrow(dataset))
       jaspResults[["total_data_value"]]   <- createJaspState(0.01)
-      if(options[["auditType"]] == "attributes"){
-        jaspResults[["ready"]]              <- createJaspState(TRUE) # Ready for analysis
+      if(options[["materiality"]] == "materialityRelative"){
+        jaspResults[["ready"]]            <- createJaspState(TRUE) # Ready for analysis
       } else {
-        jaspResults[["ready"]]              <- createJaspState(FALSE) # Ready for analysis
+        jaspResults[["ready"]]            <- createJaspState(FALSE) # Ready for analysis
       }
     }
   } else {
@@ -378,60 +357,50 @@
   
   jaspResults[["N"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable"))
   jaspResults[["total_data_value"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable"))
-  jaspResults[["ready"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable", "auditType"))
-
+  jaspResults[["ready"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable", "materiality"))
   return(dataset)
 }
 
 .readDataSelection <- function(options){
-
   recordVariable                  <- unlist(options[["recordNumberVariable"]])
   if(recordVariable == "")        recordVariable <- NULL
   rankingVariable                 <- unlist(options[["rankingVariable"]])
   if(rankingVariable == "")       rankingVariable <- NULL
   monetaryVariable                <- unlist(options[["monetaryVariable"]])
   if(monetaryVariable == "")      monetaryVariable <- NULL
-  variables                       <- unlist(options[["variables"]])
+  variables                       <- unlist(options[["additionalVariables"]])
   variables.to.read               <- c(recordVariable, variables, rankingVariable, monetaryVariable)
   dataset                         <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
-
   return(dataset)
 }
 
 .execution <- function(options, jaspResults){
-
-  if(options[["pasteVariables"]] && is.null(jaspResults[["pastingDone"]]$object)){
-    
-    dataset <- .readDataSetToEnd(columns.as.numeric = options[["recordNumberVariable"]])
-    
-    sampleFilter <- rep(0, jaspResults[["N"]]$object)
-    index <- which(dataset[, .v(options[["recordNumberVariable"]])] %in% jaspResults[["sample"]]$object[, .v(options[["recordNumberVariable"]])])
-    sampleFilter[index] <- 1
-    sampleFilter <- as.integer(sampleFilter)
-    emptyVariable <- rep(NA, jaspResults[["N"]]$object)
+  if(options[["pasteVariables"]] && is.null(jaspResults[["pastingDone"]]$object)){  
+    dataset                       <- .readDataSetToEnd(columns.as.numeric = options[["recordNumberVariable"]])
+    sampleFilter                  <- rep(0, jaspResults[["N"]]$object)
+    index                         <- which(dataset[, .v(options[["recordNumberVariable"]])] %in% jaspResults[["sample"]]$object[, .v(options[["recordNumberVariable"]])])
+    sampleFilter[index]           <- 1
+    sampleFilter                  <- as.integer(sampleFilter)
+    emptyVariable                 <- rep(NA, jaspResults[["N"]]$object)
     .setColumnDataAsNominal(options[["sampleFilterName"]], sampleFilter)
-    base::switch(options[["variableType"]],
-                  "variableTypeCorrect" = .setColumnDataAsNominal(options[["variableName"]], emptyVariable),
-                  "variableTypeTrueValues" = .setColumnDataAsScale(options[["variableName"]], emptyVariable))
-    jaspResults[["pastingDone"]] <- createJaspState(TRUE)                
+    base::switch(options[["variableType"]], "variableTypeCorrect" = .setColumnDataAsNominal(options[["variableName"]], emptyVariable), "variableTypeAuditValues" = .setColumnDataAsScale(options[["variableName"]], emptyVariable))
+    jaspResults[["pastingDone"]]  <- createJaspState(TRUE)                
   }
 }
 
 .readDataEvaluation <- function(options, jaspResults){
-
-  recordVariable                  <- unlist(options$recordNumberVariable)
+  recordVariable                  <- unlist(options[["recordNumberVariable"]])
   if(recordVariable == "")        recordVariable <- NULL
-  monetaryVariable                <- unlist(options$monetaryVariable)
+  monetaryVariable                <- unlist(options[["monetaryVariable"]])
   if(monetaryVariable == "")      monetaryVariable <- NULL
-  sampleFilter                    <- unlist(options$sampleFilter)
+  sampleFilter                    <- unlist(options[["sampleFilter"]])
   if(sampleFilter == "")          sampleFilter <- NULL
-  correctID                       <- unlist(options$correctID)
-  if(correctID == "")             correctID <- NULL
-  variables.to.read               <- c(recordVariable, correctID, sampleFilter, monetaryVariable)
+  auditResult                     <- unlist(options[["auditResult"]])
+  if(auditResult == "")           auditResult <- NULL
+  variables.to.read               <- c(recordVariable, auditResult, sampleFilter, monetaryVariable)
   dataset                         <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
 
-  jaspResults[["runEvaluation"]] <- createJaspState( (!is.null(correctID) && !is.null(sampleFilter)) )
-  jaspResults[["runEvaluation"]]$dependOnOptions(c("correctID", "sampleFilter"))
-
+  jaspResults[["runEvaluation"]] <- createJaspState( (!is.null(auditResult) && !is.null(sampleFilter)) )
+  jaspResults[["runEvaluation"]]$dependOnOptions(c("auditResult", "sampleFilter"))
   return(dataset)
 }
