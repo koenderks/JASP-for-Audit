@@ -842,7 +842,9 @@
   return(createJaspPlot(plot = p, title = "Prior and Posterior Plot", width = plotWidth, height = plotHeight))
 }
 
-.regressionEstimatorBayesian <- function(dataset, options, total_data_value, jaspResults){
+.regressionBoundBayesian <- function(dataset, options, total_data_value, jaspResults){
+  if(!is.null(jaspResults[["evaluationResult"]]$object)) 
+    return(jaspResults[["evaluationResult"]]$object)
 
     ar                      <- 1 - options[["confidence"]]
     ir                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
@@ -853,6 +855,7 @@
     M                       <- 0
     z                       <- 0
     bound                   <- "."
+    mle                     <- 0
 
     if(options[["auditResult"]] != "" && options[["sampleFilter"]] != "" && options[["monetaryVariable"]] != ""){
         sample                  <- dataset[, c(.v(options[["monetaryVariable"]]), .v(options[["auditResult"]]))]
@@ -864,21 +867,26 @@
         M                       <- length(which(t != 0))
 
         B                       <- total_data_value
-        N                       <- options[["N"]]
+        N                       <- jaspResults[["N"]]$object
         b                       <- sample[, .v(options[["monetaryVariable"]])]
         w                       <- sample[, .v(options[["auditResult"]])]
-        #b1                      <- as.numeric(coef(lm(w ~ b))[2])
-        set.seed(1)
-        formula                 <- lm(w ~ b)
-        bayesFit                <- .bayesfit(formula, 100000)
-        b1                      <- median(bayesFit[, 2])
+        
+        colnames(sample)        <- c("bookValue", "auditValue")
+        formula                 <- auditValue ~ bookValue
+        basResult               <- BAS::bas.lm(formula = formula, data = sample)
+        b1                      <- coef(basResult)$postmean[2]
 
         meanb                   <- mean(b)
         meanw                   <- mean(w)
 
-        mleregression           <- (N * meanw + b1 * (B - N * meanb)) - B
-        upperValue              <- mleregression + qt(p = options[["confidence"]], df = n - 1) * sqrt(1 - cor(b, w)^2) * sd(w) * ( N / sqrt(n)) * sqrt( (N-n) / (N-1) )
-        bound                   <- (upperValue + B) / B
+        mle                     <- N * meanw + b1 * (B - N * meanb)
+        stand.dev               <- sd(w) * sqrt(1 - cor(b, w)^2) * ( N / sqrt(n)) * sqrt( (N-n) / (N-1) )
+        upperValue              <- mle + qt(p = 1 - alpha, df = n - 1) * stand.dev
+        if(upperValue == 0){
+          bound                 <- 0
+        } else {
+          bound                 <- (upperValue - B) / B
+        }
     }
 
     resultList <- list()
@@ -890,26 +898,9 @@
     resultList[["confidence"]]  <- options[["confidence"]]
     resultList[["bound"]]       <- bound
     resultList[["alpha"]]       <- alpha
+    resultList[["mle"]]         <- mle
 
-    jaspResults[["result"]] <- createJaspState(resultList)
-    jaspResults[["result"]]$dependOnOptions(c("IR", "CR", "confidence", "correctMUS", "sampleFilterMUS", "auditType", "boundMethod", "monetaryVariable", "materialityValue", 
-                                              "variableType"))
-}
-
-.bayesfit <- function(lmfit, N){
-    QR<-lmfit$qr
-    df.residual<-lmfit$df.residual
-    R<-qr.R(QR) ## R component
-    coef<-lmfit$coef
-    Vb<-chol2inv(R) ## variance(unscaled)
-    s2<-(t(lmfit$residuals)%*%lmfit$residuals)
-    s2<-s2[1,1]/df.residual
-
-    ## now to sample residual variance
-    sigma<-df.residual*s2/rchisq(N,df.residual)
-    coef.sim<-sapply(sigma,function(x) MASS::mvrnorm(1,coef,Vb*x))
-    ret<-data.frame(t(coef.sim))
-    names(ret)<-names(lmfit$coef)
-    ret$sigma<-sqrt(sigma)
-    ret
+    jaspResults[["evaluationResult"]] <- createJaspState(resultList)
+    jaspResults[["evaluationResult"]]$dependOnOptions(c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materiality", "estimator", "monetaryVariable"))
+    return(jaspResults[["evaluationResult"]]$object)
 }

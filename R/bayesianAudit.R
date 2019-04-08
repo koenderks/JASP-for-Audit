@@ -204,7 +204,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
       # Prior parameters for pi and mu are recommendations from the Cox and Snell paper that yield good coverage
       evaluationResult <- .coxAndSnellBound(dataset, options, jaspResults, priorPi = 0.1, priorMu = 0.4, priorA = planningResult[["priorA"]], priorB = planningResult[["priorB"]])
     } else if(options[["estimator"]] == "regressionBound"){
-      evaluationResult <- list()
+      evaluationResult <- .regressionBoundBayesian(dataset, options, total_data_value, jaspResults)
     }
     # Create the summary table for the evaluation
     .bayesianAuditValueBoundTable(options, evaluationResult, jaspResults, position = 2)
