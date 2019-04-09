@@ -83,7 +83,11 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
   # Summarize the planning result in a summary table
   .bayesianPlanningTable(dataset, options, planningResult, jaspResults, position = 2)
   # Rewrite the required sample size when the planning has not been run yet
-  requiredSampleSize <- ifelse(is.null(jaspResults[["planningResult"]]$object), yes = 0, no = planningResult[["n"]])
+  if(is.null(jaspResults[["planningResult"]]$object)){
+    requiredSampleSize <- 0
+  } else {
+    requiredSampleSize <- planningResult[["n"]]
+  }
   # Calculate the number of expected errors and the maximum number of allowed errors
   expected.errors   <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = paste0(round(options[["expectedPercentage"]] * 100, 2), "%"), no = options[["expectedNumber"]])
   max.errors        <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = floor(options[["expectedPercentage"]] * requiredSampleSize) + 1, no = options[["expectedNumber"]] + 1)
@@ -110,7 +114,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
       {
           allowed.errors <- 0:(max.errors - 1)
           reject.errors <- max.errors : (max.errors + 2)
-          jaspResults[["planningContainer"]][["decisionPlot"]] 		<- .decisionPlot(allowed.errors, reject.errors, jaspResults)
+          jaspResults[["planningContainer"]][["decisionPlot"]] 		<- .decisionPlot(allowed.errors, reject.errors, options, jaspResults)
           jaspResults[["planningContainer"]][["decisionPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "expectedPercentage", "expectedNumber", "decisionPlot",
                                                                                             "planningModel", "materialityValue"))
           jaspResults[["planningContainer"]][["decisionPlot"]] 		$position <- 4
