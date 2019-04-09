@@ -219,6 +219,7 @@ Form {
             ComputedColumnField { name: "sampleFilterName"; text: "Column name selection result: "; fieldWidth: 120; enabled: pasteVariables.checked ? false : true }
             ComputedColumnField { name: "variableName"; text: "Column name audit result: "; fieldWidth: 120; enabled: pasteVariables.checked ? false : true }
           }
+          Text { text: qsTr("<b>Execute the audit before continuing to the evaluation stage</b>"); font.family: "SansSerif"; font.pointSize: 7; Layout.leftMargin: 120; visible: false; id: performAuditText }
           Item { height: toEvaluation.height; Layout.fillWidth: true
             Button { anchors.left: parent.left; text: qsTr("<b>Reset Workflow</b>");
                       onClicked: {
@@ -244,6 +245,7 @@ Form {
                 pasteButton.enabled = false
                 variablesFormPlanning.enabled = false
                 selectionMethod.enabled = false
+                performAuditText.visible = true
               }
             }
             CheckBox { anchors.right: toEvaluation.left; width: height; visible: false; name: "evaluationChecked"; id: evaluationChecked; checked: false }

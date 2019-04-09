@@ -213,11 +213,11 @@
       mle <- floor(evaluationResult[["k"]] / evaluationResult[["n"]] * jaspResults[["N"]]$object)
 
     boundTable          <- "."
-    if(result[["bound"]] != ".")
+    if(evaluationResult[["bound"]] != ".")
         boundTable <- paste0(round(evaluationResult[["bound"]], 4) * 100, "%")
 
     row <- data.frame(materiality = materialityTable, n = evaluationResult[["n"]], k = evaluationResult[["k"]], bound = boundTable)
-    if(options[["auditType"]] == "mus")
+    if(options[["materiality"]] == "materialityAbsolute")
       row <- cbind(row, projm = round(evaluationResult[["bound"]] * jaspResults[["total_data_value"]]$object, 2))
     if(options[["mostLikelyError"]])
       row <- cbind(row, mle = mle)
