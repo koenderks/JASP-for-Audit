@@ -1,6 +1,6 @@
 export(classicalAudit)
-export(classicalPlanning)
-export(classicalEvaluation)
 export(bayesianAudit)
+export(classicalPlanning)
 export(bayesianPlanning)
+export(classicalEvaluation)
 export(bayesianEvaluation)

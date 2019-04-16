@@ -1,13 +1,11 @@
 classicalEvaluation <- function(jaspResults, dataset, options, ...){
-  ### TITLE ###
-  jaspResults$title 			<- "Evaluation"
   ### AUDIT RISK MODEL ###
   .auditRiskModel(options, jaspResults)
-  
+
   correctID <- options[["correctID"]]
   if(correctID == "") correctID <- NULL
   dataset                 <- .readDataSetToEnd(columns.as.numeric = correctID)
-  
+
   if(options[["auditType"]] == "attributes"){
       jaspResults[["runEvaluation"]] <- createJaspState(options[["correctID"]] != "" && options[["materiality"]] != 0 && options[["populationSize"]] != 0)
   } else {
@@ -21,9 +19,9 @@ classicalEvaluation <- function(jaspResults, dataset, options, ...){
   } else {
       jaspResults[["materiality"]] <- createJaspState(options[["materiality"]])
   }
-  
+
   jaspResults[["N"]] <- createJaspState(options[["populationSize"]])
-  
+
   jaspResults[["evaluationContainer"]] <- createJaspContainer(title = "<u>Evaluation</u>")
   jaspResults[["evaluationContainer"]]$position <- 5
 
@@ -65,7 +63,7 @@ classicalEvaluation <- function(jaspResults, dataset, options, ...){
   #                                                         than <b>", boundLabel ,"</b>."), "p")
   #   jaspResults[["resultParagraph"]]$position <- 1
   # }
-  # 
+  #
   # # Confidence bound plot
   # if(options[['plotBound']])
   # {
@@ -77,7 +75,7 @@ classicalEvaluation <- function(jaspResults, dataset, options, ...){
   #         jaspResults[["confidenceBoundPlot"]] 		$position <- 22
   #     }
   # }
-  # 
+  #
   # # Correlation plot
   # if(options[['plotCorrelation']])
   # {
@@ -88,7 +86,7 @@ classicalEvaluation <- function(jaspResults, dataset, options, ...){
   #         jaspResults[["correlationPlot"]] 		$position <- 23
   #     }
   # }
-  # 
+  #
   # if(options[["interpretation"]]){
   #     jaspResults[["conclusionTitle"]] <- createJaspHtml("<u>Conclusion</u>", "h2")
   #     jaspResults[["conclusionTitle"]]$position <- 20

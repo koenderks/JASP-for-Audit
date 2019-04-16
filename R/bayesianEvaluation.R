@@ -17,9 +17,6 @@ bayesianEvaluation <- function(jaspResults, dataset, options, state=NULL){
   options[["kNumberNumber"]]        <- 0
   options[["statistic"]]            <- "bound"
 
-  # Set the title
-  jaspResults$title 					      <- "Bayesian Evaluation"
-
   .ARMformula(options, jaspResults, position = 1)   # Show the Audit Risk Model formula and quantify detection risk
   DR              <- jaspResults[["DR"]]$object
 

@@ -1,61 +1,61 @@
 {
 	"moduleDescription" :
 	{
-		"title" : 									"Audit",
-		"description": 							"JASP for Audit (JfA) is an officially supported add-on module that is designed specifically with the auditor in mind. JfA helps the auditor in interpreting, explaining, and reporting the analyses and leaves a transparent audit trail.",
-		"version":									0.1,
-		"author":										"Koen Derks, Jacques de Swart & Ruud Wetzels",
-		"maintainer":								"Koen Derks <k.derks@nyenrode.nl>",
-		"website":									"www.github.com/koenderks/JASP-for-Audit",
-		"license":									"GPL (>= 2)"
+		"title" : 							"Audit",
+		"description": 						"JASP for Audit (JfA) is an officially supported add-on module that is designed specifically with the auditor in mind. JfA helps the auditor in interpreting, explaining, and reporting the analyses and leaves a transparent audit trail.",
+		"version":							"0.1",
+		"author":							"Koen Derks, Jacques de Swart & Ruud Wetzels",
+		"maintainer":						"Koen Derks <k.derks@nyenrode.nl>",
+		"website":							"www.github.com/koenderks/JASP-for-Audit",
+		"license":							"GPL (>= 2)",
+		"icon":     						"audit-fullaudit.svg"
 	},
 
 	"requiredPackages":	[],
 
-	"ribbonEntries":
+	"menu":
 	[
 		{
-			"title": 									"Audit",
-			"icon": 									"audit-fullaudit.svg",
-			"analyses":
-			[
-				{
-					"title":							"Audit Workflow",
-					"qml":								"classicalAudit.qml",
-					"function":						"classicalAudit",
-					"usesJaspResults":		true
-				},
-				{
-					"title":							"Planning",
-					"qml":								"classicalPlanning.qml",
-					"function":						"classicalPlanning",
-					"usesJaspResults":		true
-				},
-				{
-					"title":							"Evaluation",
-					"qml":								"classicalEvaluation.qml",
-					"function":						"classicalEvaluation",
-					"usesJaspResults":		true
-				},
-				{
-					"title":							"Bayesian Audit Workflow",
-					"qml":								"bayesianAudit.qml",
-					"function":						"bayesianAudit",
-					"usesJaspResults":		true
-				},
-				{
-					"title":							"Bayesian Planning",
-					"qml":								"bayesianPlanning.qml",
-					"function":						"bayesianPlanning",
-					"usesJaspResults":		true
-				},
-				{
-					"title":							"Bayesian Evaluation",
-					"qml":								"bayesianEvaluation.qml",
-					"function":						"bayesianEvaluation",
-					"usesJaspResults":		true
-				}
-			]
+			"title":    					"Workflow",
+			"icon":							"audit-fullaudit.svg"
+		},
+		{
+			"title":						"Audit Workflow",
+			"qml":							"classicalAudit.qml",
+			"function":						"classicalAudit"
+		},
+		{
+			"title":						"Bayesian Audit Workflow",
+			"qml":							"bayesianAudit.qml",
+			"function":						"bayesianAudit"
+		},
+		{
+			"title":    					"Planning",
+			"icon":							"audit-fullaudit.svg"
+		},
+		{
+			"title":						"Planning",
+			"qml":							"classicalPlanning.qml",
+			"function":						"classicalPlanning"
+		},
+		{
+			"title":						"Bayesian Planning",
+			"qml":							"bayesianPlanning.qml",
+			"function":						"bayesianPlanning"
+		},
+		{
+			"title":    					"Evaluation",
+			"icon":							"audit-fullaudit.svg"
+		},
+		{
+			"title":						"Evaluation",
+			"qml":							"classicalEvaluation.qml",
+			"function":						"classicalEvaluation"
+		},
+		{
+			"title":						"Bayesian Evaluation",
+			"qml":							"bayesianEvaluation.qml",
+			"function":						"bayesianEvaluation"
 		}
 	]
 }

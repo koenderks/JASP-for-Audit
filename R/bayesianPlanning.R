@@ -1,9 +1,7 @@
 bayesianPlanning <- function(jaspResults, dataset, options, ...){
-  ### TITLE ###
-  jaspResults$title <- "Bayesian Planning"
 
   jaspResults[["figNumber"]]          <- createJaspState(1)
-  jaspResults[["figNumber"]]$dependOnOptions(c("priorPlot", "decisionPlot"))
+  jaspResults[["figNumber"]]$dependOn(options = c("priorPlot", "decisionPlot"))
 
   jaspResults[["procedureContainer"]] <- createJaspContainer(title= "<u>Procedure</u>")
   jaspResults[["procedureContainer"]]$position <- 1
@@ -12,14 +10,14 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
   if(options[["explanatoryText"]] && is.null(jaspResults[["procedureContainer"]][["procedureParagraph"]])){
     if(is.null(jaspResults[["confidenceLevelLabel"]]$object)){
       jaspResults[["confidenceLevelLabel"]] <- createJaspState(paste0(round(options[["confidence"]] * 100, 2), "%"))
-      jaspResults[["confidenceLevelLabel"]]$dependOnOptions(c("confidence"))
+      jaspResults[["confidenceLevelLabel"]]$dependOn(options = c("confidence"))
     }
     criterion <- base::switch(options[["materiality"]], "materialityRelative" = "<b>percentage</b>", "materialityAbsolute" = "<b>amount</b>")
     materialityLabel <- base::switch(options[["materiality"]], "materialityRelative" = paste0(round(options[["materialityPercentage"]] * 100, 2), "%"), "materialityAbsolute" = paste0(format(options[["materialityValue"]], scientific = FALSE), " monetary units"))
     jaspResults[["procedureContainer"]][["procedureParagraph"]] <- createJaspHtml(paste0("The objective of a substantive testing procedure is to determine with a specified confidence <b>(", jaspResults[["confidenceLevelLabel"]]$object, ")</b> whether the ", criterion ," of
                                                                                           misstatement in the target population is lower than the specified materiality of <b>", materialityLabel, "</b>."), "p")
     jaspResults[["procedureContainer"]][["procedureParagraph"]]$position <- 1
-    jaspResults[["procedureContainer"]][["procedureParagraph"]]$dependOnOptions(c("explanatoryText", "confidence"))
+    jaspResults[["procedureContainer"]][["procedureParagraph"]]$dependOn(options = c("explanatoryText", "confidence"))
   }
 
   .auditRiskModel(options, jaspResults)
@@ -29,7 +27,7 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
   } else {
     jaspResults[["ready"]] <- createJaspState(options[["materiality"]] != 0 && options[["populationSize"]] != 0)
   }
-  jaspResults[["ready"]]$dependOnOptions(c("materialityValue", "materialityPercentage", "populationSize", "populationValue", "materiality"))
+  jaspResults[["ready"]]$dependOn(options = c("materialityValue", "materialityPercentage", "populationSize", "populationValue", "materiality"))
 
   jaspResults[["planningContainer"]] <- createJaspContainer(title= "<u>Planning</u>")
   jaspResults[["planningContainer"]]$position <- 3
@@ -38,7 +36,7 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
     if(options[["populationValue"]] == 0) { populationValue <- 0.01 } else { populationValue <- options[["populationValue"]] }
     materiality <- ifelse(options[["materiality"]] == "materialityAbsolute", yes = options[["materialityValue"]] / populationValue, no = options[["materialityPercentage"]])
     jaspResults[["materiality"]] <- createJaspState(materiality)
-    jaspResults[["materiality"]]$dependOnOptions(c("materialityValue", "materialityPercentage", "populationSize", "populationValue", "materiality"))
+    jaspResults[["materiality"]]$dependOn(options = c("materialityValue", "materialityPercentage", "populationSize", "populationValue", "materiality"))
 
     expTMP <- ifelse(options[['expectedErrors']] == "expectedRelative", yes = options[["expectedPercentage"]], no = options[["expectedAbsolute"]] / populationValue)
     if(expTMP > materiality){
@@ -62,14 +60,14 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
           allowed.errors <- 0:(max.errors - 1)
           reject.errors <- max.errors : (max.errors + 2)
           jaspResults[["planningContainer"]][["decisionPlot"]] 		<- .decisionPlot(allowed.errors, reject.errors, options, jaspResults)
-          jaspResults[["planningContainer"]][["decisionPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "expectedPercentage", "expectedNumber", "decisionPlot",
+          jaspResults[["planningContainer"]][["decisionPlot"]]		  $dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "expectedPercentage", "expectedNumber", "decisionPlot",
                                                                                         "planningModel", "materialityValue", "materiality"))
           jaspResults[["planningContainer"]][["decisionPlot"]] 		$position <- 4
       }
       jaspResults[["planningContainer"]][["figure2"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The number of full errors that are allowed in the sample before rejecting the population are displayed in green.
                                                         Whenever more than this number of full errors is found, displayed in red, the population should be rejected."), "p")
       jaspResults[["planningContainer"]][["figure2"]]$position <- 5
-      jaspResults[["planningContainer"]][["figure2"]]$copyDependenciesFromJaspObject(jaspResults[["planningContainer"]][["decisionPlot"]])
+      jaspResults[["planningContainer"]][["figure2"]]$dependOn(optionsFromObject= jaspResults[["planningContainer"]][["decisionPlot"]])
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
     } else if(options[["decisionPlot"]]){
         errorPlot <- createJaspPlot(plot = NULL, title = "Decision plot")
@@ -82,14 +80,14 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
         if(is.null(jaspResults[["planningContainer"]][["priorPlot"]]))
         {
             jaspResults[["planningContainer"]][["priorPlot"]] 		<- .plotPrior(options, planningResult, jaspResults)
-            jaspResults[["planningContainer"]][["priorPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "priorPlotLimit", "priorPlot", "priorPlotAdditionalInfo",
+            jaspResults[["planningContainer"]][["priorPlot"]]		  $dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "priorPlotLimit", "priorPlot", "priorPlotAdditionalInfo",
                                                                                       "planningModel", "expectedPercentage", "expectedNumber", "materialityValue", "priorPlotExpectedPosterior", "materiality"))
             jaspResults[["planningContainer"]][["priorPlot"]] 		$position <- 6
         }
         jaspResults[["planningContainer"]][["figure3"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The prior probability distribution <b>(", options[["planningModel"]] ,")</b> on the misstatement in the population. The prior parameters are
                                                               derived from the assessments of the inherent and control risk, along with the expected errors."), "p")
         jaspResults[["planningContainer"]][["figure3"]]$position <- 7
-        jaspResults[["planningContainer"]][["figure3"]]$copyDependenciesFromJaspObject(jaspResults[["planningContainer"]][["priorPlot"]])
+        jaspResults[["planningContainer"]][["figure3"]]$dependOn(optionsFromObject= jaspResults[["planningContainer"]][["priorPlot"]])
         jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
     } else if(options[["priorPlot"]]){
         errorPlot <- createJaspPlot(plot = NULL, title = "Implied Prior from Risk Assessments")
@@ -103,7 +101,7 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
   summaryTable                                                <- createJaspTable("Planning Summary")
   jaspResults[["planningContainer"]][["summaryTable"]]        <- summaryTable
   summaryTable$position                                       <- 1
-  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "expectedErrors", "materialityPercentage", "populationSize", "expectedPercentage", "expectedNumber", "expectedBF",
+  summaryTable$dependOn(options = c("IR", "CR", "confidence", "expectedErrors", "materialityPercentage", "populationSize", "expectedPercentage", "expectedNumber", "expectedBF",
                                   "planningModel", "materialityValue", "populationValue", "materiality"))
 
   summaryTable$addColumnInfo(name = 'materiality',          title = "Materiality",          type = 'string')
@@ -136,7 +134,7 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
   }
 
   jaspResults[["N"]] <- createJaspState(options[["populationSize"]])
-  jaspResults[["N"]]$dependOnOptions(c("populationSize"))
+  jaspResults[["N"]]$dependOn(options = c("populationSize"))
 
   if(is.null(jaspResults[["planningResult"]]$object)){
     if(options[["planningModel"]] == "beta"){
@@ -175,7 +173,7 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
   resultList[["alpha"]]       <- alpha
   resultList[["confidence"]]  <- options[["confidence"]]
   jaspResults[["planningResult"]] <- createJaspState(resultList)
-  jaspResults[["planningResult"]]$dependOnOptions(c("IR", "CR", "confidence", "expectedErrors", "materialityPercentage", "populationSize", "expectedNumber", "expectedPercentage",
+  jaspResults[["planningResult"]]$dependOn(options = c("IR", "CR", "confidence", "expectedErrors", "materialityPercentage", "populationSize", "expectedNumber", "expectedPercentage",
                                                       "planningModel", "materialityValue", "populationValue", "materiality"))
   }
 

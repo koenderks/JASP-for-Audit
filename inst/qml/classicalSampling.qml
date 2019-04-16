@@ -21,6 +21,7 @@ import JASP.Controls 1.0
 import JASP.Widgets 1.0
 
 Form {
+    usesJaspResults: true
     id: form
 
         Section {

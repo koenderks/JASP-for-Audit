@@ -2,7 +2,7 @@
 
   jaspResults[["ARMcontainer"]] <- createJaspContainer(title= "<u>Audit Risk Model</u>")
   jaspResults[["ARMcontainer"]]$position <- 2
-  jaspResults[["ARMcontainer"]]$dependOnOptions(c("confidence", "IR", "CR", "materialityPercentage", "materialityValue", "materiality"))
+  jaspResults[["ARMcontainer"]]$dependOn(options = c("confidence", "IR", "CR", "materialityPercentage", "materialityValue", "materiality"))
 
   #  Audit Risk Model formula
   .ARMformula(options, jaspResults, position = 2)
@@ -20,7 +20,7 @@
                                                                       to be <b>", options[["CR"]] ,"</b>. According to the Audit Risk Model, the required detection risk to maintain an audit risk of <b>", auditRiskLabel, "</b> for a materiality
                                                                       of <b>", materialityLevelLabel ,"</b> should be <b>", dectectionRiskLabel , "</b>."), "p")
       jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]]$position <- 1
-      jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]]$dependOnOptions(c("confidence", "IR", "CR", "materialityPercentage", "materialityValue"))
+      jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]]$dependOn(options = c("confidence", "IR", "CR", "materialityPercentage", "materialityValue"))
     }
   }
 }
@@ -35,13 +35,13 @@
     DR                      <- AR / IR / CR
 
     jaspResults[["DR"]]     <- createJaspState(DR)
-    jaspResults[["DR"]]     $dependOnOptions(c("IR", "CR", "confidence"))
+    jaspResults[["DR"]]     $dependOn(options = c("IR", "CR", "confidence"))
 
     text <- paste0("Audit risk (", round(AR * 100, 2),"%) = Inherent risk (", round(IR * 100, 2), "%) x Control risk (", round(CR * 100, 2), "%) x Detection risk (", round(DR * 100, 2), "%)")
 
     jaspResults[["ARMcontainer"]][["ARMformula"]] <- createJaspHtml(text, "h3")
     jaspResults[["ARMcontainer"]][["ARMformula"]]$position <- position
-    jaspResults[["ARMcontainer"]][["ARMformula"]]$dependOnOptions(c("IR", "CR", "confidence"))
+    jaspResults[["ARMcontainer"]][["ARMformula"]]$dependOn(options = c("IR", "CR", "confidence"))
 }
 
 .bookValueDescriptives <- function(dataset, options, jaspResults, position){
@@ -51,7 +51,7 @@
   dataTable                                                 <- createJaspTable("Book value Descriptives")
   jaspResults[["procedureContainer"]][["bookValueDescriptives"]]        <- dataTable
   dataTable$position                                        <- position
-  dataTable$dependOnOptions(c("monetaryVariable", "recordNumberVariable", "bookValueDescriptives"))
+  dataTable$dependOn(options = c("monetaryVariable", "recordNumberVariable", "bookValueDescriptives"))
 
   dataTable$addColumnInfo(name = 'popSize',     title = "Population size",        type = 'string')
   dataTable$addColumnInfo(name = 'value',       title = "Total value",            type = 'string')
@@ -366,9 +366,9 @@
       jaspResults[["ready"]]              <- createJaspState(FALSE)
   }
   
-  jaspResults[["N"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable"))
-  jaspResults[["total_data_value"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable"))
-  jaspResults[["ready"]]$dependOnOptions(c("recordNumberVariable", "monetaryVariable", "materiality"))
+  jaspResults[["N"]]$dependOn(options = c("recordNumberVariable", "monetaryVariable"))
+  jaspResults[["total_data_value"]]$dependOn(options = c("recordNumberVariable", "monetaryVariable"))
+  jaspResults[["ready"]]$dependOn(options = c("recordNumberVariable", "monetaryVariable", "materiality"))
   return(dataset)
 }
 
@@ -412,6 +412,6 @@
   dataset                         <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
 
   jaspResults[["runEvaluation"]] <- createJaspState( (!is.null(auditResult) && !is.null(sampleFilter)) )
-  jaspResults[["runEvaluation"]]$dependOnOptions(c("auditResult", "sampleFilter"))
+  jaspResults[["runEvaluation"]]$dependOn(options = c("auditResult", "sampleFilter"))
   return(dataset)
 }

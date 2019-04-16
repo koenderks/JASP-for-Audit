@@ -92,7 +92,7 @@
     resultList[["confidence"]]  <- options[["confidence"]]
 
     jaspResults[["planningResult"]] <- createJaspState(resultList)
-    jaspResults[["planningResult"]]$dependOnOptions(c("IR", "CR", "confidence", "expectedErrors", "materialityPercentage", "expectedPercentage",
+    jaspResults[["planningResult"]]$dependOn(options = c("IR", "CR", "confidence", "expectedErrors", "materialityPercentage", "expectedPercentage",
                                                       "expectedNumber", "planningModel", "materialityValue", "recordNumberVariable", "materiality", "monetaryVariable"))
     return(jaspResults[["planningResult"]]$object)
 }
@@ -104,7 +104,7 @@
   planningSummary                                             <- createJaspTable("Planning Summary")
   jaspResults[["planningContainer"]][["planningSummary"]]        <- planningSummary
   planningSummary$position                                       <- position
-  planningSummary$dependOnOptions(c("IR", "CR", "confidence", "expectedErrors", "materialityPercentage", "expectedPercentage", "expectedNumber", "expectedBF",
+  planningSummary$dependOn(options = c("IR", "CR", "confidence", "expectedErrors", "materialityPercentage", "expectedPercentage", "expectedNumber", "expectedBF",
                                     "planningModel", "materialityValue", "recordNumberVariable", "monetaryVariable", "materiality"))
 
   planningSummary$addColumnInfo(name = 'materiality',          title = "Materiality",          type = 'string')
@@ -159,7 +159,7 @@
   sampletable                       <- createJaspTable("Implicit Sample")
   jaspResults[["planningContainer"]][["sampletable"]]      <- sampletable
   sampletable$position              <- position
-  sampletable$dependOnOptions(c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "implicitSampleTable", "expectedPercentage", "expectedNumber",
+  sampletable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "implicitSampleTable", "expectedPercentage", "expectedNumber",
                                   "planningModel", "materialityValue"))
 
   sampletable$addColumnInfo(name = 'implicitn', title = "Implicit sample size", type = 'string')
@@ -399,7 +399,7 @@
     resultList[["posteriorB"]]  <- priorB + (n - k)
 
     jaspResults[["evaluationResult"]]     <- createJaspState(resultList)
-    jaspResults[["evaluationResult"]]     $dependOnOptions(c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "expectedErrors", "expectedPercentage", "expectedNumber", "sampleFilter",
+    jaspResults[["evaluationResult"]]     $dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "expectedErrors", "expectedPercentage", "expectedNumber", "sampleFilter",
                                                     "planningModel", "materialityValue", "variableType", "materiality"))
     return(jaspResults[["evaluationResult"]]$object)
 }
@@ -411,7 +411,7 @@
     evaluationTable                       <- createJaspTable("Evaluation Summary")
     jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
-    evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "expectedErrors", "expectedPercentage", "expectedNumber",
+    evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "expectedErrors", "expectedPercentage", "expectedNumber",
                                       "sampleFilter", "mostLikelyError", "bayesFactor", "planningModel", "materialityValue", "variableType", "estimator", "displayCredibleInterval"))
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",        type = 'string')
@@ -688,7 +688,7 @@
     resultList[["posterior"]]   <- posterior
 
     jaspResults[["evaluationResult"]] <- createJaspState(resultList)
-    jaspResults[["evaluationResult"]]$dependOnOptions(c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materiality", "estimator", "monetaryVariable"))
+    jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materiality", "estimator", "monetaryVariable"))
     return(jaspResults[["evaluationResult"]]$object)
 }
 
@@ -698,7 +698,7 @@
 
     evaluationTable                       <- createJaspTable("Evaluation Summary")
     jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
-    evaluationTable$dependOnOptions(c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "sampleFilter", "planningModel", "mostLikelyError", "estimator", "bayesFactor",
+    evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "sampleFilter", "planningModel", "mostLikelyError", "estimator", "bayesFactor",
                                         "materialityValue", "variableType", "displayCredibleInterval"))
     evaluationTable$position <- position
 
@@ -905,6 +905,6 @@
     resultList[["mle"]]         <- mle
 
     jaspResults[["evaluationResult"]] <- createJaspState(resultList)
-    jaspResults[["evaluationResult"]]$dependOnOptions(c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materiality", "estimator", "monetaryVariable"))
+    jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materiality", "estimator", "monetaryVariable"))
     return(jaspResults[["evaluationResult"]]$object)
 }

@@ -29,7 +29,7 @@
           colnames(sample)[1]   <- .v(options[["recordNumberVariable"]])
       }
       jaspResults[["sample"]] <- createJaspState(sample)
-      jaspResults[["sample"]]$dependOnOptions(c("additionalVariables", "seed", "recordNumberVariable", "monetaryVariable", "selectionMethod", "selectionType", "materiality",
+      jaspResults[["sample"]]$dependOn(options = c("additionalVariables", "seed", "recordNumberVariable", "monetaryVariable", "selectionMethod", "selectionType", "materiality",
                                                   "expectedErrors", "expectedNumber", "expectedPercentage", "planningModel", "IR", "CR"))
     }
     
@@ -40,7 +40,7 @@
       jaspResults[["selectionContainer"]][["sampleTable"]]          <- sampleTable
       sampleTable$position                  <- position
 
-      sampleTable$dependOnOptions(c("additionalVariables", "seed", "recordNumberVariable", "monetaryVariable", "selectionType", "materiality",
+      sampleTable$dependOn(options = c("additionalVariables", "seed", "recordNumberVariable", "monetaryVariable", "selectionType", "materiality",
                                     "displaySample", "selectionMethod", "expectedErrors", "expectedNumber", "expectedPercentage"))
 
       sampleTable$addColumnInfo(name="number", title ="", type = "string")
@@ -130,7 +130,7 @@
       }
 
       jaspResults[["sample"]] <- createJaspState(sample)
-      jaspResults[["sample"]]$dependOnOptions(c("additionalVariables", "seed", "recordNumberVariable", "monetaryVariable", "selectionMethod", "selectionType", "materiality", "intervalStartingPoint",
+      jaspResults[["sample"]]$dependOn(options = c("additionalVariables", "seed", "recordNumberVariable", "monetaryVariable", "selectionMethod", "selectionType", "materiality", "intervalStartingPoint",
                                                   "expectedErrors", "expectedNumber", "expectedPercentage", "planningModel", "IR", "CR"))
     }
     
@@ -141,7 +141,7 @@
       jaspResults[["selectionContainer"]][["sampleTable"]]          <- sampleTable
       sampleTable$position                  <- position
 
-      sampleTable$dependOnOptions(c("additionalVariables", "seed", "recordNumberVariable", "monetaryVariable", "selectionType", "materiality",
+      sampleTable$dependOn(options = c("additionalVariables", "seed", "recordNumberVariable", "monetaryVariable", "selectionType", "materiality",
                                     "displaySample", "selectionMethod", "expectedErrors", "expectedNumber", "expectedPercentage"))
 
       sampleTable$addColumnInfo(name="number", title ="", type = "string")
@@ -223,7 +223,7 @@
       }
 
       jaspResults[["sample"]] <- createJaspState(sample)
-      jaspResults[["sample"]]$dependOnOptions(c("additionalVariables", "seed", "recordNumberVariable", "monetaryVariable", "selectionMethod", "selectionType", "materiality", "intervalStartingPoint",
+      jaspResults[["sample"]]$dependOn(options = c("additionalVariables", "seed", "recordNumberVariable", "monetaryVariable", "selectionMethod", "selectionType", "materiality", "intervalStartingPoint",
                                                   "expectedErrors", "expectedNumber", "expectedPercentage", "planningModel", "IR", "CR"))
     }
     
@@ -234,7 +234,7 @@
       jaspResults[["selectionContainer"]][["sampleTable"]]          <- sampleTable
       sampleTable$position                  <- position
 
-      sampleTable$dependOnOptions(c("additionalVariables", "seed", "recordNumberVariable", "monetaryVariable", "selectionType", "materiality", "displaySample", "selectionMethod", 
+      sampleTable$dependOn(options = c("additionalVariables", "seed", "recordNumberVariable", "monetaryVariable", "selectionType", "materiality", "displaySample", "selectionMethod", 
                                     "expectedErrors", "expectedNumber", "expectedPercentage", "intervalStartingPoint"))
 
       sampleTable$addColumnInfo(name="number", title ="", type = "string")
@@ -283,7 +283,7 @@
       sampleDescriptivesTable$transpose          <- TRUE
       sampleDescriptivesTable$position           <- position
 
-      sampleDescriptivesTable$dependOnOptions(c("additionalVariables", "seed", "sampleDescriptives", "mean", "sd", "var", "range", "min", "max", "median", "recordNumberVariable", "rankingVariable", "additionalVariables", "monetaryVariable"))
+      sampleDescriptivesTable$dependOn(options = c("additionalVariables", "seed", "sampleDescriptives", "mean", "sd", "var", "range", "min", "max", "median", "recordNumberVariable", "rankingVariable", "additionalVariables", "monetaryVariable"))
 
                                       sampleDescriptivesTable$addColumnInfo(name="name",                        type="string", format="sf:4", title = "")
                                       sampleDescriptivesTable$addColumnInfo(name="Valid cases",                 type="integer")
@@ -327,7 +327,7 @@
   selectionInformationTable                           <- createJaspTable("Selection Summary")
   jaspResults[["selectionContainer"]][["selectionInformationTable"]]          <- selectionInformationTable
   selectionInformationTable$position                  <- position
-  selectionInformationTable$dependOnOptions(c("additionalVariables", "intervalStartingPoint", "recordNumberVariable", "rankingVariable", "selectionType", "selectionMethod", "monetaryVariable", "recordNumberVariable", "seed"))
+  selectionInformationTable$dependOn(options = c("additionalVariables", "intervalStartingPoint", "recordNumberVariable", "rankingVariable", "selectionType", "selectionMethod", "monetaryVariable", "recordNumberVariable", "seed"))
   
   selectionInformationTable$addColumnInfo(name="n", title ="Sample size", type = "string")
   if(options[["materiality"]] == "materialityAbsolute"){

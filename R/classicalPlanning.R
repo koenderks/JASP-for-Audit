@@ -1,6 +1,4 @@
 classicalPlanning <- function(jaspResults, dataset, options, ...){
-  ### TITLE ###
-  jaspResults$title <- "Planning"
 
   jaspResults[["procedureContainer"]] <- createJaspContainer(title= "<u>Procedure</u>")
   jaspResults[["procedureContainer"]]$position <- 1
@@ -9,14 +7,14 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   if(options[["explanatoryText"]] && is.null(jaspResults[["procedureContainer"]][["procedureParagraph"]])){
     if(is.null(jaspResults[["confidenceLevelLabel"]]$object)){
       jaspResults[["confidenceLevelLabel"]] <- createJaspState(paste0(round(options[["confidence"]] * 100, 2), "%"))
-      jaspResults[["confidenceLevelLabel"]]$dependOnOptions(c("confidence"))
+      jaspResults[["confidenceLevelLabel"]]$dependOn(options = c("confidence"))
     }
     criterion <- base::switch(options[["materiality"]], "materialityRelative" = "<b>percentage</b>", "materialityAbsolute" = "<b>amount</b>")
     materialityLabel <- base::switch(options[["materiality"]], "materialityRelative" = paste0(round(options[["materialityPercentage"]] * 100, 2), "%"), "materialityAbsolute" = paste0(format(options[["materialityValue"]], scientific = FALSE), " monetary units"))
     jaspResults[["procedureContainer"]][["procedureParagraph"]] <- createJaspHtml(paste0("The objective of a substantive testing procedure is to determine with a specified confidence <b>(", jaspResults[["confidenceLevelLabel"]]$object, ")</b> whether the ", criterion ," of
                                                                                           misstatement in the target population is lower than the specified materiality of <b>", materialityLabel, "</b>."), "p")
     jaspResults[["procedureContainer"]][["procedureParagraph"]]$position <- 1
-    jaspResults[["procedureContainer"]][["procedureParagraph"]]$dependOnOptions(c("explanatoryText", "confidence"))
+    jaspResults[["procedureContainer"]][["procedureParagraph"]]$dependOn(options = c("explanatoryText", "confidence"))
   }
 
   .auditRiskModel(options, jaspResults)
@@ -26,7 +24,7 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   } else {
     jaspResults[["ready"]] <- createJaspState(options[["materialityPercentage"]] != 0 && options[["populationSize"]] != 0)
   }
-  jaspResults[["ready"]]$dependOnOptions(c("materialityValue", "materialityPercentage", "populationSize", "populationValue", "materiality"))
+  jaspResults[["ready"]]$dependOn(options = c("materialityValue", "materialityPercentage", "populationSize", "populationValue", "materiality"))
 
   jaspResults[["planningContainer"]] <- createJaspContainer(title= "<u>Planning</u>")
   jaspResults[["planningContainer"]]$position <- 3
@@ -35,7 +33,7 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
     if(options[["populationValue"]] == 0) { populationValue <- 0.01 } else { populationValue <- options[["populationValue"]] }
     materiality <- ifelse(options[["materiality"]] == "materialityAbsolute", yes = options[["materialityValue"]] / populationValue, no = options[["materialityPercentage"]])
     jaspResults[["materiality"]] <- createJaspState(materiality)
-    jaspResults[["materiality"]]$dependOnOptions(c("materialityValue", "materialityPercentage", "populationSize", "populationValue", "materiality"))
+    jaspResults[["materiality"]]$dependOn(options = c("materialityValue", "materialityPercentage", "populationSize", "populationValue", "materiality"))
 
     expTMP <- ifelse(options[['expectedErrors']] == "expectedRelative", yes = options[["expectedPercentage"]], no = options[["expectedAbsolute"]] / populationValue)
     if(expTMP > materiality){
@@ -58,7 +56,7 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
           allowed.errors <- 0:(max.errors - 1)
           reject.errors <- max.errors : (max.errors + 2)
           jaspResults[["planningContainer"]][["decisionPlot"]] 		<- .decisionPlot(allowed.errors, reject.errors, options, jaspResults)
-          jaspResults[["planningContainer"]][["decisionPlot"]]		  $dependOnOptions(c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "expectedPercentage", "expectedNumber", "decisionPlot",
+          jaspResults[["planningContainer"]][["decisionPlot"]]		  $dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "expectedPercentage", "expectedNumber", "decisionPlot",
                                                                                         "planningModel", "materialityValue", "materiality"))
           jaspResults[["planningContainer"]][["decisionPlot"]] 		$position <- 4
       }
@@ -77,7 +75,7 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   summaryTable                                                <- createJaspTable("Planning Summary")
   jaspResults[["planningContainer"]][["summaryTable"]]        <- summaryTable
   summaryTable$position                                       <- 1
-  summaryTable$dependOnOptions(c("IR", "CR", "confidence", "expectedErrors", "materialityPercentage", "populationSize", "expectedPercentage", "expectedNumber", "expectedBF",
+  summaryTable$dependOn(options = c("IR", "CR", "confidence", "expectedErrors", "materialityPercentage", "populationSize", "expectedPercentage", "expectedNumber", "expectedBF",
                                   "planningModel", "materialityValue", "populationValue", "materiality"))
 
   summaryTable$addColumnInfo(name = 'materiality',          title = "Materiality",          type = 'string')
@@ -107,7 +105,7 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   }
 
   jaspResults[["N"]] <- createJaspState(options[["populationSize"]])
-  jaspResults[["N"]]$dependOnOptions(c("populationSize"))
+  jaspResults[["N"]]$dependOn(options = c("populationSize"))
 
   if(is.null(jaspResults[["planningResult"]]$object)){
     n <- base::switch(options[["planningModel"]],
@@ -124,7 +122,7 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   resultList[["alpha"]]         <- alpha
   resultList[["confidence"]]    <- options[["confidence"]]
   jaspResults[["planningResult"]] <- createJaspState(resultList)
-  jaspResults[["planningResult"]]$dependOnOptions(c("IR", "CR", "confidence", "expectedErrors", "materialityPercentage", "populationSize", "expectedPercentage", "expectedNumber",
+  jaspResults[["planningResult"]]$dependOn(options = c("IR", "CR", "confidence", "expectedErrors", "materialityPercentage", "populationSize", "expectedPercentage", "expectedNumber",
                                                       "planningModel", "materialityValue", "populationValue", "materiality"))
   }
 

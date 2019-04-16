@@ -21,6 +21,7 @@ import JASP.Controls 1.0
 import JASP.Widgets 1.0
 
 Form {
+      usesJaspResults: true
 
       VariablesForm { implicitHeight: 150
         AvailableVariablesList { name: "evaluationVariables"}
@@ -51,15 +52,15 @@ Form {
 
       Section {
         title: qsTr("Advanced options")
-      
+
         GridLayout {
           columns: 4
-      
+
           RadioButtonGroup {
               title: qsTr("<b>Inherent risk</b>")
               name: "IR"
               id: ir
-      
+
               RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
               RadioButton { text: qsTr("Medium")      ; name: "Medium" }
               RadioButton { text: qsTr("Low")         ; name: "Low" }
@@ -68,7 +69,7 @@ Form {
               title: qsTr("<b>Control risk</b>")
               name: "CR"
               id: cr
-      
+
               RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
               RadioButton { text: qsTr("Medium")      ; name: "Medium" }
               RadioButton { text: qsTr("Low")         ; name: "Low" }
@@ -93,7 +94,7 @@ Form {
 
     Section {
       title: qsTr("Tables and Plots")
-      
+
       GridLayout {
 
         GroupBox {
@@ -105,7 +106,7 @@ Form {
 
         GroupBox {
           title: qsTr("<b>Plots</b>")
-              
+
           CheckBox { text: qsTr("Evaluation information"); name: "plotBound" }
           CheckBox { text: qsTr("Prior and posterior"); name: "plotPriorAndPosterior"; id: plotPriorAndPosterior }
           PercentField { text: qsTr("x-axis limit"); defaultValue: 20; name: "limx_backup"; Layout.leftMargin: 20 }
@@ -114,7 +115,7 @@ Form {
         }
     }
   }
-  
+
   Item {
     height: downloadReportEvaluation.height
     Layout.fillWidth: true

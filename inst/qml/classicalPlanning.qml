@@ -22,6 +22,8 @@ import JASP.Controls 1.0
 import JASP.Widgets 1.0
 
 Form {
+      usesJaspResults: true
+
       GridLayout { columns: 3
           RadioButtonGroup { id: materiality; name: "materiality"; title: qsTr("<b>Materiality</b>")
             RowLayout {
@@ -74,7 +76,7 @@ Form {
                   title: qsTr("<b>Planning distribution</b>")
                   name: "planningModel"
                   id: planningModel
-                  
+
                   RadioButton { text: qsTr("Poisson")                      ; name: "Poisson" ; checked: true; id: poisson}
                   RadioButton { text: qsTr("Binomial")                    ; name: "binomial"; id: binomial}
                   RadioButton { text: qsTr("Hypergeometric")                 ; name: "hypergeometric" ; id: hypergeometric}
@@ -82,7 +84,7 @@ Form {
         }
       }
       Section { title: qsTr("Tables and plots")
-      GridLayout { columns: 2  
+      GridLayout { columns: 2
         GroupBox { title: qsTr("<b>Plots</b>")
           CheckBox { text: qsTr("Decision plot"); name: "decisionPlot" }
         }

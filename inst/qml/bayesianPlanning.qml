@@ -23,6 +23,8 @@ import JASP.Widgets 1.0
 
 
 Form {
+      usesJaspResults: true
+
       GridLayout { columns: 3
           RadioButtonGroup { id: materiality; name: "materiality"; title: qsTr("<b>Materiality</b>")
             RowLayout {
@@ -75,14 +77,14 @@ Form {
                   title: qsTr("<b>Planning distribution</b>")
                   name: "planningModel"
                   id: planningModel
-                  
+
                   RadioButton { text: qsTr("Beta")                    ; name: "beta"; id: beta; checked: true}
                   RadioButton { text: qsTr("Beta-binomial")           ; name: "beta-binomial" ; id: betaBinomial}
               }
         }
       }
       Section { title: qsTr("Tables and plots")
-        GridLayout { columns: 2  
+        GridLayout { columns: 2
           ColumnLayout {
              GroupBox {
                title: qsTr("<b>Statistics</b>")

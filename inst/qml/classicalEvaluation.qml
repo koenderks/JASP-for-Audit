@@ -21,6 +21,7 @@ import JASP.Controls 1.0
 import JASP.Widgets 1.0
 
 Form {
+    usesJaspResults: true
 
     VariablesForm { implicitHeight: 150
       AvailableVariablesList { name: "evaluationVariables"}
@@ -94,12 +95,12 @@ Form {
         }
       }
     }
-    
+
     Section {
       title: qsTr("Tables and Plots")
-      
+
       GridLayout {
-      
+
         GroupBox {
           title: qsTr("<b>Statistics</b>")
 
@@ -109,7 +110,7 @@ Form {
               checked: false
           }
         }
-        
+
         GroupBox {
             title: qsTr("<b>Plots</b>")
             CheckBox {
@@ -121,10 +122,10 @@ Form {
               name: "plotCorrelation"
               enabled: variableTypeTrueValues.checked
             }
-        }        
+        }
       }
     }
-    
+
     Item {
       height: downloadReportEvaluation.height
       Layout.fillWidth: true
