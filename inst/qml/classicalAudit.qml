@@ -42,7 +42,7 @@ Form {
             }
         }
 
-        Divider { }
+        Divider { width: parent.width }
 
         Text { text: qsTr("<b>Variable selection</b>"); font.family: "SansSerif"; font.pointSize: 12; Layout.leftMargin: 220 }
         VariablesForm { id: variablesFormPlanning; implicitHeight: 110
@@ -120,7 +120,7 @@ Form {
             if (monetaryVariable.count == 0)  recordSampling.click()
             if (monetaryVariable.count > 0)   musSampling.click()
             if (monetaryVariable.count == 0)  variableTypeCorrect.click()
-            if (monetaryVariable.count > 0)   variableTypeTrueValues.click()
+            if (monetaryVariable.count > 0)   variableTypeAuditValues.click()
           }
         }
       }
@@ -208,7 +208,7 @@ Form {
               }
             }
 
-            Divider { }
+            Divider { width: parent.width }
 
             GroupBox {
               ComputedColumnField { name: "sampleFilterName"; text: "Column name selection result: "; fieldWidth: 120; enabled: pasteVariables.checked ? false : true }

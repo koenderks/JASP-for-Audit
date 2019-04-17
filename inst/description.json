@@ -8,7 +8,7 @@
 		"maintainer":						"Koen Derks <k.derks@nyenrode.nl>",
 		"website":							"www.github.com/koenderks/JASP-for-Audit",
 		"license":							"GPL (>= 2)",
-		"icon":     						"audit-fullaudit.svg"
+		"icon":     						"audit-module.svg"
 	},
 
 	"requiredPackages":	[],
@@ -17,7 +17,7 @@
 	[
 		{
 			"title":    					"Workflow",
-			"icon":							"audit-fullaudit.svg"
+			"icon":							"audit-workflow.svg"
 		},
 		{
 			"title":						"Audit Workflow",
@@ -31,7 +31,7 @@
 		},
 		{
 			"title":    					"Planning",
-			"icon":							"audit-fullaudit.svg"
+			"icon":							"audit-planning.svg"
 		},
 		{
 			"title":						"Planning",
@@ -45,7 +45,7 @@
 		},
 		{
 			"title":    					"Evaluation",
-			"icon":							"audit-fullaudit.svg"
+			"icon":							"audit-evaluation.svg"
 		},
 		{
 			"title":						"Evaluation",
