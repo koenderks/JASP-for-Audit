@@ -211,9 +211,10 @@ Form {
             Divider { width: parent.width }
 
             GroupBox {
-              ComputedColumnField { name: "sampleFilterName"; text: "Column name selection result: "; fieldWidth: 120; enabled: pasteVariables.checked ? false : true }
-              ComputedColumnField { name: "variableName"; text: "Column name audit result: "; fieldWidth: 120; enabled: pasteVariables.checked ? false : true }
+              ComputedColumnField { name: "sampleFilter"; text: "Column name selection result: "; fieldWidth: 120; enabled: pasteVariables.checked ? false : true }
+              AddColumnField { name: "auditResult"; text: "Column name audit result: "; fieldWidth: 120; enabled: pasteVariables.checked ? false : true }
             }
+            
             Text { text: qsTr("<b>Execute the audit before continuing to the evaluation stage</b>"); font.family: "SansSerif"; font.pointSize: 7; Layout.leftMargin: 120; visible: false; id: performAuditText }
             Item { height: toEvaluation.height; Layout.fillWidth: true
               Button { anchors.left: parent.left; text: qsTr("<b>Reset Workflow</b>");
@@ -224,6 +225,7 @@ Form {
               CheckBox { anchors.right: pasteButton.left; width: height; visible: false; name: "pasteVariables"; id: pasteVariables; checked: false }
               Button { text: qsTr("<b>Add Variables</b>"); id: pasteButton; anchors.right: evaluationChecked.left
                 onClicked: {
+                  focus = true
                   toEvaluation.enabled = true
                   pasteButton.enabled = false
                   pasteVariables.checked = true
@@ -266,11 +268,13 @@ Form {
             }
         }
         Section { text: evaluationPhase.expanded ? qsTr("<b>4. Evaluation</b>") : qsTr("4. Evaluation"); expanded: false; enabled: false; id: evaluationPhase; columns: 1
+            
+            /* commented out because you can just use the value of the added columns!
             VariablesForm { implicitHeight: 200
               AvailableVariablesList { name: "evaluationVariables"}
               AssignedVariablesList { name: "sampleFilter"; title: qsTr("Selection result"); singleVariable: true; allowedColumns: ["nominal"]; id: sampleFilter }
               AssignedVariablesList { name: "auditResult"; title: qsTr("Audit result"); singleVariable: true; allowedColumns: ["nominal" ,"scale"]; id: auditResult }
-            }
+            }*/
             Section { title: qsTr("Advanced options"); columns: 1
               GridLayout { columns: 2
                 RadioButtonGroup { title: qsTr("<b>Estimator</b>"); name: "estimator"

@@ -174,16 +174,21 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
   # Create a container for the evaluation
   jaspResults[["evaluationContainer"]] <- createJaspContainer(title = "<u>Evaluation</u>")
   jaspResults[["evaluationContainer"]]$position <- 5
+  
   # Read data for the evaluation
   dataset <- .readDataEvaluation(options, jaspResults)
+  
   # Import stored objects from jaspResults
   total_data_value              <- jaspResults[["total_data_value"]]$object
   planningResult                <- jaspResults[["planningResult"]]$object
   runEvaluation                 <- jaspResults[["runEvaluation"]]$object
+  
   # Apply the selection filter to the dataset
   if(jaspResults[["runEvaluation"]]$object)
       dataset <- subset(dataset, dataset[, .v(options[["sampleFilter"]])] == 1)
+  
   # Perform the evaluation conditional on the type of variable
+  
   if(options[["variableType"]] == "variableTypeCorrect"){
     # Attributes evaluation
     evaluationResult <- .attributesBound(dataset, options, jaspResults)

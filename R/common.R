@@ -393,8 +393,8 @@
     sampleFilter[index]           <- 1
     sampleFilter                  <- as.integer(sampleFilter)
     emptyVariable                 <- rep(NA, jaspResults[["N"]]$object)
-    .setColumnDataAsNominal(options[["sampleFilterName"]], sampleFilter)
-    base::switch(options[["variableType"]], "variableTypeCorrect" = .setColumnDataAsNominal(options[["variableName"]], emptyVariable), "variableTypeAuditValues" = .setColumnDataAsScale(options[["variableName"]], emptyVariable))
+    .setColumnDataAsNominal(options[["sampleFilter"]], sampleFilter)
+    #base::switch(options[["variableType"]], "variableTypeCorrect" = .setColumnDataAsNominal(options[["variableName"]], emptyVariable), "variableTypeAuditValues" = .setColumnDataAsScale(options[["variableName"]], emptyVariable))
     jaspResults[["pastingDone"]]  <- createJaspState(TRUE)                
   }
 }
