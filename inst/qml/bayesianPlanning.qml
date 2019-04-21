@@ -127,7 +127,7 @@ Form {
         enabled: materialityRelative.checked ? (populationSize.value != 0 & materialityPercentage.value != 0) : (populationSize.value != 0 & materialityValue.value != 0 & populationValue.value != 0)
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        text: qsTr("<b>Download Report</b>")
+        text: qsTr("<b>Download report</b>")
       }
     }
 }

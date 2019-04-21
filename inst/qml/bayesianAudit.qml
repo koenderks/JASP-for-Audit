@@ -107,15 +107,10 @@ Form {
       }
   }
   Item { height: toSampling.height; Layout.fillWidth: true
-      Button { anchors.left: parent.left; text: qsTr("<b>Reset Workflow</b>");
-                onClicked: {
-                  form.reset()
-                }
-              }
-      Button { id: downloadReportPlanning; anchors.right: samplingChecked.left; text: qsTr("<b>Download Report</b>")
+      Button { id: downloadReportPlanning; anchors.right: samplingChecked.left; text: qsTr("<b>Download report</b>")
           enabled: materialityRelative.checked ? (materialityPercentage.value == "0" ? false : true) : (materialityValue.value == "0" ? false : (recordNumberVariable.count > 0 && monetaryVariable.count > 0)) }
         CheckBox { anchors.right: toSampling.left; width: height; visible: false; name: "samplingChecked"; id: samplingChecked; checked: false }
-        Button { id: toSampling; anchors.right: parent.right; text: qsTr("<b>To Selection</b>")
+        Button { id: toSampling; anchors.right: parent.right; text: qsTr("<b>To selection</b>")
           enabled: materialityRelative.checked ? (materialityPercentage.value == "0" ? false : (recordNumberVariable.count > 0)) : (materialityValue.value == "0" ? false : (recordNumberVariable.count > 0 && monetaryVariable.count > 0))
           onClicked: {
             planningPhase.expanded = false
@@ -186,9 +181,9 @@ Form {
                   }
                 }
         Button { id: downloadReportSelection; enabled: materialityRelative.checked ? (materialityPercentage.value == "0" ? false : true) : (materialityValue.value == "0" ? false : true)
-                anchors.right: executionChecked.left; text: qsTr("<b>Download Report</b>") }
+                anchors.right: executionChecked.left; text: qsTr("<b>Download report</b>") }
         CheckBox { anchors.right: toExecution.left; width: height; visible: false; name: "executionChecked"; id: executionChecked; checked: false }
-        Button { id: toExecution; anchors.right: parent.right; text: qsTr("<b>To Execution</b>")
+        Button { id: toExecution; anchors.right: parent.right; text: qsTr("<b>To execution</b>")
                   onClicked: {
                     samplingPhase.expanded = false
                     executionPhase.expanded = true
@@ -228,7 +223,7 @@ Form {
                       }
                     }
             CheckBox { anchors.right: pasteButton.left; width: height; visible: false; name: "pasteVariables"; id: pasteVariables; checked: false }
-            Button { text: qsTr("<b>Add Variables</b>"); id: pasteButton; anchors.right: evaluationChecked.left
+            Button { text: qsTr("<b>Add variables</b>"); id: pasteButton; anchors.right: evaluationChecked.left
               onClicked: {
                 toEvaluation.enabled = true
                 pasteButton.enabled = false
@@ -250,7 +245,7 @@ Form {
               }
             }
             CheckBox { anchors.right: toEvaluation.left; width: height; visible: false; name: "evaluationChecked"; id: evaluationChecked; checked: false }
-            Button { enabled: false; id: toEvaluation; anchors.right: parent.right; text: qsTr("<b>To Evaluation</b>")
+            Button { enabled: false; id: toEvaluation; anchors.right: parent.right; text: qsTr("<b>To evaluation</b>")
               onClicked: {
                 executionPhase.expanded = false
                 evaluationPhase.expanded = true
@@ -287,7 +282,7 @@ Form {
           GridLayout { columns: 2
             ColumnLayout {
               GroupBox { title: qsTr("<b>Statistics</b>")
-                CheckBox { text: qsTr("Most Likely Error (MLE)"); name: "mostLikelyError" }
+                CheckBox { text: qsTr("Most likely error (MLE)"); name: "mostLikelyError" }
                 CheckBox { text: qsTr("Bayes factor\u208B\u208A"); name: "bayesFactor" }
               }
               GroupBox { title: qsTr("<b>Tables</b>")
@@ -304,7 +299,7 @@ Form {
           }
         }
         Item { height: toInterpretation.height; Layout.fillWidth: true
-          Button { id: toInterpretation; anchors.right: parent.right; text: qsTr("<b>Download Report</b>")
+          Button { id: toInterpretation; anchors.right: parent.right; text: qsTr("<b>Download report</b>")
             enabled: sampleFilter.count > 0 && auditResult.count > 0
             onClicked: { evaluationPhase.expanded = false }
           }
