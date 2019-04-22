@@ -275,19 +275,15 @@
 
     bestModel <- 1 # which.min(Bic)
 
+    # format x labels
     xlow <- min(pretty(xVar))
     xhigh <- max(pretty(xVar))
     xticks <- pretty(c(xlow, xhigh))
-    ylow <- min(min(pretty(yVar)), min(.poly.predJfA(fit[[bestModel]], line= FALSE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd=lwd)))
-    yhigh <- max(max(pretty(yVar)), max(.poly.predJfA(fit[[bestModel]], line= FALSE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd=lwd)))
-
-    yticks <- pretty(c(ylow, yhigh))
-
-    # format x labels
     xLabs <- vector("character", length(xticks))
     xLabs <- format(xticks, digits= 3, scientific = FALSE)
 
     # Format y labels
+    yticks <- xticks
     yLabs <- vector("character", length(yticks))
     yLabs <- format(yticks, digits= 3, scientific = FALSE)
 

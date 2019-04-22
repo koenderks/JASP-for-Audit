@@ -175,7 +175,7 @@ Form {
         }
       }
       Item { height: toExecution.height; Layout.fillWidth: true
-        Button { anchors.left: parent.left; text: qsTr("<b>Reset Workflow</b>");
+        Button { anchors.left: parent.left; text: qsTr("<b>Reset workflow</b>");
                   onClicked: {
                     form.reset()
                   }
@@ -217,7 +217,7 @@ Form {
           }
           Text { text: qsTr("<b>Execute the audit before continuing to the evaluation stage</b>"); font.family: "SansSerif"; font.pointSize: 7; Layout.leftMargin: 120; visible: false; id: performAuditText }
           Item { height: toEvaluation.height; Layout.fillWidth: true
-            Button { anchors.left: parent.left; text: qsTr("<b>Reset Workflow</b>");
+            Button { anchors.left: parent.left; text: qsTr("<b>Reset workflow</b>");
                       onClicked: {
                         form.reset()
                       }

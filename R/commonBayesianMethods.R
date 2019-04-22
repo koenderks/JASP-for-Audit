@@ -629,7 +629,7 @@
   return(BF)
 }
 
-.coxAndSnellBound <- function(dataset, options, jaspResults, priorPi = 0.50, priorMu = 0.50, priorA = 1, priorB = 6){
+.coxAndSnellBound <- function(dataset, options, jaspResults, priorA = 0, priorB = 0){
   if(!is.null(jaspResults[["evaluationResult"]]$object))
     return(jaspResults[["evaluationResult"]]$object)
     # Based on the paper:
@@ -643,6 +643,11 @@
     prior                     <- NULL
     posterior                 <- NULL
     alpha                     <- 1 - options[["confidence"]]
+    priorPi                   <- priorA / (priorA + priorB)
+    a                         <- 1
+    b                         <- 3
+    priorMu                   <- jaspResults[["materiality"]]$object
+    
 
     if(jaspResults[["runEvaluation"]]$object){
 
@@ -656,13 +661,11 @@
       if(M == 0)
           z_bar               <- 0
 
-      prior_part_1            <- (0 + priorA) / (0 + priorB)
-      prior_part_2            <- ((priorMu * (priorB - 1)) + (0 * 0)) / (0 + (priorA / priorPi))
-      prior                   <- prior_part_1 * prior_part_2 * stats::rf(n = 1e6, df1 = (2 * (0 + priorA)), df2 = ( 2 *(0 + priorB)))
+      prior                   <- rbeta(n = 1e6, shape1 = priorA, shape2 = priorB) 
 
-      posterior_part_1        <- (M + priorA) / (M + priorB)
-      posterior_part_2        <- ((priorMu * (priorB - 1)) + (M * z_bar)) / (n + (priorA / priorPi))
-      posterior               <- posterior_part_1 * posterior_part_2 * stats::rf(n = 1e6, df1 = (2 * (M + priorA)), df2 = ( 2 *(M + priorB)))
+      posterior_part_1        <- (M + a) / (M + b)
+      posterior_part_2        <- ((priorMu * (b - 1)) + (M * z_bar)) / (n + (a / priorPi))
+      posterior               <- posterior_part_1 * posterior_part_2 * stats::rf(n = 1e6, df1 = (2 * (M + a)), df2 = ( 2 *(M + b)))
 
       bound                   <- as.numeric(quantile(posterior, probs = options[["confidence"]], na.rm = TRUE))
       interval                <- as.numeric(quantile(posterior, probs = c((1 - options[["confidence"]])/2, 1 - (1 - options[["confidence"]])/2), na.rm = TRUE))
