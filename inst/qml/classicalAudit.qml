@@ -90,7 +90,7 @@ Form {
                 }
           }
       }
-      Section { title: qsTr("Tables and plots")
+      Section { title: qsTr("Tables and figures")
         GridLayout { columns: 2
           GroupBox { title: qsTr("<b>Tables</b>")
             CheckBox { text: qsTr("Book value descriptives"); name: "bookValueDescriptives"; enabled: monetaryVariable.count > 0  }
@@ -151,7 +151,7 @@ Form {
                 IntegerField { text: qsTr("Seed"); name: "seed"; id: seed; defaultValue: 1; min: 1; max: 999; fieldWidth: 60 }
             }
         }
-        Section { title: qsTr("Tables and plots")
+        Section { title: qsTr("Tables and figures")
           GridLayout {
               GroupBox { title: qsTr("<b>Tables</b>"); id: samplingTables
                   CheckBox { text: qsTr("Display sample"); name: "displaySample"}
@@ -288,7 +288,7 @@ Form {
                 }
               }
             }
-            Section { title: qsTr("Tables and plots")
+            Section { title: qsTr("Tables and figures")
               GridLayout { columns: 2
                 GroupBox { title: qsTr("<b>Statistics</b>")
                   CheckBox { text: qsTr("Most likely error (MLE)"); name: "mostLikelyError"; checked: false }

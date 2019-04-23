@@ -85,7 +85,7 @@ Form {
               }
         }
     }
-    Section { title: qsTr("Tables and plots")
+    Section { title: qsTr("Tables and figures")
       GridLayout { columns: 2
           ColumnLayout {
               GroupBox { title: qsTr("<b>Statistics</b>")
@@ -157,7 +157,7 @@ Form {
               IntegerField { text: qsTr("Seed"); name: "seed"; id: seed; defaultValue: 1; min: 1; max: 999; fieldWidth: 60 }
           }
       }
-      Section { title: qsTr("Tables and plots")
+      Section { title: qsTr("Tables and figures")
         GridLayout {
             GroupBox { title: qsTr("<b>Tables</b>"); id: samplingTables
                 CheckBox { text: qsTr("Display sample")       ; name: "displaySample"}
@@ -286,7 +286,7 @@ Form {
             }
           }
         }
-        Section { title: qsTr("Tables and plots")
+        Section { title: qsTr("Tables and figures")
           GridLayout { columns: 2
             ColumnLayout {
               GroupBox { title: qsTr("<b>Statistics</b>")

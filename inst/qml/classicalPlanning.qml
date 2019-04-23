@@ -83,7 +83,7 @@ Form {
               }
         }
       }
-      Section { title: qsTr("Tables and plots")
+      Section { title: qsTr("Tables and figures")
       GridLayout { columns: 2
         GroupBox { title: qsTr("<b>Plots</b>")
           CheckBox { text: qsTr("Decision plot"); name: "decisionPlot" }

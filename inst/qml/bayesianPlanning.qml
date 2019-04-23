@@ -83,7 +83,7 @@ Form {
               }
         }
       }
-      Section { title: qsTr("Tables and plots")
+      Section { title: qsTr("Tables and figures")
         GridLayout { columns: 2
           ColumnLayout {
              GroupBox {

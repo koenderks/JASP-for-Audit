@@ -97,7 +97,7 @@ Form {
     }
 
     Section {
-      title: qsTr("Tables and Plots")
+      title: qsTr("Tables and figures")
 
       GridLayout {
 
