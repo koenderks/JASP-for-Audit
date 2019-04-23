@@ -40,7 +40,7 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
 
     expTMP <- ifelse(options[['expectedErrors']] == "expectedRelative", yes = options[["expectedPercentage"]], no = options[["expectedAbsolute"]] / populationValue)
     if(expTMP > materiality){
-      jaspResults[["planningContainer"]][["summaryTable"]] <- createJaspTable("Planning Summary")
+      jaspResults[["planningContainer"]][["summaryTable"]] <- createJaspTable("Planning summary")
       jaspResults[["planningContainer"]][["summaryTable"]]$setError("Analysis not possible: Your expected errors are higher than materiality.")
       return()
     }
@@ -98,7 +98,7 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
 
 .bayesianPlanningManual <- function(options, jaspResults){
 
-  summaryTable                                                <- createJaspTable("Planning Summary")
+  summaryTable                                                <- createJaspTable("Planning summary")
   jaspResults[["planningContainer"]][["summaryTable"]]        <- summaryTable
   summaryTable$position                                       <- 1
   summaryTable$dependOn(options = c("IR", "CR", "confidence", "expectedErrors", "materialityPercentage", "populationSize", "expectedPercentage", "expectedNumber", "expectedBF",

@@ -128,6 +128,9 @@ Form {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         text: qsTr("<b>Download report</b>")
+        onClicked: {
+          form.exportResults()
+        }
       }
     }
 }

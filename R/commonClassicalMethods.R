@@ -72,7 +72,7 @@
 
   if(!is.null(jaspResults[["planningContainer"]][["planningSummary"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-  planningSummary                              <- createJaspTable("Planning Summary")
+  planningSummary                              <- createJaspTable("Planning summary")
   jaspResults[["planningContainer"]][["planningSummary"]]        <- planningSummary
   planningSummary$position                     <- position
   planningSummary$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "planningModel", "recordNumberVariable", "monetaryVariable",
@@ -183,7 +183,7 @@
 
     if(!is.null(jaspResults[["evaluationContainer"]][["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-    evaluationTable                       <- createJaspTable("Evaluation Summary")
+    evaluationTable                       <- createJaspTable("Evaluation summary")
     jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "sampleFilter", "planningModel",
@@ -282,7 +282,7 @@
 
     if(!is.null(jaspResults[["evaluationContainer"]][["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-    evaluationTable                       <- createJaspTable("Evaluation Summary")
+    evaluationTable                       <- createJaspTable("Evaluation summary")
     jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "planningModel", "mostLikelyError", "sampleFilter", "variableType",

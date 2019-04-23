@@ -103,7 +103,11 @@ Form {
       }
     Item { height: toSampling.height; Layout.fillWidth: true
       Button { id: downloadReportPlanning; anchors.right: samplingChecked.left; text: qsTr("<b>Download report</b>")
-        enabled: materialityRelative.checked ? (materialityPercentage.value == "0" ? false : true) : (materialityValue.value == "0" ? false : (recordNumberVariable.count > 0 && monetaryVariable.count > 0)) }
+        enabled: materialityRelative.checked ? (materialityPercentage.value == "0" ? false : true) : (materialityValue.value == "0" ? false : (recordNumberVariable.count > 0 && monetaryVariable.count > 0)) 
+        onClicked: {
+          form.exportResults()
+        }
+      }
       CheckBox { anchors.right: toSampling.left; width: height; visible: false; name: "samplingChecked"; id: samplingChecked; checked: false }
       Button { id: toSampling; anchors.right: parent.right; text: qsTr("<b>To selection</b>")
           enabled: materialityRelative.checked ? (materialityPercentage.value == "0" ? false : (recordNumberVariable.count > 0)) : (materialityValue.value == "0" ? false : (recordNumberVariable.count > 0 && monetaryVariable.count > 0))
@@ -175,7 +179,11 @@ Form {
                     }
                   }
           Button { id: downloadReportSelection; enabled: materialityRelative.checked ? (materialityPercentage.value == "0" ? false : true) : (materialityValue.value == "0" ? false : true)
-                  anchors.right: executionChecked.left; text: qsTr("<b>Download report</b>") }
+                  anchors.right: executionChecked.left; text: qsTr("<b>Download report</b>") 
+                  onClicked: {
+                    form.exportResults()
+                  }
+                }
           CheckBox { anchors.right: toExecution.left; width: height; visible: false; name: "executionChecked"; id: executionChecked; checked: false }
           Button { id: toExecution; anchors.right: parent.right; text: qsTr("<b>To execution</b>")
                     onClicked: {
@@ -294,7 +302,7 @@ Form {
             Item { height: toInterpretation.height; Layout.fillWidth: true
               Button { id: toInterpretation; anchors.right: parent.right; text: qsTr("<b>Download report</b>")
                 enabled: sampleFilter.count > 0 && auditResult.count > 0
-                onClicked: { evaluationPhase.expanded = false }
+                onClicked: { evaluationPhase.expanded = false; form.exportResults()}
               }
             }
           }

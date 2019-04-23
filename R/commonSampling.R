@@ -324,7 +324,7 @@
 
   if(!is.null(jaspResults[["selectionContainer"]][["selectionInformationTable"]])) return()
 
-  selectionInformationTable                           <- createJaspTable("Selection Summary")
+  selectionInformationTable                           <- createJaspTable("Selection summary")
   jaspResults[["selectionContainer"]][["selectionInformationTable"]]          <- selectionInformationTable
   selectionInformationTable$position                  <- position
   selectionInformationTable$dependOn(options = c("additionalVariables", "intervalStartingPoint", "recordNumberVariable", "rankingVariable", "selectionType", "selectionMethod", "monetaryVariable", "recordNumberVariable", "seed"))
