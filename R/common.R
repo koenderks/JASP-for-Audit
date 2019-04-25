@@ -18,7 +18,7 @@
   
       jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]] <- createJaspHtml(paste0("Prior to the substantive testing phase, the inherent risk was determined to be <b>", options[["IR"]] ,"</b>. The internal control risk was determined
                                                                       to be <b>", options[["CR"]] ,"</b>. According to the Audit Risk Model, the required detection risk to maintain an audit risk of <b>", auditRiskLabel, "</b> for a materiality
-                                                                      of <b>", materialityLevelLabel ,"</b> should be <b>", dectectionRiskLabel , "</b>."), "p")
+                                                                      of <b>", materialityLevelLabel ,"</b> should be <b>", dectectionRiskLabel , "</b>. The translation of High, Medium and Low to probabilities is done according to <b>IODAD (2007)</b>."), "p")
       jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]]$position <- 1
       jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]]$dependOn(options = c("confidence", "IR", "CR", "materialityPercentage", "materialityValue"))
     }
@@ -48,7 +48,7 @@
 
   if(!is.null(jaspResults[["procedureContainer"]][["bookValueDescriptives"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-  dataTable                                                 <- createJaspTable("Book value Descriptives")
+  dataTable                                                 <- createJaspTable("Book value descriptives")
   jaspResults[["procedureContainer"]][["bookValueDescriptives"]]        <- dataTable
   dataTable$position                                        <- position
   dataTable$dependOn(options = c("monetaryVariable", "recordNumberVariable", "bookValueDescriptives"))
@@ -117,7 +117,7 @@
                           axis.text.y = ggplot2::element_blank(),
                           axis.text.x = ggplot2::element_text(size = 17))
 
-  return(createJaspPlot(plot = p, title = "Decision Plot", width = 600, height = 200))
+  return(createJaspPlot(plot = p, title = "Decision plot", width = 600, height = 200))
 }
 
 .bookValueDistribution <- function(dataset, options, jaspResults){
@@ -147,7 +147,7 @@
     
     p <- JASPgraphs::themeJasp(p, legend.position = "top")
 
-    return(createJaspPlot(plot = p, title = "Book Value Distribution", width = 600, height = 300))
+    return(createJaspPlot(plot = p, title = "Book value distribution", width = 600, height = 300))
 }
 
 .plotMarginalJfA <- function(column, variableName, rugs = FALSE, displayDensity = FALSE) {
@@ -258,7 +258,7 @@
                         ggplot2::theme(axis.ticks.x = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank()) +
                         ggplot2::scale_y_continuous(breaks = yBreaks, labels = x.labels)
   p                 <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE)
-  return(createJaspPlot(plot = p, title = "Evaluation Information", width = 600, height = 300))
+  return(createJaspPlot(plot = p, title = "Evaluation information", width = 600, height = 300))
 }
 
 .correlationPlot <- function(dataset, options, jaspResults) {
@@ -298,7 +298,7 @@
     p <- p + ggplot2::annotate("text", x = xticks[1], y = yticks[length(yticks)],
                                 label = paste0("italic(r) == ", co), size = 8, parse = TRUE, hjust = -0.5, vjust = 0.5)
     p <- JASPgraphs::themeJasp(p)
-    return(createJaspPlot(plot = p, title = "Correlation Plot", width = 500, height = 400))
+    return(createJaspPlot(plot = p, title = "Correlation plot", width = 500, height = 400))
 }
 
 .poly.predJfA <- function(fit, plot = NULL, line=FALSE, xMin, xMax, lwd) {

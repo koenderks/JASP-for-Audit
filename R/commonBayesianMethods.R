@@ -5,7 +5,9 @@
       impk <- base::switch(options[["expectedErrors"]], "expectedRelative" = n * options[["expectedPercentage"]], "expectedAbsolute" = options[["expectedNumber"]])
         if(impk >= n){ next }
         x <- qbeta(p = 1 - alpha, shape1 = 1 + impk, shape2 = 1 + (n - impk))
-        if(x < jaspResults[["materiality"]]$object) return(n)
+        if(x < jaspResults[["materiality"]]$object){
+          return(n)
+        }
     }
 }
 
@@ -28,7 +30,9 @@
       impk <- base::switch(options[["expectedErrors"]], "expectedRelative" = n * options[["expectedPercentage"]], "expectedAbsolute" = options[["expectedNumber"]])
       if(impk >= n){ next }
       x <- .qBetaBinom(p = 1 - alpha, N = N, u = 1 + impk, v = 1 + (n - impk)) / N
-      if(x < jaspResults[["materiality"]]$object) return(n)
+      if(x < jaspResults[["materiality"]]$object){
+        return(n)
+      }
     }
 }
 
@@ -156,7 +160,7 @@
 
   if(options[["implicitSampleTable"]]){
 
-  sampletable                       <- createJaspTable("Implicit Sample")
+  sampletable                       <- createJaspTable("Implicit sample")
   jaspResults[["planningContainer"]][["sampletable"]]      <- sampletable
   sampletable$position              <- position
   sampletable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "implicitSampleTable", "expectedPercentage", "expectedNumber",
@@ -327,7 +331,7 @@
               ggplot2::theme()
     p <- JASPgraphs::themeJasp(p, legend.position = "top") + thm
   }
-  return(createJaspPlot(plot = p, title = "Implied Prior from Risk Assessments", width = plotWidth, height = plotHeight))
+  return(createJaspPlot(plot = p, title = "Implied prior from risk assessments", width = plotWidth, height = plotHeight))
 }
 
 .bayesianAttributesBound <- function(dataset, options, jaspResults){
@@ -597,7 +601,7 @@
                 ggplot2::theme()
       p <- JASPgraphs::themeJasp(p, legend.position = "top") + thm
     }
-  return(createJaspPlot(plot = p, title = "Prior and Posterior Plot", width = plotWidth, height = plotHeight))
+  return(createJaspPlot(plot = p, title = "Prior and posterior plot", width = plotWidth, height = plotHeight))
 }
 
 .expectedBF <- function(options, planningResult, ktable, jaspResults){
@@ -846,7 +850,7 @@
   	       ggplot2::theme()
 
   p <- JASPgraphs::themeJasp(p, legend.position = "top") + thm
-  return(createJaspPlot(plot = p, title = "Prior and Posterior Plot", width = plotWidth, height = plotHeight))
+  return(createJaspPlot(plot = p, title = "Prior and posterior plot", width = plotWidth, height = plotHeight))
 }
 
 .regressionBoundBayesian <- function(dataset, options, total_data_value, jaspResults){

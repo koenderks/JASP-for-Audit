@@ -6,7 +6,9 @@
       if(impk >= n){ next }
       if(impk%%1 == 0){
           x <- choose(n, 0:impk) * jaspResults[["materiality"]]$object^(0:impk) * (1 - jaspResults[["materiality"]]$object)^(n - (0:impk))
-          if(sum(x) < alpha) return(n)
+          if(sum(x) < alpha){ 
+            return(n)
+          }
       }
     }
 }
@@ -19,7 +21,9 @@
       impk <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(n * options[["expectedPercentage"]]), "expectedAbsolute" = options[["expectedNumber"]])
       if(impk >= n) { next }
       x <- choose(K, 0:impk) * choose(jaspResults[["N"]]$object - K, n - (0:impk)) / choose(jaspResults[["N"]]$object, n)
-      if(sum(x) < alpha) return(n)
+      if(sum(x) < alpha){
+        return(n)
+      }
   }
 }
 
@@ -29,7 +33,9 @@
     jaspResults$progressbarTick()
     k <- base::switch(options[["expectedErrors"]], "expectedRelative" = (n * options[["expectedPercentage"]]), "expectedAbsolute" = options[["expectedNumber"]])
     x <- pgamma(jaspResults[["materiality"]]$object, shape = 1 + k, scale = 1 / n)
-    if(x >= (1 - alpha)) return(n)
+    if(x >= (1 - alpha)){
+      return(n)
+    }
   }
 }
 

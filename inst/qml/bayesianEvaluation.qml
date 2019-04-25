@@ -30,7 +30,7 @@ Form {
       }
 
       GridLayout { columns: 3
-          RadioButtonGroup { id: auditType; name: "auditType"; title: qsTr("<b>Materiality</b>")
+          RadioButtonGroup { id: auditType; name: "auditType"; title: qsTr("<b>Population materiality</b>")
             RowLayout {
               RadioButton { id: mus; name: "mus"; text: qsTr("Absolute"); checked: true; childrenOnSameRow: true
                 DoubleField { id: materialityValue; visible: mus.checked; name: "materialityValue"; defaultValue: 0; min: 0; fieldWidth: 90; decimals: 2 } }

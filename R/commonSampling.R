@@ -278,7 +278,7 @@
       variables                       <- unlist(options[["additionalVariables"]])
 
       all.variables                   <- c(rankingVariable, monetaryVariable, variables)
-      sampleDescriptivesTable                    <- createJaspTable("Sample Descriptives")
+      sampleDescriptivesTable                    <- createJaspTable("Selection descriptives")
       jaspResults[["selectionContainer"]][["sampleDescriptivesTable"]]   <- sampleDescriptivesTable
       sampleDescriptivesTable$transpose          <- TRUE
       sampleDescriptivesTable$position           <- position

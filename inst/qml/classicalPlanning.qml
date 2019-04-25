@@ -25,7 +25,7 @@ Form {
       usesJaspResults: true
 
       GridLayout { columns: 3
-          RadioButtonGroup { id: materiality; name: "materiality"; title: qsTr("<b>Materiality</b>")
+          RadioButtonGroup { id: materiality; name: "materiality"; title: qsTr("<b>Population materiality</b>")
             RowLayout {
               RadioButton { id: materialityAbsolute; name: "materialityAbsolute"; text: qsTr("Absolute"); checked: true; childrenOnSameRow: true
                 DoubleField { id: materialityValue; visible: materialityAbsolute.checked; name: "materialityValue"; defaultValue: 0; min: 0; fieldWidth: 90; decimals: 2 } }

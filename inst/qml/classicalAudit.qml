@@ -27,7 +27,7 @@ Form {
 
     Section { id: planningPhase; text: planningPhase.expanded ? qsTr("<b>1. Planning</b>") : qsTr("1. Planning"); expanded: true; columns: 1
         GridLayout { columns: 2
-            RadioButtonGroup { id: materiality; name: "materiality"; title: qsTr("<b>Materiality</b>")
+            RadioButtonGroup { id: materiality; name: "materiality"; title: qsTr("<b>Population materiality</b>")
               RowLayout {
                 RadioButton { id: materialityAbsolute; name: "materialityAbsolute"; text: qsTr("Absolute"); checked: true; childrenOnSameRow: true
                   DoubleField { id: materialityValue; visible: materialityAbsolute.checked; name: "materialityValue"; defaultValue: 0; min: 0; fieldWidth: 90; decimals: 2 } }
@@ -154,8 +154,8 @@ Form {
         Section { title: qsTr("Tables and plots")
           GridLayout {
               GroupBox { title: qsTr("<b>Tables</b>"); id: samplingTables
-                  CheckBox { text: qsTr("Display sample"); name: "displaySample"}
-                      CheckBox { text: qsTr("Sample descriptives"); name: "sampleDescriptives"; id: sampleDescriptives}
+                  CheckBox { text: qsTr("Display selected observations"); name: "displaySample"}
+                      CheckBox { text: qsTr("Selection descriptives"); name: "sampleDescriptives"; id: sampleDescriptives}
                       GridLayout { Layout.leftMargin: 20
                           ColumnLayout { spacing: 5
                             CheckBox { text: qsTr("Mean")                 ; name: "mean"; enabled: sampleDescriptives.checked ; checked: true}
