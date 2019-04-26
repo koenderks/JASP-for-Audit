@@ -234,7 +234,7 @@
   proj.misstatement <- bound * jaspResults[["total_data_value"]]$object
   expected.errors   <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = options[["expectedPercentage"]], no = options[["expectedNumber"]] / evaluationResult[["n"]])
   mle               <- ifelse(options[["variableType"]] == "variableTypeCorrect", yes = evaluationResult[["k"]] / evaluationResult[["n"]], no = sum(evaluationResult[["z"]]) / evaluationResult[["n"]])
-  label             <- rev(c("Materiality", "Maximum Error", "Most Likely Error", "Expected Error"))
+  label             <- rev(c("Materiality", "Maximum error", "Most likely error", "Expected error"))
   values            <- rev(c(materiality, bound, mle, expected.errors))
   if(options[["variableType"]] == "variableTypeAuditValues" && options[["materiality"]] == "materialityAbsolute")
     values          <- values * jaspResults[["total_data_value"]]$object

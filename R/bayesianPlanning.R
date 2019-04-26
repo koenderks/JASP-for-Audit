@@ -71,7 +71,7 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
     } else if(options[["decisionPlot"]]){
         errorPlot <- createJaspPlot(plot = NULL, title = "Decision plot")
-        errorPlot$setError("Plotting not possible: Please specify all  your variables.")
+        errorPlot$setError("Plotting not possible: Please specify all required variables.")
         jaspResults[["planningContainer"]][["decisionPlot"]] <- errorPlot
     }
     # Prior plot
@@ -91,7 +91,7 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
         jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
     } else if(options[["priorPlot"]]){
         errorPlot <- createJaspPlot(plot = NULL, title = "Implied Prior from Risk Assessments")
-        errorPlot$setError("Plotting not possible: Please specify all  your variables.")
+        errorPlot$setError("Plotting not possible: Please specify all required variables.")
         jaspResults[["planningContainer"]][["priorPlot"]] <- errorPlot
     }
 }
