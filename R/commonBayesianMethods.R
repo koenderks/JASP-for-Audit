@@ -368,8 +368,10 @@
     n                         <- 0
     k                         <- 0
     if(options[["auditResult"]] != ""){
-      n                       <- nrow(dataset)
-      k                       <- length(which(dataset[,.v(options[["auditResult"]])] == 1))
+      n                     <- jaspResults[["sampleSize"]]$object
+      kIndex                <- which(dataset[,.v(options[["auditResult"]])] == 1)
+      kNumber               <- dataset[kIndex ,.v(options[["sampleFilter"]])]
+      k                     <- length(rep(kIndex, times = kNumber))
     }
 
     priorA                  <- 1 + pk
@@ -656,9 +658,10 @@
     if(jaspResults[["runEvaluation"]]$object){
 
       sample                  <- dataset[, c(.v(options[["monetaryVariable"]]), .v(options[["auditResult"]]))]
-      n                       <- nrow(sample)
       t                       <- sample[, .v(options[["monetaryVariable"]])] - sample[, .v(options[["auditResult"]])]
       z                       <- t / sample[, .v(options[["monetaryVariable"]])]
+      z                       <- rep(z, times = dataset[ ,.v(options[["sampleFilter"]])])
+      n                       <- length(z)
       z                       <- subset(z, z > 0)
       M                       <- length(z)
       z_bar                   <- mean(z)

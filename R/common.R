@@ -385,8 +385,9 @@
   if(options[["pasteVariables"]] && is.null(jaspResults[["pastingDone"]]$object)){  
     dataset                       <- .readDataSetToEnd(columns.as.numeric = options[["recordNumberVariable"]])
     sampleFilter                  <- rep(0, jaspResults[["N"]]$object)
-    index                         <- which(dataset[, .v(options[["recordNumberVariable"]])] %in% jaspResults[["sample"]]$object[, .v(options[["recordNumberVariable"]])])
-    sampleFilter[index]           <- 1
+    rowNumber                     <- which(dataset[, .v(options[["recordNumberVariable"]])] %in% jaspResults[["sample"]]$object[, .v(options[["recordNumberVariable"]])])
+    noOfTimesInSample             <- table(jaspResults[["sampleVector"]]$object)
+    sampleFilter[rowNumber]       <- 1 * noOfTimesInSample
     sampleFilter                  <- as.integer(sampleFilter)
     emptyVariable                 <- rep(NA, jaspResults[["N"]]$object)
     .setColumnDataAsNominal(options[["sampleFilterName"]], sampleFilter)

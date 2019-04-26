@@ -150,19 +150,26 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
   planningResult                <- jaspResults[["planningResult"]]$object
   jaspResults[["sampleSize"]]   <- createJaspState(planningResult[["n"]])
   monetaryVariable              <- unlist(options[["monetaryVariable"]])
-  # Explanatory text for selection
-  if(options[["explanatoryText"]]){
-    technique <- base::switch(options[["selectionMethod"]], "randomSampling" = "random", "systematicSampling" = "systematic", "cellSampling" = "cell")
-    technique <- base::switch(options[["selectionType"]], "recordSampling" = paste(technique, "record sampling"), "musSampling" = paste(technique, "monetary unit sampling"))
-    jaspResults[["selectionContainer"]][["samplingParagraph"]] <- createJaspHtml(paste0("From the population of <b>", jaspResults[["N"]]$object, "</b> observations, <b>", planningResult[["n"]], "</b> samples were drawn using a <b>", technique, "</b> method."), "p")
-    jaspResults[["selectionContainer"]][["samplingParagraph"]]$position <- 1
-    jaspResults[["selectionContainer"]][["samplingParagraph"]]$dependOn(options = c("samplingType", "samplingMethod"))
-  }
   # Perform the sampling and create the tables for displaying the selection
   base::switch(options[["selectionMethod"]],
                   "randomSampling"      = .randomSampling(dataset, options, jaspResults, position = 4),
                   "systematicSampling"  = .systematicSampling(dataset, options, jaspResults, position = 4),
                   "cellSampling"        = .cellSampling(dataset, options, jaspResults, position = 4))
+    # Explanatory text for selection
+  if(options[["explanatoryText"]]){
+    technique <- base::switch(options[["selectionMethod"]], "randomSampling" = "random", "systematicSampling" = "systematic", "cellSampling" = "cell")
+    technique <- base::switch(options[["selectionType"]], "recordSampling" = paste(technique, "record sampling"), "musSampling" = paste(technique, "monetary unit sampling"))
+    if(!jaspResults[["containsDoubleObservations"]]$object){
+      message <- paste0("From the population of <b>", jaspResults[["N"]]$object, "</b> observations, <b>", planningResult[["n"]], "</b> observations were selected using a <b>", technique, "</b> method.")
+    } else {
+      message <- paste0("From the population of <b>", jaspResults[["N"]]$object, "</b> observations, <b>", planningResult[["n"]], "</b> observations were selected using a <b>", technique, "</b> method.
+                        <b>Note:</b> The selected population subset (", nrow(jaspResults[["sample"]]$object) ,") is smaller than the planned sample size (", planningResult[["n"]] ,"), as observations are selected multiple times due 
+                        to selecting with replacement. These observations (", planningResult[["n"]] - nrow(jaspResults[["sample"]]$object) ,") are counted multiple times in the evaluation.")
+    }
+    jaspResults[["selectionContainer"]][["samplingParagraph"]] <- createJaspHtml(message, "p")
+    jaspResults[["selectionContainer"]][["samplingParagraph"]]$position <- 1
+    jaspResults[["selectionContainer"]][["samplingParagraph"]]$dependOn(options = c("samplingType", "samplingMethod"))
+  }
   # Create a table at the top of the selection with information about the selection process
   .selectionInformationTable(dataset, options, jaspResults, position = 2)
   # Create a table with descriptive statistics for the selection (if the user wants it)
@@ -182,7 +189,7 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
   runEvaluation                 <- jaspResults[["runEvaluation"]]$object
   # Apply the selection filter to the dataset
   if(jaspResults[["runEvaluation"]]$object)
-      dataset <- subset(dataset, dataset[, .v(options[["sampleFilter"]])] == 1)
+      dataset <- subset(dataset, dataset[, .v(options[["sampleFilter"]])] != 0)
   # Perform the evaluation conditional on the type of variable
   if(options[["variableType"]] == "variableTypeCorrect"){
     # Attributes evaluation
@@ -203,8 +210,9 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
   # Explanatory text for the evaluation
   if(options[["explanatoryText"]]){
     boundLabel      <- ifelse(jaspResults[["runEvaluation"]]$object, yes = paste0(round(evaluationResult[["bound"]] * 100, 2), "%"), no = ".....")
-    sampleSizeLabel <- ifelse(options[["auditResult"]] == "", yes = ".....", no = nrow(dataset))
-    jaspResults[["evaluationContainer"]][["resultParagraph"]] <- createJaspHtml(paste0("The sample consisted of <b>", sampleSizeLabel , "</b> observations, <b>", evaluationResult[["k"]] , "</b> of which were found to contain an error. The knowledge from these data, com-
+    extraObsLabel   <- ifelse(jaspResults[["containsDoubleObservations"]]$object, no = nrow(dataset), yes = paste0(nrow(dataset), " + ", planningResult[["n"]] - nrow(jaspResults[["sample"]]$object)))
+    sampleSizeLabel <- ifelse(options[["auditResult"]] == "", yes = ".....", no = extraObsLabel)
+    jaspResults[["evaluationContainer"]][["resultParagraph"]] <- createJaspHtml(paste0("The selection consisted of <b>", sampleSizeLabel , "</b> observations, <b>", evaluationResult[["k"]] , "</b> of which were found to contain an error. The knowledge from these data, com-
                                                                                         bined with the prior knowledge results in an <b>", jaspResults[["confidenceLevelLabel"]]$object , "%</b> upper confidence bound of <b>", boundLabel ,"</b>. The cumulative knowledge states that there
                                                                                         is a <b>", jaspResults[["confidenceLevelLabel"]]$object , "</b> probability that, when one would repeaditly sample from this population, the maximum misstatement is calculated to be lower
                                                                                         than <b>", boundLabel ,"</b>."), "p")

@@ -145,8 +145,10 @@
 
   if(jaspResults[["runEvaluation"]]$object){
     if(options[["estimator"]] == "binomialBound"){
-      n                     <- nrow(dataset)
-      k                     <- length(which(dataset[,.v(options[["auditResult"]])] == 1))
+      n                     <- jaspResults[["sampleSize"]]$object
+      kIndex                <- which(dataset[,.v(options[["auditResult"]])] == 1)
+      kNumber               <- dataset[kIndex ,.v(options[["sampleFilter"]])]
+      k                     <- length(rep(kIndex, times = kNumber))
       binomResult <- binom.test(x = k,
                                 n = n,
                                 p = jaspResults[["materiality"]]$object,
@@ -156,8 +158,10 @@
     } else if(options[["estimator"]] == "hyperBound"){
 
       N <- jaspResults[["N"]]$object
-      n <- nrow(dataset)
-      k <- length(which(dataset[,.v(options[["auditResult"]])] == 1))
+      n                     <- jaspResults[["sampleSize"]]$object
+      kIndex                <- which(dataset[,.v(options[["auditResult"]])] == 1)
+      kNumber               <- dataset[kIndex ,.v(options[["sampleFilter"]])]
+      k                     <- length(rep(kIndex, times = kNumber))
       for(K in 1000:1){
        x <- phyper(k, K, N - K, n)
        if(x >= 0.05)
@@ -165,8 +169,10 @@
       }
       bound <- K / N
     } else if(options[["estimator"]] == "gammaBound"){
-      n <- nrow(dataset)
-      k <- length(which(dataset[,.v(options[["auditResult"]])] == 1))
+      n                     <- jaspResults[["sampleSize"]]$object
+      kIndex                <- which(dataset[,.v(options[["auditResult"]])] == 1)
+      kNumber               <- dataset[kIndex ,.v(options[["sampleFilter"]])]
+      k                     <- length(rep(kIndex, times = kNumber))
       bound <- qgamma(p = (1 - alpha), shape = 1 + k, scale = 1 / n)
     }
   }
@@ -229,7 +235,7 @@
         boundTable <- paste0(round(evaluationResult[["bound"]], 4) * 100, "%")
 
     row <- data.frame(materiality = materialityTable, n = evaluationResult[["n"]], k = evaluationResult[["k"]], bound = boundTable)
-    if(options[["materiality"]] == "materialityAbsolute")
+    if(options[["materiality"]] == "materialityAbsolute" || options[["monetaryVariable"]] != "")
       row <- cbind(row, projm = round(evaluationResult[["bound"]] * jaspResults[["total_data_value"]]$object, 2))
     if(options[["mostLikelyError"]])
       row <- cbind(row, mle = mle)
@@ -253,12 +259,13 @@
 
     if(jaspResults[["runEvaluation"]]$object){
       sample                  <- dataset[, c(.v(options[["monetaryVariable"]]), .v(options[["auditResult"]]))]
-      n                       <- nrow(sample)
       t                       <- sample[, .v(options[["monetaryVariable"]])] - sample[, .v(options[["auditResult"]])]
       z                       <- t / sample[, .v(options[["monetaryVariable"]])]
+      z                       <- rep(z, times = dataset[ ,.v(options[["sampleFilter"]])])
+      n                       <- length(z)
       zplus                   <- sort(subset(z, z > 0), decreasing = TRUE)
       M                       <- length(zplus)
-      NoOfErrors              <- length(which(t != 0))
+      NoOfErrors              <- length(which(z != 0))
       bound                   <- 1 - alpha^(1/n)
       if(M > 0){
           prop.sum            <- 0
@@ -333,7 +340,7 @@
     boundTable          <- "."
     projectedMisstatement <- "."
     if(evaluationResult[["bound"]] != "."){
-        boundTable <- round(evaluationResult[["bound"]],3)
+        boundTable <- round(evaluationResult[["bound"]], 4)
         projectedMisstatement <- ceiling(evaluationResult[["bound"]] * total_data_value)
         boundTable <- paste0(boundTable * 100, "%")
     }

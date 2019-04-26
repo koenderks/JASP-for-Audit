@@ -17,9 +17,9 @@
       recordColumn <- dataset[, recordColumnIndex]
 
       if(options[["selectionType"]] == "recordSampling"){
-          samplingRegion        <- 1:nrow(dataset)
-          samp                  <- base::sample(x = samplingRegion, size = sampleSize, replace = TRUE)
-          sample                <- as.data.frame(dataset[samp, ])
+          samplingRegion        <- recordColumn
+          sampleVector          <- base::sample(x = samplingRegion, size = sampleSize, replace = TRUE)
+          sample                <- as.data.frame(dataset[sampleVector, ])
           colnames(sample)[1]   <- .v(options[["recordNumberVariable"]])
       } else {
           monetaryColumn        <- dataset[, .v(options[["monetaryVariable"]])]
@@ -31,6 +31,14 @@
       jaspResults[["sample"]] <- createJaspState(sample)
       jaspResults[["sample"]]$dependOn(options = c("additionalVariables", "seed", "recordNumberVariable", "monetaryVariable", "selectionMethod", "selectionType", "materiality",
                                                   "expectedErrors", "expectedNumber", "expectedPercentage", "planningModel", "IR", "CR"))
+      jaspResults[["sampleVector"]] <- createJaspState(sampleVector)
+      jaspResults[["sampleVector"]]$dependOn(optionsFromObject = jaspResults[["sample"]])
+      if(any(duplicated(jaspResults[["sampleVector"]]$object))){
+        jaspResults[["containsDoubleObservations"]] <- createJaspState(TRUE)
+      } else {
+        jaspResults[["containsDoubleObservations"]] <- createJaspState(FALSE)
+      }
+      jaspResults[["containsDoubleObservations"]]$dependOn(optionsFromObject = jaspResults[["sample"]])
     }
     
     sample <- jaspResults[["sample"]]$object
@@ -132,6 +140,14 @@
       jaspResults[["sample"]] <- createJaspState(sample)
       jaspResults[["sample"]]$dependOn(options = c("additionalVariables", "seed", "recordNumberVariable", "monetaryVariable", "selectionMethod", "selectionType", "materiality", "intervalStartingPoint",
                                                   "expectedErrors", "expectedNumber", "expectedPercentage", "planningModel", "IR", "CR"))
+      jaspResults[["sampleVector"]] <- createJaspState(sample.rows)
+      jaspResults[["sampleVector"]]$dependOn(optionsFromObject = jaspResults[["sample"]])
+      if(any(duplicated(jaspResults[["sampleVector"]]$object))){
+        jaspResults[["containsDoubleObservations"]] <- createJaspState(TRUE)
+      } else {
+        jaspResults[["containsDoubleObservations"]] <- createJaspState(FALSE)
+      }
+      jaspResults[["containsDoubleObservations"]]$dependOn(optionsFromObject = jaspResults[["sample"]])
     }
     
     sample <- jaspResults[["sample"]]$object
@@ -225,6 +241,14 @@
       jaspResults[["sample"]] <- createJaspState(sample)
       jaspResults[["sample"]]$dependOn(options = c("additionalVariables", "seed", "recordNumberVariable", "monetaryVariable", "selectionMethod", "selectionType", "materiality", "intervalStartingPoint",
                                                   "expectedErrors", "expectedNumber", "expectedPercentage", "planningModel", "IR", "CR"))
+      jaspResults[["sampleVector"]] <- createJaspState(sample.rows)
+      jaspResults[["sampleVector"]]$dependOn(optionsFromObject = jaspResults[["sample"]])
+      if(any(duplicated(jaspResults[["sampleVector"]]$object))){
+        jaspResults[["containsDoubleObservations"]] <- createJaspState(TRUE)
+      } else {
+        jaspResults[["containsDoubleObservations"]] <- createJaspState(FALSE)
+      }
+      jaspResults[["containsDoubleObservations"]]$dependOn(optionsFromObject = jaspResults[["sample"]])
     }
     
     sample <- jaspResults[["sample"]]$object
