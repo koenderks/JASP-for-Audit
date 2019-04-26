@@ -60,7 +60,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
       jaspResults[["figNumber"]]$dependOn(options = c("bookValueDistribution", "decisionPlot"))
     } else if(options[["bookValueDistribution"]]){
         errorPlot <- createJaspPlot(plot = NULL, title = "Population Distribution")
-        errorPlot$setError("Plotting not possible: Please specify all required variables.")
+        errorPlot$status <- "complete"
         jaspResults[["procedureContainer"]][["bookValueDistribution"]] <- errorPlot
     }
   # Finish procedure
@@ -131,7 +131,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
     } else if(options[["decisionPlot"]]){
         errorPlot <- createJaspPlot(plot = NULL, title = "Decision plot")
-        errorPlot$setError("Plotting not possible: Please specify all required variables.")
+        errorPlot$status <- "complete"
         jaspResults[["planningContainer"]][["decisionPlot"]] <- errorPlot
     }
   # Plot the prior (and optional expected posterior) distribution (if the user wants it)
@@ -151,7 +151,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
   } else if(options[["priorPlot"]]){
       errorPlot <- createJaspPlot(plot = NULL, title = "Implied Prior from Risk Assessments")
-      errorPlot$setError("Plotting not possible: Please specify all required variables.")
+      errorPlot$status <- "complete"
       jaspResults[["planningContainer"]][["priorPlot"]] <- errorPlot
   }
   # Finish planning
@@ -252,7 +252,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
   } else if(options[["evaluationInformation"]]){
       errorPlot <- createJaspPlot(plot = NULL, title = "Evaluation Information")
-      errorPlot$setError("Plotting not possible: Please specify all required variables.")
+      errorPlot$status <- "complete"
       jaspResults[["evaluationContainer"]][["evaluationInformation"]] <- errorPlot
   }
   # Create a plot containing the prior and posterior information (if the user wants it)
@@ -276,7 +276,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
   } else if(options[["priorAndPosteriorPlot"]]){
       errorPlot <- createJaspPlot(plot = NULL, title = "Prior and Posterior Plot")
-      errorPlot$setError("Plotting not possible: Please specify all required variables.")
+      errorPlot$status <- "complete"
       jaspResults[["evaluationContainer"]][["priorAndPosteriorPlot"]] <- errorPlot
   }
   # Create a plot containing the correlation between the book values and audit values (if the user wants it)
@@ -296,7 +296,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
   } else if(options[["correlationPlot"]]){
       errorPlot <- createJaspPlot(plot = NULL, title = "Correlation Plot")
-      errorPlot$setError("Plotting not possible: Please specify all required variables.")
+      errorPlot$status <- "complete"
       jaspResults[["evaluationContainer"]][["correlationPlot"]] <- errorPlot
   }
   # Finish evaluation

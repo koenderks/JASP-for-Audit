@@ -65,7 +65,7 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
       jaspResults[["planningContainer"]][["figure2"]]$position <- 5
     } else if(options[["decisionPlot"]]){
         errorPlot <- createJaspPlot(plot = NULL, title = "Decision plot")
-        errorPlot$setError("Plotting not possible: Please specify all required variables.")
+        errorPlot$status <- "complete"
         jaspResults[["planningContainer"]][["decisionPlot"]] <- errorPlot
     }
 }

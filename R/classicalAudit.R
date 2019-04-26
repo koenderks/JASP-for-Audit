@@ -60,7 +60,7 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
       jaspResults[["figNumber"]]$dependOn(options = c("bookValueDistribution", "decisionPlot"))
     } else if(options[["bookValueDistribution"]]){
         errorPlot <- createJaspPlot(plot = NULL, title = "Population Distribution")
-        errorPlot$setError("Plotting not possible: Please specify all required variables.")
+        errorPlot$status <- "complete"
         jaspResults[["procedureContainer"]][["bookValueDistribution"]] <- errorPlot
     }
   # Finish procedure
@@ -133,7 +133,7 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
     } else if(options[["decisionPlot"]]){
         errorPlot <- createJaspPlot(plot = NULL, title = "Decision Plot")
-        errorPlot$setError("Plotting not possible: Please specify all required variables.")
+        errorPlot$status <- "complete"
         jaspResults[["planningContainer"]][["decisionPlot"]] <- errorPlot
     }
   # Finish planning
@@ -235,7 +235,7 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
   } else if(options[["evaluationInformation"]]){
       errorPlot <- createJaspPlot(plot = NULL, title = "Evaluation Information")
-      errorPlot$setError("Plotting not possible: Please specify all required variables.")
+      errorPlot$status <- "complete"
       jaspResults[["evaluationContainer"]][["evaluationInformation"]] <- errorPlot
   }
   # Create a plot containing the correlation between the book values and audit values (if the user wants it)
@@ -255,7 +255,7 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
   } else if(options[["correlationPlot"]]){
       errorPlot <- createJaspPlot(plot = NULL, title = "Correlation Plot")
-      errorPlot$setError("Plotting not possible: Please specify all required variables.")
+      errorPlot$status <- "complete"
       jaspResults[["evaluationContainer"]][["correlationPlot"]] <- errorPlot
   }
   # Finish evaluation
