@@ -226,8 +226,6 @@
 }
 
 .evaluationInformation <- function(options, evaluationResult, jaspResults){
-  
-  print(evaluationResult)
 
   materiality       <- jaspResults[["materiality"]]$object
   bound             <- evaluationResult[["bound"]]
