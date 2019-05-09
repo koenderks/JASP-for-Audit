@@ -44,7 +44,13 @@ Form {
 
       Divider { width: parent.width }
 
-      Text { text: qsTr("<b>Variable selection</b>"); font.family: "SansSerif"; font.pointSize: 12; Layout.leftMargin: 220 }
+      Item {
+        height: variableSelectionTitle.height
+        Layout.fillWidth: true
+        Text { id: variableSelectionTitle; anchors.horizontalCenter: parent.horizontalCenter
+            text: qsTr("<b>Variable selection</b>"); font.family: "SansSerif"; font.pointSize: 12
+        }
+      }
       VariablesForm { id: variablesFormPlanning; implicitHeight: 110
           AvailableVariablesList { name: "variablesFormPlanning" }
           AssignedVariablesList { name: "recordNumberVariable"; title: qsTr("Record numbers"); singleVariable: true; allowedColumns: ["nominal", "ordinal", "scale"]; id: recordNumberVariable }

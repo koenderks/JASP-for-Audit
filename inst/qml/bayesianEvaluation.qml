@@ -23,21 +23,15 @@ import JASP.Widgets 1.0
 Form {
       usesJaspResults: true
 
-      VariablesForm { implicitHeight: 150
-        AvailableVariablesList { name: "evaluationVariables"}
-        AssignedVariablesList { name: "correctID"; title: qsTr("Audit result"); singleVariable: true; allowedColumns: ["nominal" ,"scale"]; id: correctID }
-        AssignedVariablesList { name: "monetaryVariable"; title: qsTr("Book values (optional)"); singleVariable: true; allowedColumns: ["scale"]; id: monetaryVariable }
-      }
-
       GridLayout { columns: 3
-          RadioButtonGroup { id: auditType; name: "auditType"; title: qsTr("<b>Population materiality</b>")
+          RadioButtonGroup { id: auditType; name: "materiality"; title: qsTr("<b>Population materiality</b>")
             RowLayout {
-              RadioButton { id: mus; name: "mus"; text: qsTr("Absolute"); checked: true; childrenOnSameRow: true
+              RadioButton { id: mus; name: "materialityAbsolute"; text: qsTr("Absolute"); checked: true; childrenOnSameRow: true
                 DoubleField { id: materialityValue; visible: mus.checked; name: "materialityValue"; defaultValue: 0; min: 0; fieldWidth: 90; decimals: 2 } }
             }
             RowLayout {
-              RadioButton { id: attributes; name: "attributes"; text: qsTr("Relative"); childrenOnSameRow: true
-                PercentField { id: materiality; visible: attributes.checked; decimals: 2; defaultValue: 0; name: "materiality"; fieldWidth: 50 } }
+              RadioButton { id: attributes; name: "materialityRelative"; text: qsTr("Relative"); childrenOnSameRow: true
+                PercentField { id: materiality; visible: attributes.checked; decimals: 2; defaultValue: 0; name: "materialityPercentage"; fieldWidth: 50 } }
             }
           }
           GroupBox {
@@ -48,6 +42,22 @@ Form {
           GroupBox { title: qsTr("<b>Audit risk</b>"); id: auditRisk
               PercentField { name: "confidence"; label: qsTr("Confidence"); decimals: 2; defaultValue: 95 }
           }
+      }
+
+      Divider { }
+
+      Item {
+        height: variableSelectionTitle.height
+        Layout.fillWidth: true
+        Text { id: variableSelectionTitle; anchors.horizontalCenter: parent.horizontalCenter
+            text: qsTr("<b>Variable selection</b>"); font.family: "SansSerif"; font.pointSize: 12
+        }
+      }
+      VariablesForm { implicitHeight: 200
+        AvailableVariablesList { name: "evaluationVariables"}
+        AssignedVariablesList { name: "correctID"; title: qsTr("Audit result"); singleVariable: true; allowedColumns: ["nominal" ,"scale"]; id: correctID }
+        AssignedVariablesList { name: "monetaryVariable"; title: qsTr("Book values (optional)"); singleVariable: true; allowedColumns: ["scale"]; id: monetaryVariable }
+        AssignedVariablesList { name: "sampleFilter"; title: qsTr("Sample indicator (optional)"); singleVariable: true; allowedColumns: ["nominal"]; id: sampleFilter }
       }
 
       Section {
@@ -76,7 +86,7 @@ Form {
           }
           RadioButtonGroup {
             title: qsTr("<b>Estimator</b>")
-            name: "boundMethod"
+            name: "estimator"
 
             RadioButton { name: "coxAndSnellBound"; text: qsTr("Cox and Snell"); id: coxAndSnellBound }
             RadioButton { name: "betaBound"; text: qsTr("Beta"); id: betaBound }
@@ -85,7 +95,7 @@ Form {
           }
           GroupBox { title: qsTr("<b>Explanatory text</b>")
             RowLayout {
-              CheckBox { id: interpretationOn; text: qsTr("Enable"); name: "interpretation"; checked: true }
+              CheckBox { id: interpretationOn; text: qsTr("Enable"); name: "explanatoryText"; checked: true }
               MenuButton { width:	20; iconSource: "qrc:/images/info-button.png"; toolTip: "Show explanatory text at each step of the analysis"; radius: 20; Layout.alignment: Qt.AlignRight }
             }
           }
@@ -100,18 +110,18 @@ Form {
         GroupBox {
           title: qsTr("<b>Statistics</b>")
 
-          CheckBox { text: qsTr("Most Likely Error (MLE)"); name: "mostLikelyError"}
+          CheckBox { text: qsTr("Most likely error (MLE)"); name: "mostLikelyError"}
           CheckBox { text: qsTr("Bayes factor\u208B\u208A"); name: "bayesFactor" }
         }
 
         GroupBox {
           title: qsTr("<b>Plots</b>")
 
-          CheckBox { text: qsTr("Evaluation information"); name: "plotBound" }
-          CheckBox { text: qsTr("Prior and posterior"); name: "plotPriorAndPosterior"; id: plotPriorAndPosterior }
-          PercentField { text: qsTr("x-axis limit"); defaultValue: 20; name: "limx_backup"; Layout.leftMargin: 20 }
-          CheckBox { text: qsTr("Additional info"); name: "plotPriorAndPosteriorAdditionalInfo"; Layout.leftMargin: 20; checked: true; enabled: plotPriorAndPosterior.checked }
-          CheckBox { text: qsTr("Correlation plot"); name: "plotCorrelation"; enabled: variableTypeTrueValues.checked }
+          CheckBox { text: qsTr("Evaluation information"); name: "evaluationInformation" }
+          CheckBox { text: qsTr("Prior and posterior"); name: "priorAndPosteriorPlot"; id: plotPriorAndPosterior }
+          PercentField { text: qsTr("x-axis limit"); defaultValue: 20; name: "priorAndPosteriorPlotLimit"; Layout.leftMargin: 20 }
+          CheckBox { text: qsTr("Additional info"); name: "priorAndPosteriorPlotAdditionalInfo"; Layout.leftMargin: 20; checked: true; enabled: plotPriorAndPosterior.checked }
+          CheckBox { text: qsTr("Correlation plot"); name: "correlationPlot"; enabled: variableTypeTrueValues.checked }
         }
     }
   }
@@ -123,7 +133,7 @@ Form {
 
     Button {
       id: downloadReportEvaluation
-      enabled: attributes.checked ? (populationSize.value != 0 & materiality.value != 0 & correctID.count > 0 & sampleFilter.count > 0) : (populationSize.value != 0 & materialityValue.value != 0 & populationValue.value != 0 & correctID.count > 0 & sampleFilter.count > 0)
+      enabled: attributes.checked ? (populationSize.value != 0 & materialityPercentage.value != 0 & correctID.count > 0 & sampleFilter.count > 0) : (populationSize.value != 0 & materialityValue.value != 0 & populationValue.value != 0 & correctID.count > 0 & sampleFilter.count > 0)
       anchors.right: parent.right
       anchors.bottom: parent.bottom
       text: qsTr("<b>Download Report</b>")
