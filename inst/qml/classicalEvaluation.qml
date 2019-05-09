@@ -138,6 +138,7 @@ Form {
     Item {
       height: downloadReportEvaluation.height
       Layout.fillWidth: true
+      
       Button {
         id: downloadReportEvaluation
         enabled: attributes.checked ? (populationSize.value != 0 & materialityPercentage.value != 0 & correctID.count > 0 & sampleFilter.count > 0) : (populationSize.value != 0 & materialityValue.value != 0 & populationValue.value != 0 & correctID.count > 0 & sampleFilter.count > 0)

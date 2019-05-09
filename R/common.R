@@ -1,8 +1,11 @@
 .auditRiskModel <- function(options, jaspResults){
 
+  if(!is.null(jaspResults[["ARMcontainer"]]))
+    return(jaspResults[["ARMcontainer"]]$object)
+
   jaspResults[["ARMcontainer"]] <- createJaspContainer(title= "<u>Audit Risk Model</u>")
   jaspResults[["ARMcontainer"]]$position <- 2
-  jaspResults[["ARMcontainer"]]$dependOn(options = c("confidence", "IR", "CR", "materialityPercentage", "materialityValue", "materiality"))
+  jaspResults[["ARMcontainer"]]$dependOn(options = c("confidence", "IR", "CR", "materialityPercentage", "materialityValue", "materiality", "explanatoryText"))
 
   #  Audit Risk Model formula
   .ARMformula(options, jaspResults, position = 2)

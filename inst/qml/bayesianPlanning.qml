@@ -64,7 +64,7 @@ Form {
               }
               GroupBox { title: qsTr("<b>Explanatory text</b>")
                 RowLayout {
-                  CheckBox { id: explanatoryText; text: qsTr("Enable"); name: "explanatoryText"; checked: false }
+                  CheckBox { id: explanatoryText; text: qsTr("Enable"); name: "explanatoryText"; checked: true }
                   MenuButton { width:	20; iconSource: "qrc:/images/info-button.png"; toolTip: "Show explanatory text at each step of the analysis"; radius: 20; Layout.alignment: Qt.AlignRight }
                 }
               }
@@ -120,7 +120,6 @@ Form {
     Item {
       height: downloadReportPlanning.height
       Layout.fillWidth: true
-      anchors.bottom: parent.bottom
 
       Button {
         id: downloadReportPlanning

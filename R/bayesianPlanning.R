@@ -3,11 +3,10 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
   jaspResults[["figNumber"]]          <- createJaspState(1)
   jaspResults[["figNumber"]]$dependOn(options = c("priorPlot", "decisionPlot"))
 
-  jaspResults[["procedureContainer"]] <- createJaspContainer(title= "<u>Procedure</u>")
-  jaspResults[["procedureContainer"]]$position <- 1
-
   # Interpretation for the Global Options phase
-  if(options[["explanatoryText"]] && is.null(jaspResults[["procedureContainer"]][["procedureParagraph"]])){
+  if(options[["explanatoryText"]] && is.null(jaspResults[["procedureContainer"]])){
+    jaspResults[["procedureContainer"]] <- createJaspContainer(title= "<u>Procedure</u>")
+    jaspResults[["procedureContainer"]]$position <- 1
     if(is.null(jaspResults[["confidenceLevelLabel"]]$object)){
       jaspResults[["confidenceLevelLabel"]] <- createJaspState(paste0(round(options[["confidence"]] * 100, 2), "%"))
       jaspResults[["confidenceLevelLabel"]]$dependOn(options = c("confidence"))
@@ -17,7 +16,7 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
     jaspResults[["procedureContainer"]][["procedureParagraph"]] <- createJaspHtml(paste0("The objective of a substantive testing procedure is to determine with a specified confidence <b>(", jaspResults[["confidenceLevelLabel"]]$object, ")</b> whether the ", criterion ," of
                                                                                           misstatement in the target population is lower than the specified materiality of <b>", materialityLabel, "</b>."), "p")
     jaspResults[["procedureContainer"]][["procedureParagraph"]]$position <- 1
-    jaspResults[["procedureContainer"]][["procedureParagraph"]]$dependOn(options = c("explanatoryText", "confidence"))
+    jaspResults[["procedureContainer"]]$dependOn(options = c("explanatoryText", "confidence", "materiality", "materialityValue", "materialityPercentage"))
   }
 
   .auditRiskModel(options, jaspResults)

@@ -129,7 +129,6 @@ Form {
   Item {
     height: downloadReportEvaluation.height
     Layout.fillWidth: true
-    anchors.bottom: parent.bottom
 
     Button {
       id: downloadReportEvaluation
