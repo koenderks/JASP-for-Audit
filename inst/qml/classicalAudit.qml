@@ -203,7 +203,11 @@ Form {
           }
       }
       Section { text: executionPhase.expanded ? qsTr("<b>3. Execution</b>") : qsTr("3. Execution"); expanded: false; enabled: false; id: executionPhase; columns: 1
-          Text { text: qsTr("<b>How would you like to evaluate your observations?</b>"); font.family: "SansSerif"; font.pointSize: 10; Layout.leftMargin: 80 }
+          Item { height: selectHowToAnalyseObservations.height; Layout.fillWidth: true
+          Text { id: selectHowToAnalyseObservations; anchors.horizontalCenter: parent.horizontalCenter
+            text: qsTr("<b>How would you like to evaluate your observations?</b>"); font.family: "SansSerif"; font.pointSize: 10
+            }
+          }
           RadioButtonGroup { Layout.leftMargin: 50; name: "variableType"; id: variableType; title: qsTr("")
               RowLayout { spacing: 150
                 RowLayout {
@@ -223,7 +227,11 @@ Form {
               AddColumnField { name: "sampleFilter"; text: "Column name selection result: "; fieldWidth: 120; enabled: pasteVariables.checked ? false : true }
               AddColumnField { name: "variableName"; text: "Column name audit result: "; fieldWidth: 120; enabled: pasteVariables.checked ? false : true }
             }
-            Text { text: qsTr("<b>Execute the audit before continuing to the evaluation stage</b>"); font.family: "SansSerif"; font.pointSize: 7; Layout.leftMargin: 120; visible: false; id: performAuditText }
+            Item { height: performAuditText.height; Layout.fillWidth: true
+            Text { id: performAuditText; anchors.horizontalCenter: parent.horizontalCenter
+              text: qsTr("<b>Execute the audit before continuing to the evaluation stage.</b>"); font.family: "SansSerif"; font.pointSize: 7; visible: false
+              }
+            }
             Item { height: toEvaluation.height; Layout.fillWidth: true
               Button { anchors.left: parent.left; text: qsTr("<b>Reset workflow</b>");
                         onClicked: {

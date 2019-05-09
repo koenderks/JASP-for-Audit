@@ -2,48 +2,47 @@ classicalEvaluation <- function(jaspResults, dataset, options, ...){
   ### AUDIT RISK MODEL ###
   .auditRiskModel(options, jaspResults)
 
-  correctID <- options[["correctID"]]
-  if(correctID == "") correctID <- NULL
-  dataset                 <- .readDataSetToEnd(columns.as.numeric = correctID)
+  auditResult <- options[["auditResult"]]
+  if(auditResult == "") auditResult <- NULL
+  dataset                 <- .readDataSetToEnd(columns.as.numeric = auditResult)
 
-  if(options[["auditType"]] == "attributes"){
-      jaspResults[["runEvaluation"]] <- createJaspState(options[["correctID"]] != "" && options[["materiality"]] != 0 && options[["populationSize"]] != 0)
+  if(options[["materiality"]] == "materialityRelative"){
+      jaspResults[["runEvaluation"]] <- createJaspState(options[["auditResult"]] != "" && options[["materialityPercentage"]] != 0 && options[["populationSize"]] != 0)
   } else {
-      jaspResults[["runEvaluation"]] <- createJaspState(options[["correctID"]] != "" && options[["materialityValue"]] != 0 && options[["populationSize"]] != 0 && options[["populationValue"]] != 0)
+      jaspResults[["runEvaluation"]] <- createJaspState(options[["auditResult"]] != "" && options[["materialityValue"]] != 0 && options[["populationSize"]] != 0 && options[["populationValue"]] != 0)
   }
 
   # Rewrite materiality based on value
   if(options[["populationValue"]] == 0) { populationValue <- 0.01 } else { populationValue <- options[["populationValue"]] }
-  if(options[["auditType"]] == "mus"){
+  if(options[["materiality"]] == "materialityAbsolute"){
       jaspResults[["materiality"]] <- createJaspState(options[["materialityValue"]] / populationValue)
   } else {
-      jaspResults[["materiality"]] <- createJaspState(options[["materiality"]])
+      jaspResults[["materiality"]] <- createJaspState(options[["materialityPercentage"]])
   }
 
   jaspResults[["N"]] <- createJaspState(options[["populationSize"]])
+  jaspResults[["sampleSize"]] <- createJaspState(nrow(dataset))
 
   jaspResults[["evaluationContainer"]] <- createJaspContainer(title = "<u>Evaluation</u>")
   jaspResults[["evaluationContainer"]]$position <- 5
 
-  if(options[["boundMethod"]] == "gammaBound" || options[["boundMethod"]] == "binomialBound" || options[["boundMethod"]] == "hyperBound"){
+  if(options[["estimator"]] == "gammaBound" || options[["estimator"]] == "binomialBound" || options[["estimator"]] == "hyperBound"){
     # Perform the attributes evaluation
-    .attributesBound(dataset, options, jaspResults)
-    result                                       <- jaspResults[["result"]]$object
-    .attributesBoundTable(options, result, jaspResults, position = 21)
+    evaluationResult <- .attributesBound(dataset, options, jaspResults)
+    .attributesBoundTable(options, evaluationResult, jaspResults, position = 21)
   } else {
-    if(options[["boundMethod"]] == "stringerBound"){
-      .stringerBound(dataset, options, jaspResults)
-    } else if(options[["boundMethod"]] == "regressionBound"){
-      .regressionBound(dataset, options, jaspResults)
-    } else if(options[["boundMethod"]] == "directBound"){
-      .directBound(dataset, options, jaspResults)
-    } else if(options[["boundMethod"]] == "differenceBound"){
-      .differenceBound(dataset, options, jaspResults)
-    } else if(options[["boundMethod"]] == "ratioBound"){
-      .ratioBound(dataset, options, jaspResults)
+    if(options[["estimator"]] == "stringerBound"){
+      evaluationResult <- .stringerBound(dataset, options, jaspResults)
+    } else if(options[["estimator"]] == "regressionBound"){
+      evaluationResult <- .regressionBound(dataset, options, jaspResults)
+    } else if(options[["estimator"]] == "directBound"){
+      evaluationResult <- .directBound(dataset, options, jaspResults)
+    } else if(options[["estimator"]] == "differenceBound"){
+      evaluationResult <- .differenceBound(dataset, options, jaspResults)
+    } else if(options[["estimator"]] == "ratioBound"){
+      evaluationResult <- .ratioBound(dataset, options, jaspResults)
     }
-    result                                       <- jaspResults[["result"]]$object
-    .musBoundTableFullAudit(total_data_value, options, result, jaspResults, position = 21)
+    .auditValueBoundTable(options, evaluationResult, jaspResults, position = 21)
   }
 
   # # Interpretation before the evalution table

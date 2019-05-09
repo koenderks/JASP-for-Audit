@@ -147,8 +147,14 @@
     if(options[["estimator"]] == "binomialBound"){
       n                     <- jaspResults[["sampleSize"]]$object
       kIndex                <- which(dataset[,.v(options[["auditResult"]])] == 1)
-      kNumber               <- dataset[kIndex ,.v(options[["sampleFilter"]])]
-      k                     <- length(rep(kIndex, times = kNumber))
+
+      if(options[["sampleFilter"]] != ""){
+        kNumber               <- dataset[kIndex ,.v(options[["sampleFilter"]])]
+        k                     <- length(rep(kIndex, times = kNumber))
+      } else {
+        k <- length(kIndex)
+      }
+
       binomResult <- binom.test(x = k,
                                 n = n,
                                 p = jaspResults[["materiality"]]$object,
@@ -160,8 +166,14 @@
       N <- jaspResults[["N"]]$object
       n                     <- jaspResults[["sampleSize"]]$object
       kIndex                <- which(dataset[,.v(options[["auditResult"]])] == 1)
-      kNumber               <- dataset[kIndex ,.v(options[["sampleFilter"]])]
-      k                     <- length(rep(kIndex, times = kNumber))
+
+      if(options[["sampleFilter"]] != ""){
+        kNumber               <- dataset[kIndex ,.v(options[["sampleFilter"]])]
+        k                     <- length(rep(kIndex, times = kNumber))
+      } else {
+        k <- length(kIndex)
+      }
+
       for(K in 1000:1){
        x <- phyper(k, K, N - K, n)
        if(x >= 0.05)

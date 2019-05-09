@@ -24,20 +24,20 @@ Form {
     usesJaspResults: true
 
     GridLayout { columns: 3
-        RadioButtonGroup { id: auditType; name: "materiality"; title: qsTr("<b>Population materiality</b>")
+        RadioButtonGroup { id: materiality; name: "materiality"; title: qsTr("<b>Population materiality</b>")
           RowLayout {
-            RadioButton { id: mus; name: "materialityAbsolute"; text: qsTr("Absolute"); checked: true; childrenOnSameRow: true
-              DoubleField { id: materialityValue; visible: mus.checked; name: "materialityValue"; defaultValue: 0; min: 0; fieldWidth: 90; decimals: 2 } }
+            RadioButton { id: materialityAbsolute; name: "materialityAbsolute"; text: qsTr("Absolute"); checked: true; childrenOnSameRow: true
+              DoubleField { id: materialityValue; visible: materialityAbsolute.checked; name: "materialityValue"; defaultValue: 0; min: 0; fieldWidth: 90; decimals: 2 } }
           }
           RowLayout {
-            RadioButton { id: attributes; name: "materialityRelative"; text: qsTr("Relative"); childrenOnSameRow: true
-              PercentField { id: materiality; visible: attributes.checked; decimals: 2; defaultValue: 0; name: "materialityPercentage"; fieldWidth: 50 } }
+            RadioButton { id: materialityRelative; name: "materialityRelative"; text: qsTr("Relative"); childrenOnSameRow: true
+              PercentField { id: materialityPercentage; visible: materialityRelative.checked; decimals: 2; defaultValue: 0; name: "materialityPercentage"; fieldWidth: 50 } }
           }
         }
         GroupBox {
             title: qsTr("<b>Population</b>")
             IntegerField { id: populationSize; name: "populationSize"; text: qsTr("Size"); fieldWidth: 100; defaultValue: 0  }
-            DoubleField { id: populationValue; name: "populationValue"; text: qsTr("Value"); defaultValue: 0; enabled: mus.checked; fieldWidth: 100 }
+            DoubleField { id: populationValue; name: "populationValue"; text: qsTr("Value"); defaultValue: 0; enabled: materialityAbsolute.checked; fieldWidth: 100 }
           }
         GroupBox { title: qsTr("<b>Audit risk</b>"); id: auditRisk
             PercentField { name: "confidence"; label: qsTr("Confidence"); decimals: 2; defaultValue: 95 }
@@ -55,9 +55,9 @@ Form {
     }
     VariablesForm { implicitHeight: 200
       AvailableVariablesList { name: "evaluationVariables"}
-      AssignedVariablesList { name: "correctID"; title: qsTr("Audit result"); singleVariable: true; allowedColumns: ["nominal" ,"scale"]; id: correctID }
+      AssignedVariablesList { name: "auditResult"; title: qsTr("Audit result"); singleVariable: true; allowedColumns: ["nominal" ,"scale"]; id: auditResult }
       AssignedVariablesList { name: "monetaryVariable"; title: qsTr("Book values (optional)"); singleVariable: true; allowedColumns: ["scale"]; id: monetaryVariable }
-      AssignedVariablesList { name: "sampleFilter"; title: qsTr("Sample indicator (optional)"); singleVariable: true; allowedColumns: ["nominal"]; id: sampleFilter }
+      AssignedVariablesList { name: "sampleFilter"; title: qsTr("Observation multiplyer (optional)"); singleVariable: true; allowedColumns: ["nominal"]; id: sampleFilter }
     }
 
     Section {
@@ -84,19 +84,36 @@ Form {
             RadioButton { text: qsTr("Medium")      ; name: "Medium" }
             RadioButton { text: qsTr("Low")         ; name: "Low" }
         }
+        
         RadioButtonGroup {
           title: qsTr("<b>Estimator</b>")
           name: "estimator"
 
-          RadioButton { name: "stringerBound"; text: qsTr("Stringer"); id: stringerBound }
-          RadioButton { name: "directBound"; text: qsTr("Direct"); id: directBound }
-          RadioButton { name: "differenceBound"; text: qsTr("Difference"); id: differenceBound }
-          RadioButton { name: "ratioBound"; text: qsTr("Ratio"); id: ratioBound }
-          RadioButton { name: "regressionBound"; text: qsTr("Regression"); id: regressionBound }
-          RadioButton { name: "gammaBound"; text: qsTr("Gamma"); id: gammaBound }
-          RadioButton { name: "binomialBound"; text: qsTr("Binomial"); id: binomialBound; checked: true }
-          RadioButton { name: "hyperBound"; text: qsTr("Hypergeometric"); id: hyperBound }
+          GridLayout {
+            columns: 2
+            columnSpacing: 5
+
+            ColumnLayout {
+              spacing: 5
+              
+              Text{ text: "<i>Binary</i>" }
+              RadioButton { name: "gammaBound"; text: qsTr("Gamma"); id: gammaBound }
+              RadioButton { name: "binomialBound"; text: qsTr("Binomial"); id: binomialBound; checked: true }
+              RadioButton { name: "hyperBound"; text: qsTr("Hypergeometric"); id: hyperBound }
+            }
+            ColumnLayout{
+              spacing: 5
+              
+              Text{ text: "<i>Monetary</i>" }
+              RadioButton { name: "stringerBound"; text: qsTr("Stringer"); id: stringerBound; enabled: monetaryVariable.count > 0 }
+              RadioButton { name: "directBound"; text: qsTr("Direct"); id: directBound; enabled: monetaryVariable.count > 0 }
+              RadioButton { name: "differenceBound"; text: qsTr("Difference"); id: differenceBound; enabled: monetaryVariable.count > 0 }
+              RadioButton { name: "ratioBound"; text: qsTr("Ratio"); id: ratioBound; enabled: monetaryVariable.count > 0 }
+              RadioButton { name: "regressionBound"; text: qsTr("Regression"); id: regressionBound; enabled: monetaryVariable.count > 0 }
+            }
+          }
         }
+
         GroupBox { title: qsTr("<b>Explanatory text</b>")
           RowLayout {
             CheckBox { id: explanatoryText; text: qsTr("Enable"); name: "explanatoryText"; checked: true }
@@ -141,7 +158,7 @@ Form {
       
       Button {
         id: downloadReportEvaluation
-        enabled: attributes.checked ? (populationSize.value != 0 & materialityPercentage.value != 0 & correctID.count > 0 & sampleFilter.count > 0) : (populationSize.value != 0 & materialityValue.value != 0 & populationValue.value != 0 & correctID.count > 0 & sampleFilter.count > 0)
+        enabled: materialityRelative.checked ? (populationSize.value != 0 & materialityPercentage.value != 0 & auditResult.count > 0) : (populationSize.value != 0 & materialityValue.value != 0 & populationValue.value != 0 & auditResult.count > 0)
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         text: qsTr("<b>Download report</b>")
