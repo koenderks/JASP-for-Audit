@@ -273,7 +273,9 @@
       sample                  <- dataset[, c(.v(options[["monetaryVariable"]]), .v(options[["auditResult"]]))]
       t                       <- sample[, .v(options[["monetaryVariable"]])] - sample[, .v(options[["auditResult"]])]
       z                       <- t / sample[, .v(options[["monetaryVariable"]])]
-      z                       <- rep(z, times = dataset[ ,.v(options[["sampleFilter"]])])
+      if(options[["sampleFilter"]] != ""){
+        z                       <- rep(z, times = dataset[ ,.v(options[["sampleFilter"]])])
+      }
       n                       <- length(z)
       zplus                   <- sort(subset(z, z > 0), decreasing = TRUE)
       M                       <- length(zplus)

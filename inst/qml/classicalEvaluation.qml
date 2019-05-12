@@ -43,6 +43,7 @@ Form {
             PercentField { name: "confidence"; label: qsTr("Confidence"); decimals: 2; defaultValue: 95 }
         }
     }
+    
 
     Divider { }
 
@@ -64,25 +65,27 @@ Form {
       title: qsTr("Advanced options")
 
       GridLayout {
-        columns: 4
+        columns: 3
 
-        RadioButtonGroup {
-            title: qsTr("<b>Inherent risk</b>")
-            name: "IR"
-            id: ir
+        ColumnLayout{
+          RadioButtonGroup {
+              title: qsTr("<b>Inherent risk</b>")
+              name: "IR"
+              id: ir
 
-            RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
-            RadioButton { text: qsTr("Medium")      ; name: "Medium" }
-            RadioButton { text: qsTr("Low")         ; name: "Low" }
-        }
-        RadioButtonGroup {
-            title: qsTr("<b>Control risk</b>")
-            name: "CR"
-            id: cr
+              RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
+              RadioButton { text: qsTr("Medium")      ; name: "Medium" }
+              RadioButton { text: qsTr("Low")         ; name: "Low" }
+          }
+          RadioButtonGroup {
+              title: qsTr("<b>Control risk</b>")
+              name: "CR"
+              id: cr
 
-            RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
-            RadioButton { text: qsTr("Medium")      ; name: "Medium" }
-            RadioButton { text: qsTr("Low")         ; name: "Low" }
+              RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
+              RadioButton { text: qsTr("Medium")      ; name: "Medium" }
+              RadioButton { text: qsTr("Low")         ; name: "Low" }
+          }
         }
         
         RadioButtonGroup {
@@ -91,14 +94,14 @@ Form {
 
           GridLayout {
             columns: 2
-            columnSpacing: 5
+            //columnSpacing: 5
 
             ColumnLayout {
               spacing: 5
               
               Text{ text: "<i>Binary</i>" }
               RadioButton { name: "gammaBound"; text: qsTr("Gamma"); id: gammaBound }
-              RadioButton { name: "binomialBound"; text: qsTr("Binomial"); id: binomialBound; checked: true }
+              RadioButton { name: "binomialBound"; text: qsTr("Binomial"); id: binomialBound; checked: monetaryVariable.count == 0 }
               RadioButton { name: "hyperBound"; text: qsTr("Hypergeometric"); id: hyperBound }
             }
             ColumnLayout{

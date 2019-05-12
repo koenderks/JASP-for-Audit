@@ -64,25 +64,27 @@ Form {
         title: qsTr("Advanced options")
 
         GridLayout {
-          columns: 4
+          columns: 3
 
-          RadioButtonGroup {
-              title: qsTr("<b>Inherent risk</b>")
-              name: "IR"
-              id: ir
+          ColumnLayout{
+            RadioButtonGroup {
+                title: qsTr("<b>Inherent risk</b>")
+                name: "IR"
+                id: ir
 
-              RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
-              RadioButton { text: qsTr("Medium")      ; name: "Medium" }
-              RadioButton { text: qsTr("Low")         ; name: "Low" }
-          }
-          RadioButtonGroup {
-              title: qsTr("<b>Control risk</b>")
-              name: "CR"
-              id: cr
+                RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
+                RadioButton { text: qsTr("Medium")      ; name: "Medium" }
+                RadioButton { text: qsTr("Low")         ; name: "Low" }
+            }
+            RadioButtonGroup {
+                title: qsTr("<b>Control risk</b>")
+                name: "CR"
+                id: cr
 
-              RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
-              RadioButton { text: qsTr("Medium")      ; name: "Medium" }
-              RadioButton { text: qsTr("Low")         ; name: "Low" }
+                RadioButton { text: qsTr("High")        ; name: "High" ; checked: true}
+                RadioButton { text: qsTr("Medium")      ; name: "Medium" }
+                RadioButton { text: qsTr("Low")         ; name: "Low" }
+            }
           }
           
           RadioButtonGroup {
