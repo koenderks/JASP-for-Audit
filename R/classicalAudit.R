@@ -168,7 +168,7 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
     }
     jaspResults[["selectionContainer"]][["samplingParagraph"]] <- createJaspHtml(message, "p")
     jaspResults[["selectionContainer"]][["samplingParagraph"]]$position <- 1
-    jaspResults[["selectionContainer"]][["samplingParagraph"]]$dependOn(options = c("samplingType", "samplingMethod"))
+    jaspResults[["selectionContainer"]][["samplingParagraph"]]$dependOn(options = c("samplingType", "samplingMethod", "seed", "intervalStartingPoint"))
   }
   # Create a table at the top of the selection with information about the selection process
   .selectionInformationTable(dataset, options, jaspResults, position = 2)

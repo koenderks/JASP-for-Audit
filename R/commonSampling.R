@@ -19,7 +19,7 @@
       if(options[["selectionType"]] == "recordSampling"){
           samplingRegion        <- recordColumn
           sampleVector          <- base::sample(x = samplingRegion, size = sampleSize, replace = TRUE)
-          sample                <- as.data.frame(dataset[sampleVector, ])
+          sample                <- as.data.frame(dataset[recordColumn %in% sampleVector, ])
           colnames(sample)[1]   <- .v(options[["recordNumberVariable"]])
       } else {
           monetaryColumn        <- dataset[, .v(options[["monetaryVariable"]])]
@@ -213,6 +213,16 @@
         
         interval <- ceiling(nrow(dataset) / jaspResults[["sampleSize"]]$object)
         
+        # Error message for when starting point is outside of interval
+        if(startingPoint > interval){
+          jaspResults[["sample"]] <- createJaspState("startingPointOutsideInterval")
+          jaspResults[["containsDoubleObservations"]] <- createJaspState(FALSE)
+          jaspResults[["sample"]]$dependOn(options = c("additionalVariables", "seed", "recordNumberVariable", "monetaryVariable", "selectionMethod", "selectionType", "materiality", "intervalStartingPoint",
+                                            "expectedErrors", "expectedNumber", "expectedPercentage", "planningModel", "IR", "CR"))
+          jaspResults[["containsDoubleObservations"]]$dependOn(optionsFromObject = jaspResults[["sample"]])
+          return()
+        }
+        
         recordColumnIndex   <- which(colnames(dataset) == .v(recordVariable))
         recordColumn        <- dataset[, .v(recordVariable)]
         interval.mat        <- matrix(dataset[, .v(recordVariable)], ncol = interval, byrow = TRUE, nrow = sampleSize)  
@@ -226,6 +236,16 @@
           dataset             <- dataset[order(dataset[, .v(monetaryVariable)]), ]
         
         interval <- ceiling(sum(dataset[, .v(monetaryVariable)]) / jaspResults[["sampleSize"]]$object)
+        
+        # Error message for when starting point is outside of interval
+        if(startingPoint > interval){
+          jaspResults[["sample"]] <- createJaspState("startingPointOutsideInterval")
+          jaspResults[["containsDoubleObservations"]] <- createJaspState(FALSE)
+          jaspResults[["sample"]]$dependOn(options = c("additionalVariables", "seed", "recordNumberVariable", "monetaryVariable", "selectionMethod", "selectionType", "materiality", "intervalStartingPoint",
+                                            "expectedErrors", "expectedNumber", "expectedPercentage", "planningModel", "IR", "CR"))
+          jaspResults[["containsDoubleObservations"]]$dependOn(optionsFromObject = jaspResults[["sample"]])
+          return()
+        }
         
         recordColumnIndex   <- which(colnames(dataset) == .v(recordVariable))
         recordColumn        <- dataset[, .v(recordVariable)]
@@ -351,7 +371,7 @@
   selectionInformationTable                           <- createJaspTable("Selection summary")
   jaspResults[["selectionContainer"]][["selectionInformationTable"]]          <- selectionInformationTable
   selectionInformationTable$position                  <- position
-  selectionInformationTable$dependOn(options = c("additionalVariables", "intervalStartingPoint", "recordNumberVariable", "rankingVariable", "selectionType", "selectionMethod", "monetaryVariable", "recordNumberVariable", "seed"))
+  selectionInformationTable$dependOn(options = c("additionalVariables", "intervalStartingPoint", "rankingVariable", "selectionType", "selectionMethod", "monetaryVariable", "recordNumberVariable", "seed"))
   
   selectionInformationTable$addColumnInfo(name="n", title ="Sample size", type = "string")
   if(options[["materiality"]] == "materialityAbsolute"){
@@ -367,6 +387,13 @@
   selectionInformationTable$addFootnote(message = message, symbol="<i>Note.</i>")
   
   sample <- jaspResults[["sample"]]$object
+
+  # Error for when starting point lies outside of interval
+  if(sample == "startingPointOutsideInterval"){
+    selectionInformationTable$setError("Your specified starting point lies outside of the interval. Lower the value of the starting point.")
+    return()
+  }
+
   total_data_value <- jaspResults[["total_data_value"]]$object 
   
   if(options[["selectionType"]] == "recordSampling"){
@@ -374,7 +401,6 @@
   } else {
     interval <- ceiling(sum(dataset[, .v(options[["monetaryVariable"]])]) / jaspResults[["sampleSize"]]$object)
   }
-
   sampleSize                              <- length(unique(sample[, .v(options[["recordNumberVariable"]])]))
   if(options[["materiality"]] == "materialityAbsolute"){
     sampleValue                             <- ceiling(sum(sample[, .v(options[["monetaryVariable"]])]))
