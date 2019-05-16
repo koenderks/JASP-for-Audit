@@ -668,6 +668,7 @@
       if(M == 0)
           z_bar               <- 0
 
+      set.seed(options[["seed"]])
       prior                   <- rbeta(n = 1e6, shape1 = priorA, shape2 = priorB) 
 
       posterior_part_1        <- (M + a) / (M + b)

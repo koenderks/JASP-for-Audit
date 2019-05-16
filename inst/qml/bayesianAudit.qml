@@ -54,7 +54,7 @@ Form {
       VariablesForm { id: variablesFormPlanning; implicitHeight: 110
           AvailableVariablesList { name: "variablesFormPlanning" }
           AssignedVariablesList { name: "recordNumberVariable"; title: qsTr("Record numbers"); singleVariable: true; allowedColumns: ["nominal", "ordinal", "scale"]; id: recordNumberVariable }
-          AssignedVariablesList { name: "monetaryVariable"; title: materialityAbsolute.checked ? qsTr("Book values") : qsTr("Book values (optional)"); singleVariable: true; allowedColumns: ["scale"]; id: monetaryVariable }
+          AssignedVariablesList { name: "monetaryVariable"; title: materialityAbsolute.checked ? qsTr("Book values <i>(required)</i>") : qsTr("Book values <i>(recommended)</i>"); singleVariable: true; allowedColumns: ["scale"]; id: monetaryVariable }
       }
 
       Section { text: qsTr("Advanced options")
@@ -138,9 +138,9 @@ Form {
 
   Section { text: samplingPhase.expanded ? qsTr("<b>2. Selection</b>") : qsTr("2. Selection"); enabled: false; expanded: false; id: samplingPhase; columns: 1
       VariablesForm { id: variablesFormSampling; implicitHeight: 200
-        AvailableVariablesList { name: "variablesFormSampling"}
-        AssignedVariablesList { name: "rankingVariable"; title: qsTr("Ranking variable (optional)"); singleVariable: true; allowedColumns: ["scale"] }
-        AssignedVariablesList { name: "additionalVariables"; title: qsTr("Additional variables (optional)"); height: 140; allowedColumns: ["scale", "ordinal", "nominal"] }
+        AvailableVariablesList { name: "variablesFormSampling"; source: "variablesFormPlanning"}
+        AssignedVariablesList { name: "rankingVariable"; title: qsTr("Ranking variable <i>(optional)</i>"); singleVariable: true; allowedColumns: ["scale"] }
+        AssignedVariablesList { name: "additionalVariables"; title: qsTr("Additional variables <i>(optional)</i>"); height: 140; allowedColumns: ["scale", "ordinal", "nominal"] }
       }
       Section { title: qsTr("Advanced options")
             GridLayout { columns: 3
@@ -286,8 +286,7 @@ Form {
       }
       Section { text: evaluationPhase.expanded ? qsTr("<b>4. Evaluation</b>") : qsTr("4. Evaluation"); expanded: false; enabled: false; id: evaluationPhase; columns: 1
         VariablesForm { implicitHeight: 150
-          AvailableVariablesList { name: "evaluationVariables"}
-          //AssignedVariablesList { name: "sampleFilter"; title: qsTr("Selection result"); singleVariable: true; allowedColumns: ["nominal"]; id: sampleFilter }
+          AvailableVariablesList { name: "evaluationVariables"; source: {"variablesFormPlanning", "variablesFormSampling"}}
           AssignedVariablesList { name: "auditResult"; title: qsTr("Audit result"); singleVariable: true; allowedColumns: ["nominal" ,"scale"] ; id: auditResult }
         }
         Section { title: qsTr("Advanced options"); columns: 1
