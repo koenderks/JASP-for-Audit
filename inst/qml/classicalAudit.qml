@@ -282,7 +282,7 @@ Form {
         }
         Section { text: evaluationPhase.expanded ? qsTr("<b>4. Evaluation</b>") : qsTr("4. Evaluation"); expanded: false; enabled: false; id: evaluationPhase; columns: 1
             VariablesForm { implicitHeight: 150
-              AvailableVariablesList { name: "evaluationVariables"; source: {"variablesFormPlanning", "variablesFormSampling"} }
+              AvailableVariablesList { name: "evaluationVariables"; source: "variablesFormPlanning" }
               AssignedVariablesList { name: "auditResult"; title: qsTr("Audit result"); singleVariable: true; allowedColumns: ["nominal" ,"scale"]; id: auditResult }
             }
             Section { title: qsTr("Advanced options"); columns: 1

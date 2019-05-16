@@ -52,7 +52,7 @@
                                     "displaySample", "selectionMethod", "expectedErrors", "expectedNumber", "expectedPercentage"))
 
       sampleTable$addColumnInfo(name="number", title ="", type = "string")
-      sampleTable$addColumnInfo(name="recordNumber", title ="Record Number", type = "string")
+      sampleTable$addColumnInfo(name="recordNumber", title ="Record number", type = "string")
       if(options[["monetaryVariable"]] != "")
         sampleTable$addColumnInfo(name="bookValue", title ="Book value", type = "string")
       for(i in variables){
@@ -99,9 +99,6 @@
       }
 
       if(options[["selectionType"]] == "recordSampling"){
-        
-        if(is.null(rankingVariable) && options[["monetaryVariable"]] != "")
-          dataset             <- dataset[order(dataset[, .v(monetaryVariable)]), ]
         
           interval <- ceiling(nrow(dataset) / jaspResults[["sampleSize"]]$object)
         
@@ -161,7 +158,7 @@
                                     "displaySample", "selectionMethod", "expectedErrors", "expectedNumber", "expectedPercentage"))
 
       sampleTable$addColumnInfo(name="number", title ="", type = "string")
-      sampleTable$addColumnInfo(name="recordNumber", title ="Record Number", type = "string")
+      sampleTable$addColumnInfo(name="recordNumber", title ="Record number", type = "string")
       if(options[["monetaryVariable"]] != "")
         sampleTable$addColumnInfo(name="bookValue", title ="Book value", type = "string")
       for(i in variables){
@@ -208,9 +205,6 @@
 
       if(options[["selectionType"]] == "recordSampling"){
         
-        if(is.null(rankingVariable) && options[["monetaryVariable"]] != "")
-          dataset             <- dataset[order(dataset[, .v(monetaryVariable)]), ]
-        
         interval <- ceiling(nrow(dataset) / jaspResults[["sampleSize"]]$object)
         
         # Error message for when starting point is outside of interval
@@ -226,8 +220,8 @@
         recordColumnIndex   <- which(colnames(dataset) == .v(recordVariable))
         recordColumn        <- dataset[, .v(recordVariable)]
         interval.mat        <- matrix(dataset[, .v(recordVariable)], ncol = interval, byrow = TRUE, nrow = sampleSize)  
-        sample.rows       <- interval.mat[1:nrow(interval.mat), startingPoint]
-        sample                  <- as.data.frame(dataset[recordColumn %in% sample.rows, ])
+        sample.rows         <- interval.mat[1:nrow(interval.mat), startingPoint]
+        sample              <- as.data.frame(dataset[recordColumn %in% sample.rows, ])
         colnames(sample)[1] <- .v(options[["recordNumberVariable"]])
           
       } else {
@@ -282,7 +276,7 @@
                                     "expectedErrors", "expectedNumber", "expectedPercentage", "intervalStartingPoint"))
 
       sampleTable$addColumnInfo(name="number", title ="", type = "string")
-      sampleTable$addColumnInfo(name="recordNumber", title ="Record Number", type = "string")
+      sampleTable$addColumnInfo(name="recordNumber", title ="Record number", type = "string")
       if(options[["monetaryVariable"]] != "")
         sampleTable$addColumnInfo(name="bookValue", title ="Book value", type = "string")
       for(i in variables){

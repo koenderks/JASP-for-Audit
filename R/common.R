@@ -362,7 +362,10 @@
       jaspResults[["total_data_value"]]   <- createJaspState(0.01)
       jaspResults[["ready"]]              <- createJaspState(FALSE)
   }
-  
+  materialityReady <- ifelse(options[["materiality"]] == "materialityRelative", yes = options[["materialityPercentage"]], no = options[["materialityValue"]])
+  if(materialityReady == 0)
+    jaspResults[["ready"]]              <- createJaspState(FALSE)
+
   jaspResults[["N"]]$dependOn(options = c("recordNumberVariable", "monetaryVariable"))
   jaspResults[["total_data_value"]]$dependOn(options = c("recordNumberVariable", "monetaryVariable"))
   jaspResults[["ready"]]$dependOn(options = c("recordNumberVariable", "monetaryVariable", "materiality"))
