@@ -215,12 +215,12 @@
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",          type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",          type = 'string')
-    evaluationTable$addColumnInfo(name = 'k',             title = "Errors",          type = 'string')
+    evaluationTable$addColumnInfo(name = 'k',             title = "Errors",               type = 'string')
+    if(options[["mostLikelyError"]])
+      evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                  type = 'string')
     evaluationTable$addColumnInfo(name = 'bound',         title = paste0(options[["confidence"]] * 100,"% Confidence bound"), type = 'string')
     if(options[["materiality"]] == "materialityAbsolute" || options[["monetaryVariable"]] != "")
       evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
-    if(options[["mostLikelyError"]])
-      evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                  type = 'string')
 
     message <- base::switch(options[["estimator"]],
                               "gammaBound" = "The confidence bound is calculated according to the <b>gamma</b> distributon.",
@@ -240,7 +240,7 @@
 
     mle <- 0
     if(jaspResults[["N"]]$object != 0)
-      mle <- floor(evaluationResult[["k"]] / evaluationResult[["n"]] * jaspResults[["N"]]$object)
+      mle <- paste0(round(evaluationResult[["k"]] / evaluationResult[["n"]], 4) * 100, "%")
 
     boundTable          <- "."
     if(evaluationResult[["bound"]] != ".")
