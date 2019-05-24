@@ -319,10 +319,10 @@
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",                      type = 'string')
     evaluationTable$addColumnInfo(name = 'fk',            title = "Errors",                           type = 'string')
     evaluationTable$addColumnInfo(name = 'k',             title = "Total tainting",                   type = 'string')
-    evaluationTable$addColumnInfo(name = 'bound',         title = paste0(options[["confidence"]] * 100,"% Confidence bound"), type = 'string')
-    evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
     if(options[["mostLikelyError"]])
       evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                              type = 'string')
+    evaluationTable$addColumnInfo(name = 'bound',         title = paste0(options[["confidence"]] * 100,"% Confidence bound"), type = 'string')
+    evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
 
     message <- base::switch(options[["estimator"]],
                               "stringerBound" = "The confidence bound is calculated according to the <b>Stringer</b> method.",
@@ -345,9 +345,9 @@
 
     mle <- 0
     if(options[["estimator"]] == "stringerBound"){
-      mle <- ceiling( sum(evaluationResult[["z"]]) / evaluationResult[["n"]] * total_data_value )
+      mle <- paste0(round(sum(evaluationResult[["z"]]) / evaluationResult[["n"]], 4) * 100, "%")
     } else {
-      mle <- round(evaluationResult[["mle"]], 2)
+      mle <- round(evaluationResult[["mle"]], 2) # CHANGE
     }
     errors <- round(sum(evaluationResult[["z"]]), 2)
 
@@ -592,6 +592,7 @@
     resultList[["mle"]]         <- mleregression
 
     jaspResults[["evaluationResult"]] <- createJaspState(resultList)
-    jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materialityPercentage", "estimator", "monetaryVariable", "materialityValue", "variableType"))
+    jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materialityPercentage", 
+                                                            "estimator", "monetaryVariable", "materialityValue", "variableType"))
     return(jaspResults[["evaluationResult"]]$object)
 }

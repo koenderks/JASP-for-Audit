@@ -718,23 +718,22 @@
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",            type = 'string')
     evaluationTable$addColumnInfo(name = 'fk',            title = "Errors",                 type = 'string')
     evaluationTable$addColumnInfo(name = 'k',             title = "Total tainting",         type = 'string')
+    if(options[["mostLikelyError"]])
+      evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                    type = 'string')
 
     if(!options[["displayCredibleInterval"]]){
       evaluationTable$addColumnInfo(name = 'bound',         title = paste0(options[["confidence"]] * 100,"% Confidence bound"), type = 'string')
       if(options[["monetaryVariable"]] != "")
           evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
     } else {
-      intervalTitles <- paste0(round(c((1 - options[["confidence"]])/2, 1 - (1 - options[["confidence"]])/2) * 100, 3), "%")
-      evaluationTable$addColumnInfo(name = 'cilow',          title = intervalTitles[1], type = 'string', overtitle = paste0(options[["confidence"]] * 100,"% Credible interval"))
-      evaluationTable$addColumnInfo(name = 'cihigh',         title = intervalTitles[2], type = 'string', overtitle = paste0(options[["confidence"]] * 100,"% Credible interval"))
+      evaluationTable$addColumnInfo(name = 'cilow',          title = "Lower", type = 'string', overtitle = paste0(options[["confidence"]] * 100,"% Credible interval"))
+      evaluationTable$addColumnInfo(name = 'cihigh',         title = "Upper", type = 'string', overtitle = paste0(options[["confidence"]] * 100,"% Credible interval"))
       if(options[["monetaryVariable"]] != ""){
         evaluationTable$addColumnInfo(name = 'projectedlow',         title = "Lower",           type = 'string', overtitle = "Projected misstatement")
         evaluationTable$addColumnInfo(name = 'projectedhigh',         title = "Upper",           type = 'string', overtitle = "Projected misstatement")
       }
     }
 
-    if(options[["mostLikelyError"]])
-      evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                    type = 'string')
     if(options[["bayesFactor"]])
       evaluationTable$addColumnInfo(name = 'bf',          title = "BF\u208B\u208A",         type = 'string')
 
@@ -761,15 +760,15 @@
       return()
     }
 
-    total_data_value <- jaspResults[["total_data_value"]]$object
+    total_data_value        <- jaspResults[["total_data_value"]]$object
 
     errors                  <- round(sum(evaluationResult[["z"]]), 2)
     mle                     <- 0
 
     if(options[["estimator"]] == "coxAndSnellBound"){
-        mle <- ceiling( sum(evaluationResult[["z"]]) / evaluationResult[["n"]] * total_data_value )
+        mle <- paste0(round(sum(evaluationResult[["z"]]) / evaluationResult[["n"]], 4) * 100, "%")
     } else if(options[["estimator"]] == "regressionBound"){
-        mle <- round(evaluationResult[["mle"]], 2)
+        mle <- round(evaluationResult[["mle"]], 2) # CHANGE
     }
 
     if(!options[["displayCredibleInterval"]]){
