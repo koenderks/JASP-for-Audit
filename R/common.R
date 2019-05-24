@@ -256,7 +256,7 @@
                         ggplot2::coord_flip() +
                         ggplot2::xlab(NULL) +
                         ggplot2::ylab(x.title) +
-                        ggplot2::theme(axis.ticks.x = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank()) +
+                        ggplot2::theme(axis.ticks.x = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank(), axis.text.y = ggplot2::element_text(hjust = 0)) +
                         ggplot2::scale_y_continuous(breaks = yBreaks, labels = x.labels)
   p                 <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE)
   return(createJaspPlot(plot = p, title = "Evaluation information", width = 600, height = 300))
