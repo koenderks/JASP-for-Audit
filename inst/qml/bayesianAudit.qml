@@ -231,9 +231,35 @@ Form {
 
           Divider { width: parent.width }
 
-          GroupBox {
-            AddColumnField { name: "sampleFilter"; text: "Column name selection result: "; fieldWidth: 120; enabled: pasteVariables.checked ? false : true }
-            AddColumnField { name: "variableName"; text: "Column name audit result: "; fieldWidth: 120; enabled: pasteVariables.checked ? false : true }
+          RowLayout{
+            GroupBox { id: groupBoxVariableNames
+              AddColumnField { name: "sampleFilter"; text: "Column name selection result: "; fieldWidth: 120; enabled: pasteVariables.checked ? false : true; id: sampleFilter }
+              AddColumnField { name: "variableName"; text: "Column name audit result: "; fieldWidth: 120; enabled: pasteVariables.checked ? false : true; id: variableName }
+            }
+            Item { height: groupBoxVariableNames.height; Layout.fillWidth: true; id: hoi
+              CheckBox { anchors.right: pasteButton.left; width: height; visible: false; name: "pasteVariables"; id: pasteVariables; checked: false }
+              Button { text: qsTr("<b>Add variables</b>"); id: pasteButton; anchors.right: parent.parent.right; enabled: (sampleFilter.value != "" & variableName.value != "")
+                onClicked: {
+                  toEvaluation.enabled = true
+                  pasteButton.enabled = false
+                  pasteVariables.checked = true
+                  variableType.enabled = false
+                  materiality.enabled = false
+                  auditRisk.enabled = false
+                  ir.enabled = false
+                  cr.enabled = false
+                  planningModel.enabled = false
+                  expectedErrors.enabled = false
+                  variablesFormSampling.enabled = false
+                  seed.enabled = false
+                  selectionType.enabled = false
+                  pasteButton.enabled = false
+                  variablesFormPlanning.enabled = false
+                  selectionMethod.enabled = false
+                  performAuditText.visible = true
+                }
+              }
+            }
           }
           Item { height: performAuditText.height; Layout.fillWidth: true
             Text { id: performAuditText; anchors.horizontalCenter: parent.horizontalCenter
@@ -246,28 +272,6 @@ Form {
                         form.reset()
                       }
                     }
-            CheckBox { anchors.right: pasteButton.left; width: height; visible: false; name: "pasteVariables"; id: pasteVariables; checked: false }
-            Button { text: qsTr("<b>Add variables</b>"); id: pasteButton; anchors.right: evaluationChecked.left
-              onClicked: {
-                toEvaluation.enabled = true
-                pasteButton.enabled = false
-                pasteVariables.checked = true
-                variableType.enabled = false
-                materiality.enabled = false
-                auditRisk.enabled = false
-                ir.enabled = false
-                cr.enabled = false
-                planningModel.enabled = false
-                expectedErrors.enabled = false
-                variablesFormSampling.enabled = false
-                seed.enabled = false
-                selectionType.enabled = false
-                pasteButton.enabled = false
-                variablesFormPlanning.enabled = false
-                selectionMethod.enabled = false
-                performAuditText.visible = true
-              }
-            }
             CheckBox { anchors.right: toEvaluation.left; width: height; visible: false; name: "evaluationChecked"; id: evaluationChecked; checked: false }
             Button { enabled: false; id: toEvaluation; anchors.right: parent.right; text: qsTr("<b>To evaluation</b>")
               onClicked: {
@@ -323,7 +327,7 @@ Form {
         }
         Item { height: toInterpretation.height; Layout.fillWidth: true
           Button { id: toInterpretation; anchors.right: parent.right; text: qsTr("<b>Download report</b>")
-            enabled: sampleFilter.count > 0 && auditResult.count > 0
+            enabled: auditResult.count > 0
             onClicked: { evaluationPhase.expanded = false; form.exportResults() }
           }
         }
