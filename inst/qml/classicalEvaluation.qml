@@ -24,7 +24,7 @@ Form {
     usesJaspResults: true
 
     GridLayout { columns: 3
-        RadioButtonGroup { id: materiality; name: "materiality"; title: qsTr("<b>Population materiality</b>")
+        RadioButtonGroup { id: materiality; name: "materiality"; title: qsTr("Population materiality")
           RowLayout {
             RadioButton { id: materialityAbsolute; name: "materialityAbsolute"; text: qsTr("Absolute"); checked: true; childrenOnSameRow: true
               DoubleField { id: materialityValue; visible: materialityAbsolute.checked; name: "materialityValue"; defaultValue: 0; min: 0; fieldWidth: 90; decimals: 2 } }
@@ -35,11 +35,11 @@ Form {
           }
         }
         GroupBox {
-            title: qsTr("<b>Population</b>")
+            title: qsTr("Population")
             IntegerField { id: populationSize; name: "populationSize"; text: qsTr("Size"); fieldWidth: 100; defaultValue: 0  }
             DoubleField { id: populationValue; name: "populationValue"; text: qsTr("Value"); defaultValue: 0; enabled: materialityAbsolute.checked; fieldWidth: 100 }
           }
-        GroupBox { title: qsTr("<b>Audit risk</b>"); id: auditRisk
+        GroupBox { title: qsTr("Audit risk"); id: auditRisk
             PercentField { name: "confidence"; label: qsTr("Confidence"); decimals: 2; defaultValue: 95 }
         }
     }
@@ -69,7 +69,7 @@ Form {
 
         ColumnLayout{
           RadioButtonGroup {
-              title: qsTr("<b>Inherent risk</b>")
+              title: qsTr("Inherent risk")
               name: "IR"
               id: ir
 
@@ -78,7 +78,7 @@ Form {
               RadioButton { text: qsTr("Low")         ; name: "Low" }
           }
           RadioButtonGroup {
-              title: qsTr("<b>Control risk</b>")
+              title: qsTr("Control risk")
               name: "CR"
               id: cr
 
@@ -89,7 +89,7 @@ Form {
         }
         
         RadioButtonGroup {
-          title: qsTr("<b>Estimator</b>")
+          title: qsTr("Estimator")
           name: "estimator"
 
           GridLayout {
@@ -117,7 +117,7 @@ Form {
           }
         }
 
-        GroupBox { title: qsTr("<b>Explanatory text</b>")
+        GroupBox { title: qsTr("Explanatory text")
           RowLayout {
             CheckBox { id: explanatoryText; text: qsTr("Enable"); name: "explanatoryText"; checked: true }
             MenuButton { width:	20; iconSource: "qrc:/images/info-button.png"; toolTip: "Show explanatory text at each step of the analysis"; radius: 20; Layout.alignment: Qt.AlignRight }
@@ -132,7 +132,7 @@ Form {
       GridLayout {
 
         GroupBox {
-          title: qsTr("<b>Statistics</b>")
+          title: qsTr("Statistics")
 
           CheckBox {
               text: qsTr("Most likely error (MLE)")
@@ -142,7 +142,7 @@ Form {
         }
 
         GroupBox {
-            title: qsTr("<b>Plots</b>")
+            title: qsTr("Plots")
             CheckBox {
               text: qsTr("Evaluation information")
               name: "evaluationInformation"

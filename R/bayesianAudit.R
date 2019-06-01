@@ -20,6 +20,8 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
 .bayesianProcedure <- function(options, jaspResults){
   # Read in data
   dataset <- .readDataProcedure(options, jaspResults)
+  # Error handling
+  .errorHandlingProcedure(options, dataset)
   # Create state for the figure number
   jaspResults[["figNumber"]] <- createJaspState(1)
   jaspResults[["figNumber"]]$dependOn(options = c("bookValueDistribution", "decisionPlot"))

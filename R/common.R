@@ -416,3 +416,16 @@
   jaspResults[["runEvaluation"]]$dependOn(options = c("auditResult", "sampleFilter"))
   return(dataset)
 }
+
+.errorHandlingProcedure <- function(options, dataset){
+  variables <- NULL
+  if(options[["recordNumberVariable"]] != "")
+    variables <- c(variables, options[["recordNumberVariable"]])
+  if(options[["monetaryVariable"]] != "")
+    variables <- c(variables, options[["monetaryVariable"]])
+  n <- nrow(dataset)
+
+    .hasErrors(dataset, perform, type=c("infinity", "variance", "observations"),
+            all.target = variables, message="short", observations.amount= paste0("< ", n),
+            exitAnalysisIfErrors = TRUE)
+}

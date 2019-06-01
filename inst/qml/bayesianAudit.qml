@@ -27,7 +27,7 @@ Form {
 
     Section { id: planningPhase; text: planningPhase.expanded ? qsTr("<b>1. Planning</b>") : qsTr("1. Planning"); columns: 1; expanded: true
       GridLayout { columns: 2
-          RadioButtonGroup { id: materiality; name: "materiality"; title: qsTr("<b>Population materiality</b>")
+          RadioButtonGroup { id: materiality; name: "materiality"; title: qsTr("Population materiality")
             RowLayout {
               RadioButton { id: materialityAbsolute; name: "materialityAbsolute"; text: qsTr("Absolute"); checked: true; childrenOnSameRow: true
                 DoubleField { id: materialityValue; visible: materialityAbsolute.checked; name: "materialityValue"; defaultValue: 0; min: 0; fieldWidth: 90; decimals: 2 } }
@@ -37,7 +37,7 @@ Form {
                 PercentField { id: materialityPercentage; visible: materialityRelative.checked; decimals: 2; defaultValue: 0; name: "materialityPercentage"; fieldWidth: 50 } }
             }
           }
-          GroupBox { title: qsTr("<b>Audit risk</b>"); id: auditRisk
+          GroupBox { title: qsTr("Audit risk"); id: auditRisk
               PercentField { name: "confidence"; label: qsTr("Confidence"); decimals: 2; defaultValue: 95 }
           }
       }
@@ -59,12 +59,12 @@ Form {
 
       Section { text: qsTr("Advanced options")
         GridLayout { columns: 3
-            RadioButtonGroup { title: qsTr("<b>Inherent risk</b>"); name: "IR"; id: ir
+            RadioButtonGroup { title: qsTr("Inherent risk"); name: "IR"; id: ir
                   RadioButton { text: qsTr("High") ; name: "High" ; checked: true}
                   RadioButton { text: qsTr("Medium") ; name: "Medium" }
                   RadioButton { text: qsTr("Low") ; name: "Low" }
               }
-              RadioButtonGroup { name: "expectedErrors"; id: expectedErrors; title: qsTr("<b>Expected errors</b>")
+              RadioButtonGroup { name: "expectedErrors"; id: expectedErrors; title: qsTr("Expected errors")
                 RowLayout {
                     RadioButton { text: qsTr("Absolute"); name: "expectedAbsolute"; id: expectedAbsolute}
                     DoubleField { name: "expectedNumber"; enabled: expectedAbsolute.checked; defaultValue: 0; min: 0; max: 9999; decimals: 2; visible: expectedAbsolute.checked; fieldWidth: 60 }
@@ -74,18 +74,18 @@ Form {
                     PercentField { name: "expectedPercentage"; enabled: expectedRelative.checked; decimals: 2; defaultValue: 0; visible: expectedRelative.checked; fieldWidth: 60  }
                 }
               }
-              GroupBox { title: qsTr("<b>Explanatory text</b>")
+              GroupBox { title: qsTr("Explanatory text")
                 RowLayout {
                   CheckBox { id: explanatoryText; text: qsTr("Enable"); name: "explanatoryText"; checked: true }
                   MenuButton { width:	20; iconSource: "qrc:/images/info-button.png"; toolTip: "Show explanatory text at each step of the analysis"; radius: 20; Layout.alignment: Qt.AlignRight }
                 }
               }
-              RadioButtonGroup { title: qsTr("<b>Control risk</b>"); name: "CR"; id: cr
+              RadioButtonGroup { title: qsTr("Control risk"); name: "CR"; id: cr
                   RadioButton { text: qsTr("High") ; name: "High" ; checked: true}
                   RadioButton { text: qsTr("Medium") ; name: "Medium" }
                   RadioButton { text: qsTr("Low") ; name: "Low" }
               }
-              RadioButtonGroup { title: qsTr("<b>Planning distribution</b>"); name: "planningModel"; id: planningModel
+              RadioButtonGroup { title: qsTr("Planning distribution"); name: "planningModel"; id: planningModel
                   RadioButton { text: qsTr("Beta")                          ; name: "beta" ; checked: true; id: beta}
                   RadioButton { text: qsTr("Beta-binomial")                 ; name: "beta-binomial"; id: betaBinomial}
               }
@@ -94,15 +94,15 @@ Form {
     Section { title: qsTr("Tables and plots")
       GridLayout { columns: 2
           ColumnLayout {
-              GroupBox { title: qsTr("<b>Statistics</b>")
+              GroupBox { title: qsTr("Statistics")
                 CheckBox { text: qsTr("Expected Bayes factor\u208B\u208A") ; name: "expectedBF"}
               }
-              GroupBox { title: qsTr("<b>Tables</b>")
+              GroupBox { title: qsTr("Tables")
                 CheckBox { text: qsTr("Book value descriptives"); name: "bookValueDescriptives"; enabled: monetaryVariable.count > 0}
                 CheckBox { text: qsTr("Implicit sample") ; name: "implicitSampleTable"}
               }
           }
-          GroupBox { title: qsTr("<b>Plots</b>")
+          GroupBox { title: qsTr("Plots")
             CheckBox { enabled: monetaryVariable.count > 0 ; text: qsTr("Book value distribution"); name: "bookValueDistribution"; id: bookValueDistribution }
             CheckBox { text: qsTr("Decision plot"); name: "decisionPlot" }
             CheckBox { text: qsTr("Implied prior from risk assessments"); name: "priorPlot"; id: priorPlot }
@@ -144,7 +144,7 @@ Form {
       }
       Section { title: qsTr("Advanced options")
             GridLayout { columns: 3
-              RadioButtonGroup { title: qsTr("<b>Selection type</b>"); name: "selectionType"; id: selectionType
+              RadioButtonGroup { title: qsTr("Selection type"); name: "selectionType"; id: selectionType
                 RowLayout {
                   RadioButton { text: qsTr("Monetary Unit Sampling") ; name: "musSampling" ; id: musSampling; enabled: (monetaryVariable.count > 0 ? true : false); checked: true }
                   MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Select observations with probability proportional to their value"; radius: 20; Layout.alignment: Qt.AlignRight }
@@ -154,7 +154,7 @@ Form {
                   MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Select observations with equal probability"; radius: 20; Layout.alignment: Qt.AlignRight }
                 }
               }
-              RadioButtonGroup { title: qsTr("<b>Selection method</b>"); name: "selectionMethod"; id: selectionMethod
+              RadioButtonGroup { title: qsTr("Selection method"); name: "selectionMethod"; id: selectionMethod
                 RadioButton { text: qsTr("Random sampling"); name: "randomSampling" ; id: randomSampling}
                 RadioButton { text: qsTr("Cell sampling"); name: "cellSampling" ; id: cellSampling}
                 RadioButton { text: qsTr("Systematic sampling") ; name: "systematicSampling" ; id: systematicSampling; checked: true}
@@ -165,7 +165,7 @@ Form {
       }
       Section { title: qsTr("Tables and plots")
         GridLayout {
-            GroupBox { title: qsTr("<b>Tables</b>"); id: samplingTables
+            GroupBox { title: qsTr("Tables"); id: samplingTables
                 CheckBox { text: qsTr("Display selected observations")       ; name: "displaySample"}
                     CheckBox { text: qsTr("Selection descriptives")  ; name: "sampleDescriptives" ; id: sampleDescriptives}
                     GridLayout { Layout.leftMargin: 20
@@ -214,18 +214,20 @@ Form {
             text: qsTr("<b>How would you like to evaluate your observations?</b>"); font.family: "SansSerif"; font.pointSize: 10
           }
         }
-        RadioButtonGroup { Layout.leftMargin: 50; name: "variableType"; id: variableType; title: qsTr("")
-            RowLayout { spacing: 150
-              RowLayout {
-                RadioButton { text: qsTr("Audit values") ; name: "variableTypeAuditValues" ; id: variableTypeAuditValues; checked: true; enabled: (monetaryVariable.count > 0 ? true : false) }
-                MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Adds a column to specify the audit value of the observations"; radius: 20; Layout.alignment: Qt.AlignRight }
-              }
-              RowLayout {
-                RadioButton { text: qsTr("Correct / Incorrect") ; name: "variableTypeCorrect" ; id: variableTypeCorrect; checked: false; enabled: true }
-                MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip:	"Adds a column to specify the observations as correct (0) or incorrect (1)"; radius: 20; Layout.alignment: Qt.AlignRight }
+        Item { height: variableType.height; Layout.fillWidth: true
+          RadioButtonGroup { name: "variableType"; id: variableType; title: qsTr(""); anchors.horizontalCenter: parent.horizontalCenter
+              RowLayout { spacing: 200
+                RowLayout {
+                  RadioButton { text: qsTr("Audit values") ; name: "variableTypeAuditValues" ; id: variableTypeAuditValues; checked: true; enabled: (monetaryVariable.count > 0 ? true : false) }
+                  MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Adds a column to specify the audit value of the observations"; radius: 20; Layout.alignment: Qt.AlignRight }
+                }
+                RowLayout {
+                  RadioButton { text: qsTr("Correct / Incorrect") ; name: "variableTypeCorrect" ; id: variableTypeCorrect; checked: false; enabled: true }
+                  MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip:	"Adds a column to specify the observations as correct (0) or incorrect (1)"; radius: 20; Layout.alignment: Qt.AlignRight }
+                }
               }
             }
-          }
+        }
 
           Divider { width: parent.width }
 
@@ -291,7 +293,7 @@ Form {
         }
         Section { title: qsTr("Advanced options"); columns: 1
           GridLayout { columns: 2
-            RadioButtonGroup { title: qsTr("<b>Estimator</b>"); name: "estimator"
+            RadioButtonGroup { title: qsTr("Estimator"); name: "estimator"
               RadioButton { name: "coxAndSnellBound"; text: qsTr("Cox and Snell"); id: coxAndSnellBound; visible: false }
               RadioButton { name: "betaBound"; text: qsTr("Beta"); id: betaBound; visible: false }
               RadioButton { name: "betabinomialBound"; text: qsTr("Beta-binomial"); id: betabinomialBound; visible: false }
@@ -302,15 +304,15 @@ Form {
         Section { title: qsTr("Tables and plots")
           GridLayout { columns: 2
             ColumnLayout {
-              GroupBox { title: qsTr("<b>Statistics</b>")
+              GroupBox { title: qsTr("Statistics")
                 CheckBox { text: qsTr("Most likely error (MLE)"); name: "mostLikelyError" }
                 CheckBox { text: qsTr("Bayes factor\u208B\u208A"); name: "bayesFactor" }
               }
-              GroupBox { title: qsTr("<b>Tables</b>")
+              GroupBox { title: qsTr("Tables")
                 CheckBox { text: qsTr("Credible interval"); name: "displayCredibleInterval" }
               }
             }
-            GroupBox { title: qsTr("<b>Plots</b>")
+            GroupBox { title: qsTr("Plots")
               CheckBox { text: qsTr("Evaluation information"); name: "evaluationInformation" }
               CheckBox { text: qsTr("Prior and posterior"); name: "priorAndPosteriorPlot"; id: priorAndPosteriorPlot }
               PercentField { text: qsTr("x-axis limit"); defaultValue: 20; name: "priorAndPosteriorPlotLimit"; Layout.leftMargin: 20 }
