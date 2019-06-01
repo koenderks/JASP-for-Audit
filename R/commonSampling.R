@@ -13,12 +13,11 @@
 
     if(is.null(jaspResults[["sample"]]$object)){
       
-      recordColumnIndex <- which(colnames(dataset) == .v(recordVariable))
-      recordColumn <- dataset[, recordColumnIndex]
+      recordColumn <- dataset[, .v(recordVariable)]
 
       if(options[["selectionType"]] == "recordSampling"){
           samplingRegion        <- recordColumn
-          sampleVector          <- base::sample(x = samplingRegion, size = sampleSize, replace = TRUE)
+          sampleVector          <- base::sample(x = samplingRegion, size = sampleSize, replace = FALSE)
           sample                <- as.data.frame(dataset[recordColumn %in% sampleVector, ])
           colnames(sample)[1]   <- .v(options[["recordNumberVariable"]])
       } else {

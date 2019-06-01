@@ -67,7 +67,7 @@ Form {
               RadioButtonGroup { name: "expectedErrors"; id: expectedErrors; title: qsTr("Expected errors")
                 RowLayout {
                     RadioButton { text: qsTr("Absolute"); name: "expectedAbsolute"; id: expectedAbsolute}
-                    DoubleField { name: "expectedNumber"; enabled: expectedAbsolute.checked; defaultValue: 0; min: 0; max: 9999; decimals: 2; visible: expectedAbsolute.checked; fieldWidth: 60 }
+                    DoubleField { name: "expectedNumber"; enabled: expectedAbsolute.checked; defaultValue: 0; min: 0; max: 1e10; decimals: 2; visible: expectedAbsolute.checked; fieldWidth: 60 }
                 }
                 RowLayout {
                     RadioButton { text: qsTr("Relative") ; name: "expectedRelative" ; checked: true; id: expectedRelative}
@@ -146,11 +146,11 @@ Form {
             GridLayout { columns: 3
               RadioButtonGroup { title: qsTr("Selection type"); name: "selectionType"; id: selectionType
                 RowLayout {
-                  RadioButton { text: qsTr("Monetary Unit Sampling") ; name: "musSampling" ; id: musSampling; enabled: (monetaryVariable.count > 0 ? true : false); checked: true }
+                  RadioButton { text: qsTr("Monetary unit sampling") ; name: "musSampling" ; id: musSampling; enabled: (monetaryVariable.count > 0 ? true : false); checked: true }
                   MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Select observations with probability proportional to their value"; radius: 20; Layout.alignment: Qt.AlignRight }
                 }
                 RowLayout {
-                  RadioButton { text: qsTr("Record Sampling") ; name: "recordSampling" ; id: recordSampling }
+                  RadioButton { text: qsTr("Record sampling") ; name: "recordSampling" ; id: recordSampling }
                   MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Select observations with equal probability"; radius: 20; Layout.alignment: Qt.AlignRight }
                 }
               }

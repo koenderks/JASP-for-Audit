@@ -78,7 +78,7 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
     jaspResults[["materiality"]] <- createJaspState(materiality)
     jaspResults[["materiality"]]$dependOn(options = c("materialityValue", "materialityPercentage", "monetaryVariable", "recordNumberVariable", "materiality"))
 
-    expTMP <- ifelse(options[['expectedErrors']] == "expectedRelative", yes = options[["expectedPercentage"]], no = options[["expectedAbsolute"]] / jaspResults[["total_data_value"]]$object)
+    expTMP <- ifelse(options[['expectedErrors']] == "expectedRelative", yes = options[["expectedPercentage"]], no = options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object)
     if(expTMP > materiality){
       jaspResults[["planningContainer"]][["summaryTable"]] <- createJaspTable("Planning Summary")
       jaspResults[["planningContainer"]][["summaryTable"]]$setError("Analysis not possible: Your expected errors are higher than materiality.")
