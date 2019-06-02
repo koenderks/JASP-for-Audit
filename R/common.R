@@ -244,10 +244,12 @@
   yBreaks           <- as.numeric(JASPgraphs::getPrettyAxisBreaks(c(0, values), min.n = 4))
   if(options[["variableType"]] == "variableTypeAuditValues" && options[["materiality"]] == "materialityAbsolute"){
     x.labels        <- format(yBreaks, scientific = TRUE)
-    x.title         <- "Error amount"
+    # x.title         <- "Error amount"
+    x.title         <- ""
   } else {
     x.labels        <- paste0(round(yBreaks * 100, 4), "%")
-    x.title         <- "Error percentage"
+    # x.title         <- "Error percentage"
+    x.title         <- ""
   }
   tb                <- data.frame(x = label, values = values)
   tb$x              <- factor(tb$x, levels = tb$x)
@@ -257,7 +259,8 @@
                         ggplot2::xlab(NULL) +
                         ggplot2::ylab(x.title) +
                         ggplot2::theme(axis.ticks.x = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank(), axis.text.y = ggplot2::element_text(hjust = 0)) +
-                        ggplot2::scale_y_continuous(breaks = yBreaks, labels = x.labels)
+                        ggplot2::scale_y_continuous(breaks = yBreaks, labels = x.labels) +
+                        ggplot2::theme(panel.grid.major.x = ggplot2::element_line(color="#cbcbcb"))
   p                 <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE)
   return(createJaspPlot(plot = p, title = "Evaluation information", width = 600, height = 300))
 }
