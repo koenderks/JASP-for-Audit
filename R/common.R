@@ -146,7 +146,8 @@
     p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = c(rgb(0,1,0,0))) +
     ggplot2::scale_shape_manual(name = "", values = c(21,21,21), labels = c("Mean", "Mean \u00B1 sd", "Quartile")) +
     ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = c(5, 4, 3), shape = 21, fill = c("red","dodgerblue1", "orange"), stroke = 2, color = "black")), order = 1) +
-    ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = -10, r = 50)))
+    ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = -10, r = 50))) +
+    ggplot2::theme(panel.grid.major.y = ggplot2::element_line(color="#cbcbcb"))
     
     p <- JASPgraphs::themeJasp(p, legend.position = "top")
 
@@ -291,7 +292,7 @@
     yLabs <- vector("character", length(yticks))
     yLabs <- format(yticks, digits= 3, scientific = FALSE)
 
-    co <- round(co, 2)
+    co <- round(co, 3)
 
     cols <- rep("gray", nrow(d))
     cols[which(d$xx != d$yy)] <- "red"
@@ -301,6 +302,8 @@
     p <- .poly.predJfA(fit[[bestModel]], plot = p, line= TRUE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd = 1)
     p <- p + ggplot2::annotate("text", x = xticks[1], y = yticks[length(yticks)],
                                 label = paste0("italic(r) == ", co), size = 8, parse = TRUE, hjust = -0.5, vjust = 0.5)
+    p <- p + ggplot2::theme(panel.grid.major.x = ggplot2::element_line(color="#cbcbcb"), panel.grid.major.y = ggplot2::element_line(color="#cbcbcb"))
+    
     p <- JASPgraphs::themeJasp(p)
     return(createJaspPlot(plot = p, title = "Correlation plot", width = 500, height = 400))
 }
