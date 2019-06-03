@@ -283,8 +283,9 @@ Form {
                 if (musSampling.checked & variableTypeAuditValues.checked)    coxAndSnellBound.visible = true
                 if (recordSampling.checked & variableTypeAuditValues.checked) regressionBound.click()
                 if (recordSampling.checked & variableTypeAuditValues.checked) regressionBound.visible = true
-                if (variableTypeCorrect.checked) betaBound.click()
+                if (variableTypeCorrect.checked & beta.checked) betaBound.click()
                 if (variableTypeCorrect.checked) betaBound.visible = true
+                if (variableTypeCorrect.checked & betaBinomial.checked) betabinomialBound.click()
                 if (variableTypeCorrect.checked) betabinomialBound.visible = true
               }
             }

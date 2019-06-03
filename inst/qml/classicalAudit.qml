@@ -278,9 +278,11 @@ Form {
                   if (recordSampling.checked & variableTypeAuditValues.checked) differenceBound.visible = true
                   if (recordSampling.checked & variableTypeAuditValues.checked) ratioBound.visible = true
                   if (recordSampling.checked & variableTypeAuditValues.checked) regressionBound.visible = true
-                  if (variableTypeCorrect.checked) gammaBound.click()
+                  if (variableTypeCorrect.checked & poisson.checked) gammaBound.click()
                   if (variableTypeCorrect.checked) gammaBound.visible = true
+                  if (variableTypeCorrect.checked & binomial.checked) binomialBound.click()
                   if (variableTypeCorrect.checked) binomialBound.visible = true
+                  if (variableTypeCorrect.checked & hypergeometric.checked) hyperBound.click()
                   if (variableTypeCorrect.checked) hyperBound.visible = true
                 }
               }
