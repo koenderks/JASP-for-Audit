@@ -58,9 +58,9 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
       {
           allowed.errors <- 0:(max.errors - 1)
           reject.errors <- max.errors : (max.errors + 2)
-          jaspResults[["planningContainer"]][["decisionPlot"]] 		<- .decisionPlot(allowed.errors, reject.errors, options, jaspResults)
+          jaspResults[["planningContainer"]][["decisionPlot"]] 		<- .decisionAnalysisBayesian(options, jaspResults)
           jaspResults[["planningContainer"]][["decisionPlot"]]		  $dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "expectedPercentage", "expectedNumber", "decisionPlot",
-                                                                                        "planningModel", "materialityValue", "materiality"))
+                                                                                        "materialityValue", "materiality"))
           jaspResults[["planningContainer"]][["decisionPlot"]] 		$position <- 4
       }
       jaspResults[["planningContainer"]][["figure2"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The number of full errors that are allowed in the sample before rejecting the population are displayed in green.

@@ -54,7 +54,7 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
       {
           allowed.errors <- 0:(max.errors - 1)
           reject.errors <- max.errors : (max.errors + 2)
-          jaspResults[["planningContainer"]][["decisionPlot"]] 		<- .decisionPlot(allowed.errors, reject.errors, options, jaspResults)
+          jaspResults[["planningContainer"]][["decisionPlot"]] 		<- .decisionAnalysisFrequentist(options, jaspResults)
           jaspResults[["planningContainer"]][["decisionPlot"]]		  $dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "expectedPercentage", "expectedNumber", "decisionPlot",
                                                                                         "planningModel", "materialityValue", "materiality"))
           jaspResults[["planningContainer"]][["decisionPlot"]] 		$position <- 4

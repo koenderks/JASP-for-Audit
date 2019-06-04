@@ -79,50 +79,6 @@
   dataTable$addRows(row)
 }
 
-.decisionPlot <- function(allowed.errors, reject.errors, options, jaspResults){
-
-  errorrange <- 0:max(reject.errors)
-  errors <- c(allowed.errors, reject.errors)
-  if(options[["planningModel"]] == "Poisson" && options[["expectedErrors"]] == "expectedRelative" && options[["expectedPercentage"]] != 0){
-    fill <- c(rep(rgb(0,1,.5,.7), length(allowed.errors)),
-              rep(rgb(0.5,0.5,0.5,.7), 1),
-              rep(rgb(1,0,0,.7), length(reject.errors) - 1))
-  } else {
-    fill <- c(rep(rgb(0,1,.5,.7), length(allowed.errors)),
-              rep(rgb(1,0,0,.7), length(reject.errors)))
-  }
-
-  pointdata <- data.frame(x = errorrange, y = 0.2)
-
-  df <- data.frame()
-  p <- ggplot2::ggplot(df) +
-      ggplot2::geom_point() +
-      ggplot2::ylim(0, 0.5) +
-      ggplot2::ylab(NULL) +
-      ggplot2::xlab("Sample errors")
-
-  p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = pointdata, fill = fill, shape = 21, stroke = 2, size = 15)
-  if(options[["planningModel"]] == "Poisson" && options[["expectedErrors"]] == "expectedRelative" && options[["expectedPercentage"]] != 0){
-    pdata <- data.frame(x = c(0,0,0), y = c(0,0,0), l = c("1","2","3"))
-    p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = c(rgb(0,1,0,0), rgb(1,0,0,0), rgb(1,0,0,0)))
-    p <- p + ggplot2::scale_shape_manual(name = "", values = c(21, 21,21), labels = c("Accept population", "Not definitive", "Reject population"))
-    p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 9, shape = 21, fill = c(rgb(0,1,.5,.7),rgb(0.5,0.5,0.5,.7),rgb(1,0,0,.7)), stroke = 2, color = "black")), order = 1)
-  } else {
-    pdata <- data.frame(x = c(0,0), y = c(0,0), l = c("1","2"))
-    p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = c(rgb(0,1,0,0), rgb(1,0,0,0)))
-    p <- p + ggplot2::scale_shape_manual(name = "", values = c(21,21), labels = c("Accept population", "Reject population"))
-    p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 9, shape = 21, fill = c(rgb(0,1,.5,.7),rgb(1,0,0,.7)), stroke = 2, color = "black")), order = 1)
-  }
-  
-  p <- p + ggplot2::scale_x_continuous(breaks = errorrange)
-  p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE, legend.position = "top")
-  p <- p + ggplot2::theme(axis.ticks = ggplot2::element_blank(),
-                          axis.text.y = ggplot2::element_blank(),
-                          axis.text.x = ggplot2::element_text(size = 17))
-
-  return(createJaspPlot(plot = p, title = "Decision plot", width = 600, height = 200))
-}
-
 .bookValueDistribution <- function(dataset, options, jaspResults){
 
     values <- dataset[, .v(options[["monetaryVariable"]])]

@@ -102,7 +102,7 @@ Form {
                title: qsTr("Plots")
 
                  CheckBox {
-                    text: qsTr("Decision plot")
+                    text: qsTr("Decision analysis")
                     name: "decisionPlot"
                   }
                CheckBox {

@@ -104,7 +104,7 @@ Form {
           }
           GroupBox { title: qsTr("Plots")
             CheckBox { enabled: monetaryVariable.count > 0 ; text: qsTr("Book value distribution"); name: "bookValueDistribution"; id: bookValueDistribution }
-            CheckBox { text: qsTr("Decision plot"); name: "decisionPlot" }
+            CheckBox { text: qsTr("Decision analysis"); name: "decisionPlot" }
             CheckBox { text: qsTr("Implied prior from risk assessments"); name: "priorPlot"; id: priorPlot }
             PercentField { text: qsTr("x-axis limit") ; name: "priorPlotLimit" ; defaultValue: 100; Layout.leftMargin: 20; enabled: priorPlot.checked }
             CheckBox { text: qsTr("Additional info") ; name: "priorPlotAdditionalInfo" ; Layout.leftMargin: 20; checked: true; enabled: priorPlot.checked }

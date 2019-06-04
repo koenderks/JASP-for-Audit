@@ -596,3 +596,36 @@
                                                             "estimator", "monetaryVariable", "materialityValue", "variableType"))
     return(jaspResults[["evaluationResult"]]$object)
 }
+
+.decisionAnalysisFrequentist <- function(options, jaspResults){
+
+  ar                      <- 1 - options[["confidence"]]
+  ir                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+  cr                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+  alpha                   <- ar / ir / cr
+  
+  n <- c(.calc.n.poisson(options, alpha, jaspResults),
+          .calc.n.binomial(options, alpha, jaspResults),
+          .calc.n.hypergeometric(options, alpha, jaspResults))
+  k <- base::switch(options[["expectedErrors"]], "expectedRelative" = options[["expectedPercentage"]] * n, "expectedAbsolute" = options[["expectedNumber"]])
+  
+  d <- data.frame(y = c(n, k), 
+                  dist = rep(c("Poisson", "Binomial", "Hypergeometric"), 2),
+                  nature = rep(c("Expected correct \nobservations", "Expected misstated \nobservations"), each = 3))
+  d$dist = factor(d$dist,levels(d$dist)[c(2,1,3)])
+  d$nature = factor(d$nature,levels(d$nature)[c(1,2)])
+  
+  p <- ggplot2::ggplot(data = d, ggplot2::aes(x = dist, y = y, fill = nature)) +
+      ggplot2::geom_bar(stat = "identity", col = "black", size = 1) +
+      ggplot2::coord_flip() +
+      ggplot2::xlab("") +
+      ggplot2::ylab("Sample size") +
+      ggplot2::theme(axis.ticks.x = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank(), axis.text.y = ggplot2::element_text(hjust = 0)) +
+      ggplot2::theme(panel.grid.major.x = ggplot2::element_line(color="#cbcbcb")) +
+      ggplot2::labs(fill = "") +
+      ggplot2::scale_fill_manual(values=c("#7FE58B", "#FF6666"), guide = ggplot2::guide_legend(reverse = TRUE)) +
+      ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = 0, r = 50)))
+  p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE, legend.position = "top")
+  
+  return(createJaspPlot(plot = p, title = "Decision analysis", width = 600, height = 300))
+}

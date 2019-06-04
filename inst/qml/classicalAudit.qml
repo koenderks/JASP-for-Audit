@@ -101,7 +101,7 @@ Form {
           }
           GroupBox { title: qsTr("Plots")
             CheckBox { enabled: monetaryVariable.count > 0 ; text: qsTr("Book value distribution"); name: "bookValueDistribution"; id: bookValueDistribution }
-            CheckBox { text: qsTr("Decision plot"); name: "decisionPlot" }
+            CheckBox { text: qsTr("Decision analysis"); name: "decisionPlot" }
           }
         }
       }

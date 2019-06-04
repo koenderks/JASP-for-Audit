@@ -86,7 +86,7 @@ Form {
       Section { title: qsTr("Tables and plots")
       GridLayout { columns: 2
         GroupBox { title: qsTr("Plots")
-          CheckBox { text: qsTr("Decision plot"); name: "decisionPlot" }
+          CheckBox { text: qsTr("Decision analysis"); name: "decisionPlot" }
         }
       }
       }

@@ -124,8 +124,8 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
           if(max.errors == 0)
             allowed.errors <- 0
           reject.errors <- allowed.errors[length(allowed.errors)] + 1 : (allowed.errors[length(allowed.errors)] + 3)
-          jaspResults[["planningContainer"]][["decisionPlot"]] 		<- .decisionPlot(allowed.errors, reject.errors, options, jaspResults)
-          jaspResults[["planningContainer"]][["decisionPlot"]]		  $dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "expectedPercentage", "expectedNumber", "decisionPlot", "planningModel", "materialityValue"))
+          jaspResults[["planningContainer"]][["decisionPlot"]] 		<- .decisionAnalysisFrequentist(options, jaspResults)
+          jaspResults[["planningContainer"]][["decisionPlot"]]		  $dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "expectedPercentage", "expectedNumber", "decisionPlot", "materialityValue"))
           jaspResults[["planningContainer"]][["decisionPlot"]] 		$position <- 4
       }
       jaspResults[["planningContainer"]][["figure2"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The number of full errors that are allowed in the sample before rejecting the population are displayed in green.
