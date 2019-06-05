@@ -121,8 +121,8 @@
     planningSummary$addColumnInfo(name = 'expBF',              title = "Expected BF\u208B\u208A", type = 'string')
 
   message <- base::switch(options[["planningModel"]],
-                            "beta" = "The sample size is based on the <b>beta</b> distribution.",
-                            "beta-binomial" = paste0("The sample size is based on the <b>beta-binomial</b> distribution (N = ", jaspResults[["N"]]$object ,")."))
+                            "beta" = paste0("The required sample size is based on the <b>beta</b> distribution <i>(\u03B1 = ", round(planningResult[["priorA"]], 2) ,", \u03B2 = ", round(planningResult[["priorB"]], 2), ")</i>."),
+                            "beta-binomial" = paste0("The required sample size is based on the <b>beta-binomial</b> distribution <i>(N = ", jaspResults[["N"]]$object ,", \u03B1 = ", round(planningResult[["priorA"]], 2) , ", \u03B2 = ", round(planningResult[["priorB"]], 2), ")</i>."))
   planningSummary$addFootnote(message = message, symbol="<i>Note.</i>")
 
   ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = round(planningResult[["k"]] * planningResult[["n"]], 2), "expectedAbsolute" = options[["expectedNumber"]])
@@ -948,7 +948,7 @@
       ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = 0, r = 30)))
   p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE, legend.position = "top")
 
-  optN <- base::switch(which.min(n), "1" = "Beta", "2" = "Beta-binomial")
+  optN <- base::switch(which.min(n), "1" = "beta", "2" = "beta-binomial")
   jaspResults[["mostEfficientPlanningDistribution"]] <- createJaspState(optN)
   jaspResults[["mostEfficientPlanningDistribution"]]$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "expectedPercentage", "expectedNumber", 
                                                                             "decisionPlot", "materialityValue"))

@@ -94,9 +94,9 @@
   planningSummary$addColumnInfo(name = 'n',                    title = "Required sample size", type = 'string')
 
   message <- base::switch(options[["planningModel"]],
-                          "Poisson" = "The sample size is based on the <b>Poisson</b> distribution.",
-                          "binomial" =  "The sample size is based on the <b>binomial</b> distribution.",
-                          "hypergeometric" = paste0("The sample size is based on the <b>hypergeometric</b> distribution (N = ", jaspResults[["N"]]$object ,")."))
+                          "Poisson" = paste0("The required sample size is based on the <b>Poisson</b> distribution <i>(\u03BB = ", round(jaspResults[["materiality"]]$object, 2) ,")</i>."),
+                          "binomial" =  paste0("The required sample size is based on the <b>binomial</b> distribution <i>(p = ", round(jaspResults[["materiality"]]$object, 2) ,")</i>."),
+                          "hypergeometric" = paste0("The required sample size is based on the <b>hypergeometric</b> distribution <i>(N = ", jaspResults[["N"]]$object ,", K = ", floor(jaspResults[["N"]]$object * jaspResults[["materiality"]]$object) ,")</i>."))
   planningSummary$addFootnote(message = message, symbol="<i>Note.</i>")
 
   if(options[["planningModel"]] != "Poisson" && options[["expectedErrors"]] == "expectedAbsolute" && options[["expectedNumber"]]%%1 != 0){
@@ -629,7 +629,7 @@
       ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = 0, r = 30)))
   p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE, legend.position = "top")
 
-  optN <- base::switch(which.min(n), "1" = "Poisson", "2" = "Binomial", "3" = "Hypergeometric")
+  optN <- base::switch(which.min(n), "1" = "Poisson", "2" = "binomial", "3" = "hypergeometric")
   jaspResults[["mostEfficientPlanningDistribution"]] <- createJaspState(optN)
   jaspResults[["mostEfficientPlanningDistribution"]]$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "expectedPercentage", "expectedNumber", 
                                                                           "decisionPlot", "materialityValue"))

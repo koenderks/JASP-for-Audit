@@ -113,12 +113,6 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
   if(options[["expectedBF"]])
     summaryTable$addColumnInfo(name = 'expBF',              title = "Expected BF\u208B\u208A", type = 'string')
 
-  message <- base::switch(options[["planningModel"]],
-                            "beta" = "The sample size is based on the <b>beta</b> distribution.",
-                            "beta-binomial" = paste0("The sample size is based on the <b>beta-binomial</b> distribution (N = ", options[["populationSize"]] ,")."))
-
-  summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
-
   ar                      <- 1 - options[["confidence"]]
   ir                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
   cr                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
@@ -126,6 +120,12 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
   DRtable <- paste0(round(alpha, 3) * 100, "%")
 
   if(!jaspResults[["ready"]]$object){
+
+    message <- base::switch(options[["planningModel"]],
+                          "beta" = "The required sample size is based on the <b>beta</b> distribution.",
+                          "beta-binomial" = paste0("The required sample size is based on the <b>beta-binomial</b> distribution (N = ", options[["populationSize"]] ,")."))
+    summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
+
     row <- data.frame(materiality = ".", IR = options[["IR"]], CR = options[["CR"]], DR = DRtable, k = ".", n = ".")
     if(options[["expectedBF"]])
       row <- cbind(row, expBF = ".")
@@ -178,6 +178,11 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
   }
 
   resultList <- jaspResults[["planningResult"]]$object
+
+  message <- base::switch(options[["planningModel"]],
+                        "beta" = paste0("The required sample size is based on the <b>beta</b> distribution <i>(\u03B1 = ", round(resultList[["priorA"]], 2) ,", \u03B2 = ", round(resultList[["priorB"]], 2), ")</i>."),
+                        "beta-binomial" = paste0("The required sample size is based on the <b>beta-binomial</b> distribution <i>(N = ", options[["populationSize"]] ,", \u03B1 = ", round(resultList[["priorA"]], 2) , ", \u03B2 = ", round(resultList[["priorB"]], 2), ")</i>."))
+  summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
   ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = round(resultList[["k"]] * resultList[["n"]], 2), "expectedAbsolute" = options[["expectedNumber"]])
 

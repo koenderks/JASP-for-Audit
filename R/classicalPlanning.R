@@ -85,13 +85,6 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   summaryTable$addColumnInfo(name = 'k',                    title = "Expected errors",       type = 'string')
   summaryTable$addColumnInfo(name = 'n',                    title = "Required sample size", type = 'string')
 
-  message <- base::switch(options[["planningModel"]],
-                            "Poisson" = "The sample size is based on the <b>Poisson</b> distribution.",
-                            "binomial" = "The sample size is based on the <b>binomial</b> distribution.",
-                            "hypergeometric" = paste0("The sample size is based on the <b>hypergeometric</b> distribution (N = ", options[["populationSize"]] ,")."))
-
-  summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
-
   ar                      <- 1 - options[["confidence"]]
   ir                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
   cr                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
@@ -99,6 +92,13 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   DRtable                 <- paste0(round(alpha, 3) * 100, "%")
 
   if(!jaspResults[["ready"]]$object){
+
+    message <- base::switch(options[["planningModel"]],
+                        "Poisson" = paste0("The required sample size is based on the <b>Poisson</b> distribution."),
+                        "binomial" =  paste0("The required sample size is based on the <b>binomial</b> distribution."),
+                        "hypergeometric" = paste0("The required sample size is based on the <b>hypergeometric</b> distribution."))
+    summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
+
     row <- data.frame(materiality = ".", IR = options[["IR"]], CR = options[["CR"]], DR = DRtable, k = ".", n = ".")
     summaryTable$addRows(row)
     return()
@@ -127,6 +127,12 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   }
 
   resultList <- jaspResults[["planningResult"]]$object
+
+  message <- base::switch(options[["planningModel"]],
+                        "Poisson" = paste0("The required sample size is based on the <b>Poisson</b> distribution <i>(\u03BB = ", round(jaspResults[["materiality"]]$object, 2) ,")</i>."),
+                        "binomial" =  paste0("The required sample size is based on the <b>binomial</b> distribution <i>(p = ", round(jaspResults[["materiality"]]$object, 2) ,")</i>."),
+                        "hypergeometric" = paste0("The required sample size is based on the <b>hypergeometric</b> distribution <i>(N = ", options[["populationSize"]] ,", K = ", floor(options[["populationSize"]] * jaspResults[["materiality"]]$object) ,")</i>."))
+  summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
   if(options[["planningModel"]] != "Poisson" && options[["expectedErrors"]] == "expectedAbsolute" && options[["expectedNumber"]]%%1 != 0){
     summaryTable$setError("Expected errors should be a whole number in this sampling model.")
