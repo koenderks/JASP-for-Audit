@@ -5,7 +5,8 @@
       impk <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(n * options[["expectedPercentage"]]), "expectedAbsolute" = options[["expectedNumber"]])
       if(impk >= n){ next }
       if(impk%%1 == 0){
-          x <- choose(n, 0:impk) * jaspResults[["materiality"]]$object^(0:impk) * (1 - jaspResults[["materiality"]]$object)^(n - (0:impk))
+          #x <- choose(n, 0:impk) * jaspResults[["materiality"]]$object^(0:impk) * (1 - jaspResults[["materiality"]]$object)^(n - (0:impk))
+          x <- dbinom(0:impk, size = n, prob = jaspResults[["materiality"]]$object)
           if(sum(x) < alpha){ 
             return(n)
           }
@@ -20,7 +21,8 @@
       jaspResults$progressbarTick()
       impk <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(n * options[["expectedPercentage"]]), "expectedAbsolute" = options[["expectedNumber"]])
       if(impk >= n) { next }
-      x <- choose(K, 0:impk) * choose(jaspResults[["N"]]$object - K, n - (0:impk)) / choose(jaspResults[["N"]]$object, n)
+      #x <- choose(K, 0:impk) * choose(jaspResults[["N"]]$object - K, n - (0:impk)) / choose(jaspResults[["N"]]$object, n)
+      x <- dhyper(x = 0:impk, m = K, n = jaspResults[["N"]]$object - K, k = n)
       if(sum(x) < alpha){
         return(n)
       }
