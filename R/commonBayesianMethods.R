@@ -932,9 +932,9 @@
   
   d <- data.frame(y = c(n, k), 
                   dist = rep(c("Beta", "Beta-binomial"), 2),
-                  nature = rep(c("Expected correct \nobservations", "Expected misstated \nobservations"), each = 2))
+                  nature = rep(c("Expected error-free", "Expected error"), each = 2))
   d$dist = factor(d$dist,levels(d$dist)[c(2,1)])
-  d$nature = factor(d$nature,levels(d$nature)[c(1,2)])
+  d$nature = factor(d$nature,levels(d$nature)[c(2,1)])
   
   p <- ggplot2::ggplot(data = d, ggplot2::aes(x = dist, y = y, fill = nature)) +
       ggplot2::geom_bar(stat = "identity", col = "black", size = 1) +
@@ -945,8 +945,13 @@
       ggplot2::theme(panel.grid.major.x = ggplot2::element_line(color="#cbcbcb")) +
       ggplot2::labs(fill = "") +
       ggplot2::scale_fill_manual(values=c("#7FE58B", "#FF6666"), guide = ggplot2::guide_legend(reverse = TRUE)) +
-      ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = 0, r = 50)))
+      ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = 0, r = 30)))
   p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE, legend.position = "top")
+
+  optN <- base::switch(which.min(n), "1" = "Beta", "2" = "Beta-binomial")
+  jaspResults[["mostEfficientPlanningDistribution"]] <- createJaspState(optN)
+  jaspResults[["mostEfficientPlanningDistribution"]]$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "expectedPercentage", "expectedNumber", 
+                                                                            "decisionPlot", "materialityValue"))
   
   return(createJaspPlot(plot = p, title = "Decision analysis", width = 600, height = 300))
 }

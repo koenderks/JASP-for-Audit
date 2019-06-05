@@ -59,8 +59,9 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
                                                                                         "planningModel", "materialityValue", "materiality"))
           jaspResults[["planningContainer"]][["decisionPlot"]] 		$position <- 4
       }
-      jaspResults[["planningContainer"]][["figure2"]] <- createJaspHtml(paste0("<b>Figure 1.</b> The number of full errors that are allowed in the sample before rejecting the population are displayed in green.
-                                                        Whenever more than this number of full errors is found, displayed in red, the population should be rejected."), "p")
+      jaspResults[["planningContainer"]][["figure2"]] <- createJaspHtml(paste0("<b>Figure 1.</b> Decision analysis for the current options. The bars represent the sample size that is required under different planning distributions.
+                                                                                  The the number of expected errors in the selection is colored in red. The number of expected correct observations is colored in green. 
+                                                                                  The most efficient distribution for these data is the <b>", jaspResults[["mostEfficientPlanningDistribution"]]$object ,"</b> distribution."), "p")
       jaspResults[["planningContainer"]][["figure2"]]$position <- 5
     } else if(options[["decisionPlot"]]){
         errorPlot <- createJaspPlot(plot = NULL, title = "Decision plot")

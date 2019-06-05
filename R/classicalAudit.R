@@ -128,8 +128,9 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
           jaspResults[["planningContainer"]][["decisionPlot"]]		  $dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "expectedPercentage", "expectedNumber", "decisionPlot", "materialityValue"))
           jaspResults[["planningContainer"]][["decisionPlot"]] 		$position <- 4
       }
-      jaspResults[["planningContainer"]][["figure2"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The number of full errors that are allowed in the sample before rejecting the population are displayed in green.
-                                                        Whenever more than this number of full errors is found, displayed in red, the population should be rejected."), "p")
+      jaspResults[["planningContainer"]][["figure2"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Decision analysis for the current options. The bars represent the sample size that is required under different planning distributions.
+                                                                                  The the number of expected errors in the selection is colored in red. The number of expected correct observations is colored in green. 
+                                                                                  The most efficient distribution for these data is the <b>", jaspResults[["mostEfficientPlanningDistribution"]]$object ,"</b> distribution."), "p")
       jaspResults[["planningContainer"]][["figure2"]]$position <- 5
       jaspResults[["planningContainer"]][["figure2"]]$dependOn(optionsFromObject= jaspResults[["planningContainer"]][["decisionPlot"]])
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
