@@ -42,10 +42,10 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
     jaspResults[["procedureContainer"]][["procedureParagraph"]]$dependOn(options = c("explanatoryText", "confidence"))
   }
   # Create a descriptives table of the population book values (if the user wants it)
-  if(options[["bookValueDescriptives"]])
+  if(options[["bookValueDescriptives"]] && options[["monetaryVariable"]] != "")
     .bookValueDescriptives(dataset, options, jaspResults, position = 2)
   # Create a plot of the population book values (if the user wants it)
-  if(options[['bookValueDistribution']] && jaspResults[["ready"]]$object)
+  if(options[['bookValueDistribution']] && jaspResults[["ready"]]$object && options[["monetaryVariable"]] != "")
   {
       if(is.null(jaspResults[["procedureContainer"]][["bookValueDistribution"]]))
       {
