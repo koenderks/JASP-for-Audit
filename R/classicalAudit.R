@@ -160,7 +160,7 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
                   "cellSampling"        = .cellSampling(dataset, options, jaspResults, position = 4))
     # Explanatory text for selection
   if(options[["explanatoryText"]]){
-    technique <- base::switch(options[["selectionMethod"]], "randomSampling" = "random", "systematicSampling" = "systematic", "cellSampling" = "cell")
+    technique <- base::switch(options[["selectionMethod"]], "randomSampling" = "random", "systematicSampling" = "fixed interval", "cellSampling" = "cell")
     technique <- base::switch(options[["selectionType"]], "recordSampling" = paste(technique, "record sampling"), "musSampling" = paste(technique, "monetary unit sampling"))
     if(!jaspResults[["containsDoubleObservations"]]$object){
       message <- paste0("From the population of <b>", jaspResults[["N"]]$object, "</b> observations, <b>", planningResult[["n"]], "</b> observations were selected using a <b>", technique, "</b> method.")

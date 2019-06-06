@@ -86,7 +86,6 @@
     if(rankingVariable == "")        rankingVariable <- NULL
     variables                       <- unlist(options[["additionalVariables"]])
 
-    startingPoint                       <- options[["intervalStartingPoint"]]
     sampleSize                          <- jaspResults[["sampleSize"]]$object
     set.seed(options[["seed"]])
 
@@ -192,7 +191,6 @@
     if(rankingVariable == "")        rankingVariable <- NULL
     variables                       <- unlist(options[["additionalVariables"]])
 
-    startingPoint                       <- options[["intervalStartingPoint"]]
     sampleSize                          <- jaspResults[["sampleSize"]]$object
 
     if(is.null(jaspResults[["sample"]])){
@@ -205,6 +203,9 @@
       if(options[["selectionType"]] == "recordSampling"){
         
         interval <- ceiling(nrow(dataset) / jaspResults[["sampleSize"]]$object)
+
+        set.seed(options[["seed"]])
+        startingPoint <- base::sample(1: interval, size = 1)
         
         # Error message for when starting point is outside of interval
         if(startingPoint > interval){
@@ -229,6 +230,9 @@
           dataset             <- dataset[order(dataset[, .v(monetaryVariable)]), ]
         
         interval <- ceiling(sum(dataset[, .v(monetaryVariable)]) / jaspResults[["sampleSize"]]$object)
+
+        set.seed(options[["seed"]])
+        startingPoint <- base::sample(1: interval, size = 1)
         
         # Error message for when starting point is outside of interval
         if(startingPoint > interval){

@@ -144,7 +144,7 @@ Form {
       }
       Section { title: qsTr("Advanced options")
             GridLayout { columns: 3
-              RadioButtonGroup { title: qsTr("Selection type"); name: "selectionType"; id: selectionType
+              RadioButtonGroup { title: qsTr("Sampling units"); name: "selectionType"; id: selectionType
                 RowLayout {
                   RadioButton { text: qsTr("Monetary unit sampling") ; name: "musSampling" ; id: musSampling; enabled: (monetaryVariable.count > 0 ? true : false); checked: true }
                   MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Select observations with probability proportional to their value"; radius: 20; Layout.alignment: Qt.AlignRight }
@@ -157,8 +157,7 @@ Form {
               RadioButtonGroup { title: qsTr("Selection method"); name: "selectionMethod"; id: selectionMethod
                 RadioButton { text: qsTr("Random sampling"); name: "randomSampling" ; id: randomSampling}
                 RadioButton { text: qsTr("Cell sampling"); name: "cellSampling" ; id: cellSampling}
-                RadioButton { text: qsTr("Systematic sampling") ; name: "systematicSampling" ; id: systematicSampling; checked: true}
-                IntegerField { text: qsTr("Starting point"); min: 1; Layout.leftMargin: 20; enabled: systematicSampling.checked; fieldWidth: 60; name: "intervalStartingPoint"; defaultValue: 1 }
+                RadioButton { text: qsTr("Fixed interval sampling") ; name: "systematicSampling" ; id: systematicSampling; checked: true}
               }
               IntegerField { text: qsTr("Seed"); name: "seed"; id: seed; defaultValue: 1; min: 1; max: 999; fieldWidth: 60 }
           }
