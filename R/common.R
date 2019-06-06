@@ -190,21 +190,23 @@
   materiality       <- jaspResults[["materiality"]]$object
   bound             <- evaluationResult[["bound"]]
   proj.misstatement <- bound * jaspResults[["total_data_value"]]$object
-  expected.errors   <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = options[["expectedPercentage"]], no = options[["expectedNumber"]] / evaluationResult[["n"]])
+  #expected.errors   <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = options[["expectedPercentage"]], no = options[["expectedNumber"]] / evaluationResult[["n"]])
   mle               <- ifelse(options[["variableType"]] == "variableTypeCorrect", yes = evaluationResult[["k"]] / evaluationResult[["n"]], no = sum(evaluationResult[["z"]]) / evaluationResult[["n"]])
-  label             <- rev(c("Materiality", "Maximum error", "Most likely error", "Expected error"))
-  values            <- rev(c(materiality, bound, mle, expected.errors))
+  label             <- rev(c("Materiality", "Maximum error", "Most likely error"))
+  values            <- rev(c(materiality, bound, mle))
   if(options[["variableType"]] == "variableTypeAuditValues" && options[["materiality"]] == "materialityAbsolute")
     values          <- values * jaspResults[["total_data_value"]]$object
   boundColor        <- ifelse(bound < materiality, yes = rgb(0,1,.7,1), no = rgb(1,0,0,1))
-  fillUp            <- rev(c("#1380A1", boundColor, "#1380A1" ,"#1380A1"))
+  fillUp            <- rev(c("#1380A1", boundColor, "#1380A1"))
   yBreaks           <- as.numeric(JASPgraphs::getPrettyAxisBreaks(c(0, values), min.n = 4))
   if(options[["variableType"]] == "variableTypeAuditValues" && options[["materiality"]] == "materialityAbsolute"){
-    x.labels        <- format(yBreaks, scientific = TRUE)
+    x.labels        <- format(JASPgraphs::getPrettyAxisBreaks(seq(0, 1.1*max(values), 0.01), min.n = 4), scientific = TRUE)
     # x.title         <- "Error amount"
     x.title         <- ""
   } else {
-    x.labels        <- paste0(round(yBreaks * 100, 4), "%")
+    x.labels        <- paste0(round(JASPgraphs::getPrettyAxisBreaks(seq(0, 1.1*max(values), 0.01), min.n = 4) * 100, 4), "%")
+    print("HPI")
+    print(x.labels)
     # x.title         <- "Error percentage"
     x.title         <- ""
   }
@@ -216,8 +218,9 @@
                         ggplot2::xlab(NULL) +
                         ggplot2::ylab(x.title) +
                         ggplot2::theme(axis.ticks.x = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank(), axis.text.y = ggplot2::element_text(hjust = 0)) +
-                        ggplot2::scale_y_continuous(breaks = yBreaks, labels = x.labels) +
-                        ggplot2::theme(panel.grid.major.x = ggplot2::element_line(color="#cbcbcb"))
+                        ggplot2::theme(panel.grid.major.x = ggplot2::element_line(color="#cbcbcb"))+
+                        ggplot2::annotate("text", y = values, x = c(1, 2, 3), label = paste0(round(values * 100, 2), "%"), size = 6, vjust = 0.5, hjust = -0.3) + 
+                        ggplot2::scale_y_continuous(breaks = JASPgraphs::getPrettyAxisBreaks(seq(0, 1.1*max(values), 0.01), min.n = 4), limits = c(0, 1.1*max(values)), labels = x.labels)
   p                 <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE)
   return(createJaspPlot(plot = p, title = "Evaluation information", width = 600, height = 300))
 }
