@@ -609,13 +609,18 @@
   n <- c(.calc.n.poisson(options, alpha, jaspResults),
           .calc.n.binomial(options, alpha, jaspResults),
           .calc.n.hypergeometric(options, alpha, jaspResults))
-  k <- base::switch(options[["expectedErrors"]], "expectedRelative" = options[["expectedPercentage"]] * n, "expectedAbsolute" = options[["expectedNumber"]])
-  
+
+  kpois <- base::switch(options[["expectedErrors"]], "expectedRelative" = options[["expectedPercentage"]] * n[1], "expectedAbsolute" = options[["expectedNumber"]])
+  kbinom <- base::switch(options[["expectedErrors"]], "expectedRelative" = floor(options[["expectedPercentage"]] * n[2]), "expectedAbsolute" = options[["expectedNumber"]])
+  khyper <- base::switch(options[["expectedErrors"]], "expectedRelative" = floor(options[["expectedPercentage"]] * n[3]), "expectedAbsolute" = options[["expectedNumber"]])
+
+  k <- c(round(kpois, 2), kbinom, khyper)
+
   d <- data.frame(y = c(n, k), 
                   dist = rep(c("Poisson", "Binomial", "Hypergeometric"), 2),
-                  nature = rep(c("Expected error-free", "Expected error"), each = 3))
+                  nature = rep(c("Expected error-free", "Expected errors"), each = 3))
   d$dist = factor(d$dist,levels(d$dist)[c(2,1,3)])
-  d$nature = factor(d$nature,levels(d$nature)[c(2,1)])
+  d$nature = factor(d$nature,levels(d$nature)[c(1,2)])
   
   p <- ggplot2::ggplot(data = d, ggplot2::aes(x = dist, y = y, fill = nature)) +
       ggplot2::geom_bar(stat = "identity", col = "black", size = 1) +
@@ -626,7 +631,11 @@
       ggplot2::theme(panel.grid.major.x = ggplot2::element_line(color="#cbcbcb")) +
       ggplot2::labs(fill = "") +
       ggplot2::scale_fill_manual(values=c("#7FE58B", "#FF6666"), guide = ggplot2::guide_legend(reverse = TRUE)) +
-      ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = 0, r = 30)))
+      ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = 0, r = 30))) +
+      ggplot2::annotate("text", y = k, x = c(3, 2, 1), label = k, size = 6, vjust = 0.5, hjust = -0.3) + 
+      ggplot2::annotate("text", y = n, x = c(3, 2, 1), label = n, size = 6, vjust = 0.5, hjust = -0.5) + 
+      ggplot2::scale_y_continuous(breaks = JASPgraphs::getPrettyAxisBreaks(0:(ceiling(1.1*max(n))), min.n = 4), limits = c(0, ceiling(1.1*max(n)))) +
+      ggplot2::ylim(0, ceiling(1.2*max(n)))
   p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE, legend.position = "top")
 
   optN <- base::switch(which.min(n), "1" = "Poisson", "2" = "binomial", "3" = "hypergeometric")

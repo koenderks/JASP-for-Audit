@@ -932,9 +932,9 @@
   
   d <- data.frame(y = c(n, k), 
                   dist = rep(c("Beta", "Beta-binomial"), 2),
-                  nature = rep(c("Expected error-free", "Expected error"), each = 2))
+                  nature = rep(c("Expected error-free", "Expected errors"), each = 2))
   d$dist = factor(d$dist,levels(d$dist)[c(2,1)])
-  d$nature = factor(d$nature,levels(d$nature)[c(2,1)])
+  d$nature = factor(d$nature,levels(d$nature)[c(1,2)])
   
   p <- ggplot2::ggplot(data = d, ggplot2::aes(x = dist, y = y, fill = nature)) +
       ggplot2::geom_bar(stat = "identity", col = "black", size = 1) +
@@ -945,7 +945,11 @@
       ggplot2::theme(panel.grid.major.x = ggplot2::element_line(color="#cbcbcb")) +
       ggplot2::labs(fill = "") +
       ggplot2::scale_fill_manual(values=c("#7FE58B", "#FF6666"), guide = ggplot2::guide_legend(reverse = TRUE)) +
-      ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = 0, r = 30)))
+      ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = 0, r = 30))) +
+      ggplot2::annotate("text", y = k, x = c(2, 1), label = k, size = 6, vjust = 0.5, hjust = -0.3) + 
+      ggplot2::annotate("text", y = n, x = c(2, 1), label = n, size = 6, vjust = 0.5, hjust = -0.5) + 
+      ggplot2::scale_y_continuous(breaks = JASPgraphs::getPrettyAxisBreaks(0:(ceiling(1.1*max(n))), min.n = 4), limits = c(0, ceiling(1.1*max(n)))) +
+      ggplot2::ylim(0, ceiling(1.2*max(n)))
   p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE, legend.position = "top")
 
   optN <- base::switch(which.min(n), "1" = "beta", "2" = "beta-binomial")
