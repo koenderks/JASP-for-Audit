@@ -92,7 +92,7 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
         jaspResults[["planningContainer"]][["figure3"]]$dependOn(optionsFromObject= jaspResults[["planningContainer"]][["priorPlot"]])
         jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
     } else if(options[["priorPlot"]]){
-        errorPlot <- createJaspPlot(plot = NULL, title = "Implied Prior from Risk Assessments")
+        errorPlot <- createJaspPlot(plot = NULL, title = "Implied prior from risk assessments")
         errorPlot$status <- "complete"
         jaspResults[["planningContainer"]][["priorPlot"]] <- errorPlot
     }

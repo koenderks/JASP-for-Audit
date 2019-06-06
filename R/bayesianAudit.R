@@ -61,7 +61,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
       jaspResults[["figNumber"]]$dependOn(options = c("bookValueDistribution", "decisionPlot"))
     } else if(options[["bookValueDistribution"]]){
-        errorPlot <- createJaspPlot(plot = NULL, title = "Population Distribution")
+        errorPlot <- createJaspPlot(plot = NULL, title = "Population distribution")
         errorPlot$status <- "complete"
         jaspResults[["procedureContainer"]][["bookValueDistribution"]] <- errorPlot
     }
@@ -80,7 +80,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
 
     expTMP <- ifelse(options[['expectedErrors']] == "expectedRelative", yes = options[["expectedPercentage"]], no = options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object)
     if(expTMP > materiality){
-      jaspResults[["planningContainer"]][["summaryTable"]] <- createJaspTable("Planning Summary")
+      jaspResults[["planningContainer"]][["summaryTable"]] <- createJaspTable("Planning summary")
       jaspResults[["planningContainer"]][["summaryTable"]]$setError("Analysis not possible: Your expected errors are higher than materiality.")
       return()
     }
@@ -153,7 +153,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
       jaspResults[["planningContainer"]][["figure3"]]$dependOn(optionsFromObject = jaspResults[["planningContainer"]][["priorPlot"]])
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
   } else if(options[["priorPlot"]]){
-      errorPlot <- createJaspPlot(plot = NULL, title = "Implied Prior from Risk Assessments")
+      errorPlot <- createJaspPlot(plot = NULL, title = "Implied prior from risk assessments")
       errorPlot$status <- "complete"
       jaspResults[["planningContainer"]][["priorPlot"]] <- errorPlot
   }
@@ -254,7 +254,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
       jaspResults[["evaluationContainer"]][["figure4"]]$dependOn(optionsFromObject = jaspResults[["evaluationContainer"]][["evaluationInformation"]])
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
   } else if(options[["evaluationInformation"]]){
-      errorPlot <- createJaspPlot(plot = NULL, title = "Evaluation Information")
+      errorPlot <- createJaspPlot(plot = NULL, title = "Evaluation information")
       errorPlot$status <- "complete"
       jaspResults[["evaluationContainer"]][["evaluationInformation"]] <- errorPlot
   }
@@ -278,7 +278,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
       jaspResults[["evaluationContainer"]][["figure5"]]$dependOn(optionsFromObject = jaspResults[["evaluationContainer"]][["priorAndPosteriorPlot"]])
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
   } else if(options[["priorAndPosteriorPlot"]]){
-      errorPlot <- createJaspPlot(plot = NULL, title = "Prior and Posterior Plot")
+      errorPlot <- createJaspPlot(plot = NULL, title = "Prior and posterior plot")
       errorPlot$status <- "complete"
       jaspResults[["evaluationContainer"]][["priorAndPosteriorPlot"]] <- errorPlot
   }
@@ -298,7 +298,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
       jaspResults[["evaluationContainer"]][["figure6"]]$dependOn(optionsFromObject = jaspResults[["evaluationContainer"]][["correlationPlot"]])
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
   } else if(options[["correlationPlot"]]){
-      errorPlot <- createJaspPlot(plot = NULL, title = "Correlation Plot")
+      errorPlot <- createJaspPlot(plot = NULL, title = "Correlation plot")
       errorPlot$status <- "complete"
       jaspResults[["evaluationContainer"]][["correlationPlot"]] <- errorPlot
   }
