@@ -203,7 +203,7 @@
           type = c(rep("Prior", length(xseq)))
       )
     } else {
-      k   <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = round(options[["expectedPercentage"]] * planningResult[["n"]], 2), no = options[["expectedNumber"]])
+      k   <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = round(options[["expectedPercentage"]] * planningResult[["n"]], 2), no = round(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * planningResult[["n"]], 2))
       xseq <- seq(0, options[["priorPlotLimit"]], 0.001)
       d <- data.frame(
           x = rep(xseq, 2),
@@ -271,7 +271,7 @@
           type = c(rep("Prior", length(xseq)))
       )
     } else {
-        k   <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = round(options[["expectedPercentage"]] * planningResult[["n"]], 2), no = options[["expectedNumber"]])
+        k   <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = round(options[["expectedPercentage"]] * planningResult[["n"]], 2), no = round(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * planningResult[["n"]], 2))
 
         xseq <- seq(0, jaspResults[["N"]]$object, 1)[1:ceiling(options[["priorPlotLimit"]] * jaspResults[["N"]]$object)]
         d <- data.frame(
@@ -354,13 +354,13 @@
 
     pk                        <- 0
     pn                        <- n_noprior - n_withprior
-    exp.k                     <- base::switch(options[["expectedErrors"]], "expectedRelative" = options[["expectedPercentage"]], "expectedAbsolute" = options[["expectedNumber"]])
+    exp.k                     <- base::switch(options[["expectedErrors"]], "expectedRelative" = options[["expectedPercentage"]], "expectedAbsolute" = options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object)
     if(pn != 0){
         if(options[["expectedErrors"]] == "expectedRelative"){
             exp.k             <- options[["expectedPercentage"]]
             pk                <- pn * exp.k
         } else {
-            exp.k             <- options[["expectedNumber"]]
+            exp.k             <- options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object
             pk                <- exp.k
         }
     }

@@ -66,11 +66,11 @@ Form {
               }
               RadioButtonGroup { name: "expectedErrors"; id: expectedErrors; title: qsTr("Expected errors")
                 RowLayout {
-                    RadioButton { text: qsTr("Absolute"); name: "expectedAbsolute"; id: expectedAbsolute}
+                    RadioButton { text: qsTr("Absolute"); name: "expectedAbsolute"; id: expectedAbsolute; checked: true}
                     DoubleField { name: "expectedNumber"; enabled: expectedAbsolute.checked; defaultValue: 0; min: 0; max: 1e10; decimals: 2; visible: expectedAbsolute.checked; fieldWidth: 60; label: euroValuta.checked ? "€" : (dollarValuta.checked ? "$" : otherValutaName.value) }
                 }
                 RowLayout {
-                    RadioButton { text: qsTr("Relative") ; name: "expectedRelative" ; checked: true; id: expectedRelative}
+                    RadioButton { text: qsTr("Relative") ; name: "expectedRelative"; id: expectedRelative}
                     PercentField { name: "expectedPercentage"; enabled: expectedRelative.checked; decimals: 2; defaultValue: 0; visible: expectedRelative.checked; fieldWidth: 60  }
                 }
               }
