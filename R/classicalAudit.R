@@ -135,7 +135,7 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
       jaspResults[["planningContainer"]][["figure2"]]$dependOn(optionsFromObject= jaspResults[["planningContainer"]][["decisionPlot"]])
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
     } else if(options[["decisionPlot"]]){
-        errorPlot <- createJaspPlot(plot = NULL, title = "Decision Plot")
+        errorPlot <- createJaspPlot(plot = NULL, title = "Decision analysis")
         errorPlot$status <- "complete"
         jaspResults[["planningContainer"]][["decisionPlot"]] <- errorPlot
     }

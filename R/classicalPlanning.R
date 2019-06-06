@@ -64,7 +64,7 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
                                                                                   The most efficient distribution for these data is the <b>", jaspResults[["mostEfficientPlanningDistribution"]]$object ,"</b> distribution."), "p")
       jaspResults[["planningContainer"]][["figure2"]]$position <- 5
     } else if(options[["decisionPlot"]]){
-        errorPlot <- createJaspPlot(plot = NULL, title = "Decision plot")
+        errorPlot <- createJaspPlot(plot = NULL, title = "Decision analysis")
         errorPlot$status <- "complete"
         jaspResults[["planningContainer"]][["decisionPlot"]] <- errorPlot
     }

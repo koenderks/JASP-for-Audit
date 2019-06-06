@@ -53,7 +53,7 @@ Form {
       }
       VariablesForm { id: variablesFormPlanning; implicitHeight: 110
           AvailableVariablesList { name: "variablesFormPlanning" }
-          AssignedVariablesList { name: "recordNumberVariable"; title: qsTr("Record numbers"); singleVariable: true; allowedColumns: ["nominal", "ordinal", "scale"]; id: recordNumberVariable }
+          AssignedVariablesList { name: "recordNumberVariable"; title: qsTr("Record ID's"); singleVariable: true; allowedColumns: ["nominal", "ordinal", "scale"]; id: recordNumberVariable }
           AssignedVariablesList { name: "monetaryVariable"; title: materialityAbsolute.checked ? qsTr("Book values <i>(required)</i>") : qsTr("Book values <i>(recommended)</i>"); singleVariable: true; allowedColumns: ["scale"]; id: monetaryVariable }
       }
 
