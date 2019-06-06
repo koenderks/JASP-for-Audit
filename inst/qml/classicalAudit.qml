@@ -29,7 +29,7 @@ Form {
         GridLayout { columns: 2
             RadioButtonGroup { id: materiality; name: "materiality"; title: qsTr("Population materiality")
                 RadioButton { id: materialityAbsolute; name: "materialityAbsolute"; text: qsTr("Absolute"); checked: true; childrenOnSameRow: true
-                  DoubleField { id: materialityValue; visible: materialityAbsolute.checked; name: "materialityValue"; defaultValue: 0; min: 0; fieldWidth: 90; decimals: 2 } }
+                  DoubleField { id: materialityValue; visible: materialityAbsolute.checked; name: "materialityValue"; defaultValue: 0; min: 0; fieldWidth: 90; decimals: 2; label: euroValuta.checked ? "€" : (dollarValuta.checked ? "$" : otherValutaName.value) } }
               RowLayout {
                 RadioButton { id: materialityRelative; name: "materialityRelative"; text: qsTr("Relative"); childrenOnSameRow: true
                   PercentField { id: materialityPercentage; visible: materialityRelative.checked; decimals: 2; defaultValue: 0; name: "materialityPercentage"; fieldWidth: 50 } }
@@ -65,7 +65,7 @@ Form {
                 RadioButtonGroup { name: "expectedErrors"; id: expectedErrors; title: qsTr("Expected errors")
                   RowLayout {
                       RadioButton { text: qsTr("Absolute"); name: "expectedAbsolute"; id: expectedAbsolute}
-                      DoubleField { name: "expectedNumber"; enabled: expectedAbsolute.checked; defaultValue: 0; min: 0; max: 1e10; decimals: 2; visible: expectedAbsolute.checked; fieldWidth: 60 }
+                      DoubleField { name: "expectedNumber"; enabled: expectedAbsolute.checked; defaultValue: 0; min: 0; max: 1e10; decimals: 2; visible: expectedAbsolute.checked; fieldWidth: 60; label: euroValuta.checked ? "€" : (dollarValuta.checked ? "$" : otherValutaName.value) }
                   }
                   RowLayout {
                       RadioButton { text: qsTr("Relative") ; name: "expectedRelative" ; checked: true; id: expectedRelative}
@@ -91,6 +91,19 @@ Form {
                     RadioButton { text: qsTr("Poisson")         ; name: "Poisson" ; checked: true; id: poisson}
                     RadioButton { text: qsTr("Binomial")        ; name: "binomial"; id: binomial}
                     RadioButton { text: qsTr("Hypergeometric")  ; name: "hypergeometric" ; id: hypergeometric}
+                }
+                RadioButtonGroup {
+                  title: qsTr("Valuta")
+                  name: "valuta"
+                  id: valuta
+                  visible: materialityAbsolute.checked
+
+                  RadioButton { text: qsTr("Euro (€)"); name: "euroValuta"; checked: true; id: euroValuta }
+                  RadioButton { text: qsTr("Dollar ($)"); name: "dollarValuta"; checked: false; id: dollarValuta }
+                  RowLayout {
+                    RadioButton { text: qsTr("Other"); name: "otherValuta"; checked: false; id: otherValuta}
+                    TextField { name: "otherValutaName"; fieldWidth: 40; id: otherValutaName; enabled: otherValuta.checked; visible: otherValuta.checked }
+                  }
                 }
           }
       }
