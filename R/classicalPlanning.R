@@ -25,6 +25,8 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   }
   jaspResults[["ready"]]$dependOn(options = c("materialityValue", "materialityPercentage", "populationSize", "populationValue", "materiality"))
 
+  jaspResults[["total_data_value"]] <- createJaspState(options[["populationValue"]])
+
   jaspResults[["planningContainer"]] <- createJaspContainer(title= "<u>Planning</u>")
   jaspResults[["planningContainer"]]$position <- 3
 
@@ -34,7 +36,7 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
     jaspResults[["materiality"]] <- createJaspState(materiality)
     jaspResults[["materiality"]]$dependOn(options = c("materialityValue", "materialityPercentage", "populationSize", "populationValue", "materiality"))
 
-    expTMP <- ifelse(options[['expectedErrors']] == "expectedRelative", yes = options[["expectedPercentage"]], no = options[["expectedAbsolute"]] / populationValue)
+    expTMP <- ifelse(options[['expectedErrors']] == "expectedRelative", yes = options[["expectedPercentage"]], no = options[["expectedNumber"]] / populationValue)
     if(expTMP > materiality){
       jaspResults[["planningContainer"]][["summaryTable"]] <- createJaspTable("Planning summary")
       jaspResults[["planningContainer"]][["summaryTable"]]$setError("Analysis not possible: Your expected errors are higher than materiality.")
@@ -112,7 +114,7 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
                         "Poisson"         = .calc.n.poisson(options, alpha, jaspResults),
                         "binomial"        = .calc.n.binomial(options, alpha, jaspResults),
                         "hypergeometric"  = .calc.n.hypergeometric(options, alpha, jaspResults))
-    k <- base::switch(options[["expectedErrors"]], "expectedRelative" = options[["expectedPercentage"]], "expectedAbsolute" = options[["expectedNumber"]] / n)
+    k <- base::switch(options[["expectedErrors"]], "expectedRelative" = options[["expectedPercentage"]], "expectedAbsolute" = options[["expectedNumber"]] / options[["populationValue"]])
 
   resultList <- list()
   resultList[["n"]]             <- n

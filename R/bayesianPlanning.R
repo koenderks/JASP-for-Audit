@@ -28,6 +28,8 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
   }
   jaspResults[["ready"]]$dependOn(options = c("materialityValue", "materialityPercentage", "populationSize", "populationValue", "materiality"))
 
+  jaspResults[["total_data_value"]] <- createJaspState(options[["populationValue"]])
+
   jaspResults[["planningContainer"]] <- createJaspContainer(title= "<u>Planning</u>")
   jaspResults[["planningContainer"]]$position <- 3
 
@@ -37,7 +39,7 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
     jaspResults[["materiality"]] <- createJaspState(materiality)
     jaspResults[["materiality"]]$dependOn(options = c("materialityValue", "materialityPercentage", "populationSize", "populationValue", "materiality"))
 
-    expTMP <- ifelse(options[['expectedErrors']] == "expectedRelative", yes = options[["expectedPercentage"]], no = options[["expectedAbsolute"]] / populationValue)
+    expTMP <- ifelse(options[['expectedErrors']] == "expectedRelative", yes = options[["expectedPercentage"]], no = options[["expectedNumber"]] / populationValue)
     if(expTMP > materiality){
       jaspResults[["planningContainer"]][["summaryTable"]] <- createJaspTable("Planning summary")
       jaspResults[["planningContainer"]][["summaryTable"]]$setError("Analysis not possible: Your expected errors are higher than materiality.")
@@ -147,14 +149,14 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
 
     pk                      <- 0
     pn                      <- n_noprior - n_withprior
-    k                       <- base::switch(options[["expectedErrors"]], "expectedRelative" = options[["expectedPercentage"]], "expectedAbsolute" = options[["expectedNumber"]])
+    k                       <- base::switch(options[["expectedErrors"]], "expectedRelative" = options[["expectedPercentage"]], "expectedAbsolute" = options[["expectedNumber"]] / options[["populationValue"]])
     if(pn != 0){
         if(options[["expectedErrors"]] == "expectedRelative"){
             k               <- options[["expectedPercentage"]]
             pk              <- pn * k
         } else {
-            k               <- options[["expectedNumber"]]
-            pk              <- k
+            k               <- options[["expectedNumber"]] / options[["populationValue"]]
+            pk              <- pn * k
         }
     }
 

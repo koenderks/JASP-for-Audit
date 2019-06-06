@@ -2,12 +2,12 @@
     jaspResults$startProgressbar(5000)
     for(n in 1:5000){
       jaspResults$progressbarTick()
-      impk <- base::switch(options[["expectedErrors"]], "expectedRelative" = n * options[["expectedPercentage"]], "expectedAbsolute" = options[["expectedNumber"]])
-        if(impk >= n){ next }
-        x <- qbeta(p = 1 - alpha, shape1 = 1 + impk, shape2 = 1 + (n - impk))
-        if(x < jaspResults[["materiality"]]$object){
-          return(n)
-        }
+      impk <- base::switch(options[["expectedErrors"]], "expectedRelative" = n * options[["expectedPercentage"]], "expectedAbsolute" = (options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n))
+      if(impk >= n){ next }
+      x <- qbeta(p = 1 - alpha, shape1 = 1 + impk, shape2 = 1 + (n - impk))
+      if(x < jaspResults[["materiality"]]$object){
+        return(n)
+      }
     }
 }
 
@@ -27,7 +27,7 @@
     N <- jaspResults[["N"]]$object
     for(n in 1:5000){
       jaspResults$progressbarTick()
-      impk <- base::switch(options[["expectedErrors"]], "expectedRelative" = n * options[["expectedPercentage"]], "expectedAbsolute" = options[["expectedNumber"]])
+      impk <- base::switch(options[["expectedErrors"]], "expectedRelative" = n * options[["expectedPercentage"]], "expectedAbsolute" = (options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n))
       if(impk >= n){ next }
       x <- .qBetaBinom(p = 1 - alpha, N = N, u = 1 + impk, v = 1 + (n - impk)) / N
       if(x < jaspResults[["materiality"]]$object){
@@ -67,14 +67,14 @@
 
       pk                      <- 0
       pn                      <- n_noprior - n_withprior
-      k                       <- base::switch(options[["expectedErrors"]], "expectedRelative" = options[["expectedPercentage"]], "expectedAbsolute" = options[["expectedNumber"]])
+      k                       <- base::switch(options[["expectedErrors"]], "expectedRelative" = options[["expectedPercentage"]], "expectedAbsolute" = options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object)
       if(pn != 0){
           if(options[["expectedErrors"]] == "expectedRelative"){
               k               <- options[["expectedPercentage"]]
               pk              <- pn * k
-          } else if(options[["expected.errors"]] == "expectedAbsolute"){
-              k               <- options[["expectedNumber"]]
-              pk              <- k
+          } else if(options[["expectedErrors"]] == "expectedAbsolute"){
+              k               <- options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object
+              pk              <- pn * k
           }
       }
 
@@ -928,7 +928,7 @@
   alpha                   <- ar / ir / cr
   
   n <- c(.calc.n.beta(options, alpha, jaspResults), .calc.n.betabinom(options, alpha, jaspResults))
-  k <- base::switch(options[["expectedErrors"]], "expectedRelative" = options[["expectedPercentage"]] * n, "expectedAbsolute" = options[["expectedNumber"]])
+  k <- base::switch(options[["expectedErrors"]], "expectedRelative" = round(options[["expectedPercentage"]] * n, 2), "expectedAbsolute" = round(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n, 2))
   
   d <- data.frame(y = c(n, k), 
                   dist = rep(c("Beta", "Beta-binomial"), 2),

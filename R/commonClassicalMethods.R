@@ -1,39 +1,35 @@
 .calc.n.binomial <- function(options, alpha, jaspResults){
-    jaspResults$startProgressbar(5000)
-    for(n in 1:5000){
-      jaspResults$progressbarTick()
-      impk <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(n * options[["expectedPercentage"]]), "expectedAbsolute" = options[["expectedNumber"]])
-      if(impk >= n){ next }
-      if(impk%%1 == 0){
-          #x <- choose(n, 0:impk) * jaspResults[["materiality"]]$object^(0:impk) * (1 - jaspResults[["materiality"]]$object)^(n - (0:impk))
-          x <- dbinom(0:impk, size = n, prob = jaspResults[["materiality"]]$object)
-          if(sum(x) < alpha){ 
-            return(n)
-          }
-      }
+  jaspResults$startProgressbar(5000)
+  for(n in 1:5000){
+    jaspResults$progressbarTick()
+    impk <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(n * options[["expectedPercentage"]]), "expectedAbsolute" = ceiling(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n))
+    if(impk >= n){ next }
+    x <- dbinom(0:impk, size = n, prob = jaspResults[["materiality"]]$object)
+    if(sum(x) < alpha){ 
+      return(n)
     }
+  }
 }
 
 .calc.n.hypergeometric <- function(options, alpha, jaspResults){
-    jaspResults$startProgressbar(5000)
-    K <- floor(jaspResults[["N"]]$object * jaspResults[["materiality"]]$object)
-    for(n in 1:5000){
-      jaspResults$progressbarTick()
-      impk <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(n * options[["expectedPercentage"]]), "expectedAbsolute" = options[["expectedNumber"]])
-      if(impk >= n) { next }
-      #x <- choose(K, 0:impk) * choose(jaspResults[["N"]]$object - K, n - (0:impk)) / choose(jaspResults[["N"]]$object, n)
-      x <- dhyper(x = 0:impk, m = K, n = jaspResults[["N"]]$object - K, k = n)
-      if(sum(x) < alpha){
-        return(n)
-      }
-  }
+  jaspResults$startProgressbar(5000)
+  K <- floor(jaspResults[["N"]]$object * jaspResults[["materiality"]]$object)
+  for(n in 1:5000){
+    jaspResults$progressbarTick()
+    impk <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(n * options[["expectedPercentage"]]), "expectedAbsolute" = ceiling(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n))
+    if(impk >= n) { next }
+    x <- dhyper(x = 0:impk, m = K, n = jaspResults[["N"]]$object - K, k = n)
+    if(sum(x) < alpha){
+      return(n)
+    }
+}
 }
 
 .calc.n.poisson <- function(options, alpha, jaspResults){
   jaspResults$startProgressbar(5000)
   for(n in 1:5000){
     jaspResults$progressbarTick()
-    k <- base::switch(options[["expectedErrors"]], "expectedRelative" = (n * options[["expectedPercentage"]]), "expectedAbsolute" = options[["expectedNumber"]])
+    k <- base::switch(options[["expectedErrors"]], "expectedRelative" = (n * options[["expectedPercentage"]]), "expectedAbsolute" = (options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n))
     x <- pgamma(jaspResults[["materiality"]]$object, shape = 1 + k, scale = 1 / n)
     if(x >= (1 - alpha)){
       return(n)
@@ -610,9 +606,9 @@
           .calc.n.binomial(options, alpha, jaspResults),
           .calc.n.hypergeometric(options, alpha, jaspResults))
 
-  kpois <- base::switch(options[["expectedErrors"]], "expectedRelative" = options[["expectedPercentage"]] * n[1], "expectedAbsolute" = options[["expectedNumber"]])
-  kbinom <- base::switch(options[["expectedErrors"]], "expectedRelative" = floor(options[["expectedPercentage"]] * n[2]), "expectedAbsolute" = options[["expectedNumber"]])
-  khyper <- base::switch(options[["expectedErrors"]], "expectedRelative" = floor(options[["expectedPercentage"]] * n[3]), "expectedAbsolute" = options[["expectedNumber"]])
+  kpois <- base::switch(options[["expectedErrors"]], "expectedRelative" = round(options[["expectedPercentage"]] * n[1], 2), "expectedAbsolute" = round(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n[1], 2))
+  kbinom <- base::switch(options[["expectedErrors"]], "expectedRelative" = floor(options[["expectedPercentage"]] * n[2]), "expectedAbsolute" = round(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n[2], 2))
+  khyper <- base::switch(options[["expectedErrors"]], "expectedRelative" = floor(options[["expectedPercentage"]] * n[3]), "expectedAbsolute" = round(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n[3], 2))
 
   k <- c(round(kpois, 2), kbinom, khyper)
 
