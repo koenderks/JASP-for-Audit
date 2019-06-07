@@ -368,7 +368,7 @@
   selectionInformationTable                           <- createJaspTable("Selection summary")
   jaspResults[["selectionContainer"]][["selectionInformationTable"]]          <- selectionInformationTable
   selectionInformationTable$position                  <- position
-  selectionInformationTable$dependOn(options = c("additionalVariables", "intervalStartingPoint", "rankingVariable", "selectionType", "selectionMethod", "monetaryVariable", "recordNumberVariable", "seed"))
+  selectionInformationTable$dependOn(options = c("additionalVariables", "intervalStartingPoint", "rankingVariable", "selectionType", "selectionMethod", "monetaryVariable", "recordNumberVariable", "seed", "valuta"))
   
   selectionInformationTable$addColumnInfo(name="n", title ="Sample size", type = "string")
   if(options[["materiality"]] == "materialityAbsolute"){
@@ -402,7 +402,7 @@
   if(options[["materiality"]] == "materialityAbsolute"){
     sampleValue                             <- ceiling(sum(sample[, .v(options[["monetaryVariable"]])]))
     percOfTotal                             <- paste0(round(sampleValue / total_data_value * 100, 2), "%")
-    row <- data.frame("n" = sampleSize, "V" = sampleValue, "P" = percOfTotal)
+    row <- data.frame("n" = sampleSize, "V" = paste(jaspResults[["valutaTitle"]]$object, sampleValue), "P" = percOfTotal)
   } else {
     percOfTotal                             <- paste0(round(sampleSize / jaspResults[["N"]]$object * 100, 2), "%")
     row <- data.frame("n" = sampleSize, "P" = percOfTotal)

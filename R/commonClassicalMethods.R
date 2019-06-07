@@ -101,9 +101,9 @@
   }
 
   if(options[["planningModel"]] != "Poisson"){
-    ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = floor(planningResult[["k"]] * planningResult[["n"]]), "expectedAbsolute" = options[["expectedNumber"]])
+    ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(planningResult[["k"]] * planningResult[["n"]]), "expectedAbsolute" = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]]))
   } else {
-    ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = round(planningResult[["k"]] * planningResult[["n"]], 2), "expectedAbsolute" = options[["expectedNumber"]])
+    ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = round(planningResult[["k"]] * planningResult[["n"]], 2), "expectedAbsolute" = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]]))
   }
   DRtable <- paste0(round(planningResult[["alpha"]], 3) * 100, "%")
 
@@ -115,7 +115,7 @@
 
   materialityTitle  <- paste0(round(jaspResults[["materiality"]]$object * 100, 2), "%")
   materialityValue  <- base::switch(options[["materiality"]], "materialityRelative" = ceiling(jaspResults[["materiality"]]$object * sum(dataset[, .v(options[["monetaryVariable"]])])), "materialityAbsolute" = options[["materialityValue"]])
-  materiality       <- base::switch(options[["materiality"]], "materialityRelative" = materialityTitle, "materialityAbsolute" = materialityValue)
+  materiality       <- base::switch(options[["materiality"]], "materialityRelative" = materialityTitle, "materialityAbsolute" = paste(jaspResults[["valutaTitle"]]$object, materialityValue))
 
   if(!jaspResults[["ready"]]$object){
     row <- data.frame(materiality = materiality, IR = planningResult[["IR"]], CR = planningResult[["CR"]], DR = DRtable, k = ktable, n = ".")
@@ -209,7 +209,7 @@
     jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "sampleFilter", "planningModel",
-                                      "mostLikelyError", "materialityValue", "auditType"))
+                                      "mostLikelyError", "materialityValue", "auditType", "valuta"))
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",          type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",          type = 'string')
@@ -226,7 +226,7 @@
                               "hyperBound" = "The confidence bound is calculated according to the <b>hypergeometric</b> distribution.")
     evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
-    materialityTable <- ifelse(options[["materiality"]] == "materialityRelative", yes = paste0(round(jaspResults[["materiality"]]$object, 2) * 100, "%"), no = options[["materialityValue"]])
+    materialityTable <- ifelse(options[["materiality"]] == "materialityRelative", yes = paste0(round(jaspResults[["materiality"]]$object, 2) * 100, "%"), no = paste(jaspResults[["valutaTitle"]]$object, options[["materialityValue"]]))
     # Return empty table
     if(!jaspResults[["runEvaluation"]]$object){
       row <- data.frame(materiality = materialityTable, n = ".", k = ".", bound = ".")
@@ -246,7 +246,7 @@
 
     row <- data.frame(materiality = materialityTable, n = evaluationResult[["n"]], k = evaluationResult[["k"]], bound = boundTable)
     if(options[["materiality"]] == "materialityAbsolute" || options[["monetaryVariable"]] != "")
-      row <- cbind(row, projm = round(evaluationResult[["bound"]] * jaspResults[["total_data_value"]]$object, 2))
+      row <- cbind(row, projm = paste(jaspResults[["valutaTitle"]]$object, round(evaluationResult[["bound"]] * jaspResults[["total_data_value"]]$object, 2)))
     if(options[["mostLikelyError"]])
       row <- cbind(row, mle = mle)
     evaluationTable$addRows(row)
@@ -311,7 +311,7 @@
     jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "planningModel", "mostLikelyError", "sampleFilter", "variableType",
-                                      "estimator", "monetaryVariable", "materialityValue"))
+                                      "estimator", "monetaryVariable", "materialityValue", "valuta"))
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",                      type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",                      type = 'string')
@@ -330,7 +330,7 @@
                               "ratioBound" = "The confidence bound is calculated according to the <b>ratio</b> method.")
     evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
-    materialityTable <- ifelse(options[["materiality"]] == "materialityRelative", yes = paste0(round(jaspResults[["materiality"]]$object, 2) * 100, "%"), no = options[["materialityValue"]])
+    materialityTable <- ifelse(options[["materiality"]] == "materialityRelative", yes = paste0(round(jaspResults[["materiality"]]$object, 2) * 100, "%"), no = paste(jaspResults[["valutaTitle"]]$object, options[["materialityValue"]]))
 
     # Return empty table with materiality
     if(!jaspResults[["runEvaluation"]]$object){
@@ -353,7 +353,7 @@
     projectedMisstatement <- "."
     if(evaluationResult[["bound"]] != "."){
         boundTable <- round(evaluationResult[["bound"]], 4)
-        projectedMisstatement <- ceiling(evaluationResult[["bound"]] * total_data_value)
+        projectedMisstatement <- paste(jaspResults[["valutaTitle"]]$object, ceiling(evaluationResult[["bound"]] * total_data_value))
         boundTable <- paste0(boundTable * 100, "%")
     }
 
@@ -607,8 +607,8 @@
           .calc.n.hypergeometric(options, alpha, jaspResults))
 
   kpois <- base::switch(options[["expectedErrors"]], "expectedRelative" = round(options[["expectedPercentage"]] * n[1], 2), "expectedAbsolute" = round(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n[1], 2))
-  kbinom <- base::switch(options[["expectedErrors"]], "expectedRelative" = floor(options[["expectedPercentage"]] * n[2]), "expectedAbsolute" = round(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n[2], 2))
-  khyper <- base::switch(options[["expectedErrors"]], "expectedRelative" = floor(options[["expectedPercentage"]] * n[3]), "expectedAbsolute" = round(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n[3], 2))
+  kbinom <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(options[["expectedPercentage"]] * n[2]), "expectedAbsolute" = ceiling(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n[2]))
+  khyper <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(options[["expectedPercentage"]] * n[3]), "expectedAbsolute" = ceiling(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n[3]))
 
   k <- c(round(kpois, 2), kbinom, khyper)
 

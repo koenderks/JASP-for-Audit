@@ -43,20 +43,20 @@
 			"title":						"Bayesian Planning",
 			"qml":							"bayesianPlanning.qml",
 			"function":						"bayesianPlanning"
-		},
-		{
-			"title":    					"Evaluation",
-			"icon":							"audit-evaluation.svg"
-		},
-		{
-			"title":						"Evaluation",
-			"qml":							"classicalEvaluation.qml",
-			"function":						"classicalEvaluation"
-		},
-		{
-			"title":						"Bayesian Evaluation",
-			"qml":							"bayesianEvaluation.qml",
-			"function":						"bayesianEvaluation"
-		}
+		}//,
+		// {
+		// 	"title":    					"Evaluation",
+		// 	"icon":							"audit-evaluation.svg"
+		// },
+		// {
+		// 	"title":						"Evaluation",
+		// 	"qml":							"classicalEvaluation.qml",
+		// 	"function":						"classicalEvaluation"
+		// },
+		// {
+		// 	"title":						"Bayesian Evaluation",
+		// 	"qml":							"bayesianEvaluation.qml",
+		// 	"function":						"bayesianEvaluation"
+		// }
 	]
 }

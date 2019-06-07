@@ -5,7 +5,7 @@
 
   jaspResults[["ARMcontainer"]] <- createJaspContainer(title= "<u>Audit Risk Model</u>")
   jaspResults[["ARMcontainer"]]$position <- 2
-  jaspResults[["ARMcontainer"]]$dependOn(options = c("confidence", "IR", "CR", "materialityPercentage", "materialityValue", "materiality", "explanatoryText"))
+  jaspResults[["ARMcontainer"]]$dependOn(options = c("confidence", "IR", "CR", "materialityPercentage", "materialityValue", "materiality", "explanatoryText", "valuta"))
 
   #  Audit Risk Model formula
   .ARMformula(options, jaspResults, position = 2)
@@ -15,7 +15,7 @@
     return()
   } else {
     if(options[["explanatoryText"]]){
-      materialityLevelLabel <- base::switch(options[["materiality"]], "materialityRelative" = paste0(round(options[["materialityPercentage"]], 10) * 100, "%"), "materialityAbsolute" = format(options[["materialityValue"]], scientific = FALSE))
+      materialityLevelLabel <- base::switch(options[["materiality"]], "materialityRelative" = paste0(round(options[["materialityPercentage"]], 10) * 100, "%"), "materialityAbsolute" = paste(jaspResults[["valutaTitle"]]$object, format(options[["materialityValue"]], scientific = FALSE)))
       auditRiskLabel        <- paste0(round((1 - options[["confidence"]]) * 100, 2), "%")
       dectectionRiskLabel   <- paste0(round(DR * 100, 2), "%")
   
@@ -23,7 +23,7 @@
                                                                       to be <b>", options[["CR"]] ,"</b>. According to the Audit Risk Model, the required detection risk to maintain an audit risk of <b>", auditRiskLabel, "</b> for a materiality
                                                                       of <b>", materialityLevelLabel ,"</b> should be <b>", dectectionRiskLabel , "</b>. The translation of High, Medium and Low to probabilities is done according to <b>IODAD (2007)</b>."), "p")
       jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]]$position <- 1
-      jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]]$dependOn(options = c("confidence", "IR", "CR", "materialityPercentage", "materialityValue"))
+      jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]]$dependOn(options = c("confidence", "IR", "CR", "materialityPercentage", "materialityValue", "valuta"))
     }
   }
 }
@@ -70,10 +70,10 @@
 
   popSize                           <- jaspResults[["N"]]$object
   values                            <- dataset[, .v(options[["monetaryVariable"]])]
-  total.value                       <- round(sum(values), 2)
-  mean.value                        <- round(mean(values), 2)
-  sd.value                          <- round(sd(values), 2)
-  Q                                 <- round(as.numeric(quantile(values, c(0.25, 0.50, 0.75))), 2)
+  total.value                       <- paste(jaspResults[["valutaTitle"]]$object, round(sum(values), 2))
+  mean.value                        <- paste(jaspResults[["valutaTitle"]]$object, round(mean(values), 2))
+  sd.value                          <- paste(jaspResults[["valutaTitle"]]$object, round(sd(values), 2))
+  Q                                 <- paste(jaspResults[["valutaTitle"]]$object, round(as.numeric(quantile(values, c(0.25, 0.50, 0.75))), 2))
 
   row <- data.frame(popSize = popSize, value = total.value, mean = mean.value, sd = sd.value, p1 = Q[1], p2 = Q[2], p3 = Q[3])
   dataTable$addRows(row)
@@ -89,7 +89,7 @@
     minx <- min(q[1], meanx - sdx)
     maxx <- max(q[3], meanx + sdx)
 
-    p <- .plotMarginalJfA(values, options[["monetaryVariable"]])
+    p <- .plotMarginalJfA(values, options[["monetaryVariable"]], jaspResults)
 
     p <- p + ggplot2::geom_point(ggplot2::aes(x = q[1], y = 0), shape = 21, fill = "orange", stroke = 2, size = 3)
     p <- p + ggplot2::geom_point(ggplot2::aes(x = q[2], y = 0), shape = 21, fill = "orange", stroke = 2, size = 3)
@@ -110,7 +110,7 @@
     return(createJaspPlot(plot = p, title = "Book value distribution", width = 600, height = 300))
 }
 
-.plotMarginalJfA <- function(column, variableName, rugs = FALSE, displayDensity = FALSE) {
+.plotMarginalJfA <- function(column, variableName, jaspResults, rugs = FALSE, displayDensity = FALSE) {
   column <- as.numeric(column)
   variable <- na.omit(column)
 
@@ -133,7 +133,7 @@
   if (!displayDensity)
     p <-
       JASPgraphs::drawAxis(
-        xName = "Book values", yName = "Counts", xBreaks = xticks,
+        xName = paste0("Book values (", jaspResults[["valutaTitle"]]$object, ")"), yName = "Counts", xBreaks = xticks,
         yBreaks = base::pretty(c(0, h$counts)), force = TRUE, xLabels = xticks
       )
   else
@@ -190,26 +190,28 @@
   materiality       <- jaspResults[["materiality"]]$object
   bound             <- evaluationResult[["bound"]]
   proj.misstatement <- bound * jaspResults[["total_data_value"]]$object
-  #expected.errors   <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = options[["expectedPercentage"]], no = options[["expectedNumber"]] / evaluationResult[["n"]])
   mle               <- ifelse(options[["variableType"]] == "variableTypeCorrect", yes = evaluationResult[["k"]] / evaluationResult[["n"]], no = sum(evaluationResult[["z"]]) / evaluationResult[["n"]])
+  
   label             <- rev(c("Materiality", "Maximum error", "Most likely error"))
   values            <- rev(c(materiality, bound, mle))
+  
   if(options[["variableType"]] == "variableTypeAuditValues" && options[["materiality"]] == "materialityAbsolute")
     values          <- values * jaspResults[["total_data_value"]]$object
+  
   boundColor        <- ifelse(bound < materiality, yes = rgb(0,1,.7,1), no = rgb(1,0,0,1))
   fillUp            <- rev(c("#1380A1", boundColor, "#1380A1"))
   yBreaks           <- as.numeric(JASPgraphs::getPrettyAxisBreaks(c(0, values), min.n = 4))
+  
   if(options[["variableType"]] == "variableTypeAuditValues" && options[["materiality"]] == "materialityAbsolute"){
-    x.labels        <- format(JASPgraphs::getPrettyAxisBreaks(seq(0, 1.1*max(values), 0.01), min.n = 4), scientific = TRUE)
-    # x.title         <- "Error amount"
+    x.labels        <- format(JASPgraphs::getPrettyAxisBreaks(seq(0, 1.1*max(values), 0.01), min.n = 4), scientific = FALSE)
+    values.labels   <- paste(jaspResults[["valutaTitle"]]$object, ceiling(values))
     x.title         <- ""
   } else {
     x.labels        <- paste0(round(JASPgraphs::getPrettyAxisBreaks(seq(0, 1.1*max(values), 0.01), min.n = 4) * 100, 4), "%")
-    print("HPI")
-    print(x.labels)
-    # x.title         <- "Error percentage"
+    values.labels   <- paste0(round(values * 100, 2), "%")
     x.title         <- ""
   }
+
   tb                <- data.frame(x = label, values = values)
   tb$x              <- factor(tb$x, levels = tb$x)
   p                 <- ggplot2::ggplot(data = data.frame(x = tb[, 1], y = tb[, 2]), ggplot2::aes(x = x, y = y)) +
@@ -219,7 +221,7 @@
                         ggplot2::ylab(x.title) +
                         ggplot2::theme(axis.ticks.x = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank(), axis.text.y = ggplot2::element_text(hjust = 0)) +
                         ggplot2::theme(panel.grid.major.x = ggplot2::element_line(color="#cbcbcb"))+
-                        ggplot2::annotate("text", y = values, x = c(1, 2, 3), label = paste0(round(values * 100, 2), "%"), size = 6, vjust = 0.5, hjust = -0.3) + 
+                        ggplot2::annotate("text", y = values, x = c(1, 2, 3), label = values.labels, size = 6, vjust = 0.5, hjust = -0.3) + 
                         ggplot2::scale_y_continuous(breaks = JASPgraphs::getPrettyAxisBreaks(seq(0, 1.1*max(values), 0.01), min.n = 4), limits = c(0, 1.1*max(values)), labels = x.labels)
   p                 <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE)
   return(createJaspPlot(plot = p, title = "Evaluation information", width = 600, height = 300))
@@ -256,7 +258,7 @@
     cols <- rep("gray", nrow(d))
     cols[which(d$xx != d$yy)] <- "red"
 
-    p <- JASPgraphs::drawAxis(xName = "Book values", yName = "Audit values", xBreaks = xticks, yBreaks = yticks, yLabels = yLabs, xLabels = xLabs, force = TRUE)
+    p <- JASPgraphs::drawAxis(xName = paste0("Book values (", jaspResults[["valutaTitle"]]$object, ")"), yName = paste0("Audit values (", jaspResults[["valutaTitle"]]$object, ")"), xBreaks = xticks, yBreaks = yticks, yLabels = yLabs, xLabels = xLabs, force = TRUE)
     p <- JASPgraphs::drawPoints(p, dat = d, size = 3, fill = cols)
     p <- .poly.predJfA(fit[[bestModel]], plot = p, line= TRUE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd = 1)
     p <- p + ggplot2::annotate("text", x = xticks[1], y = (yticks[length(yticks)] - ((yticks[length(yticks)] - yticks[length(yticks) - 1]) / 2)),

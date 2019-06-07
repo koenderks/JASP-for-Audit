@@ -22,6 +22,8 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
   dataset <- .readDataProcedure(options, jaspResults)
   # Error handling
   .errorHandlingProcedure(options, dataset)
+  # Valuta title
+  jaspResults[["valutaTitle"]] <- createJaspState(base::switch(options[["valuta"]], "euroValuta" = "\u20AC", "dollarValuta" = "\u0024", "otherValuta" = options[["otherValutaName"]]))
   # Create state for the figure number
   jaspResults[["figNumber"]] <- createJaspState(1)
   jaspResults[["figNumber"]]$dependOn(options = c("bookValueDistribution", "decisionPlot"))
@@ -35,7 +37,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
       jaspResults[["confidenceLevelLabel"]]$dependOn(options = c("confidence"))
     }
     criterion <- base::switch(options[["materiality"]], "materialityRelative" = "<b>percentage</b>", "materialityAbsolute" = "<b>amount</b>")
-    materialityLabel <- base::switch(options[["materiality"]], "materialityRelative" = paste0(round(options[["materialityPercentage"]] * 100, 2), "%"), "materialityAbsolute" = paste0(format(options[["materialityValue"]], scientific = FALSE), " monetary units"))
+    materialityLabel <- base::switch(options[["materiality"]], "materialityRelative" = paste0(round(options[["materialityPercentage"]] * 100, 2), "%"), "materialityAbsolute" = paste(jaspResults[["valutaTitle"]]$object, format(options[["materialityValue"]], scientific = FALSE)))
     jaspResults[["procedureContainer"]][["procedureParagraph"]] <- createJaspHtml(paste0("The objective of a substantive testing procedure is to determine with a specified confidence <b>(", jaspResults[["confidenceLevelLabel"]]$object, ")</b> whether the ", criterion ," of
                                                                                           misstatement in the target population is lower than the specified materiality of <b>", materialityLabel, "</b>."), "p")
     jaspResults[["procedureContainer"]][["procedureParagraph"]]$position <- 1
@@ -50,7 +52,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
       if(is.null(jaspResults[["procedureContainer"]][["bookValueDistribution"]]))
       {
           jaspResults[["procedureContainer"]][["bookValueDistribution"]] 		<- .bookValueDistribution(dataset, options, jaspResults)
-          jaspResults[["procedureContainer"]][["bookValueDistribution"]]		$dependOn(options = c("bookValueDistribution", "monetaryVariable"))
+          jaspResults[["procedureContainer"]][["bookValueDistribution"]]		$dependOn(options = c("bookValueDistribution", "monetaryVariable", "valuta"))
           jaspResults[["procedureContainer"]][["bookValueDistribution"]] 		$position <- 3
       }
       jaspResults[["procedureContainer"]][["figure1"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The distribution of book values in the audit population. The red and blue dots respectively represent the mean
@@ -96,11 +98,11 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
     requiredSampleSize <- planningResult[["n"]]
   }
   # Calculate the number of expected errors and the maximum number of allowed errors
-  expected.errors   <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = paste0(round(options[["expectedPercentage"]] * 100, 2), "%"), no = options[["expectedNumber"]])
-  max.errors        <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = floor(options[["expectedPercentage"]] * requiredSampleSize) + 1, no = options[["expectedNumber"]] + 1)
+  expected.errors   <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = paste0(round(options[["expectedPercentage"]] * 100, 2), "%"), no = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]]))
+  max.errors        <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = floor(options[["expectedPercentage"]] * requiredSampleSize) + 1, no = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]] + 1))
   # Explanatory text for the planning
   if(options[["explanatoryText"]] && is.null(jaspResults[["planningContainer"]][["planningParagraph"]])){
-    materialityLevelLabel <- ifelse(options[["materiality"]] == "materialityRelative", yes = paste0(round(jaspResults[["materiality"]]$object, 4) * 100, "%"), no = format(options[["materialityValue"]], scientific = FALSE))
+    materialityLevelLabel <- ifelse(options[["materiality"]] == "materialityRelative", yes = paste0(round(jaspResults[["materiality"]]$object, 4) * 100, "%"), no = paste0(jaspResults[["valutaTitle"]]$object, format(options[["materialityValue"]], scientific = FALSE)))
     jaspResults[["materialityLevelLabel"]] <- createJaspState(materialityLevelLabel)
     jaspResults[["planningContainer"]][["planningParagraph"]] <- createJaspHtml(paste0("The most likely error in the data was expected to be <b>", expected.errors ,"</b>.  The sample size that is required to prove a materiality of <b>", materialityLevelLabel ,"</b>, assuming
                                                                                               the sample contains <b>", expected.errors ,"</b> full errors, is <b>", planningResult[["n"]] ,"</b>. This sample size is calculated according to the <b>", options[["planningModel"]] , "</b> distribution, the inherent risk <b>(", options[["IR"]] , ")</b>,
@@ -119,8 +121,6 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
   {
       if(is.null(jaspResults[["planningContainer"]][["decisionPlot"]]))
       {
-          allowed.errors <- 0:(max.errors - 1)
-          reject.errors <- max.errors : (max.errors + 2)
           jaspResults[["planningContainer"]][["decisionPlot"]] 		<- .decisionAnalysisBayesian(options, jaspResults)
           jaspResults[["planningContainer"]][["decisionPlot"]]		  $dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "expectedPercentage", "expectedNumber", "decisionPlot",
                                                                                             "materialityValue"))
@@ -245,7 +245,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
       {
           jaspResults[["evaluationContainer"]][["evaluationInformation"]] 		<- .evaluationInformation(options, evaluationResult, jaspResults)
           jaspResults[["evaluationContainer"]][["evaluationInformation"]]		$dependOn(options = c("IR", "CR", "confidence", "auditResult", "evaluationInformation", "materialityPercentage", "estimator",
-                                                                                              "materialityValue", "materiality", "sampleFilter"))
+                                                                                              "materialityValue", "materiality", "sampleFilter", "valuta"))
           jaspResults[["evaluationContainer"]][["evaluationInformation"]] 		$position <- 3
       }
       jaspResults[["evaluationContainer"]][["figure4"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Results of the sample evaluation compared with materiality and expected errors. The most likely error (MLE)
@@ -288,7 +288,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
       if(is.null(jaspResults[["evaluationContainer"]][["correlationPlot"]]))
       {
           jaspResults[["evaluationContainer"]][["correlationPlot"]] 		<- .correlationPlot(dataset, options, jaspResults)
-          jaspResults[["evaluationContainer"]][["correlationPlot"]]		$dependOn(options = c("auditResult", "correlationPlot", "monetaryVariable"))
+          jaspResults[["evaluationContainer"]][["correlationPlot"]]		$dependOn(options = c("auditResult", "correlationPlot", "monetaryVariable", "valuta"))
           jaspResults[["evaluationContainer"]][["correlationPlot"]] 		$position <- 7
       }
       jaspResults[["evaluationContainer"]][["figure6"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Scatterplot of the sample book values versus their audit values. Red dots indicate observations that did not match

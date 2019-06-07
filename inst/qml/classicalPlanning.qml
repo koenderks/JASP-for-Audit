@@ -85,7 +85,6 @@ Form {
                 title: qsTr("Valuta")
                 name: "valuta"
                 id: valuta
-                visible: materialityAbsolute.checked
 
                 RadioButton { text: qsTr("Euro (€)"); name: "euroValuta"; checked: true; id: euroValuta }
                 RadioButton { text: qsTr("Dollar ($)"); name: "dollarValuta"; checked: false; id: dollarValuta }

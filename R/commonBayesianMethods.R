@@ -125,7 +125,7 @@
                             "beta-binomial" = paste0("The required sample size is based on the <b>beta-binomial</b> distribution <i>(N = ", jaspResults[["N"]]$object ,", \u03B1 = ", round(planningResult[["priorA"]], 2) , ", \u03B2 = ", round(planningResult[["priorB"]], 2), ")</i>."))
   planningSummary$addFootnote(message = message, symbol="<i>Note.</i>")
 
-  ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = round(planningResult[["k"]] * planningResult[["n"]], 2), "expectedAbsolute" = options[["expectedNumber"]])
+  ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = round(planningResult[["k"]] * planningResult[["n"]], 2), "expectedAbsolute" = round(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * planningResult[["n"]], 2))
   DRtable <- paste0(round(planningResult[["alpha"]], 3) * 100, "%")
 
   if(jaspResults[["materiality"]]$object == 0){
@@ -137,18 +137,19 @@
   }
 
   materialityTitle  <- paste0(round(jaspResults[["materiality"]]$object * 100, 2), "%")
-  materialityValue  <- base::switch(options[["materiality"]], "materialityRelative" = ceiling(jaspResults[["materiality"]]$object * sum(dataset[, .v(options[["monetaryVariable"]])])), "materialityAbsolute" = options[["materialityValue"]])
+  materialityValue  <- base::switch(options[["materiality"]], "materialityRelative" = ceiling(jaspResults[["materiality"]]$object * sum(dataset[, .v(options[["monetaryVariable"]])])), "materialityAbsolute" = paste(jaspResults[["valutaTitle"]]$object, options[["materialityValue"]]))
   materiality       <- base::switch(options[["materiality"]], "materialityRelative" = materialityTitle, "materialityAbsolute" = materialityValue)
+  kTitle            <- base::switch(options[["expectedErrors"]], "expectedRelative" = ktable, "expectedAbsolute" = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]]))
 
   if(!jaspResults[["ready"]]$object){
-    row <- data.frame(materiality = materiality, IR = planningResult[["IR"]],CR = planningResult[["CR"]], DR = DRtable, k = ktable, n = ".")
+    row <- data.frame(materiality = materiality, IR = planningResult[["IR"]],CR = planningResult[["CR"]], DR = DRtable, k = kTitle, n = ".")
     if(options[["expectedBF"]])
       row <- cbind(row, expBF = ".")
     planningSummary$addRows(row)
     return()
   }
 
-  row <- data.frame(materiality = materiality, IR  = planningResult[["IR"]], CR = planningResult[["CR"]], DR = DRtable, k = ktable, n = planningResult[["n"]])
+  row <- data.frame(materiality = materiality, IR  = planningResult[["IR"]], CR = planningResult[["CR"]], DR = DRtable, k = kTitle, n = planningResult[["n"]])
   if(options[["expectedBF"]])
     row <- cbind(row, expBF = .expectedBF(options, planningResult, ktable, jaspResults))
   planningSummary$addRows(row)
@@ -418,7 +419,7 @@
     jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "expectedErrors", "expectedPercentage", "expectedNumber",
-                                      "sampleFilter", "mostLikelyError", "bayesFactor", "planningModel", "materialityValue", "variableType", "estimator", "displayCredibleInterval"))
+                                      "sampleFilter", "mostLikelyError", "bayesFactor", "planningModel", "materialityValue", "variableType", "estimator", "displayCredibleInterval", "valuta"))
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",        type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",        type = 'string')
@@ -468,14 +469,14 @@
       return()
     }
 
-    materialityTable <- ifelse(options[["materiality"]] == "materialityRelative", yes = paste0(round(jaspResults[["materiality"]]$object, 2) * 100, "%"), no = options[["materialityValue"]])
+    materialityTable <- ifelse(options[["materiality"]] == "materialityRelative", yes = paste0(round(jaspResults[["materiality"]]$object, 2) * 100, "%"), no = paste(jaspResults[["valutaTitle"]], options[["materialityValue"]]))
 
     if(!options[["displayCredibleInterval"]]){
       boundTable <- evaluationResult[["bound"]]
       projectedMisstatement <- "."
       if(!"." %in% boundTable){
         boundTable            <- round(evaluationResult[["bound"]], 4)
-        projectedMisstatement <- ceiling(evaluationResult[["bound"]] * jaspResults[["total_data_value"]]$object)
+        projectedMisstatement <- paste(jaspResults[["valutaTitle"]]$object, ceiling(evaluationResult[["bound"]] * jaspResults[["total_data_value"]]$object))
         boundTable            <- paste0(boundTable * 100, "%")
       }
       row <- data.frame(materiality = materialityTable, n = evaluationResult[["n"]], k = evaluationResult[["k"]], bound = boundTable)
@@ -486,7 +487,7 @@
       projectedMisstatement <- "."
       if(!"." %in% intervalTable){
         intervalTable             <- round(evaluationResult[["interval"]], 4)
-        projectedMisstatement     <- ceiling(evaluationResult[["interval"]] * jaspResults[["total_data_value"]]$object)
+        projectedMisstatement     <- paste(jaspResults[["valutaTitle"]]$object, ceiling(evaluationResult[["interval"]] * jaspResults[["total_data_value"]]$object))
         intervalTable             <- paste0(intervalTable * 100, "%")
       }
       row <- data.frame(materiality = materialityTable, n = evaluationResult[["n"]], k = evaluationResult[["k"]], cilow = intervalTable[1], cihigh = intervalTable[2])
@@ -711,7 +712,7 @@
     evaluationTable                       <- createJaspTable("Evaluation summary")
     jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "sampleFilter", "planningModel", "mostLikelyError", "estimator", "bayesFactor",
-                                        "materialityValue", "variableType", "displayCredibleInterval"))
+                                        "materialityValue", "variableType", "displayCredibleInterval", "valuta"))
     evaluationTable$position <- position
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",            type = 'string')
@@ -742,7 +743,7 @@
                                       "regressionBound" = "The confidence bound is calculated according to the <b>Regression</b> method.")
     evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
-    materialityTable <- ifelse(options[["materiality"]] == "materialityAbsolute", yes = options[["materialityValue"]], no = paste0(round(options[["materialityPercentage"]] * 100, 2) , "%"))
+    materialityTable <- ifelse(options[["materiality"]] == "materialityAbsolute", yes = paste(jaspResults[["valutaTitle"]]$object, options[["materialityValue"]]), no = paste0(round(options[["materialityPercentage"]] * 100, 2) , "%"))
 
     # Return empty table with materiality
     if(!jaspResults[["runEvaluation"]]$object){
@@ -776,7 +777,7 @@
       projectedMisstatement <- "."
       if(!"." %in% boundTable){
         boundTable            <- round(evaluationResult[["bound"]], 4)
-        projectedMisstatement <- ceiling(evaluationResult[["bound"]] * total_data_value)
+        projectedMisstatement <- paste(jaspResults[["valutaTitle"]]$object, ceiling(evaluationResult[["bound"]] * total_data_value))
         boundTable            <- paste0(boundTable * 100, "%")
       }
       row <- data.frame(materiality = materialityTable, n = evaluationResult[["n"]], fk = evaluationResult[["k"]], k = errors, bound = boundTable)
@@ -787,7 +788,7 @@
       projectedMisstatement <- "."
       if(!"." %in% intervalTable){
         intervalTable             <- round(evaluationResult[["interval"]], 4)
-        projectedMisstatement     <- ceiling(evaluationResult[["interval"]] * total_data_value)
+        projectedMisstatement     <- paste(jaspResults[["valutaTitle"]]$object, ceiling(evaluationResult[["interval"]] * total_data_value))
         intervalTable             <- paste0(intervalTable * 100, "%")
       }
       row <- data.frame(materiality = materialityTable, n = evaluationResult[["n"]], fk = evaluationResult[["k"]], k = errors, cilow = intervalTable[1], cihigh = intervalTable[2])
