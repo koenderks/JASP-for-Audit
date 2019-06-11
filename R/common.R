@@ -203,11 +203,11 @@
   yBreaks           <- as.numeric(JASPgraphs::getPrettyAxisBreaks(c(0, values), min.n = 4))
   
   if(options[["variableType"]] == "variableTypeAuditValues" && options[["materiality"]] == "materialityAbsolute"){
-    x.labels        <- format(JASPgraphs::getPrettyAxisBreaks(seq(0, 1.1*max(values), 0.01), min.n = 4), scientific = FALSE)
+    x.labels        <- format(JASPgraphs::getPrettyAxisBreaks(seq(0, 1.1*max(values), length.out = 100), min.n = 4), scientific = FALSE)
     values.labels   <- paste(jaspResults[["valutaTitle"]]$object, ceiling(values))
     x.title         <- ""
   } else {
-    x.labels        <- paste0(round(JASPgraphs::getPrettyAxisBreaks(seq(0, 1.1*max(values), 0.01), min.n = 4) * 100, 4), "%")
+    x.labels        <- paste0(round(JASPgraphs::getPrettyAxisBreaks(seq(0, 1.1*max(values), length.out = 100), min.n = 4) * 100, 4), "%")
     values.labels   <- paste0(round(values * 100, 2), "%")
     x.title         <- ""
   }

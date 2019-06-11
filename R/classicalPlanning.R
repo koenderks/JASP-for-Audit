@@ -16,7 +16,7 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
     jaspResults[["procedureContainer"]][["procedureParagraph"]] <- createJaspHtml(paste0("The objective of a substantive testing procedure is to determine with a specified confidence <b>(", jaspResults[["confidenceLevelLabel"]]$object, ")</b> whether the ", criterion ," of
                                                                                           misstatement in the target population is lower than the specified materiality of <b>", materialityLabel, "</b>."), "p")
     jaspResults[["procedureContainer"]][["procedureParagraph"]]$position <- 1
-    jaspResults[["procedureContainer"]]$dependOn(options = c("explanatoryText", "confidence", "materiality", "materialityValue", "materialityPercentage"))
+    jaspResults[["procedureContainer"]]$dependOn(options = c("explanatoryText", "confidence", "materiality", "materialityValue", "materialityPercentage", "valuta"))
   }
 
   .auditRiskModel(options, jaspResults)

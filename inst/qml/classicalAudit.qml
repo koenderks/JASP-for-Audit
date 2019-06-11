@@ -46,7 +46,7 @@ Form {
           height: variableSelectionTitle.height
           Layout.fillWidth: true
           Text { id: variableSelectionTitle; anchors.horizontalCenter: parent.horizontalCenter
-            text: qsTr("<b>Variable selection</b>"); font.family: "SansSerif"; font.pointSize: 12
+            text: qsTr("<b>Variable definition</b>"); font.family: "SansSerif"; font.pointSize: 12
           }
         }
         VariablesForm { id: variablesFormPlanning; implicitHeight: 110

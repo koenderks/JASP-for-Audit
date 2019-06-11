@@ -41,7 +41,7 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
     jaspResults[["procedureContainer"]][["procedureParagraph"]] <- createJaspHtml(paste0("The objective of a substantive testing procedure is to determine with a specified confidence <b>(", jaspResults[["confidenceLevelLabel"]]$object, ")</b> whether the ", criterion ," of
                                                                                           misstatement in the target population is lower than the specified materiality of <b>", materialityLabel, "</b>."), "p")
     jaspResults[["procedureContainer"]][["procedureParagraph"]]$position <- 1
-    jaspResults[["procedureContainer"]][["procedureParagraph"]]$dependOn(options = c("explanatoryText", "confidence", "materiality", "materialityPercentage", "materialityValue"))
+    jaspResults[["procedureContainer"]][["procedureParagraph"]]$dependOn(options = c("explanatoryText", "confidence", "materiality", "materialityPercentage", "materialityValue", "valuta"))
   }
   # Create a table of the population descriptives (if the user wants it)
   if(options[["bookValueDescriptives"]] && options[["monetaryVariable"]] != "")

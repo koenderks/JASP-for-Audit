@@ -41,7 +41,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
     jaspResults[["procedureContainer"]][["procedureParagraph"]] <- createJaspHtml(paste0("The objective of a substantive testing procedure is to determine with a specified confidence <b>(", jaspResults[["confidenceLevelLabel"]]$object, ")</b> whether the ", criterion ," of
                                                                                           misstatement in the target population is lower than the specified materiality of <b>", materialityLabel, "</b>."), "p")
     jaspResults[["procedureContainer"]][["procedureParagraph"]]$position <- 1
-    jaspResults[["procedureContainer"]][["procedureParagraph"]]$dependOn(options = c("explanatoryText", "confidence"))
+    jaspResults[["procedureContainer"]][["procedureParagraph"]]$dependOn(options = c("explanatoryText", "confidence", "valuta"))
   }
   # Create a descriptives table of the population book values (if the user wants it)
   if(options[["bookValueDescriptives"]] && options[["monetaryVariable"]] != "")
