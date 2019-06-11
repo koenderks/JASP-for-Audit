@@ -70,7 +70,7 @@
 
   popSize                           <- jaspResults[["N"]]$object
   values                            <- dataset[, .v(options[["monetaryVariable"]])]
-  total.value                       <- paste(jaspResults[["valutaTitle"]]$object, round(sum(values), 2))
+  total.value                       <- paste(jaspResults[["valutaTitle"]]$object, round(sum(abs(values)), 2))
   mean.value                        <- paste(jaspResults[["valutaTitle"]]$object, round(mean(values), 2))
   sd.value                          <- paste(jaspResults[["valutaTitle"]]$object, round(sd(values), 2))
   Q                                 <- paste(jaspResults[["valutaTitle"]]$object, round(as.numeric(quantile(values, c(0.25, 0.50, 0.75))), 2))
