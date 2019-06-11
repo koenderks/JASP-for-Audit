@@ -136,6 +136,11 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
                         "hypergeometric" = paste0("The required sample size is based on the <b>hypergeometric</b> distribution <i>(N = ", options[["populationSize"]] ,", K = ", floor(options[["populationSize"]] * jaspResults[["materiality"]]$object) ,")</i>."))
   summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
+  if(!is.null(jaspResults[["errorInSampler"]])){
+    summaryTable$setError("There is no sample size (< 5000) large enough to prove the current materiality. Please try other values.")
+    return()
+  }
+
   if(options[["planningModel"]] != "Poisson" && options[["expectedErrors"]] == "expectedAbsolute" && options[["expectedNumber"]]%%1 != 0){
     summaryTable$setError("Expected errors should be a whole number in this sampling model.")
     return()

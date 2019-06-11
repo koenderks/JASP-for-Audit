@@ -186,6 +186,11 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
                         "beta-binomial" = paste0("The required sample size is based on the <b>beta-binomial</b> distribution <i>(N = ", options[["populationSize"]] ,", \u03B1 = ", round(resultList[["priorA"]], 2) , ", \u03B2 = ", round(resultList[["priorB"]], 2), ")</i>."))
   summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
+  if(!is.null(jaspResults[["errorInSampler"]])){
+    summaryTable$setError("There is no sample size (< 5000) large enough to prove the current materiality. Please try other values.")
+    return()
+  }
+
   ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = round(resultList[["k"]] * resultList[["n"]], 2), "expectedAbsolute" = options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object)
 
   materialityTitle  <- paste0(round(jaspResults[["materiality"]]$object * 100, 2), "%")

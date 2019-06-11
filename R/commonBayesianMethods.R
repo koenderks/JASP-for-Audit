@@ -9,6 +9,9 @@
         return(n)
       }
     }
+    jaspResults[["errorInSampler"]] <- createJaspState(TRUE)
+    jaspResults[["errorInSampler"]]$dependOn(options = c("materiality", "materialityPercentage", "materialityValue", "expectedNumber", "expectedErrors", "populationValue", "populationSize"))
+    return(1)
 }
 
 .dBetaBinom <- function (x, N, u, v, log = FALSE){
@@ -34,6 +37,9 @@
         return(n)
       }
     }
+    jaspResults[["errorInSampler"]] <- createJaspState(TRUE)
+    jaspResults[["errorInSampler"]]$dependOn(options = c("materiality", "materialityPercentage", "materialityValue", "expectedNumber", "expectedErrors", "populationValue", "populationSize"))
+    return(1)
 }
 
 .bayesianPlanningHelper <- function(options, jaspResults){
@@ -124,6 +130,11 @@
                             "beta" = paste0("The required sample size is based on the <b>beta</b> distribution <i>(\u03B1 = ", round(planningResult[["priorA"]], 2) ,", \u03B2 = ", round(planningResult[["priorB"]], 2), ")</i>."),
                             "beta-binomial" = paste0("The required sample size is based on the <b>beta-binomial</b> distribution <i>(N = ", jaspResults[["N"]]$object ,", \u03B1 = ", round(planningResult[["priorA"]], 2) , ", \u03B2 = ", round(planningResult[["priorB"]], 2), ")</i>."))
   planningSummary$addFootnote(message = message, symbol="<i>Note.</i>")
+
+  if(!is.null(jaspResults[["errorInSampler"]])){
+    planningSummary$setError("There is no sample size (< 5000) large enough to prove the current materiality. Please try other values.")
+    return()
+  }
 
   ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = round(planningResult[["k"]] * planningResult[["n"]], 2), "expectedAbsolute" = round(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * planningResult[["n"]], 2))
   DRtable <- paste0(round(planningResult[["alpha"]], 3) * 100, "%")

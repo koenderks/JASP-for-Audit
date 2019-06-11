@@ -9,6 +9,9 @@
       return(n)
     }
   }
+  jaspResults[["errorInSampler"]] <- createJaspState(TRUE)
+  jaspResults[["errorInSampler"]]$dependOn(options = c("materiality", "materialityPercentage", "materialityValue", "expectedNumber", "expectedErrors", "populationValue", "populationSize"))
+  return(1)
 }
 
 .calc.n.hypergeometric <- function(options, alpha, jaspResults){
@@ -22,7 +25,10 @@
     if(sum(x) < alpha){
       return(n)
     }
-}
+  }
+  jaspResults[["errorInSampler"]] <- createJaspState(TRUE)
+  jaspResults[["errorInSampler"]]$dependOn(options = c("materiality", "materialityPercentage", "materialityValue", "expectedNumber", "expectedErrors", "populationValue", "populationSize"))
+  return(1)
 }
 
 .calc.n.poisson <- function(options, alpha, jaspResults){
@@ -35,6 +41,9 @@
       return(n)
     }
   }
+  jaspResults[["errorInSampler"]] <- createJaspState(TRUE)
+  jaspResults[["errorInSampler"]]$dependOn(options = c("materiality", "materialityPercentage", "materialityValue", "expectedNumber", "expectedErrors", "populationValue", "populationSize"))
+  return(1)
 }
 
 .classicalPlanningHelper <- function(options, jaspResults){
@@ -94,6 +103,11 @@
                           "binomial" =  paste0("The required sample size is based on the <b>binomial</b> distribution <i>(p = ", round(jaspResults[["materiality"]]$object, 2) ,")</i>."),
                           "hypergeometric" = paste0("The required sample size is based on the <b>hypergeometric</b> distribution <i>(N = ", jaspResults[["N"]]$object ,", K = ", floor(jaspResults[["N"]]$object * jaspResults[["materiality"]]$object) ,")</i>."))
   planningSummary$addFootnote(message = message, symbol="<i>Note.</i>")
+
+  if(!is.null(jaspResults[["errorInSampler"]])){
+    planningSummary$setError("There is no sample size (< 5000) large enough to prove the current materiality. Please try other values.")
+    return()
+  }
 
   if(options[["planningModel"]] != "Poisson" && options[["expectedErrors"]] == "expectedAbsolute" && options[["expectedNumber"]]%%1 != 0){
     planningSummary$setError("Expected errors should be a whole number in the Poisson sampling model.")
