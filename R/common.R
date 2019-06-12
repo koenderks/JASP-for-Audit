@@ -222,7 +222,7 @@
                         ggplot2::theme(axis.ticks.x = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank(), axis.text.y = ggplot2::element_text(hjust = 0)) +
                         ggplot2::theme(panel.grid.major.x = ggplot2::element_line(color="#cbcbcb"))+
                         ggplot2::annotate("text", y = values, x = c(1, 2, 3), label = values.labels, size = 6, vjust = 0.5, hjust = -0.3) + 
-                        ggplot2::scale_y_continuous(breaks = JASPgraphs::getPrettyAxisBreaks(seq(0, 1.1*max(values), 0.01), min.n = 4), limits = c(0, 1.1*max(values)), labels = x.labels)
+                        ggplot2::scale_y_continuous(breaks = JASPgraphs::getPrettyAxisBreaks(seq(0, 1.1*max(values), length.out = 100), min.n = 4), limits = c(0, 1.1*max(values)), labels = x.labels)
   p                 <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE)
   return(createJaspPlot(plot = p, title = "Evaluation information", width = 600, height = 300))
 }
