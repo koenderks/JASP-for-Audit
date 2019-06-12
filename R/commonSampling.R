@@ -394,21 +394,26 @@
   total_data_value <- jaspResults[["total_data_value"]]$object 
   
   if(options[["selectionType"]] == "recordSampling"){
-    interval <- ceiling(nrow(dataset) / jaspResults[["sampleSize"]]$object)
+    interval                                <- ceiling(nrow(dataset) / jaspResults[["sampleSize"]]$object)
   } else {
-    interval <- ceiling(sum(dataset[, .v(options[["monetaryVariable"]])]) / jaspResults[["sampleSize"]]$object)
+    interval                                <- ceiling(sum(dataset[, .v(options[["monetaryVariable"]])]) / jaspResults[["sampleSize"]]$object)
   }
-  sampleSize                              <- length(unique(sample[, .v(options[["recordNumberVariable"]])]))
+  sampleSize                                <- length(unique(sample[, .v(options[["recordNumberVariable"]])]))
   if(options[["materiality"]] == "materialityAbsolute"){
     sampleValue                             <- ceiling(sum(sample[, .v(options[["monetaryVariable"]])]))
     percOfTotal                             <- paste0(round(sampleValue / total_data_value * 100, 2), "%")
-    row <- data.frame("n" = sampleSize, "V" = paste(jaspResults[["valutaTitle"]]$object, sampleValue), "P" = percOfTotal)
+    row                                     <- data.frame("n" = sampleSize, "V" = paste(jaspResults[["valutaTitle"]]$object, sampleValue), "P" = percOfTotal)
   } else {
     percOfTotal                             <- paste0(round(sampleSize / jaspResults[["N"]]$object * 100, 2), "%")
-    row <- data.frame("n" = sampleSize, "P" = percOfTotal)
+    row                                     <- data.frame("n" = sampleSize, "P" = percOfTotal)
   }
 
-  if(options[["selectionMethod"]] != "randomSampling")
-    row <- cbind(row, I = interval)
+  if(options[["selectionMethod"]] != "randomSampling"){
+    if(options[["selectionType"]] == "musSampling"){
+      row                                   <- cbind(row, I = paste(jaspResults[["valutaTitle"]]$object, interval))
+    } else {
+      row                                   <- cbind(row, I = interval)
+    }
+  }
   selectionInformationTable$addRows(row)
 }
