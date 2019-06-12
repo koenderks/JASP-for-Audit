@@ -5,40 +5,30 @@
 
 # JASP for Audit (JfA)
 
-JASP for Audit **(JfA)** is an officially supported add-on module for JASP (www.jasp-stats.org) that is developed for statistical auditing. The module includes procedures and analyses that can be used in daily auditing tasks and eliminates the difficulties that arise from programming statistical analyses and correctly interpreting their results. The module provides a guided workflow for performing a full (Classical or Bayesian) audit. It also features methods for planning an audit without data and evaluating an audit using a sample list only.
+JASP for Audit **(JfA)** is an officially supported add-on module for JASP (www.jasp-stats.org, version 0.10.0 or higher) that is developed for statistical auditing. The module includes procedures and analyses that can be used in daily auditing tasks and eliminates the difficulties that arise from programming statistical analyses and correctly interpreting their results. The module features a guided workflow for performing (frequentist or Bayesian) substantive testing in an audit. It also features methods for planning an audit sample without requiring access to data.
 
-**Note: The required version of JASP (0.9.3) is not released yet, which means that the dynamic module functionality is not supported.**
-
-![readme5](https://user-images.githubusercontent.com/25059399/56079522-283dfd80-5df6-11e9-8ad2-ffbecd3cb7dd.PNG)
+![readme5](https://user-images.githubusercontent.com/25059399/59338117-11d2f600-8d02-11e9-8f63-b3f173477e4d.png)
 
 ## How to install JfA
 
-To install JfA in the base version of JASP, simply click the + icon on the right side and go to "Add Dynamic Module".
+To install JfA into the main version of JASP, simply click the + icon on the right side and go to "Install Module".
 
-![readme1](https://user-images.githubusercontent.com/25059399/51800005-5feecd80-2229-11e9-89d9-6547a9bc39ff.PNG)
+![readme1](https://user-images.githubusercontent.com/25059399/59338248-552d6480-8d02-11e9-8a4a-40f696914ca0.png)
 
-The Audit module should be visible in the folder where you downloaded it. Simply click the module and after that click "Install".
+The JfA module should be visible in the folder where you downloaded it. Simply click the module and after that click "Install".
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/25059399/51800037-ffac5b80-2229-11e9-8fac-a8579b16a922.PNG" alt="readme2" width="700" height = "400">
 </p>
 
-This will install the Audit module into JASP, and it can be accessed by clicking its name and the corresponding icon.
+This will install the JfA (Audit) module into JASP, and it can be accessed by clicking its name and the corresponding icon.
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/25059399/51800038-0044f200-222a-11e9-94ef-435849221fdf.PNG" alt="readme2" width="200" height = "200">
+  <img src="https://user-images.githubusercontent.com/25059399/59338406-9c1b5a00-8d02-11e9-8808-68dcc686f398.png" alt="readme2" width="200" height = "200">
 </p>
 
-You now have access to all that JfA has to offer, including methods to plan, perform and evaluate an audit. Click one of the icons in the tabbar to select an analysis. JfA provides the auditor with a workflow for performing the full statistical process of substantive testing.
+You now have access to all that JfA has to offer, including methods to plan, perform and evaluate an audit. Click one of the icons in the tabbar to select an analysis. 
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/25059399/56079420-7b16b580-5df4-11e9-8acb-2b84ae6dd06e.png" alt="readme4" width="110" height="100">
 </p>
-
-**Currently implemented in JfA is:**
-
-| Frequentist                       | Bayesian                  |
-|       -------------               |-------------              | 
-| Audit Workflow                    | Audti Workflow            | 
-| Planning                          | Planning                  |
-| Evaluation                        | Evaluation                |
