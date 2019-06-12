@@ -192,6 +192,7 @@
     variables                       <- unlist(options[["additionalVariables"]])
 
     sampleSize                          <- jaspResults[["sampleSize"]]$object
+    set.seed(options[["seed"]])
 
     if(is.null(jaspResults[["sample"]])){
       
@@ -204,7 +205,6 @@
         
         interval <- ceiling(nrow(dataset) / jaspResults[["sampleSize"]]$object)
 
-        set.seed(options[["seed"]])
         startingPoint <- base::sample(1: interval, size = 1)
         
         # Error message for when starting point is outside of interval
@@ -231,7 +231,6 @@
         
         interval <- ceiling(sum(dataset[, .v(monetaryVariable)]) / jaspResults[["sampleSize"]]$object)
 
-        set.seed(options[["seed"]])
         startingPoint <- base::sample(1: interval, size = 1)
         
         # Error message for when starting point is outside of interval
