@@ -142,6 +142,7 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
   # Create a container for the selection
   jaspResults[["selectionContainer"]] <- createJaspContainer(title= "<u>Selection</u>")
   jaspResults[["selectionContainer"]]$position <- 4
+  jaspResults[["selectionContainer"]]$dependOn(options = c("samplingChecked"))
   # Read in data for selection
   dataset <- .readDataSelection(options)
   # Import stored objects from jaspResults
@@ -191,7 +192,7 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
       dataset <- subset(dataset, dataset[, .v(options[["sampleFilter"]])] != 0)
   # Perform the evaluation conditional on the type of variable
   if(options[["variableType"]] == "variableTypeCorrect"){
-    # Attributes evaluation
+    # Correct / Incorrect evaluation
     evaluationResult <- .attributesBound(dataset, options, jaspResults)
     # Create the summary table for the evaluation
     .attributesBoundTable(options, evaluationResult, jaspResults, position = 2)
