@@ -32,7 +32,7 @@ Form {
                   DoubleField { id: materialityValue; visible: materialityAbsolute.checked; name: "materialityValue"; defaultValue: 0; min: 0; fieldWidth: 90; decimals: 2; label: euroValuta.checked ? "€" : (dollarValuta.checked ? "$" : otherValutaName.value) } }
               RowLayout {
                 RadioButton { id: materialityRelative; name: "materialityRelative"; text: qsTr("Relative"); childrenOnSameRow: true
-                  PercentField { id: materialityPercentage; visible: materialityRelative.checked; decimals: 2; defaultValue: 0; name: "materialityPercentage"; fieldWidth: 50 } }
+                  PercentField { id: materialityPercentage; visible: materialityRelative.checked; decimals: 2; defaultValue: 0; name: "materialityPercentage"; fieldWidth: 40 } }
               }
             }
             GroupBox { title: qsTr("Audit risk"); id: auditRisk
@@ -64,12 +64,12 @@ Form {
                 }
                 RadioButtonGroup { name: "expectedErrors"; id: expectedErrors; title: qsTr("Expected errors")
                   RowLayout {
-                      RadioButton { text: qsTr("Absolute"); name: "expectedAbsolute"; id: expectedAbsolute; checked: true}
+                      RadioButton { text: qsTr("Absolute"); name: "expectedAbsolute"; id: expectedAbsolute}
                       DoubleField { name: "expectedNumber"; enabled: expectedAbsolute.checked; defaultValue: 0; min: 0; max: 1e10; decimals: 2; visible: expectedAbsolute.checked; fieldWidth: 60; label: euroValuta.checked ? "€" : (dollarValuta.checked ? "$" : otherValutaName.value) }
                   }
                   RowLayout {
-                      RadioButton { text: qsTr("Relative") ; name: "expectedRelative"; id: expectedRelative}
-                      PercentField { name: "expectedPercentage"; enabled: expectedRelative.checked; decimals: 2; defaultValue: 0; visible: expectedRelative.checked; fieldWidth: 60  }
+                      RadioButton { text: qsTr("Relative") ; name: "expectedRelative"; id: expectedRelative; checked: true}
+                      PercentField { name: "expectedPercentage"; enabled: expectedRelative.checked; decimals: 3; defaultValue: 0; visible: expectedRelative.checked; fieldWidth: 40  }
                   }
                 }
                 GroupBox { title: qsTr("Explanatory text")
