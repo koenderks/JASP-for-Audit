@@ -665,7 +665,7 @@
     priorPi                   <- priorA / (priorA + priorB)
     a                         <- 1
     b                         <- 3
-    priorMu                   <- jaspResults[["materiality"]]$object
+    priorMu                   <- 1 # prior mean taint is set to 1 when planning conservatively
     
 
     if(jaspResults[["runEvaluation"]]$object){
