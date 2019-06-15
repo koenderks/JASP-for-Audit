@@ -290,15 +290,19 @@
       }
       n                       <- length(z)
       zplus                   <- sort(subset(z, z > 0), decreasing = TRUE)
+      zmin                    <- sort(subset(z, z < 0), decreasing = TRUE)
       M                       <- length(zplus)
       NoOfErrors              <- length(which(z != 0))
-      bound                   <- 1 - alpha^(1/n)
+      bound                   <- 1 - alpha^(1 / n)
       if(M > 0){
           prop.sum            <- 0
           for(i in 1:M){
-              prop.sum        <- prop.sum + ((qbeta(1 - alpha, i + 1, n - i) - qbeta(1 - alpha, (i-1) + 1, n - (i-1) ))  * zplus[i])
+              prop.sum        <- prop.sum + ((qbeta(1 - alpha, i + 1, n - i) - qbeta(1 - alpha, (i - 1) + 1, n - (i - 1) ))  * zplus[i])
           }
           bound               <- bound + prop.sum
+      }
+      if(options[["stringerBoundLtaAdjustment"]]){
+        bound <- bound - ( (1/n) * sum(abs(zmin)) )
       }
     }
 
@@ -313,7 +317,7 @@
     resultList[["alpha"]]       <- alpha
 
     jaspResults[["evaluationResult"]] <- createJaspState(resultList)
-    jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "variableType", "auditResult", "materiality", "estimator", "materialityValue", "materialityPercentage"))
+    jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "variableType", "auditResult", "materiality", "estimator", "materialityValue", "materialityPercentage", "stringerBoundLtaAdjustment"))
     return(jaspResults[["evaluationResult"]]$object)
 }
 
@@ -325,7 +329,7 @@
     jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "planningModel", "mostLikelyError", "sampleFilter", "variableType",
-                                      "estimator", "monetaryVariable", "materialityValue", "valuta"))
+                                      "estimator", "monetaryVariable", "materialityValue", "valuta", "stringerBoundLtaAdjustment"))
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",                      type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",                      type = 'string')

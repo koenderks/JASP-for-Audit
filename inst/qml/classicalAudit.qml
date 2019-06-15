@@ -284,6 +284,7 @@ Form {
                   evaluationChecked.checked = true
                   if (musSampling.checked & variableTypeAuditValues.checked) stringerBound.click()
                   if (musSampling.checked & variableTypeAuditValues.checked) stringerBound.visible = true
+                  if (musSampling.checked & variableTypeAuditValues.checked) stringerBoundLtaAdjustment.visible = true
                   if (recordSampling.checked & variableTypeAuditValues.checked) regressionBound.click()
                   if (recordSampling.checked & variableTypeAuditValues.checked) directBound.visible = true
                   if (recordSampling.checked & variableTypeAuditValues.checked) differenceBound.visible = true
@@ -306,8 +307,10 @@ Form {
             }
             Section { title: qsTr("Advanced options"); columns: 1
               GridLayout { columns: 2
-                RadioButtonGroup { title: qsTr("Estimator"); name: "estimator"
-                  RadioButton { name: "stringerBound"; text: qsTr("Stringer"); id: stringerBound; visible: false }
+                RadioButtonGroup { title: qsTr("Estimation method"); name: "estimator"
+                  RadioButton { name: "stringerBound"; text: qsTr("Stringer"); id: stringerBound; visible: false;
+                        CheckBox { name: "stringerBoundLtaAdjustment"; text: qsTr("LTA adjustment"); id: stringerBoundLtaAdjustment; visible: false; checked: true }
+                     }
                   RadioButton { name: "directBound"; text: qsTr("Direct"); id: directBound; visible: false }
                   RadioButton { name: "differenceBound"; text: qsTr("Difference"); id: differenceBound; visible: false }
                   RadioButton { name: "ratioBound"; text: qsTr("Ratio"); id: ratioBound; visible: false }

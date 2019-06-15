@@ -309,7 +309,7 @@ Form {
         }
         Section { title: qsTr("Advanced options"); columns: 1
           GridLayout { columns: 2
-            RadioButtonGroup { title: qsTr("Estimator"); name: "estimator"
+            RadioButtonGroup { title: qsTr("Estimation method"); name: "estimator"
               RadioButton { name: "coxAndSnellBound"; text: qsTr("Cox and Snell"); id: coxAndSnellBound; visible: false }
               RadioButton { name: "betaBound"; text: qsTr("Beta"); id: betaBound; visible: false }
               RadioButton { name: "betabinomialBound"; text: qsTr("Beta-binomial"); id: betabinomialBound; visible: false }
