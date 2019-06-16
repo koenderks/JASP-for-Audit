@@ -49,7 +49,7 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   planningResult <- .classicalPlanningManual(options, jaspResults)
 
   expected.errors   <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = paste0(round(options[["expectedPercentage"]] * 100, 2), "%"), no = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]]))
-  max.errors        <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = floor(options[["expectedPercentage"]] * planningResult[["n"]]) + 1, no = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]] + 1))
+  max.errors        <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = ceiling(options[["expectedPercentage"]] * planningResult[["n"]]), no = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]] + 1))
 
   # Decision plot
   if(options[['decisionPlot']] && jaspResults[["ready"]]$object)
@@ -131,9 +131,9 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   resultList <- jaspResults[["planningResult"]]$object
 
   message <- base::switch(options[["planningModel"]],
-                        "Poisson" = paste0("The required sample size is based on the <b>Poisson</b> distribution <i>(\u03BB = ", round(jaspResults[["materiality"]]$object, 2) ,")</i>."),
+                        "Poisson" = paste0("The required sample size is based on the <b>Poisson</b> distribution <i>(\u03BB = ", round(jaspResults[["materiality"]]$object * resultList[["n"]], 4) , ")</i>."),
                         "binomial" =  paste0("The required sample size is based on the <b>binomial</b> distribution <i>(p = ", round(jaspResults[["materiality"]]$object, 2) ,")</i>."),
-                        "hypergeometric" = paste0("The required sample size is based on the <b>hypergeometric</b> distribution <i>(N = ", options[["populationSize"]] ,", K = ", floor(options[["populationSize"]] * jaspResults[["materiality"]]$object) ,")</i>."))
+                        "hypergeometric" = paste0("The required sample size is based on the <b>hypergeometric</b> distribution <i>(N = ", options[["populationSize"]] ,", K = ", ceiling(options[["populationSize"]] * jaspResults[["materiality"]]$object) ,")</i>."))
   summaryTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
   if(!is.null(jaspResults[["errorInSampler"]])){
@@ -141,16 +141,7 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
     return()
   }
 
-  if(options[["planningModel"]] != "Poisson" && options[["expectedErrors"]] == "expectedAbsolute" && options[["expectedNumber"]]%%1 != 0){
-    summaryTable$setError("Expected errors should be a whole number in this sampling model.")
-    return()
-  }
-
-  if(options[["planningModel"]] != "Poisson"){
-    ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = floor(resultList[["k"]] * resultList[["n"]]), "expectedAbsolute" = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]]))
-  } else {
-    ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = round(resultList[["k"]] * resultList[["n"]], 2), "expectedAbsolute" = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]]))
-  }
+  ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(resultList[["k"]] * resultList[["n"]]), "expectedAbsolute" = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]]))
 
   materialityTitle <- paste0(round(jaspResults[["materiality"]]$object * 100, 2), "%")
   materialityValue <- base::switch(options[["materiality"]], "materialityRelative" = ceiling(jaspResults[["materiality"]]$object * options[["populationValue"]]), "materialityAbsolute" = options[["materialityValue"]])

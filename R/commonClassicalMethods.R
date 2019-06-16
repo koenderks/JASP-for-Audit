@@ -16,7 +16,7 @@
 
 .calc.n.hypergeometric <- function(options, alpha, jaspResults){
   jaspResults$startProgressbar(5000)
-  K <- floor(jaspResults[["N"]]$object * jaspResults[["materiality"]]$object)
+  K <- ceiling(jaspResults[["N"]]$object * jaspResults[["materiality"]]$object)
   for(n in 1:5000){
     jaspResults$progressbarTick()
     impk <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(n * options[["expectedPercentage"]]), "expectedAbsolute" = ceiling(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n))
@@ -35,9 +35,10 @@
   jaspResults$startProgressbar(5000)
   for(n in 1:5000){
     jaspResults$progressbarTick()
-    k <- base::switch(options[["expectedErrors"]], "expectedRelative" = (n * options[["expectedPercentage"]]), "expectedAbsolute" = (options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n))
-    x <- pgamma(jaspResults[["materiality"]]$object, shape = 1 + k, scale = 1 / n)
-    if(x >= (1 - alpha)){
+    k <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(n * options[["expectedPercentage"]]), "expectedAbsolute" = ceiling(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n))
+    #x <- pgamma(jaspResults[["materiality"]]$object, shape = 1 + k, scale = 1 / n)
+    x <- dpois(x = 0:k, lambda = jaspResults[["materiality"]]$object * n)
+    if(sum(x) < alpha){
       return(n)
     }
   }
@@ -98,27 +99,20 @@
   planningSummary$addColumnInfo(name = 'k',                    title = "Expected errors",       type = 'string')
   planningSummary$addColumnInfo(name = 'n',                    title = "Required sample size", type = 'string')
 
-  message <- base::switch(options[["planningModel"]],
-                          "Poisson" = paste0("The required sample size is based on the <b>Poisson</b> distribution <i>(\u03BB = ", round(jaspResults[["materiality"]]$object, 2) ,")</i>."),
-                          "binomial" =  paste0("The required sample size is based on the <b>binomial</b> distribution <i>(p = ", round(jaspResults[["materiality"]]$object, 2) ,")</i>."),
-                          "hypergeometric" = paste0("The required sample size is based on the <b>hypergeometric</b> distribution <i>(N = ", jaspResults[["N"]]$object ,", K = ", floor(jaspResults[["N"]]$object * jaspResults[["materiality"]]$object) ,")</i>."))
-  planningSummary$addFootnote(message = message, symbol="<i>Note.</i>")
+  if(!jaspResults[["ready"]]$object){
+    message <- base::switch(options[["planningModel"]],
+                          "Poisson" = paste0("The required sample size is based on the <b>Poisson</b> distribution."),
+                          "binomial" =  paste0("The required sample size is based on the <b>binomial</b> distribution."),
+                          "hypergeometric" = paste0("The required sample size is based on the <b>hypergeometric</b> distribution."))
+    planningSummary$addFootnote(message = message, symbol="<i>Note.</i>")
+  }
 
   if(!is.null(jaspResults[["errorInSampler"]])){
     planningSummary$setError("There is no sample size (< 5000) large enough to prove the current materiality. Please try other values.")
     return()
   }
 
-  if(options[["planningModel"]] != "Poisson" && options[["expectedErrors"]] == "expectedAbsolute" && options[["expectedNumber"]]%%1 != 0){
-    planningSummary$setError("Expected errors should be a whole number in the Poisson sampling model.")
-    return()
-  }
-
-  if(options[["planningModel"]] != "Poisson"){
-    ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(planningResult[["k"]] * planningResult[["n"]]), "expectedAbsolute" = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]]))
-  } else {
-    ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = round(planningResult[["k"]] * planningResult[["n"]], 2), "expectedAbsolute" = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]]))
-  }
+  ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(planningResult[["k"]] * planningResult[["n"]]), "expectedAbsolute" = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]]))
   DRtable <- paste0(round(planningResult[["alpha"]], 3) * 100, "%")
 
   if(jaspResults[["materiality"]]$object == 0){
@@ -136,6 +130,12 @@
     planningSummary$addRows(row)
     return()
   }
+
+  message <- base::switch(options[["planningModel"]],
+                        "Poisson" = paste0("The required sample size is based on the <b>Poisson</b> distribution <i>(\u03BB = ", round(jaspResults[["materiality"]]$object * planningResult[["n"]], 4) , ")</i>."),
+                        "binomial" =  paste0("The required sample size is based on the <b>binomial</b> distribution <i>(p = ", round(jaspResults[["materiality"]]$object, 2) ,")</i>."),
+                        "hypergeometric" = paste0("The required sample size is based on the <b>hypergeometric</b> distribution <i>(N = ", jaspResults[["N"]]$object ,", K = ", ceiling(jaspResults[["N"]]$object * jaspResults[["materiality"]]$object) ,")</i>."))
+  planningSummary$addFootnote(message = message, symbol="<i>Note.</i>")
 
   row <- data.frame(materiality = materiality, IR = planningResult[["IR"]], CR = planningResult[["CR"]], DR = DRtable, k = ktable, n = planningResult[["n"]])
   planningSummary$addRows(row)
@@ -624,11 +624,7 @@
           .calc.n.binomial(options, alpha, jaspResults),
           .calc.n.hypergeometric(options, alpha, jaspResults))
 
-  kpois <- base::switch(options[["expectedErrors"]], "expectedRelative" = round(options[["expectedPercentage"]] * n[1], 2), "expectedAbsolute" = round(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n[1], 2))
-  kbinom <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(options[["expectedPercentage"]] * n[2]), "expectedAbsolute" = ceiling(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n[2]))
-  khyper <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(options[["expectedPercentage"]] * n[3]), "expectedAbsolute" = ceiling(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n[3]))
-
-  k <- c(round(kpois, 2), kbinom, khyper)
+  k <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(options[["expectedPercentage"]] * n), "expectedAbsolute" = ceiling(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n))
 
   d <- data.frame(y = c(n, k), 
                   dist = rep(c("Poisson", "Binomial", "Hypergeometric"), 2),

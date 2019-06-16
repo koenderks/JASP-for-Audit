@@ -99,11 +99,7 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
   }
   # Calculate the number of expected errors and the maximum number of allowed errors
   expected.errors   <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = paste0(round(options[["expectedPercentage"]] * 100, 2), "%"), no = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]]))
-  if(options[["planningModel"]] == "Poisson"){
-    max.errors        <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = round(options[["expectedPercentage"]] * requiredSampleSize, 2), no = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]]))
-  } else {
-    max.errors        <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = floor(options[["expectedPercentage"]] * requiredSampleSize) + 1, no = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]] + 1))
-  }
+  max.errors        <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = floor(options[["expectedPercentage"]] * requiredSampleSize) + 1, no = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]] + 1))
   # Explanatory text for the planning
   if(options[["explanatoryText"]] && is.null(jaspResults[["planningContainer"]][["planningParagraph"]])){
     materialityLevelLabel           <- base::switch(options[["materiality"]], "materialityRelative" = paste0(round(jaspResults[["materiality"]]$object, 4) * 100, "%"), "materialityAbsolute" = paste(jaspResults[["valutaTitle"]]$object, format(options[["materialityValue"]], scientific = FALSE)))
