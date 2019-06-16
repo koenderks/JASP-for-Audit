@@ -653,7 +653,7 @@
     return(jaspResults[["evaluationResult"]]$object)
     # Based on the paper:
     # Cox, D. R., & Snell, E. J. (1979). On sampling and the estimation of rare errors. Biometrika, 66(1), 125-132.
-    # Default prior options (pi = 0.10, mu = 0.40) are recommendations from the paper
+    # Default prior options (a = 1 and b = 3) are recommendations from the paper
     n                         <- 0
     M                         <- 0
     z                         <- 0
@@ -688,8 +688,8 @@
       posterior_part_2        <- ((priorMu * (b - 1)) + (M * z_bar)) / (n + (a / priorPi))
       posterior               <- posterior_part_1 * posterior_part_2 * stats::rf(n = 1e6, df1 = (2 * (M + a)), df2 = ( 2 *(M + b)))
 
-      bound                   <- as.numeric(quantile(posterior, probs = options[["confidence"]], na.rm = TRUE))
-      interval                <- as.numeric(quantile(posterior, probs = c((1 - options[["confidence"]])/2, 1 - (1 - options[["confidence"]])/2), na.rm = TRUE))
+      bound                   <- posterior_part_1 * posterior_part_2 * qf(p = options[["confidence"]], df1 = (2 * (M + a)), df2 = ( 2 *(M + b)))
+      interval                <- posterior_part_1 * posterior_part_2 * qf(p = c((1 - options[["confidence"]])/2, 1 - (1 - options[["confidence"]])/2), df1 = (2 * (M + a)), df2 = ( 2 *(M + b)))
     }
 
     resultList <- list()
