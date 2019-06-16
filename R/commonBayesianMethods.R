@@ -430,14 +430,14 @@
     jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "expectedErrors", "expectedPercentage", "expectedNumber",
-                                      "sampleFilter", "mostLikelyError", "bayesFactor", "planningModel", "materialityValue", "variableType", "estimator", "displayCredibleInterval", "valuta"))
+                                      "sampleFilter", "mostLikelyError", "bayesFactor", "planningModel", "materialityValue", "variableType", "estimator", "areaUnderPosterior", "valuta"))
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",        type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",        type = 'string')
     evaluationTable$addColumnInfo(name = 'k',             title = "Full errors",        type = 'string')
     if(options[["mostLikelyError"]])
       evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                type = 'string')
-    if(!options[["displayCredibleInterval"]]){
+    if(options[["areaUnderPosterior"]]=="displayCredibleBound"){
       evaluationTable$addColumnInfo(name = 'bound',         title = paste0(options[["confidence"]] * 100,"% Confidence bound"), type = 'string')
       if(options[["monetaryVariable"]] != "")
           evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
@@ -463,7 +463,7 @@
 
     if(options[["auditResult"]] == ""){
       row                   <- data.frame(materiality = ".", n = ".", k = ".")
-      if(!options[["displayCredibleInterval"]]){
+      if(options[["areaUnderPosterior"]]=="displayCredibleBound"){
         row <- cbind(row, bound = ".")
         if(options[["monetaryVariable"]] != "")
           row <- cbind(row, projm = ".")
@@ -482,7 +482,7 @@
 
     materialityTable <- ifelse(options[["materiality"]] == "materialityRelative", yes = paste0(round(jaspResults[["materiality"]]$object, 2) * 100, "%"), no = paste(jaspResults[["valutaTitle"]], options[["materialityValue"]]))
 
-    if(!options[["displayCredibleInterval"]]){
+    if(options[["areaUnderPosterior"]]=="displayCredibleBound"){
       boundTable <- evaluationResult[["bound"]]
       projectedMisstatement <- "."
       if(!"." %in% boundTable){
@@ -544,7 +544,7 @@
       p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior \nconfidence region"))
       p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 0.25, 1, .5), stroke = 2, color = "black")), order = 2)
 
-      if(!options[["displayCredibleInterval"]]){
+      if(options[["areaUnderPosterior"]]=="displayCredibleBound"){
         p <- p + ggplot2::stat_function(fun = dbeta, args = list(shape1 = evaluationResult[["posteriorA"]], shape2 = evaluationResult[["posteriorB"]]), xlim = c(0, evaluationResult[["bound"]]),
                                         geom = "area", fill = rgb(0, 0.25, 1, .5))
       } else {
@@ -595,7 +595,7 @@
           p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 0.25, 1, .5), stroke = 2, color = "black")))
 
           df <- data.frame(x = 0:jaspResults[["N"]]$object, y = .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, u = evaluationResult[["posteriorA"]], v = evaluationResult[["posteriorB"]]))
-          if(!options[["displayCredibleInterval"]]){
+          if(options[["areaUnderPosterior"]]=="displayCredibleBound"){
             lim <- .qBetaBinom(p = options[["confidence"]], N = jaspResults[["N"]]$object, u = evaluationResult[["posteriorA"]], v = evaluationResult[["posteriorB"]])
             df <- df[1:lim, ]
             p <- p + ggplot2::geom_bar(data = df, stat="identity", fill = rgb(0, 0.25, 1, .5))
@@ -723,7 +723,7 @@
     evaluationTable                       <- createJaspTable("Evaluation summary")
     jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "sampleFilter", "planningModel", "mostLikelyError", "estimator", "bayesFactor",
-                                        "materialityValue", "variableType", "displayCredibleInterval", "valuta"))
+                                        "materialityValue", "variableType", "areaUnderPosterior", "valuta"))
     evaluationTable$position <- position
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",            type = 'string')
@@ -733,8 +733,8 @@
     if(options[["mostLikelyError"]])
       evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                    type = 'string')
 
-    if(!options[["displayCredibleInterval"]]){
-      evaluationTable$addColumnInfo(name = 'bound',         title = paste0(options[["confidence"]] * 100,"% Confidence bound"), type = 'string')
+    if(options[["areaUnderPosterior"]]=="displayCredibleBound"){
+      evaluationTable$addColumnInfo(name = 'bound',         title = paste0(options[["confidence"]] * 100,"% Credible bound"), type = 'string')
       if(options[["monetaryVariable"]] != "")
           evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
     } else {
@@ -749,9 +749,10 @@
     if(options[["bayesFactor"]])
       evaluationTable$addColumnInfo(name = 'bf',          title = "BF\u208B\u208A",         type = 'string')
 
+    area <- ifelse(options[["areaUnderPosterior"]]=="displayCredibleBound", yes = "bound", no = "interval")
     message <- base::switch(options[["estimator"]],
-                                      "coxAndSnellBound" = "The confidence bound is calculated according to the <b>Cox and Snell</b> method.",
-                                      "regressionBound" = "The confidence bound is calculated according to the <b>Regression</b> method.")
+                                      "coxAndSnellBound" = paste0("The credible ", area ," is calculated according to the <b>Cox and Snell</b> method."),
+                                      "regressionBound" = paste0("The credible ", area ," is calculated according to the <b>Regression</b> method."))
     evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
     materialityTable <- ifelse(options[["materiality"]] == "materialityAbsolute", yes = paste(jaspResults[["valutaTitle"]]$object, options[["materialityValue"]]), no = paste0(round(options[["materialityPercentage"]] * 100, 2) , "%"))
@@ -759,7 +760,7 @@
     # Return empty table with materiality
     if(!jaspResults[["runEvaluation"]]$object){
       row <- data.frame(materiality = materialityTable, n = ".", fk = ".", k = ".")
-      if(!options[["displayCredibleInterval"]]){
+      if(options[["areaUnderPosterior"]]=="displayCredibleBound"){
         row <- cbind(row, bound = ".")
         if(options[["monetaryVariable"]] != "")
           row <- cbind(row, projm = ".")
@@ -783,7 +784,7 @@
         mle <- round(evaluationResult[["mle"]], 2) # CHANGE
     }
 
-    if(!options[["displayCredibleInterval"]]){
+    if(options[["areaUnderPosterior"]]=="displayCredibleBound"){
       boundTable <- evaluationResult[["bound"]]
       projectedMisstatement <- "."
       if(!"." %in% boundTable){
@@ -847,7 +848,7 @@
     p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 0.25, 1, 0))
     p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior \nconfidence region"))
     p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 0.25, 1, .5), stroke = 2, color = "black")), order = 2)
-    if(!options[["displayCredibleInterval"]]){
+    if(options[["areaUnderPosterior"]]=="displayCredibleBound"){
         p <- p + ggplot2::geom_area(mapping = ggplot2::aes(x = x, y = y), data = subset(subset(d, d$type == "Posterior"), subset(d, d$type == "Posterior")$x <= evaluationResult[["bound"]]), fill = rgb(0, 0.25, 1, .5))
     } else {
       subset1 <- subset(subset(d, d$type == "Posterior"), subset(d, d$type == "Posterior")$x <= evaluationResult[["interval"]][2])

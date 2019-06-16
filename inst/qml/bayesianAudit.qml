@@ -315,18 +315,18 @@ Form {
               RadioButton { name: "betabinomialBound"; text: qsTr("Beta-binomial"); id: betabinomialBound; visible: false }
               RadioButton { name: "regressionBound"; text: qsTr("Regression"); id: regressionBound; visible: false }
             }
+
+            RadioButtonGroup { title: qsTr("Area under posterior"); name: "areaUnderPosterior" 
+                RadioButton { text: qsTr("Credible bound"); name: "displayCredibleBound" }
+                RadioButton { text: qsTr("Credible interval"); name: "displayCredibleInterval" }
+              }
           }
         }
         Section { title: qsTr("Tables and plots")
           GridLayout { columns: 2
-            ColumnLayout {
-              GroupBox { title: qsTr("Statistics")
-                CheckBox { text: qsTr("Most likely error (MLE)"); name: "mostLikelyError" }
-                CheckBox { text: qsTr("Bayes factor\u208B\u208A"); name: "bayesFactor" }
-              }
-              GroupBox { title: qsTr("Tables")
-                CheckBox { text: qsTr("Credible interval"); name: "displayCredibleInterval" }
-              }
+            GroupBox { title: qsTr("Statistics")
+              CheckBox { text: qsTr("Most likely error (MLE)"); name: "mostLikelyError" }
+              CheckBox { text: qsTr("Bayes factor\u208B\u208A"); name: "bayesFactor" }
             }
             GroupBox { title: qsTr("Plots")
               CheckBox { text: qsTr("Evaluation information"); name: "evaluationInformation" }
