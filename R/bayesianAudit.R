@@ -250,7 +250,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
           jaspResults[["evaluationContainer"]][["evaluationInformation"]] 		$position <- 3
       }
       jaspResults[["evaluationContainer"]][["figure4"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Results of the sample evaluation compared with materiality and expected errors. The most likely error (MLE)
-                                                            is an estimate of the true misstatement in the population. The maximum error is the upper confidence bound on this MLE."), "p")
+                                                            is an estimate of the true misstatement in the population. The maximum error is the upper credible bound on this MLE."), "p")
       jaspResults[["evaluationContainer"]][["figure4"]]$position <- 4
       jaspResults[["evaluationContainer"]][["figure4"]]$dependOn(optionsFromObject = jaspResults[["evaluationContainer"]][["evaluationInformation"]])
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
@@ -317,8 +317,8 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
     # Produce relevant terms conditional on the analysis result
     above_below   <- ifelse(evaluationResult[["bound"]] < jaspResults[["materiality"]]$object, yes = "lower", no = "higher")
     approve       <- ifelse(evaluationResult[["bound"]] < jaspResults[["materiality"]]$object, yes = "<b>no material misstatement</b>", no = "<b>material misstatement</b>")
-    jaspResults[["conclusionContainer"]][["conclusionParagraph"]] <- createJaspHtml(paste0("To approve these data, a <b>", jaspResults[["confidenceLevelLabel"]]$object ,"</b> upper confidence bound on the population proportion of full errors should be determined to be
-                                                                lower than materiality, in this case <b>", jaspResults[["materialityLevelLabel"]]$object ,"</b>. For the current data, the confidence bound is <b>", above_below ,"</b> than materiality.
+    jaspResults[["conclusionContainer"]][["conclusionParagraph"]] <- createJaspHtml(paste0("To approve these data, a <b>", jaspResults[["confidenceLevelLabel"]]$object ,"</b> upper credible bound on the population proportion of full errors should be determined to be
+                                                                lower than materiality, in this case <b>", jaspResults[["materialityLevelLabel"]]$object ,"</b>. For the current data, the credible bound is <b>", above_below ,"</b> than materiality.
                                                                 The conclusion for these data is that the data contain ", approve ,"."), "p")
     jaspResults[["conclusionContainer"]][["conclusionParagraph"]]$position <- 1
     jaspResults[["conclusionContainer"]][["conclusionParagraph"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "materialityPercentage", "estimator", "materialityValue", "sampleFilter", "materiality"))

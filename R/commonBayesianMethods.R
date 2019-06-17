@@ -180,7 +180,7 @@
 
   sampletable$addColumnInfo(name = 'implicitn', title = "Implicit sample size", type = 'string')
   sampletable$addColumnInfo(name = 'implicitk', title = "Implicit errors", type = 'string')
-  sampletable$addColumnInfo(name = 'priorbound', title = paste0(options[["confidence"]]*100,"% Prior confidence bound"), type = 'string')
+  sampletable$addColumnInfo(name = 'priorbound', title = paste0(options[["confidence"]]*100,"% Prior credible bound"), type = 'string')
 
   message <- paste0("Sample sizes shown are implicit sample sizes derived from the ARM risk assessments: IR = <b>", options[["IR"]], "</b> and CR = <b>", options[["CR"]], "</b>.")
   sampletable$addFootnote(message = message, symbol="<i>Note.</i>")
@@ -252,9 +252,9 @@
         pdata <- data.frame(x = 0, y = 0, l = "1")
         p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 1, 0.5, 0))
         if(options[["priorPlotExpectedPosterior"]]){
-          p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Prior \nconfidence region"))
+          p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Prior \ncredible region"))
         } else {
-          p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Prior confidence region"))
+          p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Prior credible region"))
         }
         p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 1, 0.5, .7), stroke = 2, color = "black")))
 
@@ -322,9 +322,9 @@
         pdata <- data.frame(x = 0, y = 0, l = "1")
         p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 1, 0.5, 0))
         if(options[["priorPlotExpectedPosterior"]]){
-          p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Prior \nconfidence region"))
+          p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Prior \ncredible region"))
         } else {
-          p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Prior confidence region"))
+          p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Prior credible region"))
         }
         p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 1, 0.5, .7), stroke = 2, color = "black")))
 
@@ -438,7 +438,7 @@
     if(options[["mostLikelyError"]])
       evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                type = 'string')
     if(options[["areaUnderPosterior"]]=="displayCredibleBound"){
-      evaluationTable$addColumnInfo(name = 'bound',         title = paste0(options[["confidence"]] * 100,"% Confidence bound"), type = 'string')
+      evaluationTable$addColumnInfo(name = 'bound',         title = paste0(options[["confidence"]] * 100,"% Credible bound"), type = 'string')
       if(options[["monetaryVariable"]] != "")
           evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
     } else {
@@ -452,9 +452,10 @@
     if(options[["bayesFactor"]])
       evaluationTable$addColumnInfo(name = 'bf',          title = "BF\u208B\u208A",     type = 'string')
 
+    area <- ifelse(options[["areaUnderPosterior"]]=="displayCredibleBound", yes = "bound", no = "interval")
     message <- base::switch(options[["estimator"]],
-                              "betaBound" = "The confidence bound is calculated according to the <b>beta</b> distribution.",
-                              "betabinomialBound" = "The confidence bound is calculated according to the <b>beta-binomial</b> distribution.")
+                              "betaBound" = paste0("The credible ", area , " is calculated according to the <b>beta</b> distribution."),
+                              "betabinomialBound" = paste0("The credible ", area ," is calculated according to the <b>beta-binomial</b> distribution."))
     evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
 
     mle <- 0
@@ -541,7 +542,7 @@
     if(options[["priorAndPosteriorPlotAdditionalInfo"]]){
       pdata <- data.frame(x = 0, y = 0, l = "1")
       p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 0.25, 1, 0))
-      p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior \nconfidence region"))
+      p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior \ncredible region"))
       p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 0.25, 1, .5), stroke = 2, color = "black")), order = 2)
 
       if(options[["areaUnderPosterior"]]=="displayCredibleBound"){
@@ -591,7 +592,7 @@
       if(options[["priorAndPosteriorPlotAdditionalInfo"]]){
           pdata <- data.frame(x = 0, y = 0, l = "1")
           p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 1, 0.5, 0))
-          p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior confidence region"))
+          p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior credible region"))
           p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 0.25, 1, .5), stroke = 2, color = "black")))
 
           df <- data.frame(x = 0:jaspResults[["N"]]$object, y = .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, shape1 = evaluationResult[["posteriorA"]], shape2 = evaluationResult[["posteriorB"]]))
@@ -846,7 +847,7 @@
   if(options[["priorAndPosteriorPlotAdditionalInfo"]]){
     pdata <- data.frame(x = 0, y = 0, l = "1")
     p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = rgb(0, 0.25, 1, 0))
-    p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior \nconfidence region"))
+    p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior \ncredible region"))
     p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 0.25, 1, .5), stroke = 2, color = "black")), order = 2)
     if(options[["areaUnderPosterior"]]=="displayCredibleBound"){
         p <- p + ggplot2::geom_area(mapping = ggplot2::aes(x = x, y = y), data = subset(subset(d, d$type == "Posterior"), subset(d, d$type == "Posterior")$x <= evaluationResult[["bound"]]), fill = rgb(0, 0.25, 1, .5))
