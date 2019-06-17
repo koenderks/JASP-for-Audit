@@ -82,7 +82,7 @@ Form {
                   RadioButton { text: qsTr("Beta-binomial")           ; name: "beta-binomial" ; id: betaBinomial}
               }
               RadioButtonGroup {
-                title: qsTr("Valuta")
+                title: qsTr("Currency")
                 name: "valuta"
                 id: valuta
 

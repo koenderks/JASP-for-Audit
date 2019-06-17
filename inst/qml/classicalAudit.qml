@@ -93,7 +93,7 @@ Form {
                     RadioButton { text: qsTr("Hypergeometric")  ; name: "hypergeometric" ; id: hypergeometric}
                 }
                 RadioButtonGroup {
-                  title: qsTr("Valuta")
+                  title: qsTr("Currency")
                   name: "valuta"
                   id: valuta
 
