@@ -1,4 +1,4 @@
 The use of explanatory text
 ==========================
 
-Turning on the explanatory text will provide you with an explanation of each step in the estimation process. This will help you understand what the practical interpretation of your choices is, and helps you report your findings to others. With explanatory text enabled each table will have its own caption. Figures always have captions enabled.
+The explanatory text provides you with an in-depth explanation of each step in the audit process. The text will help you understand what the practical interpretation of your choices is, and helps translate your statistical findings to others (in common English). With explanatory text enabled, each table will have its own caption interpreting the result displayed in that table.
