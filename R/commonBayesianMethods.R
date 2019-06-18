@@ -912,14 +912,17 @@
         colnames(sample)        <- c("bookValue", "auditValue")
         formula                 <- auditValue ~ bookValue
         basResult               <- BAS::bas.lm(formula = formula, data = sample)
-        b1                      <- coef(basResult)$postmean[2]
+        coefBasResult           <- coef(basResult)
+        b1                      <- coefBasResult$postmean[2]
+        b1max                   <- coefBasResult$postmean[2] + coefBasResult$postsd[2]
 
         meanb                   <- mean(b)
         meanw                   <- mean(w)
 
+        # Posterior distribution of regression coefficient
         mle                     <- N * meanw + b1 * (B - N * meanb)
         stand.dev               <- sd(w) * sqrt(1 - cor(b, w)^2) * ( N / sqrt(n)) * sqrt( (N-n) / (N-1) )
-        lowerValue              <- mle - qt(p = 1 - alpha, df = n - 1) * stand.dev
+        lowerValue              <- mle - b1max * stand.dev
         if(lowerValue == 0){
           bound                 <- 0
         } else {

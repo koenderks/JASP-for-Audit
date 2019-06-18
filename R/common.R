@@ -199,8 +199,7 @@
       mle <- abs(evaluationResult[["mleTable"]])
     }
   }
-  #mle               <- ifelse(options[["variableType"]] == "variableTypeCorrect", yes = evaluationResult[["k"]] / evaluationResult[["n"]], no = sum(evaluationResult[["z"]]) / evaluationResult[["n"]])
-  
+ 
   label             <- rev(c("Materiality", "Maximum error", "Most likely error"))
   values            <- rev(c(materiality, bound, mle))
   
