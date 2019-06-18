@@ -32,7 +32,7 @@
       jaspResults$progressbarTick()
       impk <- base::switch(options[["expectedErrors"]], "expectedRelative" = n * options[["expectedPercentage"]], "expectedAbsolute" = (options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n))
       if(impk >= n){ next }
-      x <- .qBetaBinom(p = 1 - alpha, N = N, shape1 = 1 + impk, shape2 = 1 + (n - impk)) / N
+      x <- .qBetaBinom(p = 1 - alpha, N = N - n, shape1 = 1 + impk, shape2 = 1 + (n - impk)) / N
       if(x < jaspResults[["materiality"]]$object){
         return(n)
       }
@@ -195,7 +195,7 @@
   if(options[["planningModel"]] == "beta")
     priorBound <- round(qbeta(p = options[["confidence"]], shape1 = result[["priorA"]], shape2 = result[["priorB"]]), 3)
   if(options[["planningModel"]] == "beta-binomial")
-    priorBound <- round(.qBetaBinom(p = options[["confidence"]], N = jaspResults[["N"]]$object, shape1 = result[["priorA"]], shape2 = result[["priorB"]]) / jaspResults[["N"]]$object, 3)
+    priorBound <- round(.qBetaBinom(p = options[["confidence"]], N = jaspResults[["N"]]$object - result[["n"]], shape1 = result[["priorA"]], shape2 = result[["priorB"]]) / jaspResults[["N"]]$object, 3)
 
   priorBound <- paste0(priorBound * 100, "%")
   row <- data.frame(implicitn = implicitn, implicitk = implicitk, priorbound = priorBound)
@@ -404,8 +404,8 @@
         bound             <- qbeta(p = options[["confidence"]], shape1 = priorA + k, shape2 = priorB + (n - k), lower.tail = TRUE)
         interval          <- qbeta(p = c((1 - options[["confidence"]])/2, 1 - (1 - options[["confidence"]])/2), shape1 = priorA + k, shape2 = priorB + (n - k), lower.tail = TRUE)
       if(options[["estimator"]] == "betabinomialBound")
-        bound             <- .qBetaBinom(p = options[["confidence"]], N = jaspResults[["N"]]$object, shape1 = priorA + k, shape2 = priorB + (n - k)) / jaspResults[["N"]]$object
-        interval          <- .qBetaBinom(p = c((1 - options[["confidence"]])/2, 1 - (1 - options[["confidence"]])/2), N = jaspResults[["N"]]$object, shape1 = priorA + k, shape2 = priorB + (n - k)) / jaspResults[["N"]]$object
+        bound             <- .qBetaBinom(p = options[["confidence"]], N = jaspResults[["N"]]$object - n, shape1 = priorA + k, shape2 = priorB + (n - k)) / jaspResults[["N"]]$object
+        interval          <- .qBetaBinom(p = c((1 - options[["confidence"]])/2, 1 - (1 - options[["confidence"]])/2), N = jaspResults[["N"]]$object - n, shape1 = priorA + k, shape2 = priorB + (n - k)) / jaspResults[["N"]]$object
     }
 
     resultList <- list()
@@ -605,11 +605,11 @@
 
           df <- data.frame(x = 0:jaspResults[["N"]]$object, y = .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, shape1 = evaluationResult[["posteriorA"]], shape2 = evaluationResult[["posteriorB"]]))
           if(options[["areaUnderPosterior"]]=="displayCredibleBound"){
-            lim <- .qBetaBinom(p = options[["confidence"]], N = jaspResults[["N"]]$object, shape1 = evaluationResult[["posteriorA"]], shape2 = evaluationResult[["posteriorB"]])
+            lim <- .qBetaBinom(p = options[["confidence"]], N = jaspResults[["N"]]$object - evaluationResult[["n"]], shape1 = evaluationResult[["posteriorA"]], shape2 = evaluationResult[["posteriorB"]])
             df <- df[1:lim, ]
             p <- p + ggplot2::geom_bar(data = df, stat="identity", fill = rgb(0, 0.25, 1, .5))
           } else {
-            lim <- .qBetaBinom(p = c((1 - options[["confidence"]])/2, 1 - (1 - options[["confidence"]])/2), N = jaspResults[["N"]]$object, shape1 = evaluationResult[["posteriorA"]], shape2 = evaluationResult[["posteriorB"]])
+            lim <- .qBetaBinom(p = c((1 - options[["confidence"]])/2, 1 - (1 - options[["confidence"]])/2), N = jaspResults[["N"]]$object - evaluationResult[["n"]], shape1 = evaluationResult[["posteriorA"]], shape2 = evaluationResult[["posteriorB"]])
             df <- df[lim[1]:lim[2], ]
             p <- p + ggplot2::geom_bar(data = df, stat="identity", fill = rgb(0, 0.25, 1, .5))
           }
