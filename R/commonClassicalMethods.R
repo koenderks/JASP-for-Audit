@@ -364,7 +364,7 @@
     if(options[["estimator"]] == "stringerBound"){
       mle <- paste0(round(sum(evaluationResult[["z"]]) / evaluationResult[["n"]], 4) * 100, "%")
     } else {
-      mle <- round(evaluationResult[["mle"]], 2) # CHANGE
+      mle <- paste(jaspResults[["valutaTitle"]]$object, round(evaluationResult[["mle"]], 2))
     }
     errors <- round(sum(evaluationResult[["z"]]), 2)
 
