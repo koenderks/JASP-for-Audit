@@ -65,7 +65,7 @@ Form {
                   RadioButton { text: qsTr("Low") ; name: "Low" }
               }
               RadioButtonGroup { name: "expectedErrors"; id: expectedErrors; title: qsTr("Expected errors")
-                RowLayout {
+                RowLayout { enabled: monetaryVariable.count > 0
                     RadioButton { text: qsTr("Absolute"); name: "expectedAbsolute"; id: expectedAbsolute}
                     DoubleField { name: "expectedNumber"; enabled: expectedAbsolute.checked; defaultValue: 0; min: 0; max: 1e10; decimals: 2; visible: expectedAbsolute.checked; fieldWidth: 60; label: euroValuta.checked ? "€" : (dollarValuta.checked ? "$" : otherValutaName.value) }
                 }
