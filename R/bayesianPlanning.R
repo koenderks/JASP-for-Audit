@@ -132,6 +132,7 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
     if(options[["expectedBF"]])
       row <- cbind(row, expBF = ".")
     summaryTable$addRows(row)
+    summaryTable$addFootnote(message = "The materiality is defined as 0.", symbol="<b>ANALYSIS NOT READY.</b>")
     return()
   }
 

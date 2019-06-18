@@ -118,6 +118,7 @@
   if(jaspResults[["materiality"]]$object == 0){
     row <- data.frame(materiality = ".", IR = planningResult[["IR"]], CR = planningResult[["CR"]], DR = DRtable, k = 0, n = ".")
     planningSummary$addRows(row)
+    planningSummary$addFootnote(message = "The materiality is defined as 0.", symbol="<b>ANALYSIS NOT READY.</b>")
     return()
   }
 

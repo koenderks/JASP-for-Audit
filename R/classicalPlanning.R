@@ -103,6 +103,7 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
 
     row <- data.frame(materiality = ".", IR = options[["IR"]], CR = options[["CR"]], DR = DRtable, k = ".", n = ".")
     summaryTable$addRows(row)
+    summaryTable$addFootnote(message = "The materiality is defined as 0.", symbol="<b>ANALYSIS NOT READY.</b>")
     return()
   }
 

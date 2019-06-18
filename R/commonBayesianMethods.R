@@ -144,6 +144,7 @@
     if(options[["expectedBF"]])
       row <- cbind(row, expBF = ".")
     planningSummary$addRows(row)
+    planningSummary$addFootnote(message = "The materiality is defined as 0.", symbol="<b>ANALYSIS NOT READY.</b>")
     return()
   }
 
