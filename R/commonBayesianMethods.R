@@ -448,13 +448,13 @@
     if(options[["areaUnderPosterior"]]=="displayCredibleBound"){
       evaluationTable$addColumnInfo(name = 'bound',         title = paste0(options[["confidence"]] * 100,"% Credible bound"), type = 'string')
       if(options[["monetaryVariable"]] != "")
-          evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
+          evaluationTable$addColumnInfo(name = 'projm',         title = "Maximum Misstatement",           type = 'string')
     } else {
       evaluationTable$addColumnInfo(name = 'cilow',          title = "Lower", type = 'string', overtitle = paste0(options[["confidence"]] * 100,"% Credible interval"))
       evaluationTable$addColumnInfo(name = 'cihigh',         title = "Upper", type = 'string', overtitle = paste0(options[["confidence"]] * 100,"% Credible interval"))
       if(options[["monetaryVariable"]] != ""){
-        evaluationTable$addColumnInfo(name = 'projectedlow',         title = "Lower",           type = 'string', overtitle = "Projected misstatement")
-        evaluationTable$addColumnInfo(name = 'projectedhigh',         title = "Upper",           type = 'string', overtitle = "Projected misstatement")
+        evaluationTable$addColumnInfo(name = 'projectedlow',         title = "Lower",           type = 'string', overtitle = "Maximum misstatement")
+        evaluationTable$addColumnInfo(name = 'projectedhigh',         title = "Upper",           type = 'string', overtitle = "Maximum misstatement")
       }
     }
     if(options[["bayesFactor"]])
@@ -745,13 +745,13 @@
     if(options[["areaUnderPosterior"]]=="displayCredibleBound"){
       evaluationTable$addColumnInfo(name = 'bound',         title = paste0(options[["confidence"]] * 100,"% Credible bound"), type = 'string')
       if(options[["monetaryVariable"]] != "")
-          evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
+          evaluationTable$addColumnInfo(name = 'projm',         title = "Maximum Misstatement",           type = 'string')
     } else {
       evaluationTable$addColumnInfo(name = 'cilow',          title = "Lower", type = 'string', overtitle = paste0(options[["confidence"]] * 100,"% Credible interval"))
       evaluationTable$addColumnInfo(name = 'cihigh',         title = "Upper", type = 'string', overtitle = paste0(options[["confidence"]] * 100,"% Credible interval"))
       if(options[["monetaryVariable"]] != ""){
-        evaluationTable$addColumnInfo(name = 'projectedlow',         title = "Lower",           type = 'string', overtitle = "Projected misstatement")
-        evaluationTable$addColumnInfo(name = 'projectedhigh',         title = "Upper",           type = 'string', overtitle = "Projected misstatement")
+        evaluationTable$addColumnInfo(name = 'projectedlow',         title = "Lower",           type = 'string', overtitle = "Maximum misstatement")
+        evaluationTable$addColumnInfo(name = 'projectedhigh',         title = "Upper",           type = 'string', overtitle = "Maximum misstatement")
       }
     }
 

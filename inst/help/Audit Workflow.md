@@ -77,7 +77,7 @@ Default Output
 - Errors: The number of errors in the selection
 - Total taining: The sum of the proportional errors
 - x-% Confidence bound: The estimate of the maximum misstatement in percentages
-- Projected misstatement: The estimate of the maximum misstatement in monetary values
+- Maximum misstatement: The estimate of the maximum misstatement in monetary values
 
 Tables and plots
 -------

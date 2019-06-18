@@ -233,7 +233,7 @@
       evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                  type = 'string')
     evaluationTable$addColumnInfo(name = 'bound',         title = paste0(options[["confidence"]] * 100,"% Confidence bound"), type = 'string')
     if(options[["materiality"]] == "materialityAbsolute" || options[["monetaryVariable"]] != "")
-      evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
+      evaluationTable$addColumnInfo(name = 'projm',         title = "Maximum Misstatement",           type = 'string')
 
     message <- base::switch(options[["estimator"]],
                               "gammaBound" = "The confidence bound is calculated according to the <b>gamma</b> distributon.",
@@ -339,7 +339,7 @@
     if(options[["mostLikelyError"]])
       evaluationTable$addColumnInfo(name = 'mle',         title = "MLE",                              type = 'string')
     evaluationTable$addColumnInfo(name = 'bound',         title = paste0(options[["confidence"]] * 100,"% Confidence bound"), type = 'string')
-    evaluationTable$addColumnInfo(name = 'projm',         title = "Projected Misstatement",           type = 'string')
+    evaluationTable$addColumnInfo(name = 'projm',         title = "Maximum Misstatement",           type = 'string')
 
     message <- base::switch(options[["estimator"]],
                               "stringerBound" = "The confidence bound is calculated according to the <b>Stringer</b> method.",
@@ -414,8 +414,8 @@
 
         mle                     <- N * meanw
         stand.dev               <- sd(w) * (N / sqrt(n)) * sqrt( (N-n) / (N-1) )
-        upperValue              <- mle + qt(p = 1 - alpha, df = n - 1) * stand.dev
-        bound                   <- (upperValue - B) / B
+        upperValue              <- mle - qt(p = 1 - alpha, df = n - 1) * stand.dev
+        bound                   <- (B - upperValue) / B
     }
 
     resultList <- list()
@@ -467,11 +467,11 @@
 
         mle                     <- B - N * meant
         stand.dev               <- sd(t) * (N / sqrt(n)) * sqrt( (N-n) / (N-1) )
-        upperValue              <- mle + qt(p = 1 - alpha, df = n - 1) * stand.dev
+        upperValue              <- mle - qt(p = 1 - alpha, df = n - 1) * stand.dev
         if(upperValue == 0){
           bound                 <- 0
         } else {
-          bound                 <- (upperValue - B) / B
+          bound                 <- (B - upperValue) / B
         }
     }
 
@@ -528,11 +528,11 @@
 
         mle                     <- q * B
         stand.dev               <- sqrt( ( sum(t^2) - 2 * (1-q) * sum(b*t) + (1 - q)^2 * sum(b^2) ) / (n - 1)) * (N / sqrt(n)) * sqrt( (N-n) / (N-1) )
-        upperValue              <- mle + qt(p = 1 - alpha, df = n - 1) * stand.dev
+        upperValue              <- mle - qt(p = 1 - alpha, df = n - 1) * stand.dev
         if(upperValue == 0){
           bound                 <- 0
         } else {
-          bound                 <- (upperValue - B) / B
+          bound                 <- (B - upperValue) / B
         }
     }
 
@@ -581,19 +581,18 @@
         N                       <- jaspResults[["N"]]$object
         b                       <- sample[, .v(options[["monetaryVariable"]])]
         w                       <- sample[, .v(options[["auditResult"]])]
-        b1                      <- as.numeric(coef(lm(b ~ w))[2])
-        #b1                      <- (sum(b * w) - (sum(b) * sum(w) / n)) / (sum(b^2) - (sum(b)^2 / n))
+        b1                      <- as.numeric(coef(lm(w ~ b))[2])
 
         meanb                   <- mean(b)
         meanw                   <- mean(w)
 
         mleregression           <- N * meanw + b1 * (B - N * meanb)
         stand.dev               <- sd(w) * sqrt(1 - cor(b, w)^2) * ( N / sqrt(n)) * sqrt( (N-n) / (N-1) )
-        upperValue              <- mleregression + qt(p = 1 - alpha, df = n - 1) * stand.dev
+        upperValue              <- mleregression - qt(p = 1 - alpha, df = n - 1) * stand.dev
         if(upperValue == 0){
           bound                 <- 0
         } else {
-          bound                 <- (upperValue - B) / B
+          bound                 <- (B - upperValue) / B
         }
     }
 

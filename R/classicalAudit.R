@@ -107,7 +107,7 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
     jaspResults[["planningContainer"]][["planningParagraph"]] <- createJaspHtml(paste0("The most likely error in the data was expected to be <b>", expected.errors ,"</b>. The sample size that is required to prove a materiality of <b>", materialityLevelLabel ,"</b>, assuming
                                                                                               the sample contains <b>", expected.errors ,"</b> full errors, is <b>", requiredSampleSize ,"</b>. This sample size is based on the <b>", options[["planningModel"]] , "</b> distribution, the inherent risk <b>(", options[["IR"]] , ")</b>, the
                                                                                               control risk <b>(", options[["CR"]] , ")</b> and the expected errors. Consequently, if the sum of errors from the audited observations exceeds <b>", max.errors ,"</b>, the
-                                                                                              projected misstatement exceeds materiality and the population cannot be approved."), "p")
+                                                                                              maximum misstatement exceeds materiality and the population cannot be approved."), "p")
       jaspResults[["planningContainer"]][["planningParagraph"]]$position <- 1
       jaspResults[["planningContainer"]][["planningParagraph"]]$dependOn(options = c("expectedPercentage", "expectedErrors", "expectedNumber", "planningModel", "IR", "CR", "materialityPercentage", "confidence", "materialityValue"))
   }
