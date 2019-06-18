@@ -75,7 +75,7 @@ Form {
                 GroupBox { title: qsTr("Explanatory text")
                   RowLayout {
                     CheckBox { id: explanatoryText; text: qsTr("Enable"); name: "explanatoryText"; checked: true }
-                    MenuButton { width:	20; iconSource: "qrc:/images/info-button.png"; toolTip: "Show explanatory text at each step of the analysis"; radius: 20; Layout.alignment: Qt.AlignRight }
+                    MenuButton { width:	20; iconSource: "qrc:/images/info-button.png"; toolTip: "Show explanatory text at each step of the analysis"; radius: 20; Layout.alignment: Qt.AlignRight; onClicked: helpModel.showOrTogglePage(myAnalysis.fullHelpPath("explanatoryText")) }
                   }
                 }
                 RadioButtonGroup { title: qsTr("Control risk"); name: "CR"; id: cr
@@ -151,11 +151,11 @@ Form {
                 RadioButtonGroup { title: qsTr("Sampling units"); name: "selectionType"; id: selectionType
                   RowLayout {
                     RadioButton { text: qsTr("Monetary unit sampling"); name: "musSampling"; id: musSampling; enabled: (monetaryVariable.count > 0 ? true : false); checked: true }
-                    MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Select observations with probability proportional to their value"; radius: 20; Layout.alignment: Qt.AlignRight }
+                    MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Select observations with probability proportional to their value"; radius: 20; Layout.alignment: Qt.AlignRight; onClicked: helpModel.showOrTogglePage(myAnalysis.fullHelpPath("monetaryUnitSampling")) }
                   }
                   RowLayout {
                     RadioButton { text: qsTr("Record sampling") ; name: "recordSampling"; id: recordSampling }
-                    MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Select observations with equal probability"; radius: 20; Layout.alignment: Qt.AlignRight }
+                    MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Select observations with equal probability"; radius: 20; Layout.alignment: Qt.AlignRight; onClicked: helpModel.showOrTogglePage(myAnalysis.fullHelpPath("recordSampling")) }
                   }
                 }
                 RadioButtonGroup { title: qsTr("Selection method"); name: "selectionMethod"; id: selectionMethod
