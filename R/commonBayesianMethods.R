@@ -233,6 +233,8 @@
     yLim <- range(yBreaks)
 
     pointdata <- data.frame(x = jaspResults[["materiality"]]$object, y = dbeta(jaspResults[["materiality"]]$object, planningResult[["priorA"]], planningResult[["priorB"]]))
+    kk <- base::switch(options[["expectedErrors"]], "expectedRelative" = options[["expectedPercentage"]], "expectedAbsolute" = round(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object, 2))
+    secondPointData <- data.frame(x = kk, y = dbeta(kk, planningResult[["priorA"]], planningResult[["priorB"]]))
 
     if(!options[["priorPlotExpectedPosterior"]]){
       scaleValues <- c("dashed")
@@ -265,6 +267,7 @@
     }
 
     p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = pointdata, size = 3, shape = 21, stroke = 2, color = "black", fill = "red")
+    p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = secondPointData, size = 3, shape = 21, stroke = 2, color = "black", fill = "grey")
 
     thm <- ggplot2::theme(
   		axis.ticks.y = ggplot2::element_blank(),
