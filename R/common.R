@@ -190,7 +190,16 @@
   materiality       <- jaspResults[["materiality"]]$object
   bound             <- evaluationResult[["bound"]]
   proj.misstatement <- bound * jaspResults[["total_data_value"]]$object
-  mle               <- ifelse(options[["variableType"]] == "variableTypeCorrect", yes = evaluationResult[["k"]] / evaluationResult[["n"]], no = sum(evaluationResult[["z"]]) / evaluationResult[["n"]])
+  if(options[["variableType"]] == "variableTypeCorrect"){
+    mle <- evaluationResult[["k"]] / evaluationResult[["n"]]
+  } else {
+    if(options[["estimator"]] == "stringerBound" || options[["estimator"]] == "coxAndSnellBound"){
+      mle <- sum(evaluationResult[["z"]]) / evaluationResult[["n"]]
+    } else {
+      mle <- abs(evaluationResult[["mleTable"]])
+    }
+  }
+  #mle               <- ifelse(options[["variableType"]] == "variableTypeCorrect", yes = evaluationResult[["k"]] / evaluationResult[["n"]], no = sum(evaluationResult[["z"]]) / evaluationResult[["n"]])
   
   label             <- rev(c("Materiality", "Maximum error", "Most likely error"))
   values            <- rev(c(materiality, bound, mle))

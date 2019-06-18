@@ -364,7 +364,7 @@
     if(options[["estimator"]] == "stringerBound"){
       mle <- paste0(round(sum(evaluationResult[["z"]]) / evaluationResult[["n"]], 4) * 100, "%")
     } else {
-      mle <- paste(jaspResults[["valutaTitle"]]$object, round(evaluationResult[["mle"]], 2))
+      mle <- paste(jaspResults[["valutaTitle"]]$object, round(evaluationResult[["mleTable"]] * total_data_value, 2))
     }
     errors <- round(sum(evaluationResult[["z"]]), 2)
 
@@ -397,6 +397,7 @@
     z                       <- 0
     bound                   <- "."
     mle                     <- 0
+    mleTable                <- 0
 
     if(jaspResults[["runEvaluation"]]$object){
 
@@ -414,8 +415,9 @@
 
         mle                     <- N * meanw
         stand.dev               <- sd(w) * (N / sqrt(n)) * sqrt( (N-n) / (N-1) )
-        upperValue              <- mle - qt(p = 1 - alpha, df = n - 1) * stand.dev
-        bound                   <- (B - upperValue) / B
+        lowerValue              <- mle - qt(p = 1 - alpha, df = n - 1) * stand.dev
+        bound                   <- (B - lowerValue) / B
+        mleTable                <- (B - mle) / B
     }
 
     resultList <- list()
@@ -428,6 +430,7 @@
     resultList[["bound"]]       <- bound
     resultList[["alpha"]]       <- alpha
     resultList[["mle"]]         <- mle
+    resultList[["mleTable"]]    <- mleTable
 
     jaspResults[["evaluationResult"]] <- createJaspState(resultList)
     jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materialityPercentage", "estimator", "monetaryVariable", "materialityValue", "variableType"))
@@ -449,6 +452,7 @@
     z                       <- 0
     bound                   <- "."
     mle                     <- 0
+    mleTable                <- 0
 
     if(jaspResults[["runEvaluation"]]$object){
 
@@ -467,12 +471,13 @@
 
         mle                     <- B - N * meant
         stand.dev               <- sd(t) * (N / sqrt(n)) * sqrt( (N-n) / (N-1) )
-        upperValue              <- mle - qt(p = 1 - alpha, df = n - 1) * stand.dev
-        if(upperValue == 0){
+        lowerValue              <- mle - qt(p = 1 - alpha, df = n - 1) * stand.dev
+        if(lowerValue == 0){
           bound                 <- 0
         } else {
-          bound                 <- (B - upperValue) / B
+          bound                 <- (B - lowerValue) / B
         }
+        mleTable                <- (B - mle) / B
     }
 
     resultList <- list()
@@ -485,6 +490,7 @@
     resultList[["bound"]]       <- bound
     resultList[["alpha"]]       <- alpha
     resultList[["mle"]]         <- mle
+    resultList[["mleTable"]]    <- mleTable
 
     jaspResults[["evaluationResult"]] <- createJaspState(resultList)
     jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materialityPercentage", "estimator", "monetaryVariable", "materialityValue", "variableType"))
@@ -506,6 +512,7 @@
     z                       <- 0
     bound                   <- "."
     mle                     <- 0
+    mleTable                <- 0
 
     if(jaspResults[["runEvaluation"]]$object){
 
@@ -528,12 +535,13 @@
 
         mle                     <- q * B
         stand.dev               <- sqrt( ( sum(t^2) - 2 * (1-q) * sum(b*t) + (1 - q)^2 * sum(b^2) ) / (n - 1)) * (N / sqrt(n)) * sqrt( (N-n) / (N-1) )
-        upperValue              <- mle - qt(p = 1 - alpha, df = n - 1) * stand.dev
-        if(upperValue == 0){
+        lowerValue              <- mle - qt(p = 1 - alpha, df = n - 1) * stand.dev
+        if(lowerValue == 0){
           bound                 <- 0
         } else {
-          bound                 <- (B - upperValue) / B
+          bound                 <- (B - lowerValue) / B
         }
+        mleTable                <- (B - mle) / B
     }
 
     resultList <- list()
@@ -546,6 +554,7 @@
     resultList[["bound"]]       <- bound
     resultList[["alpha"]]       <- alpha
     resultList[["mle"]]         <- mle
+    resultList[["mleTable"]]    <- mleTable
 
     jaspResults[["evaluationResult"]] <- createJaspState(resultList)
     jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materialityPercentage", "estimator", "monetaryVariable", "materialityValue", "variableType"))
@@ -567,6 +576,7 @@
     z                       <- 0
     bound                   <- "."
     mleregression           <- 0
+    mleTable                <- 0
 
     if(jaspResults[["runEvaluation"]]$object){
 
@@ -588,12 +598,13 @@
 
         mleregression           <- N * meanw + b1 * (B - N * meanb)
         stand.dev               <- sd(w) * sqrt(1 - cor(b, w)^2) * ( N / sqrt(n)) * sqrt( (N-n) / (N-1) )
-        upperValue              <- mleregression - qt(p = 1 - alpha, df = n - 1) * stand.dev
-        if(upperValue == 0){
+        lowerValue              <- mleregression - qt(p = 1 - alpha, df = n - 1) * stand.dev
+        if(lowerValue == 0){
           bound                 <- 0
         } else {
-          bound                 <- (B - upperValue) / B
+          bound                 <- (B - lowerValue) / B
         }
+        mleTable                <- (B - mleregression) / B
     }
 
     resultList <- list()
@@ -606,6 +617,7 @@
     resultList[["bound"]]       <- bound
     resultList[["alpha"]]       <- alpha
     resultList[["mle"]]         <- mleregression
+    resultList[["mleTable"]]    <- mleTable
 
     jaspResults[["evaluationResult"]] <- createJaspState(resultList)
     jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materialityPercentage", 

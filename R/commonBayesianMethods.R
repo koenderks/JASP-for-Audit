@@ -790,7 +790,7 @@
     if(options[["estimator"]] == "coxAndSnellBound"){
         mle <- paste0(round(sum(evaluationResult[["z"]]) / evaluationResult[["n"]], 4) * 100, "%")
     } else if(options[["estimator"]] == "regressionBound"){
-        mle <- round(evaluationResult[["mle"]], 2) # CHANGE
+        mle <- paste(jaspResults[["valutaTitle"]]$object, round(evaluationResult[["mleTable"]] * total_data_value, 2))
     }
 
     if(options[["areaUnderPosterior"]]=="displayCredibleBound"){
@@ -893,6 +893,7 @@
     z                       <- 0
     bound                   <- "."
     mle                     <- 0
+    mleTable                <- 0
 
     if(options[["auditResult"]] != "" && options[["sampleFilter"]] != "" && options[["monetaryVariable"]] != ""){
         sample                  <- dataset[, c(.v(options[["monetaryVariable"]]), .v(options[["auditResult"]]))]
@@ -918,12 +919,13 @@
 
         mle                     <- N * meanw + b1 * (B - N * meanb)
         stand.dev               <- sd(w) * sqrt(1 - cor(b, w)^2) * ( N / sqrt(n)) * sqrt( (N-n) / (N-1) )
-        upperValue              <- mle + qt(p = 1 - alpha, df = n - 1) * stand.dev
-        if(upperValue == 0){
+        lowerValue              <- mle - qt(p = 1 - alpha, df = n - 1) * stand.dev
+        if(lowerValue == 0){
           bound                 <- 0
         } else {
-          bound                 <- (upperValue - B) / B
+          bound                 <- (B - lowerValue) / B
         }
+        mleTable                <- (B - mle) / B
     }
 
     resultList <- list()
@@ -936,6 +938,7 @@
     resultList[["bound"]]       <- bound
     resultList[["alpha"]]       <- alpha
     resultList[["mle"]]         <- mle
+    resultList[["mleTable"]]    <- mleTable
 
     jaspResults[["evaluationResult"]] <- createJaspState(resultList)
     jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materiality", "estimator", "monetaryVariable"))
