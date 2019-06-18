@@ -307,6 +307,8 @@
 
     pointdata <- data.frame(x = jaspResults[["materiality"]]$object * jaspResults[["N"]]$object, y = .dBetaBinom(ceiling(jaspResults[["materiality"]]$object * jaspResults[["N"]]$object),
                           N = jaspResults[["N"]]$object, shape1 = planningResult[["priorA"]], shape2 = planningResult[["priorB"]]))
+    kk <- base::switch(options[["expectedErrors"]], "expectedRelative" = options[["expectedPercentage"]] * jaspResults[["N"]]$object, "expectedAbsolute" = round(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * jaspResults[["N"]]$object, 2))
+    secondPointData <- data.frame(x = kk, y = .dBetaBinom(kk, N = jaspResults[["N"]]$object, planningResult[["priorA"]], planningResult[["priorB"]]))
 
     if(!options[["priorPlotExpectedPosterior"]]){
       scaleValues <- c("dashed")
@@ -339,6 +341,8 @@
     }
 
     p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = pointdata, size = 3, shape = 21, stroke = 2, color = "black", fill = "red")
+    p <- p + ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = secondPointData, size = 3, shape = 21, stroke = 2, color = "black", fill = "grey")
+    
     thm <- ggplot2::theme(
       axis.ticks.y = ggplot2::element_blank(),
       axis.title.y = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = -5, b = 0, l = 0))
