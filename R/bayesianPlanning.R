@@ -68,7 +68,7 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
       if(options[["explanatoryText"]]){
         jaspResults[["planningContainer"]][["figure2"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Decision analysis for the current options. The bars represent the sample size that is required under different planning distributions.
                                                                                     The the number of expected errors in the selection is colored in red. The number of expected correct observations is colored in green. 
-                                                                                    The most efficient distribution for these data is the <b>", jaspResults[["mostEfficientPlanningDistribution"]]$object ,"</b> distribution."), "p")
+                                                                                    The most efficient distribution for these options is the <b>", jaspResults[["mostEfficientPlanningDistribution"]]$object ,"</b> distribution."), "p")
         jaspResults[["planningContainer"]][["figure2"]]$position <- 5
         jaspResults[["planningContainer"]][["figure2"]]$dependOn(optionsFromObject= jaspResults[["planningContainer"]][["decisionPlot"]])
         jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
@@ -90,7 +90,8 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
         }
         if(options[["explanatoryText"]]){
           jaspResults[["planningContainer"]][["figure3"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The prior probability distribution <b>(", options[["planningModel"]] ,")</b> on the misstatement in the population. The prior parameters are
-                                                                derived from the assessments of the inherent and control risk, along with the expected errors."), "p")
+                                                                derived from the assessments of the inherent and control risk, along with the expected errors. The expected posterior has its 
+                                                                upper confidence bound below materiality. The red dot represents the materiality, and the grey dot reprents the expected errors."), "p")
           jaspResults[["planningContainer"]][["figure3"]]$position <- 7
           jaspResults[["planningContainer"]][["figure3"]]$dependOn(optionsFromObject= jaspResults[["planningContainer"]][["priorPlot"]])
           jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)

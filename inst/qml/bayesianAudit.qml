@@ -169,15 +169,15 @@ Form {
               RadioButtonGroup { title: qsTr("Selection method"); name: "selectionMethod"; id: selectionMethod
                 RowLayout{
                   RadioButton { text: qsTr("Random sampling"); name: "randomSampling" ; id: randomSampling}
-                  MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Select observations with equal "; radius: 20; Layout.alignment: Qt.AlignRight; onClicked: helpModel.showOrTogglePage(myAnalysis.fullHelpPath("randomSampling")) }
+                  MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Select observations by random sampling"; radius: 20; Layout.alignment: Qt.AlignRight; onClicked: helpModel.showOrTogglePage(myAnalysis.fullHelpPath("randomSampling")) }
                 }
                 RowLayout{
                   RadioButton { text: qsTr("Cell sampling"); name: "cellSampling" ; id: cellSampling}
-                  MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Select observations with equal "; radius: 20; Layout.alignment: Qt.AlignRight; onClicked: helpModel.showOrTogglePage(myAnalysis.fullHelpPath("cellSampling")) }
+                  MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Select observations by cell sampling"; radius: 20; Layout.alignment: Qt.AlignRight; onClicked: helpModel.showOrTogglePage(myAnalysis.fullHelpPath("cellSampling")) }
                 }
                 RowLayout{
                   RadioButton { text: qsTr("Fixed interval sampling") ; name: "systematicSampling" ; id: systematicSampling; checked: true}
-                  MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Select observations with equal "; radius: 20; Layout.alignment: Qt.AlignRight; onClicked: helpModel.showOrTogglePage(myAnalysis.fullHelpPath("fixedIntervalSampling")) }
+                  MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Select observations by fixed interval sampling"; radius: 20; Layout.alignment: Qt.AlignRight; onClicked: helpModel.showOrTogglePage(myAnalysis.fullHelpPath("fixedIntervalSampling")) }
                 }
               }
               IntegerField { text: qsTr("Seed"); name: "seed"; id: seed; defaultValue: 1; min: 1; max: 999; fieldWidth: 60 }
