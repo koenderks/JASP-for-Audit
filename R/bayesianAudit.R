@@ -6,12 +6,12 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
     ### PLANNING ###
     .bayesianPlanning(dataset, options, jaspResults)
     ### SELECTION ###
-    if(!options[["samplingChecked"]]) return()    # Stop if "To Selection" is not pressed
+    if(!options[["samplingChecked"]] || jaspResults[["planningContainer"]]$getError()) return()    # Stop if "To Selection" is not pressed
     .bayesianSelection(options, jaspResults)
     ### EXECUTION ###
     .execution(options, jaspResults)
     ### EVALUATION ###
-    if(!options[["evaluationChecked"]]) return()  # Stop if "To Evaluation" is not pressed
+    if(!options[["evaluationChecked"]] || jaspResults[["planningContainer"]]$getError() || jaspResults[["selectionContainer"]]$getError()) return()  # Stop if "To Evaluation" is not pressed
     .bayesianEvaluation(options, jaspResults)
     ### CONCLUSION ###
     .bayesianConclusion(options, jaspResults)
