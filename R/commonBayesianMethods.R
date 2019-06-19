@@ -111,7 +111,7 @@
 
   if(!is.null(planningContainer[["planningSummary"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-  planningSummary <- createJaspTable("Planning summary")
+  planningSummary <- createJaspTable("Planning Summary")
   planningSummary$position <- position
   planningSummary$dependOn(options = c("IR", "CR", "confidence", "expectedErrors", "materialityPercentage", "expectedPercentage", "expectedNumber", "expectedBF",
                                     "planningModel", "materialityValue", "recordNumberVariable", "monetaryVariable", "materiality"))
@@ -177,7 +177,7 @@
 
   if(!is.null(planningContainer[["sampletable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-  sampletable                       <- createJaspTable("Implicit sample")
+  sampletable                       <- createJaspTable("Implicit Sample")
   sampletable$position              <- position
   sampletable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "implicitSampleTable", "expectedPercentage", "expectedNumber",
                                   "planningModel", "materialityValue"))
@@ -210,7 +210,7 @@
 
   if(!is.null(planningContainer[["priorPlot"]])) return()
 
-  priorPlot <- createJaspPlot(plot = NULL, title = "Implied prior from risk assessments", width = 600, height = 400)
+  priorPlot <- createJaspPlot(plot = NULL, title = "Implied Prior from Risk Assessments", width = 600, height = 400)
   priorPlot$position <- position
   priorPlot$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "priorPlotLimit", "priorPlot", "priorPlotAdditionalInfo", "priorPlotExpectedPosterior",
                                                                                     "planningModel", "expectedPercentage", "expectedNumber", "materialityValue"))
@@ -462,7 +462,7 @@
 
     if(!is.null(evaluationContainer[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-    evaluationTable                       <- createJaspTable("Evaluation summary")
+    evaluationTable                       <- createJaspTable("Evaluation Summary")
     evaluationTable$position              <- position
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "expectedErrors", "expectedPercentage", "expectedNumber",
                                       "sampleFilter", "mostLikelyError", "bayesFactor", "planningModel", "materialityValue", "variableType", "estimator", "areaUnderPosterior", "valuta"))
@@ -757,7 +757,7 @@
 
     if(!is.null(evaluationContainer[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-    evaluationTable                       <- createJaspTable("Evaluation summary")
+    evaluationTable                       <- createJaspTable("Evaluation Summary")
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "sampleFilter", "planningModel", "mostLikelyError", "estimator", "bayesFactor",
                                         "materialityValue", "variableType", "areaUnderPosterior", "valuta"))
     evaluationTable$position <- position
@@ -981,7 +981,7 @@
 
   if(!is.null(evaluationContainer[["priorAndPosteriorPlot"]])) return()
 
-  priorAndPosteriorPlot <- createJaspPlot(plot = NULL, title = "Prior and posterior plot", width = 600, height = 400)
+  priorAndPosteriorPlot <- createJaspPlot(plot = NULL, title = "Prior and Posterior", width = 600, height = 400)
   priorAndPosteriorPlot$position <- position
   priorAndPosteriorPlot$dependOn(options = c("IR", "CR", "confidence", "priorAndPosteriorPlotLimit", "priorAndPosteriorPlot", "priorAndPosteriorPlotAdditionalInfo", "materialityPercentage", "auditResult",
                                               "expectedErrors", "expectedPercentage", "expectedNumber", "sampleFilter", "planningModel", "materialityValue", "displayCredibleInterval"))

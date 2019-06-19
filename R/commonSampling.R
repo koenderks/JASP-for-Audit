@@ -43,7 +43,7 @@
     sample <- jaspResults[["sample"]]$object
     
     if(options[["displaySample"]]){
-      sampleTable <- createJaspTable("Selected observations")
+      sampleTable <- createJaspTable("Selected Observations")
       sampleTable$position <- position
       sampleTable$dependOn(options = c("additionalVariables", "seed", "recordNumberVariable", "monetaryVariable", "selectionType", "materiality",
                                     "displaySample", "selectionMethod", "expectedErrors", "expectedNumber", "expectedPercentage"))
@@ -148,7 +148,7 @@
     sample <- jaspResults[["sample"]]$object
     
     if(options[["displaySample"]]){
-      sampleTable                           <- createJaspTable("Selected observations")
+      sampleTable                           <- createJaspTable("Selected Observations")
       sampleTable$position                  <- position
       sampleTable$dependOn(options = c("additionalVariables", "seed", "recordNumberVariable", "monetaryVariable", "selectionType", "materiality",
                                     "displaySample", "selectionMethod", "expectedErrors", "expectedNumber", "expectedPercentage"))
@@ -270,7 +270,7 @@
     sample <- jaspResults[["sample"]]$object
     
     if(options[["displaySample"]]){
-      sampleTable                           <- createJaspTable("Selected observations")
+      sampleTable                           <- createJaspTable("Selected Observations")
       sampleTable$position                  <- position
       sampleTable$dependOn(options = c("additionalVariables", "seed", "recordNumberVariable", "monetaryVariable", "selectionType", "materiality", "displaySample", "selectionMethod", 
                                     "expectedErrors", "expectedNumber", "expectedPercentage", "intervalStartingPoint"))
@@ -316,7 +316,7 @@
     variables                       <- unlist(options[["additionalVariables"]])
 
     all.variables                   <- c(rankingVariable, monetaryVariable, variables)
-    sampleDescriptivesTable                    <- createJaspTable("Selection descriptives")
+    sampleDescriptivesTable                    <- createJaspTable("Selection Descriptives")
     sampleDescriptivesTable$transpose          <- TRUE
     sampleDescriptivesTable$position           <- position
 
@@ -363,7 +363,7 @@
 
   if(!is.null(selectionContainer[["selectionInformationTable"]])) return()
 
-  selectionInformationTable                           <- createJaspTable("Selection summary")
+  selectionInformationTable                           <- createJaspTable("Selection Summary")
   selectionInformationTable$position                  <- position
   selectionInformationTable$dependOn(options = c("additionalVariables", "intervalStartingPoint", "rankingVariable", "selectionType", "selectionMethod", "monetaryVariable", "recordNumberVariable", "seed", "valuta"))
   

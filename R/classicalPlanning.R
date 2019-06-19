@@ -61,7 +61,7 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
 
 .classicalPlanningManual <- function(options, jaspResults, planningContainer){
 
-  summaryTable <- createJaspTable("Planning summary")
+  summaryTable <- createJaspTable("Planning Summary")
   summaryTable$position <- 1
   summaryTable$dependOn(options = c("IR", "CR", "confidence", "expectedErrors", "materialityPercentage", "populationSize", "expectedPercentage", "expectedNumber", "expectedBF",
                                   "planningModel", "materialityValue", "populationValue", "materiality", "valuta"))

@@ -86,7 +86,7 @@
 
   if(!is.null(planningContainer[["planningSummary"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-  planningSummary                              <- createJaspTable("Planning summary")
+  planningSummary                              <- createJaspTable("Planning Summary")
   planningSummary$position                     <- position
   planningSummary$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "planningModel", "recordNumberVariable", "monetaryVariable",
                                     "expectedErrors" , "expectedPercentage", "expectedNumber", "materialityValue", "materiality"))
@@ -228,7 +228,7 @@
 
     if(!is.null(evaluationContainer[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-    evaluationTable                       <- createJaspTable("Evaluation summary")
+    evaluationTable                       <- createJaspTable("Evaluation Summary")
     evaluationTable$position              <- position
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "sampleFilter", "planningModel",
                                       "mostLikelyError", "materialityValue", "auditType", "valuta"))
@@ -335,7 +335,7 @@
 
     if(!is.null(evaluationContainer[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-    evaluationTable                       <- createJaspTable("Evaluation summary")
+    evaluationTable                       <- createJaspTable("Evaluation Summary")
     evaluationTable$position              <- position
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "planningModel", "mostLikelyError", "sampleFilter", "variableType",
                                       "estimator", "monetaryVariable", "materialityValue", "valuta", "stringerBoundLtaAdjustment"))

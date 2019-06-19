@@ -51,7 +51,7 @@
 
   if(!is.null(procedureContainer[["bookValueDescriptives"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-  dataTable                                                 <- createJaspTable("Book value descriptives")
+  dataTable                                                 <- createJaspTable("Book Value Descriptives")
   dataTable$position                                        <- position
   dataTable$dependOn(options = c("monetaryVariable", "recordNumberVariable", "bookValueDescriptives"))
 
@@ -83,7 +83,7 @@
 
   if(!is.null(procedureContainer[["bookValueDistribution"]])) return()
 
-  bookValuePlot <- createJaspPlot(plot = NULL, title = "Population distribution", width = 600, height = 300)
+  bookValuePlot <- createJaspPlot(plot = NULL, title = "Book Value Distribution", width = 600, height = 300)
   bookValuePlot$position <- position
   bookValuePlot$dependOn(options = c("bookValueDistribution", "monetaryVariable", "valuta"))
 
@@ -209,7 +209,7 @@
 
   if(!is.null(evaluationContainer[["evaluationInformation"]])) return()
 
-  evaluationInformation <- createJaspPlot(plot = NULL, title = "Evaluation information", width = 600, height = 300)
+  evaluationInformation <- createJaspPlot(plot = NULL, title = "Evaluation Information", width = 600, height = 300)
   evaluationInformation$position <- position
   evaluationInformation$dependOn(options = c("IR", "CR", "confidence", "auditResult", "evaluationInformation", "materialityPercentage", "estimator", "materialityValue", "valuta"))
 
@@ -280,7 +280,7 @@
 
   if(!is.null(evaluationContainer[["correlationPlot"]])) return()
 
-  correlationPlot <- createJaspPlot(plot = NULL, title = "Correlation plot", width = 500, height = 400)
+  correlationPlot <- createJaspPlot(plot = NULL, title = "Correlation Plot", width = 500, height = 400)
   correlationPlot$position <- position
   correlationPlot$dependOn(options = c("auditResult", "correlationPlot", "monetaryVariable", "valuta"))
 
@@ -472,7 +472,7 @@
 
   if(!is.null(planningContainer[["decisionPlot"]])) return()
 
-  decisionPlot <- createJaspPlot(plot = NULL, title = "Decision analysis", width = 600, height = 300)
+  decisionPlot <- createJaspPlot(plot = NULL, title = "Decision Analysis", width = 600, height = 300)
   decisionPlot$position <- position
   decisionPlot$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "expectedPercentage", "expectedNumber", "decisionPlot", "materialityValue", "explanatoryText"))
 

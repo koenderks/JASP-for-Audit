@@ -25,7 +25,7 @@ Form {
       usesJaspResults: true
 
       GridLayout { columns: 3
-          RadioButtonGroup { id: materiality; name: "materiality"; title: qsTr("Population materiality")
+          RadioButtonGroup { id: materiality; name: "materiality"; title: qsTr("Population Materiality")
             RowLayout {
               RadioButton { id: materialityAbsolute; name: "materialityAbsolute"; text: qsTr("Absolute"); checked: true; childrenOnSameRow: true
                 DoubleField { id: materialityValue; visible: materialityAbsolute.checked; name: "materialityValue"; defaultValue: 0; min: 0; fieldWidth: 90; decimals: 2; label: euroValuta.checked ? "€" : (dollarValuta.checked ? "$" : otherValutaName.value) } }
@@ -40,18 +40,18 @@ Form {
               IntegerField { id: populationSize; name: "populationSize"; text: qsTr("Size"); fieldWidth: 100; defaultValue: 0; min: 0 }
               DoubleField { id: populationValue; name: "populationValue"; text: qsTr("Value"); defaultValue: 0; enabled: materialityAbsolute.checked; fieldWidth: 100; min: 0; decimals: 2}
             }
-          GroupBox { title: qsTr("Audit risk"); id: auditRisk
+          GroupBox { title: qsTr("Audit Risk"); id: auditRisk
               PercentField { name: "confidence"; label: qsTr("Confidence"); decimals: 2; defaultValue: 95 }
           }
       }
-      Section { text: qsTr("Advanced options")
+      Section { text: qsTr("Advanced Options")
         GridLayout { columns: 3
-            RadioButtonGroup { title: qsTr("Inherent risk"); name: "IR"; id: ir
+            RadioButtonGroup { title: qsTr("Inherent Risk"); name: "IR"; id: ir
                   RadioButton { text: qsTr("High") ; name: "High" ; checked: true}
                   RadioButton { text: qsTr("Medium") ; name: "Medium" }
                   RadioButton { text: qsTr("Low") ; name: "Low" }
               }
-              RadioButtonGroup { name: "expectedErrors"; id: expectedErrors; title: qsTr("Expected errors")
+              RadioButtonGroup { name: "expectedErrors"; id: expectedErrors; title: qsTr("Expected Errors")
                 RowLayout { enabled: materialityAbsolute.checked
                     RadioButton { text: qsTr("Absolute"); name: "expectedAbsolute"; id: expectedAbsolute}
                     DoubleField { name: "expectedNumber"; enabled: expectedAbsolute.checked; defaultValue: 0; min: 0; decimals: 2; visible: expectedAbsolute.checked; fieldWidth: 60; label: euroValuta.checked ? "€" : (dollarValuta.checked ? "$" : otherValutaName.value) }
@@ -61,19 +61,19 @@ Form {
                     PercentField { name: "expectedPercentage"; enabled: expectedRelative.checked; decimals: 3; defaultValue: 0; visible: expectedRelative.checked; fieldWidth: 40  }
                 }
               }
-              GroupBox { title: qsTr("Explanatory text")
+              GroupBox { title: qsTr("Explanatory Text")
                 RowLayout {
                   CheckBox { id: explanatoryText; text: qsTr("Enable"); name: "explanatoryText"; checked: true }
                   MenuButton { width:	20; iconSource: "qrc:/images/info-button.png"; toolTip: "Show explanatory text at each step of the analysis"; radius: 20; Layout.alignment: Qt.AlignRight; onClicked: helpModel.showOrTogglePage(myAnalysis.fullHelpPath("explanatoryText")) }
                 }
               }
-              RadioButtonGroup { title: qsTr("Control risk"); name: "CR"; id: cr
+              RadioButtonGroup { title: qsTr("Control Risk"); name: "CR"; id: cr
                   RadioButton { text: qsTr("High") ; name: "High" ; checked: true}
                   RadioButton { text: qsTr("Medium") ; name: "Medium" }
                   RadioButton { text: qsTr("Low") ; name: "Low" }
               }
               RadioButtonGroup {
-                  title: qsTr("Planning distribution")
+                  title: qsTr("Planning Distribution")
                   name: "planningModel"
                   id: planningModel
 
@@ -95,7 +95,7 @@ Form {
               }
         }
       }
-      Section { title: qsTr("Tables and plots")
+      Section { title: qsTr("Tables and Plots")
       GridLayout { columns: 2
         GroupBox { title: qsTr("Plots")
           CheckBox { text: qsTr("Decision analysis"); name: "decisionPlot" }
@@ -112,7 +112,7 @@ Form {
           enabled: materialityRelative.checked ? (populationSize.value != 0 & materialityPercentage.value != 0) : (populationSize.value != 0 & materialityValue.value != 0 & populationValue.value != 0)
           anchors.right: parent.right
           anchors.bottom: parent.bottom
-          text: qsTr("<b>Download report</b>")
+          text: qsTr("<b>Download Report</b>")
           onClicked: {
             form.exportResults()
           }
