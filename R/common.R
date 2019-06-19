@@ -205,7 +205,17 @@
   return(p)
 }
 
-.evaluationInformation <- function(options, evaluationResult, jaspResults){
+.evaluationInformation <- function(options, evaluationResult, jaspResults, position, evaluationContainer){
+
+  if(!is.null(evaluationContainer[["evaluationInformation"]])) return()
+
+  evaluationInformation <- createJaspPlot(plot = NULL, title = "Evaluation information", width = 600, height = 300)
+  evaluationInformation$position <- position
+  evaluationInformation$dependOn(options = c("IR", "CR", "confidence", "auditResult", "evaluationInformation", "materialityPercentage", "estimator", "materialityValue", "valuta"))
+
+  evaluationContainer[["evaluationInformation"]] <- evaluationInformation
+
+  if(!jaspResults[["runEvaluation"]]$object) return()
 
   materiality       <- jaspResults[["materiality"]]$object
   bound             <- evaluationResult[["bound"]]
@@ -252,49 +262,80 @@
                         ggplot2::annotate("text", y = values, x = c(1, 2, 3), label = values.labels, size = 6, vjust = 0.5, hjust = -0.3) + 
                         ggplot2::scale_y_continuous(breaks = JASPgraphs::getPrettyAxisBreaks(seq(0, 1.1*max(values), length.out = 100), min.n = 4), limits = c(0, 1.1*max(values)), labels = x.labels)
   p                 <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE)
-  return(createJaspPlot(plot = p, title = "Evaluation information", width = 600, height = 300))
+
+  evaluationInformation$plotObject <- p
+
+  if(options[["explanatoryText"]]){
+      figure4 <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Results of the sample evaluation compared with materiality and expected errors. The most likely error (MLE)
+                                                            is an estimate of the true misstatement in the population. The maximum error is the upper confidence bound on this MLE."), "p")
+      figure4$position <- 4
+      figure4$dependOn(optionsFromObject = evaluationInformation)
+      evaluationContainer[["figure4"]] <- figure4
+      jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+  }
 }
 
-.correlationPlot <- function(dataset, options, jaspResults) {
+.correlationPlot <- function(dataset, options, jaspResults, position, evaluationContainer) {
 
-    d <- data.frame(xx= dataset[,.v(options[["monetaryVariable"]])], yy= dataset[,.v(options[["auditResult"]])])
-    co <- cor(d$xx, d$yy)
-    d <- na.omit(d)
-    d <- ceiling(d)
-    xVar <- d$xx
-    yVar <- d$yy
+  if(!is.null(evaluationContainer[["correlationPlot"]])) return()
 
-    fit <- vector("list", 1)# vector("list", 4)
-    fit[[1]] <- lm(yy ~ poly(xx, 1, raw= TRUE), data = d)
+  correlationPlot <- createJaspPlot(plot = NULL, title = "Correlation plot", width = 500, height = 400)
+  correlationPlot$position <- position
+  correlationPlot$dependOn(options = c("auditResult", "correlationPlot", "monetaryVariable", "valuta"))
 
-    bestModel <- 1 # which.min(Bic)
+  evaluationContainer[["correlationPlot"]] <- correlationPlot
 
-    # format x labels
-    xlow <- min(pretty(xVar))
-    xhigh <- max(pretty(xVar))
-    xticks <- pretty(c(xlow, xhigh))
-    xLabs <- vector("character", length(xticks))
-    xLabs <- format(xticks, digits= 3, scientific = FALSE)
+  if(!jaspResults[["runEvaluation"]]$object) return()
 
-    # Format y labels
-    yticks <- xticks
-    yLabs <- vector("character", length(yticks))
-    yLabs <- format(yticks, digits= 3, scientific = FALSE)
+  d <- data.frame(xx= dataset[,.v(options[["monetaryVariable"]])], yy= dataset[,.v(options[["auditResult"]])])
+  co <- cor(d$xx, d$yy)
+  d <- na.omit(d)
+  d <- ceiling(d)
+  xVar <- d$xx
+  yVar <- d$yy
 
-    co <- round(co, 3)
+  fit <- vector("list", 1)# vector("list", 4)
+  fit[[1]] <- lm(yy ~ poly(xx, 1, raw= TRUE), data = d)
 
-    cols <- rep("gray", nrow(d))
-    cols[which(d$xx != d$yy)] <- "red"
+  bestModel <- 1 # which.min(Bic)
 
-    p <- JASPgraphs::drawAxis(xName = paste0("Book values (", jaspResults[["valutaTitle"]]$object, ")"), yName = paste0("Audit values (", jaspResults[["valutaTitle"]]$object, ")"), xBreaks = xticks, yBreaks = yticks, yLabels = yLabs, xLabels = xLabs, force = TRUE)
-    p <- JASPgraphs::drawPoints(p, dat = d, size = 3, fill = cols)
-    p <- .poly.predJfA(fit[[bestModel]], plot = p, line= TRUE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd = 1)
-    p <- p + ggplot2::annotate("text", x = xticks[1], y = (yticks[length(yticks)] - ((yticks[length(yticks)] - yticks[length(yticks) - 1]) / 2)),
-                                label = paste0("italic(r) == ", co), size = 8, parse = TRUE, hjust = -0.5, vjust = 0.5)
-    p <- p + ggplot2::theme(panel.grid.major.x = ggplot2::element_line(color="#cbcbcb"), panel.grid.major.y = ggplot2::element_line(color="#cbcbcb"))
-    
-    p <- JASPgraphs::themeJasp(p)
-    return(createJaspPlot(plot = p, title = "Correlation plot", width = 500, height = 400))
+  # format x labels
+  xlow <- min(pretty(xVar))
+  xhigh <- max(pretty(xVar))
+  xticks <- pretty(c(xlow, xhigh))
+  xLabs <- vector("character", length(xticks))
+  xLabs <- format(xticks, digits= 3, scientific = FALSE)
+
+  # Format y labels
+  yticks <- xticks
+  yLabs <- vector("character", length(yticks))
+  yLabs <- format(yticks, digits= 3, scientific = FALSE)
+
+  co <- round(co, 3)
+
+  cols <- rep("gray", nrow(d))
+  cols[which(d$xx != d$yy)] <- "red"
+
+  p <- JASPgraphs::drawAxis(xName = paste0("Book values (", jaspResults[["valutaTitle"]]$object, ")"), yName = paste0("Audit values (", jaspResults[["valutaTitle"]]$object, ")"), xBreaks = xticks, yBreaks = yticks, yLabels = yLabs, xLabels = xLabs, force = TRUE)
+  p <- JASPgraphs::drawPoints(p, dat = d, size = 3, fill = cols)
+  p <- .poly.predJfA(fit[[bestModel]], plot = p, line= TRUE, xMin= xticks[1], xMax= xticks[length(xticks)], lwd = 1)
+  p <- p + ggplot2::annotate("text", x = xticks[1], y = (yticks[length(yticks)] - ((yticks[length(yticks)] - yticks[length(yticks) - 1]) / 2)),
+                              label = paste0("italic(r) == ", co), size = 8, parse = TRUE, hjust = -0.5, vjust = 0.5)
+  p <- p + ggplot2::theme(panel.grid.major.x = ggplot2::element_line(color="#cbcbcb"), panel.grid.major.y = ggplot2::element_line(color="#cbcbcb"))
+  
+  p <- JASPgraphs::themeJasp(p)
+
+  correlationPlot$plotObject <- p
+
+  if(options[["explanatoryText"]]){
+      figure6 <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Scatterplot of the sample book values versus their audit values. Red dots indicate observations that did not match
+                                                              their original book value. If these red dots lie in the bottom part of the graph, the observations are overstated. If these red dots
+                                                              lie in the upper part of the graph, they are understated."), "p")
+      figure6$position <- 8
+      figure6$dependOn(optionsFromObject = correlationPlot)
+      evaluationContainer[["figure6"]] <- figure6
+      jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+  }
 }
 
 .poly.predJfA <- function(fit, plot = NULL, line=FALSE, xMin, xMax, lwd) {

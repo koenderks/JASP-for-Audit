@@ -224,12 +224,11 @@
   return(jaspResults[["evaluationResult"]]$object)
 }
 
-.attributesBoundTable <- function(options, evaluationResult, jaspResults, position = 1){
+.attributesBoundTable <- function(options, evaluationResult, jaspResults, position = 1, evaluationContainer){
 
-    if(!is.null(jaspResults[["evaluationContainer"]][["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
+    if(!is.null(evaluationContainer[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
     evaluationTable                       <- createJaspTable("Evaluation summary")
-    jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "sampleFilter", "planningModel",
                                       "mostLikelyError", "materialityValue", "auditType", "valuta"))
@@ -248,6 +247,8 @@
                               "binomialBound" = "The confidence bound is calculated according to the <b>binomial</b> distributon.",
                               "hyperBound" = "The confidence bound is calculated according to the <b>hypergeometric</b> distribution.")
     evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
+
+    evaluationContainer[["evaluationTable"]]      <- evaluationTable
 
     materialityTable <- ifelse(options[["materiality"]] == "materialityRelative", yes = paste0(round(jaspResults[["materiality"]]$object, 2) * 100, "%"), no = paste(jaspResults[["valutaTitle"]]$object, options[["materialityValue"]]))
     # Return empty table
@@ -330,12 +331,11 @@
     return(jaspResults[["evaluationResult"]]$object)
 }
 
-.auditValueBoundTable <- function(options, evaluationResult, jaspResults, position = 1){
+.auditValueBoundTable <- function(options, evaluationResult, jaspResults, position = 1, evaluationContainer){
 
-    if(!is.null(jaspResults[["evaluationContainer"]][["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
+    if(!is.null(evaluationContainer[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
     evaluationTable                       <- createJaspTable("Evaluation summary")
-    jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "planningModel", "mostLikelyError", "sampleFilter", "variableType",
                                       "estimator", "monetaryVariable", "materialityValue", "valuta", "stringerBoundLtaAdjustment"))
@@ -356,6 +356,8 @@
                               "differenceBound" = "The confidence bound is calculated according to the <b>difference</b> method.",
                               "ratioBound" = "The confidence bound is calculated according to the <b>ratio</b> method.")
     evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
+
+    evaluationContainer[["evaluationTable"]]      <- evaluationTable
 
     materialityTable <- ifelse(options[["materiality"]] == "materialityRelative", yes = paste0(round(jaspResults[["materiality"]]$object, 2) * 100, "%"), no = paste(jaspResults[["valutaTitle"]]$object, options[["materialityValue"]]))
 

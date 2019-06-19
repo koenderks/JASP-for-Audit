@@ -456,12 +456,11 @@
     return(jaspResults[["evaluationResult"]]$object)
 }
 
-.bayesianAttributesBoundTable <- function(options, evaluationResult, jaspResults, position = 1){
+.bayesianAttributesBoundTable <- function(options, evaluationResult, jaspResults, position = 1, evaluationContainer){
 
-    if(!is.null(jaspResults[["evaluationContainer"]][["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
+    if(!is.null(evaluationContainer[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
     evaluationTable                       <- createJaspTable("Evaluation summary")
-    jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$position              <- position
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "expectedErrors", "expectedPercentage", "expectedNumber",
                                       "sampleFilter", "mostLikelyError", "bayesFactor", "planningModel", "materialityValue", "variableType", "estimator", "areaUnderPosterior", "valuta"))
@@ -491,6 +490,8 @@
                               "betaBound" = paste0("The credible ", area , " is calculated according to the <b>beta</b> distribution."),
                               "betabinomialBound" = paste0("The credible ", area ," is calculated according to the <b>beta-binomial</b> distribution."))
     evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
+
+    evaluationContainer[["evaluationTable"]]      <- evaluationTable
 
     mle <- 0
     if(jaspResults[["N"]]$object != 0)
@@ -547,7 +548,7 @@
     evaluationTable$addRows(row)
 }
 
-.priorAndPosteriorBayesianAttributes <- function(options, evaluationResult, jaspResults, plotWidth = 600, plotHeight = 450){
+.priorAndPosteriorBayesianAttributes <- function(options, evaluationResult, jaspResults){
 
   if(options[["estimator"]] == "betaBound"){
 
@@ -651,7 +652,7 @@
                 ggplot2::theme()
       p <- JASPgraphs::themeJasp(p, legend.position = "top") + thm
     }
-  return(createJaspPlot(plot = p, title = "Prior and posterior plot", width = plotWidth, height = plotHeight))
+  return(p)
 }
 
 .expectedBF <- function(options, planningResult, ktable, jaspResults){
@@ -751,12 +752,11 @@
     return(jaspResults[["evaluationResult"]]$object)
 }
 
-.bayesianAuditValueBoundTable <- function(options, evaluationResult, jaspResults, position = 1){
+.bayesianAuditValueBoundTable <- function(options, evaluationResult, jaspResults, position = 1, evaluationContainer){
 
-    if(!is.null(jaspResults[["evaluationContainer"]][["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
+    if(!is.null(evaluationContainer[["evaluationTable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
     evaluationTable                       <- createJaspTable("Evaluation summary")
-    jaspResults[["evaluationContainer"]][["evaluationTable"]]      <- evaluationTable
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "sampleFilter", "planningModel", "mostLikelyError", "estimator", "bayesFactor",
                                         "materialityValue", "variableType", "areaUnderPosterior", "valuta"))
     evaluationTable$position <- position
@@ -789,6 +789,8 @@
                                       "coxAndSnellBound" = paste0("The credible ", area ," is calculated according to the <b>Cox and Snell</b> method."),
                                       "regressionBound" = paste0("The credible ", area ," is calculated according to the <b>Regression</b> method."))
     evaluationTable$addFootnote(message = message, symbol="<i>Note.</i>")
+
+    evaluationContainer[["evaluationTable"]]      <- evaluationTable
 
     materialityTable <- ifelse(options[["materiality"]] == "materialityAbsolute", yes = paste(jaspResults[["valutaTitle"]]$object, options[["materialityValue"]]), no = paste0(round(options[["materialityPercentage"]] * 100, 2) , "%"))
 
@@ -849,7 +851,7 @@
     evaluationTable$addRows(row)
 }
 
-.priorAndPosteriorFromSamples <- function(options, evaluationResult, jaspResults, plotWidth = 600, plotHeight = 450){
+.priorAndPosteriorFromSamples <- function(options, evaluationResult, jaspResults){
 
   prior <- density(evaluationResult[["prior"]], from = 0, to = options[["priorAndPosteriorPlotLimit"]], n = 2^10)
   posterior <- density(evaluationResult[["posterior"]], from = 0, to = options[["priorAndPosteriorPlotLimit"]], n = 2^10)
@@ -902,7 +904,7 @@
   	       ggplot2::theme()
 
   p <- JASPgraphs::themeJasp(p, legend.position = "top") + thm
-  return(createJaspPlot(plot = p, title = "Prior and posterior plot", width = plotWidth, height = plotHeight))
+  return(p)
 }
 
 .regressionBoundBayesian <- function(dataset, options, total_data_value, jaspResults){
@@ -974,42 +976,33 @@
     return(jaspResults[["evaluationResult"]]$object)
 }
 
-.decisionAnalysisBayesian <- function(options, jaspResults){
+.priorAndPosteriorPlot <- function(options, evaluationResult, jaspResults, position, evaluationContainer){
 
-  ar                      <- 1 - options[["confidence"]]
-  ir                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
-  cr                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
-  alpha                   <- ar / ir / cr
-  
-  n <- c(.calc.n.beta(options, alpha, jaspResults), .calc.n.betabinom(options, alpha, jaspResults))
-  k <- base::switch(options[["expectedErrors"]], "expectedRelative" = round(options[["expectedPercentage"]] * n, 2), "expectedAbsolute" = round(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n, 2))
-  
-  d <- data.frame(y = c(n, k), 
-                  dist = rep(c("Beta", "Beta-binomial"), 2),
-                  nature = rep(c("Expected error-free", "Expected errors"), each = 2))
-  d$dist = factor(d$dist,levels(d$dist)[c(2,1)])
-  d$nature = factor(d$nature,levels(d$nature)[c(1,2)])
-  
-  p <- ggplot2::ggplot(data = d, ggplot2::aes(x = dist, y = y, fill = nature)) +
-      ggplot2::geom_bar(stat = "identity", col = "black", size = 1) +
-      ggplot2::coord_flip() +
-      ggplot2::xlab("") +
-      ggplot2::ylab("Sample size") +
-      ggplot2::theme(axis.ticks.x = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank(), axis.text.y = ggplot2::element_text(hjust = 0)) +
-      ggplot2::theme(panel.grid.major.x = ggplot2::element_line(color="#cbcbcb")) +
-      ggplot2::labs(fill = "") +
-      ggplot2::scale_fill_manual(values=c("#7FE58B", "#FF6666"), guide = ggplot2::guide_legend(reverse = TRUE)) +
-      ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = 0, r = 30))) +
-      ggplot2::annotate("text", y = k, x = c(2, 1), label = k, size = 6, vjust = 0.5, hjust = -0.3) + 
-      ggplot2::annotate("text", y = n, x = c(2, 1), label = n, size = 6, vjust = 0.5, hjust = -0.5) + 
-      ggplot2::scale_y_continuous(breaks = JASPgraphs::getPrettyAxisBreaks(0:(ceiling(1.1*max(n))), min.n = 4), limits = c(0, ceiling(1.1*max(n)))) +
-      ggplot2::ylim(0, ceiling(1.2*max(n)))
-  p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE, legend.position = "top")
+  if(!is.null(evaluationContainer[["priorAndPosteriorPlot"]])) return()
 
-  optN <- base::switch(which.min(n), "1" = "beta", "2" = "beta-binomial")
-  jaspResults[["mostEfficientPlanningDistribution"]] <- createJaspState(optN)
-  jaspResults[["mostEfficientPlanningDistribution"]]$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "expectedPercentage", "expectedNumber", 
-                                                                            "decisionPlot", "materialityValue"))
-  
-  return(createJaspPlot(plot = p, title = "Decision analysis", width = 600, height = 300))
+  priorAndPosteriorPlot <- createJaspPlot(plot = NULL, title = "Prior and posterior plot", width = 600, height = 400)
+  priorAndPosteriorPlot$position <- position
+  priorAndPosteriorPlot$dependOn(options = c("IR", "CR", "confidence", "priorAndPosteriorPlotLimit", "priorAndPosteriorPlot", "priorAndPosteriorPlotAdditionalInfo", "materialityPercentage", "auditResult",
+                                              "expectedErrors", "expectedPercentage", "expectedNumber", "sampleFilter", "planningModel", "materialityValue", "displayCredibleInterval"))
+
+  evaluationContainer[["priorAndPosteriorPlot"]] <- priorAndPosteriorPlot
+
+  if(!jaspResults[["runEvaluation"]]$object) return()
+
+  if(options[["variableType"]] == "variableTypeCorrect"){
+    p <- .priorAndPosteriorBayesianAttributes(options, evaluationResult, jaspResults)
+  } else {
+    p <- .priorAndPosteriorFromSamples(options, evaluationResult, jaspResults)
+  }
+
+  priorAndPosteriorPlot$plotObject <- p
+
+  if(options[["explanatoryText"]]){
+    figure5 <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The prior and posterior probability distrubution on the percentage of misstatement in the population. The red dot
+                                                          represents the set materiality. If the area under the distribution exceeds this limit, the population should be rejected."), "p")
+    figure5$position <- 6
+    figure5$dependOn(optionsFromObject = priorAndPosteriorPlot)
+    evaluationContainer[["figure5"]] <- figure5
+    jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+  }
 }

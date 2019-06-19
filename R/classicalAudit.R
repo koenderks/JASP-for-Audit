@@ -140,8 +140,8 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
 
 .classicalEvaluation <- function(options, jaspResults){
   # Create a container for the evaluation
-  jaspResults[["evaluationContainer"]] <- createJaspContainer(title = "<u>Evaluation</u>")
-  jaspResults[["evaluationContainer"]]$position <- 5
+  evaluationContainer <- createJaspContainer(title = "<u>Evaluation</u>")
+  evaluationContainer$position <- 5
   # Read data for the evaluation
   dataset <- .readDataEvaluation(options, jaspResults)
   # Import stored objects from jaspResults
@@ -150,13 +150,13 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
   runEvaluation                 <- jaspResults[["runEvaluation"]]$object
   # Apply the selection filter to the dataset
   if(jaspResults[["runEvaluation"]]$object)
-      dataset <- subset(dataset, dataset[, .v(options[["sampleFilter"]])] != 0)
+    dataset <- subset(dataset, dataset[, .v(options[["sampleFilter"]])] != 0)
   # Perform the evaluation conditional on the type of variable
   if(options[["variableType"]] == "variableTypeCorrect"){
     # Correct / Incorrect evaluation
     evaluationResult <- .attributesBound(dataset, options, jaspResults)
     # Create the summary table for the evaluation
-    .attributesBoundTable(options, evaluationResult, jaspResults, position = 2)
+    .attributesBoundTable(options, evaluationResult, jaspResults, position = 2, evaluationContainer)
   } else if(options[["variableType"]] == "variableTypeAuditValues"){
     # Audit value evaluation
     evaluationResult <- base::switch(options[["estimator"]],
@@ -166,64 +166,28 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
                                       "differenceBound"   = .differenceBound(dataset, options, jaspResults),
                                       "ratioBound"        = .ratioBound(dataset, options, jaspResults))
     # Create the summary table for the evaluation
-    .auditValueBoundTable(options, evaluationResult, jaspResults, position = 2)
+    .auditValueBoundTable(options, evaluationResult, jaspResults, position = 2, evaluationContainer)
   }
   # Explanatory text for the evaluation
   if(options[["explanatoryText"]]){
     boundLabel      <- ifelse(jaspResults[["runEvaluation"]]$object, yes = paste0(round(evaluationResult[["bound"]] * 100, 2), "%"), no = ".....")
     extraObsLabel   <- ifelse(jaspResults[["containsDoubleObservations"]]$object, no = nrow(dataset), yes = paste0(nrow(dataset), " + ", planningResult[["n"]] - nrow(jaspResults[["sample"]]$object)))
     sampleSizeLabel <- ifelse(options[["auditResult"]] == "", yes = ".....", no = extraObsLabel)
-    jaspResults[["evaluationContainer"]][["resultParagraph"]] <- createJaspHtml(paste0("The selection consisted of <b>", sampleSizeLabel , "</b> observations, <b>", evaluationResult[["k"]] , "</b> of which were found to contain an error. The knowledge from these data, com-
+    evaluationContainer[["resultParagraph"]] <- createJaspHtml(paste0("The selection consisted of <b>", sampleSizeLabel , "</b> observations, <b>", evaluationResult[["k"]] , "</b> of which were found to contain an error. The knowledge from these data, com-
                                                                                         bined with the prior knowledge results in an <b>", jaspResults[["confidenceLevelLabel"]]$object , "%</b> upper confidence bound of <b>", boundLabel ,"</b>. The cumulative knowledge states that there
                                                                                         is a <b>", jaspResults[["confidenceLevelLabel"]]$object , "</b> probability that, when one would repeaditly sample from this population, the maximum misstatement is calculated to be lower
                                                                                         than <b>", boundLabel ,"</b>."), "p")
-    jaspResults[["evaluationContainer"]][["resultParagraph"]]$position <- 1
-    jaspResults[["evaluationContainer"]][["resultParagraph"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "materialityPercentage", "estimator", "materialityValue", "sampleFilter"))
+    evaluationContainer[["resultParagraph"]]$position <- 1
+    evaluationContainer[["resultParagraph"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "materialityPercentage", "estimator", "materialityValue", "sampleFilter"))
   }
   # Create a plot containing evaluation information (if the user wants it)
-  if(options[['evaluationInformation']] && runEvaluation)
-  {
-      if(is.null(jaspResults[["evaluationContainer"]][["evaluationInformation"]]))
-      {
-          jaspResults[["evaluationContainer"]][["evaluationInformation"]] 		<- .evaluationInformation(options, evaluationResult, jaspResults)
-          jaspResults[["evaluationContainer"]][["evaluationInformation"]]		$dependOn(options = c("IR", "CR", "confidence", "auditResult", "evaluationInformation", "materialityPercentage", "estimator", "materialityValue", "valuta"))
-          jaspResults[["evaluationContainer"]][["evaluationInformation"]] 		$position <- 3
-      }
-      if(options[["explanatoryText"]]){
-        jaspResults[["evaluationContainer"]][["figure4"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Results of the sample evaluation compared with materiality and expected errors. The most likely error (MLE)
-                                                              is an estimate of the true misstatement in the population. The maximum error is the upper confidence bound on this MLE."), "p")
-        jaspResults[["evaluationContainer"]][["figure4"]]$position <- 4
-        jaspResults[["evaluationContainer"]][["figure4"]]$dependOn(optionsFromObject= jaspResults[["evaluationContainer"]][["evaluationInformation"]])
-        jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
-      }
-  } else if(options[["evaluationInformation"]]){
-      errorPlot <- createJaspPlot(plot = NULL, title = "Evaluation Information")
-      errorPlot$status <- "complete"
-      jaspResults[["evaluationContainer"]][["evaluationInformation"]] <- errorPlot
-  }
+  if(options[["evaluationInformation"]])
+    .evaluationInformation(options, evaluationResult, jaspResults, position = 3, evaluationContainer)
   # Create a plot containing the correlation between the book values and audit values (if the user wants it)
-  if(options[['correlationPlot']] && runEvaluation)
-  {
-      if(is.null(jaspResults[["evaluationContainer"]][["correlationPlot"]]))
-      {
-          jaspResults[["evaluationContainer"]][["correlationPlot"]] 		<- .correlationPlot(dataset, options, jaspResults)
-          jaspResults[["evaluationContainer"]][["correlationPlot"]]		  $dependOn(options = c("auditResult", "correlationPlot", "monetaryVariable", "valuta"))
-          jaspResults[["evaluationContainer"]][["correlationPlot"]] 		$position <- 7
-      }
-      if(options[["explanatoryText"]]){
-        jaspResults[["evaluationContainer"]][["figure6"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Scatterplot of the sample book values versus their audit values. Red dots indicate observations that did not match
-                                                                their original book value. If these red dots lie in the bottom part of the graph, the observations are overstated. If these red dots
-                                                                lie in the upper part of the graph, they are understated."), "p")
-        jaspResults[["evaluationContainer"]][["figure6"]]$position <- 8
-        jaspResults[["evaluationContainer"]][["figure6"]]$dependOn(optionsFromObject= jaspResults[["evaluationContainer"]][["correlationPlot"]])
-        jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
-      }
-  } else if(options[["correlationPlot"]]){
-      errorPlot <- createJaspPlot(plot = NULL, title = "Correlation Plot")
-      errorPlot$status <- "complete"
-      jaspResults[["evaluationContainer"]][["correlationPlot"]] <- errorPlot
-  }
+  if(options[["correlationPlot"]])
+    .correlationPlot(dataset, options, jaspResults, position = 7, evaluationContainer)
   # Finish evaluation
+  jaspResults[["evaluationContainer"]] <- evaluationContainer
 }
 
 .classicalConclusion <- function(options, jaspResults){
@@ -244,7 +208,7 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
                                                                 The conclusion for these data is that the data contain ", approve ,"."), "p")
     conclusionContainer[["conclusionParagraph"]]$position <- 1
     conclusionContainer[["conclusionParagraph"]]$dependOn(optionsFromObject =conclusionContainer)
+    # Finsh conclusion
     jaspResults[["conclusionContainer"]] <- conclusionContainer
   }
-  # Finsh conclusion
 }
