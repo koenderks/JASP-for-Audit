@@ -147,7 +147,9 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
     return()
   }
 
-  ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(resultList[["k"]] * resultList[["n"]]), "expectedAbsolute" = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]]))
+  ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = (resultList[["k"]] * resultList[["n"]]), "expectedAbsolute" = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]]))
+  if(options[["planningModel"]] != "Poisson" && options[["expectedErrors"]] == "expectedRelative")
+    ktable <- ceiling(ktable)
 
   materialityTitle <- paste0(round(jaspResults[["materiality"]]$object * 100, 2), "%")
   materialityValue <- base::switch(options[["materiality"]], "materialityRelative" = ceiling(jaspResults[["materiality"]]$object * options[["populationValue"]]), "materialityAbsolute" = options[["materialityValue"]])
