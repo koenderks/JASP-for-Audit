@@ -50,6 +50,8 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   expected.errors   <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = paste0(round(options[["expectedPercentage"]] * 100, 2), "%"), no = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]]))
   max.errors        <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = ceiling(options[["expectedPercentage"]] * planningResult[["n"]]), no = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]] + 1))
 
+  jaspResults[["figNumber"]] <- createJaspState(1)
+
   # Create a decision plot (if the user wants it)
   if(options[["decisionPlot"]])
     .decisionAnalysis(options, jaspResults, position = 4, planningContainer, type = "frequentist")
