@@ -42,7 +42,7 @@
     return(1)
 }
 
-.bayesianPlanningHelper <- function(options, jaspResults){
+.bayesianPlanningHelper <- function(options, jaspResults, planningContainer){
 
     if(!is.null(jaspResults[["planningResult"]]$object))
       return(jaspResults[["planningResult"]]$object)
@@ -52,7 +52,7 @@
     cr                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
     alpha                   <- ar / ir / cr
 
-    if(jaspResults[["materiality"]]$object == 0){
+    if(jaspResults[["materiality"]]$object == 0 || planningContainer$getError()){
 
       pk                    <- 0
       pn                    <- 0
@@ -107,13 +107,12 @@
     return(jaspResults[["planningResult"]]$object)
 }
 
-.bayesianPlanningTable <- function(dataset, options, planningResult, jaspResults, position = 1){
+.bayesianPlanningTable <- function(dataset, options, planningResult, jaspResults, position = 1, planningContainer){
 
-  if(!is.null(jaspResults[["planningContainer"]][["planningSummary"]])) return() #The options for this table didn't change so we don't need to rebuild it
+  if(!is.null(planningContainer[["planningSummary"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
-  planningSummary                                             <- createJaspTable("Planning summary")
-  jaspResults[["planningContainer"]][["planningSummary"]]        <- planningSummary
-  planningSummary$position                                       <- position
+  planningSummary <- createJaspTable("Planning summary")
+  planningSummary$position <- position
   planningSummary$dependOn(options = c("IR", "CR", "confidence", "expectedErrors", "materialityPercentage", "expectedPercentage", "expectedNumber", "expectedBF",
                                     "planningModel", "materialityValue", "recordNumberVariable", "monetaryVariable", "materiality"))
 
@@ -131,8 +130,10 @@
                             "beta-binomial" = paste0("The required sample size is based on the <b>beta-binomial</b> distribution <i>(N = ", jaspResults[["N"]]$object ,", \u03B1 = ", round(planningResult[["priorA"]], 2) , ", \u03B2 = ", round(planningResult[["priorB"]], 2), ")</i>."))
   planningSummary$addFootnote(message = message, symbol="<i>Note.</i>")
 
+  planningContainer[["planningSummary"]] <- planningSummary
+
   if(!is.null(jaspResults[["errorInSampler"]])){
-    planningSummary$setError("There is no sample size (< 5000) large enough to prove the current materiality. Please try other values.")
+    planningContainer$setError("There is no sample size (< 5000) large enough to prove the current materiality. Please try other values.")
     return()
   }
 
@@ -149,7 +150,7 @@
   }
 
   if(planningResult[["n"]] > jaspResults[["N"]]$object && jaspResults[["ready"]]$object){
-    planningSummary$setError("The required sample size is larger than the population size. You cannot audit this population with this materiality and this amount of confidence.")
+    planningContainer$setError("The required sample size is larger than the population size. You cannot audit this population with this materiality and this amount of confidence.")
     return()
   }
 
@@ -172,14 +173,11 @@
   planningSummary$addRows(row)
 }
 
-.implicitSampleTable <- function(options, result, jaspResults, position = 3){
+.implicitSampleTable <- function(options, result, jaspResults, position = 3, planningContainer){
 
-  if(!is.null(jaspResults[["planningContainer"]][["sampletable"]])) return() #The options for this table didn't change so we don't need to rebuild it
-
-  if(options[["implicitSampleTable"]]){
+  if(!is.null(planningContainer[["sampletable"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
   sampletable                       <- createJaspTable("Implicit sample")
-  jaspResults[["planningContainer"]][["sampletable"]]      <- sampletable
   sampletable$position              <- position
   sampletable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "implicitSampleTable", "expectedPercentage", "expectedNumber",
                                   "planningModel", "materialityValue"))
@@ -191,8 +189,9 @@
   message <- paste0("Sample sizes shown are implicit sample sizes derived from the ARM risk assessments: IR = <b>", options[["IR"]], "</b> and CR = <b>", options[["CR"]], "</b>.")
   sampletable$addFootnote(message = message, symbol="<i>Note.</i>")
 
-  if(!jaspResults[["ready"]]$object)
-    return()
+  planningContainer[["sampletable"]]      <- sampletable
+
+  if(!jaspResults[["ready"]]$object || planningContainer$getError()) return()
 
   implicitn <- round(result[["implicitn"]], 2)
   implicitk <- round(result[["implicitk"]], 2)
@@ -205,10 +204,20 @@
   priorBound <- paste0(priorBound * 100, "%")
   row <- data.frame(implicitn = implicitn, implicitk = implicitk, priorbound = priorBound)
   sampletable$addRows(row)
-  }
 }
 
-.plotPrior <- function(options, planningResult, jaspResults, plotWidth = 600, plotHeight = 450){
+.plotPrior <- function(options, planningResult, jaspResults, position, planningContainer){
+
+  if(!is.null(planningContainer[["priorPlot"]])) return()
+
+  priorPlot <- createJaspPlot(plot = NULL, title = "Implied prior from risk assessments", width = 600, height = 400)
+  priorPlot$position <- position
+  priorPlot$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "priorPlotLimit", "priorPlot", "priorPlotAdditionalInfo", "priorPlotExpectedPosterior",
+                                                                                    "planningModel", "expectedPercentage", "expectedNumber", "materialityValue"))
+
+  planningContainer[["priorPlot"]] <- priorPlot
+
+  if(!jaspResults[["ready"]]$object || planningContainer$getError()) return()
 
   if(options[["planningModel"]] == "beta"){
     mle <- floor(planningResult[["k"]] * planningResult[["n"]])
@@ -356,7 +365,19 @@
               ggplot2::theme()
     p <- JASPgraphs::themeJasp(p, legend.position = "top") + thm
   }
-  return(createJaspPlot(plot = p, title = "Implied prior from risk assessments", width = plotWidth, height = plotHeight))
+
+  priorPlot$plotObject <- p
+
+  if(options[["explanatoryText"]]){
+      figure3 <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The prior probability distribution <b>(", options[["planningModel"]] ,")</b> on the misstatement in the population. The prior parameters are
+                                                            derived from the assessments of the inherent and control risk, along with the expected errors. The expected posterior has its 
+                                                            upper confidence bound below materiality. The red dot represents the materiality, and the grey dot reprents the expected errors."), "p")
+      figure3$position <- 7
+      figure3$dependOn(optionsFromObject = priorPlot)
+      planningContainer[["figure3"]] <- figure3
+      jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+      jaspResults[["figNumber"]]$dependOn(options = c("bookValueDistribution", "decisionPlot", "priorPlot"))
+  }
 }
 
 .bayesianAttributesBound <- function(dataset, options, jaspResults){

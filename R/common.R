@@ -1,17 +1,16 @@
 .auditRiskModel <- function(options, jaspResults){
 
-  if(!is.null(jaspResults[["ARMcontainer"]]))
-    return(jaspResults[["ARMcontainer"]]$object)
+  if(!is.null(jaspResults[["ARMcontainer"]])) return()
 
-  jaspResults[["ARMcontainer"]] <- createJaspContainer(title= "<u>Audit Risk Model</u>")
-  jaspResults[["ARMcontainer"]]$position <- 2
-  jaspResults[["ARMcontainer"]]$dependOn(options = c("confidence", "IR", "CR", "materialityPercentage", "materialityValue", "materiality", "explanatoryText", "valuta"))
+  ARMcontainer <- createJaspContainer(title= "<u>Audit Risk Model</u>")
+  ARMcontainer$position <- 2
+  ARMcontainer$dependOn(options = c("confidence", "IR", "CR", "materialityPercentage", "materialityValue", "materiality", "explanatoryText", "valuta"))
 
   #  Audit Risk Model formula
-  .ARMformula(options, jaspResults, position = 2)
+  .ARMformula(options, jaspResults, position = 2, ARMcontainer)
   DR                          <- jaspResults[["DR"]]$object
   
-  if(!is.null(jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]])){
+  if(!is.null(ARMcontainer[["AuditRiskModelParagraph"]])){
     return()
   } else {
     if(options[["explanatoryText"]]){
@@ -19,18 +18,19 @@
       auditRiskLabel        <- paste0(round((1 - options[["confidence"]]) * 100, 2), "%")
       dectectionRiskLabel   <- paste0(round(DR * 100, 2), "%")
   
-      jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]] <- createJaspHtml(paste0("Prior to the substantive testing phase, the inherent risk was determined to be <b>", options[["IR"]] ,"</b>. The internal control risk was determined
+      ARMcontainer[["AuditRiskModelParagraph"]] <- createJaspHtml(paste0("Prior to the substantive testing phase, the inherent risk was determined to be <b>", options[["IR"]] ,"</b>. The internal control risk was determined
                                                                       to be <b>", options[["CR"]] ,"</b>. According to the Audit Risk Model, the required detection risk to maintain an audit risk of <b>", auditRiskLabel, "</b> for a materiality
                                                                       of <b>", materialityLevelLabel ,"</b> should be <b>", dectectionRiskLabel , "</b>. The translation of High, Medium and Low to probabilities is done according to <b>IODAD (2007)</b>."), "p")
-      jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]]$position <- 1
-      jaspResults[["ARMcontainer"]][["AuditRiskModelParagraph"]]$dependOn(options = c("confidence", "IR", "CR", "materialityPercentage", "materialityValue", "valuta"))
+      ARMcontainer[["AuditRiskModelParagraph"]]$position <- 1
+      ARMcontainer[["AuditRiskModelParagraph"]]$dependOn(options = c("confidence", "IR", "CR", "materialityPercentage", "materialityValue", "valuta"))
     }
   }
+  jaspResults[["ARMcontainer"]] <- ARMcontainer
 }
 
-.ARMformula <- function(options, jaspResults, position = 2){
+.ARMformula <- function(options, jaspResults, position = 2, ARMcontainer){
 
-    if(!is.null(jaspResults[["ARMcontainer"]][["ARMformula"]])) return()
+    if(!is.null(ARMcontainer[["ARMformula"]])) return()
 
     AR                      <- 1 - options[["confidence"]]
     IR                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
@@ -42,17 +42,16 @@
 
     text <- paste0("Audit risk (", round(AR * 100, 2),"%) = Inherent risk (", round(IR * 100, 2), "%) x Control risk (", round(CR * 100, 2), "%) x Detection risk (", round(DR * 100, 2), "%)")
 
-    jaspResults[["ARMcontainer"]][["ARMformula"]] <- createJaspHtml(text, "h3")
-    jaspResults[["ARMcontainer"]][["ARMformula"]]$position <- position
-    jaspResults[["ARMcontainer"]][["ARMformula"]]$dependOn(options = c("IR", "CR", "confidence"))
+    ARMcontainer[["ARMformula"]] <- createJaspHtml(text, "h3")
+    ARMcontainer[["ARMformula"]]$position <- position
+    ARMcontainer[["ARMformula"]]$dependOn(options = c("IR", "CR", "confidence"))
 }
 
-.bookValueDescriptives <- function(dataset, options, jaspResults, position){
+.bookValueDescriptives <- function(dataset, options, jaspResults, position, procedureContainer){
 
-  if(!is.null(jaspResults[["procedureContainer"]][["bookValueDescriptives"]])) return() #The options for this table didn't change so we don't need to rebuild it
+  if(!is.null(procedureContainer[["bookValueDescriptives"]])) return() #The options for this table didn't change so we don't need to rebuild it
 
   dataTable                                                 <- createJaspTable("Book value descriptives")
-  jaspResults[["procedureContainer"]][["bookValueDescriptives"]]        <- dataTable
   dataTable$position                                        <- position
   dataTable$dependOn(options = c("monetaryVariable", "recordNumberVariable", "bookValueDescriptives"))
 
@@ -64,9 +63,10 @@
   dataTable$addColumnInfo(name = 'p2',          title = "50%",                    type = 'string', overtitle = "Percentile")
   dataTable$addColumnInfo(name = 'p3',          title = "75%",                    type = 'string', overtitle = "Percentile")
 
-  if(!jaspResults[["ready"]]$object){
+  procedureContainer[["bookValueDescriptives"]]        <- dataTable
+
+  if(options[["monetaryVariable"]] == "" || options[["recordNumberVariable"]] == "")
     return()
-  }
 
   popSize                           <- jaspResults[["N"]]$object
   values                            <- dataset[, .v(options[["monetaryVariable"]])]
@@ -79,35 +79,55 @@
   dataTable$addRows(row)
 }
 
-.bookValueDistribution <- function(dataset, options, jaspResults){
+.bookValueDistribution <- function(dataset, options, jaspResults, position, procedureContainer){
 
-    values <- dataset[, .v(options[["monetaryVariable"]])]
+  if(!is.null(procedureContainer[["bookValueDistribution"]])) return()
 
-    meanx <- mean(values)
-    sdx <- sd(values)
-    q <- as.numeric(quantile(values, c(0.25, 0.5, 0.75)))
-    minx <- min(q[1], meanx - sdx)
-    maxx <- max(q[3], meanx + sdx)
+  bookValuePlot <- createJaspPlot(plot = NULL, title = "Population distribution", width = 600, height = 300)
+  bookValuePlot$position <- position
+  bookValuePlot$dependOn(options = c("bookValueDistribution", "monetaryVariable", "valuta"))
 
-    p <- .plotMarginalJfA(values, options[["monetaryVariable"]], jaspResults)
+  procedureContainer[["bookValueDistribution"]] <- bookValuePlot
 
-    p <- p + ggplot2::geom_point(ggplot2::aes(x = q[1], y = 0), shape = 21, fill = "orange", stroke = 2, size = 3)
-    p <- p + ggplot2::geom_point(ggplot2::aes(x = q[2], y = 0), shape = 21, fill = "orange", stroke = 2, size = 3)
-    p <- p + ggplot2::geom_point(ggplot2::aes(x = q[3], y = 0), shape = 21, fill = "orange", stroke = 2, size = 3)
-    p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx, y = 0), shape = 21, fill = "red", stroke = 2, size = 5)
-    p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx + sdx, y = 0), shape = 21, fill = "dodgerblue1", stroke = 2, size = 4)
-    p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx - sdx, y = 0), shape = 21, fill = "dodgerblue1", stroke = 2, size = 4)
+  if(options[["monetaryVariable"]] == "" || options[["recordNumberVariable"]] == "") return()
 
-    pdata <- data.frame(x = c(0,0,0), y = c(0,0,0), l = c("1","2","3"))
-    p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = c(rgb(0,1,0,0))) +
-    ggplot2::scale_shape_manual(name = "", values = c(21,21,21), labels = c("Mean", "Mean \u00B1 sd", "Quartile")) +
-    ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = c(5, 4, 3), shape = 21, fill = c("red","dodgerblue1", "orange"), stroke = 2, color = "black")), order = 1) +
-    ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = -10, r = 50))) +
-    ggplot2::theme(panel.grid.major.y = ggplot2::element_line(color="#cbcbcb"))
-    
-    p <- JASPgraphs::themeJasp(p, legend.position = "top")
+  values  <- dataset[, .v(options[["monetaryVariable"]])]
+  meanx   <- mean(values)
+  sdx     <- sd(values)
+  q       <- as.numeric(quantile(values, c(0.25, 0.5, 0.75)))
+  minx    <- min(q[1], meanx - sdx)
+  maxx    <- max(q[3], meanx + sdx)
 
-    return(createJaspPlot(plot = p, title = "Book value distribution", width = 600, height = 300))
+  p <- .plotMarginalJfA(values, options[["monetaryVariable"]], jaspResults)
+
+  p <- p + ggplot2::geom_point(ggplot2::aes(x = q[1], y = 0), shape = 21, fill = "orange", stroke = 2, size = 3)
+  p <- p + ggplot2::geom_point(ggplot2::aes(x = q[2], y = 0), shape = 21, fill = "orange", stroke = 2, size = 3)
+  p <- p + ggplot2::geom_point(ggplot2::aes(x = q[3], y = 0), shape = 21, fill = "orange", stroke = 2, size = 3)
+  p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx, y = 0), shape = 21, fill = "red", stroke = 2, size = 5)
+  p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx + sdx, y = 0), shape = 21, fill = "dodgerblue1", stroke = 2, size = 4)
+  p <- p + ggplot2::geom_point(ggplot2::aes(x = meanx - sdx, y = 0), shape = 21, fill = "dodgerblue1", stroke = 2, size = 4)
+
+  pdata <- data.frame(x = c(0,0,0), y = c(0,0,0), l = c("1","2","3"))
+  p <- p + ggplot2::geom_point(data = pdata, mapping = ggplot2::aes(x = x, y = y, shape = l), size = 0, color = c(rgb(0,1,0,0))) +
+            ggplot2::scale_shape_manual(name = "", values = c(21,21,21), labels = c("Mean", "Mean \u00B1 sd", "Quartile")) +
+            ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = c(5, 4, 3), shape = 21, fill = c("red","dodgerblue1", "orange"), stroke = 2, color = "black")), order = 1) +
+            ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = -10, r = 50))) +
+            ggplot2::theme(panel.grid.major.y = ggplot2::element_line(color="#cbcbcb"))
+  
+  p <- JASPgraphs::themeJasp(p, legend.position = "top")
+
+  bookValuePlot$plotObject <- p
+
+  if(options[["explanatoryText"]]){
+      figure1 <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The distribution of book values in the audit population. The red and blue dots respectively represent the mean
+                                                                                        and the values exactly one standard deviation from the mean. The orange dots represent the 25th, 50th (median) and
+                                                                                        75th percentile of the book values."), "p")
+      figure1$position <- 4
+      figure1$dependOn(optionsFromObject= bookValuePlot)
+      procedureContainer[["figure1"]] <- figure1
+      jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+      jaspResults[["figNumber"]]$dependOn(options = c("bookValueDistribution", "decisionPlot"))
+  }
 }
 
 .plotMarginalJfA <- function(column, variableName, jaspResults, rugs = FALSE, displayDensity = FALSE) {
@@ -403,4 +423,106 @@
     .hasErrors(dataset, perform, type=c("infinity", "variance", "observations"),
             all.target = variables, message="short", observations.amount= paste0("< ", n),
             exitAnalysisIfErrors = TRUE)
+}
+
+.decisionAnalysis <- function(options, jaspResults, position, planningContainer, type){
+
+  if(!is.null(planningContainer[["decisionPlot"]])) return()
+
+  decisionPlot <- createJaspPlot(plot = NULL, title = "Decision analysis", width = 600, height = 300)
+  decisionPlot$position <- position
+  decisionPlot$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "expectedPercentage", "expectedNumber", "decisionPlot", "materialityValue", "explanatoryText"))
+
+  planningContainer[["decisionPlot"]] <- decisionPlot
+
+  if(!jaspResults[["ready"]]$object || planningContainer$getError()) return()
+
+  ar                      <- 1 - options[["confidence"]]
+  ir                      <- base::switch(options[["IR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+  cr                      <- base::switch(options[["CR"]], "Low" = 0.50, "Medium" = 0.60, "High" = 1)
+  alpha                   <- ar / ir / cr
+
+  if(type == "frequentist"){
+
+      n <- c(.calc.n.poisson(options, alpha, jaspResults),
+          .calc.n.binomial(options, alpha, jaspResults),
+          .calc.n.hypergeometric(options, alpha, jaspResults))
+
+      kpois <- base::switch(options[["expectedErrors"]], "expectedRelative" = round(options[["expectedPercentage"]] * n[1], 2), "expectedAbsolute" = round(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n[1], 2))
+      kbinom <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(options[["expectedPercentage"]] * n[2]), "expectedAbsolute" = ceiling(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n[2]))
+      khyper <- base::switch(options[["expectedErrors"]], "expectedRelative" = ceiling(options[["expectedPercentage"]] * n[3]), "expectedAbsolute" = ceiling(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n[3]))
+
+      k <- c(round(kpois, 2), kbinom, khyper)
+
+      d <- data.frame(y = c(n, k), 
+                      dist = rep(c("Poisson", "Binomial", "Hypergeometric"), 2),
+                      nature = rep(c("Expected error-free", "Expected errors"), each = 3))
+      d$dist = factor(d$dist,levels(d$dist)[c(2,1,3)])
+      d$nature = factor(d$nature,levels(d$nature)[c(1,2)])
+      
+      p <- ggplot2::ggplot(data = d, ggplot2::aes(x = dist, y = y, fill = nature)) +
+          ggplot2::geom_bar(stat = "identity", col = "black", size = 1) +
+          ggplot2::coord_flip() +
+          ggplot2::xlab("") +
+          ggplot2::ylab("Sample size") +
+          ggplot2::theme(axis.ticks.x = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank(), axis.text.y = ggplot2::element_text(hjust = 0)) +
+          ggplot2::theme(panel.grid.major.x = ggplot2::element_line(color="#cbcbcb")) +
+          ggplot2::labs(fill = "") +
+          ggplot2::scale_fill_manual(values=c("#7FE58B", "#FF6666"), guide = ggplot2::guide_legend(reverse = TRUE)) +
+          ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = 0, r = 30))) +
+          ggplot2::annotate("text", y = k, x = c(3, 2, 1), label = k, size = 6, vjust = 0.5, hjust = -0.3) + 
+          ggplot2::annotate("text", y = n, x = c(3, 2, 1), label = n, size = 6, vjust = 0.5, hjust = -0.5) + 
+          ggplot2::scale_y_continuous(breaks = JASPgraphs::getPrettyAxisBreaks(0:(ceiling(1.1*max(n))), min.n = 4), limits = c(0, ceiling(1.1*max(n)))) +
+          ggplot2::ylim(0, ceiling(1.2*max(n)))
+      p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE, legend.position = "top")
+
+      optN <- base::switch(which.min(n), "1" = "Poisson", "2" = "binomial", "3" = "hypergeometric")
+      jaspResults[["mostEfficientPlanningDistribution"]] <- createJaspState(optN)
+      jaspResults[["mostEfficientPlanningDistribution"]]$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "expectedPercentage", "expectedNumber", 
+                                                                          "decisionPlot", "materialityValue"))
+
+  } else if(type == "bayesian"){
+
+      n <- c(.calc.n.beta(options, alpha, jaspResults), .calc.n.betabinom(options, alpha, jaspResults))
+      k <- base::switch(options[["expectedErrors"]], "expectedRelative" = round(options[["expectedPercentage"]] * n, 2), "expectedAbsolute" = round(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * n, 2))
+      
+      d <- data.frame(y = c(n, k), 
+                      dist = rep(c("Beta", "Beta-binomial"), 2),
+                      nature = rep(c("Expected error-free", "Expected errors"), each = 2))
+      d$dist = factor(d$dist,levels(d$dist)[c(2,1)])
+      d$nature = factor(d$nature,levels(d$nature)[c(1,2)])
+      
+      p <- ggplot2::ggplot(data = d, ggplot2::aes(x = dist, y = y, fill = nature)) +
+          ggplot2::geom_bar(stat = "identity", col = "black", size = 1) +
+          ggplot2::coord_flip() +
+          ggplot2::xlab("") +
+          ggplot2::ylab("Sample size") +
+          ggplot2::theme(axis.ticks.x = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank(), axis.text.y = ggplot2::element_text(hjust = 0)) +
+          ggplot2::theme(panel.grid.major.x = ggplot2::element_line(color="#cbcbcb")) +
+          ggplot2::labs(fill = "") +
+          ggplot2::scale_fill_manual(values=c("#7FE58B", "#FF6666"), guide = ggplot2::guide_legend(reverse = TRUE)) +
+          ggplot2::theme(legend.text = ggplot2::element_text(margin = ggplot2::margin(l = 0, r = 30))) +
+          ggplot2::annotate("text", y = k, x = c(2, 1), label = k, size = 6, vjust = 0.5, hjust = -0.3) + 
+          ggplot2::annotate("text", y = n, x = c(2, 1), label = n, size = 6, vjust = 0.5, hjust = -0.5) + 
+          ggplot2::scale_y_continuous(breaks = JASPgraphs::getPrettyAxisBreaks(0:(ceiling(1.1*max(n))), min.n = 4), limits = c(0, ceiling(1.1*max(n)))) +
+          ggplot2::ylim(0, ceiling(1.2*max(n)))
+      p <- JASPgraphs::themeJasp(p, xAxis = FALSE, yAxis = FALSE, legend.position = "top")
+
+      optN <- base::switch(which.min(n), "1" = "beta", "2" = "beta-binomial")
+      jaspResults[["mostEfficientPlanningDistribution"]] <- createJaspState(optN)
+      jaspResults[["mostEfficientPlanningDistribution"]]$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "expectedErrors", "expectedPercentage", "expectedNumber", 
+                                                                            "decisionPlot", "materialityValue"))
+  }
+
+  decisionPlot$plotObject <- p
+
+  if(options[["explanatoryText"]]){
+        figure2 <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Decision analysis for the current options. The bars represent the sample size that is required under different planning distributions.
+                                                                                    The the number of expected errors in the selection is colored in red. The number of expected correct observations is colored in green. 
+                                                                                    The most efficient distribution for these data is the <b>", jaspResults[["mostEfficientPlanningDistribution"]]$object ,"</b> distribution."), "p")
+        figure2$position <- 5
+        figure2$dependOn(optionsFromObject = decisionPlot)
+        planningContainer[["figure2"]] <- figure2
+        jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+  }
 }
