@@ -148,6 +148,11 @@
     return()
   }
 
+  if(planningResult[["n"]] > jaspResults[["N"]]$object && jaspResults[["ready"]]$object){
+    planningSummary$setError("The required sample size is larger than the population size. You cannot audit this population with this materiality and this amount of confidence.")
+    return()
+  }
+
   materialityTitle  <- paste0(round(jaspResults[["materiality"]]$object * 100, 2), "%")
   materialityValue  <- base::switch(options[["materiality"]], "materialityRelative" = ceiling(jaspResults[["materiality"]]$object * sum(dataset[, .v(options[["monetaryVariable"]])])), "materialityAbsolute" = paste(jaspResults[["valutaTitle"]]$object, options[["materialityValue"]]))
   materiality       <- base::switch(options[["materiality"]], "materialityRelative" = materialityTitle, "materialityAbsolute" = materialityValue)

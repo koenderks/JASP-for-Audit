@@ -192,6 +192,11 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
     return()
   }
 
+  if(resultList[["n"]] > jaspResults[["N"]]$object && jaspResults[["ready"]]$object){
+    summaryTable$setError("The required sample size is larger than the population size. You cannot audit this population with this materiality and this amount of confidence.")
+    return()
+  }
+
   ktable <- base::switch(options[["expectedErrors"]], "expectedRelative" = round(resultList[["k"]] * resultList[["n"]], 2), "expectedAbsolute" = options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object)
 
   materialityTitle  <- paste0(round(jaspResults[["materiality"]]$object * 100, 2), "%")

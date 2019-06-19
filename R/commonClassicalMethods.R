@@ -132,6 +132,11 @@
     return()
   }
 
+  if(planningResult[["n"]] > jaspResults[["N"]]$object && jaspResults[["ready"]]$object){
+    planningSummary$setError("The required sample size is larger than the population size. You cannot audit this population with this materiality and this amount of confidence.")
+    return()
+  }
+
   message <- base::switch(options[["planningModel"]],
                         "Poisson" = paste0("The required sample size is based on the <b>Poisson</b> distribution <i>(\u03BB = ", round(jaspResults[["materiality"]]$object * planningResult[["n"]], 4) , ")</i>."),
                         "binomial" =  paste0("The required sample size is based on the <b>binomial</b> distribution <i>(p = ", round(jaspResults[["materiality"]]$object, 2) ,")</i>."),
