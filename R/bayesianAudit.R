@@ -55,13 +55,15 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
           jaspResults[["procedureContainer"]][["bookValueDistribution"]]		$dependOn(options = c("bookValueDistribution", "monetaryVariable", "valuta"))
           jaspResults[["procedureContainer"]][["bookValueDistribution"]] 		$position <- 3
       }
-      jaspResults[["procedureContainer"]][["figure1"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The distribution of book values in the audit population. The red and blue dots respectively represent the mean
-                                                                                        and the values exactly one standard deviation from the mean. The orange dots represent the 25th, 50th (median) and
-                                                                                        75th percentile of the book values."), "p")
-      jaspResults[["procedureContainer"]][["figure1"]]$position <- 4
-      jaspResults[["procedureContainer"]][["figure1"]]$dependOn(optionsFromObject = jaspResults[["procedureContainer"]][["bookValueDistribution"]])
-      jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
-      jaspResults[["figNumber"]]$dependOn(options = c("bookValueDistribution", "decisionPlot"))
+      if(options[["explanatoryText"]]){
+        jaspResults[["procedureContainer"]][["figure1"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The distribution of book values in the audit population. The red and blue dots respectively represent the mean
+                                                                                          and the values exactly one standard deviation from the mean. The orange dots represent the 25th, 50th (median) and
+                                                                                          75th percentile of the book values."), "p")
+        jaspResults[["procedureContainer"]][["figure1"]]$position <- 4
+        jaspResults[["procedureContainer"]][["figure1"]]$dependOn(optionsFromObject = jaspResults[["procedureContainer"]][["bookValueDistribution"]])
+        jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+        jaspResults[["figNumber"]]$dependOn(options = c("bookValueDistribution", "decisionPlot"))
+      }
     } else if(options[["bookValueDistribution"]]){
         errorPlot <- createJaspPlot(plot = NULL, title = "Population distribution")
         errorPlot$status <- "complete"
@@ -126,12 +128,14 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
                                                                                             "materialityValue"))
           jaspResults[["planningContainer"]][["decisionPlot"]] 		$position <- 4
       }
-      jaspResults[["planningContainer"]][["figure2"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Decision analysis for the current options. The bars represent the sample size that is required under different planning distributions.
-                                                                                  The the number of expected errors in the selection is colored in red. The number of expected correct observations is colored in green. 
-                                                                                  The most efficient distribution for these data is the <b>", jaspResults[["mostEfficientPlanningDistribution"]]$object ,"</b> distribution."), "p")
-      jaspResults[["planningContainer"]][["figure2"]]$position <- 5
-      jaspResults[["planningContainer"]][["figure2"]]$dependOn(optionsFromObject = jaspResults[["planningContainer"]][["decisionPlot"]])
-      jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+      if(options[["explanatoryText"]]){
+        jaspResults[["planningContainer"]][["figure2"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Decision analysis for the current options. The bars represent the sample size that is required under different planning distributions.
+                                                                                    The the number of expected errors in the selection is colored in red. The number of expected correct observations is colored in green. 
+                                                                                    The most efficient distribution for these data is the <b>", jaspResults[["mostEfficientPlanningDistribution"]]$object ,"</b> distribution."), "p")
+        jaspResults[["planningContainer"]][["figure2"]]$position <- 5
+        jaspResults[["planningContainer"]][["figure2"]]$dependOn(optionsFromObject = jaspResults[["planningContainer"]][["decisionPlot"]])
+        jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+      }
     } else if(options[["decisionPlot"]]){
         errorPlot <- createJaspPlot(plot = NULL, title = "Decision analysis")
         errorPlot$status <- "complete"
@@ -147,11 +151,13 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
                                                                                     "planningModel", "expectedPercentage", "expectedNumber", "materialityValue"))
           jaspResults[["planningContainer"]][["priorPlot"]] 		$position <- 6
       }
-      jaspResults[["planningContainer"]][["figure3"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The prior probability distribution <b>(", options[["planningModel"]] ,")</b> on the misstatement in the population. The prior parameters are
-                                                            derived from the assessments of the inherent and control risk, along with the expected errors."), "p")
-      jaspResults[["planningContainer"]][["figure3"]]$position <- 7
-      jaspResults[["planningContainer"]][["figure3"]]$dependOn(optionsFromObject = jaspResults[["planningContainer"]][["priorPlot"]])
-      jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+      if(options[["explanatoryText"]]){
+        jaspResults[["planningContainer"]][["figure3"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The prior probability distribution <b>(", options[["planningModel"]] ,")</b> on the misstatement in the population. The prior parameters are
+                                                              derived from the assessments of the inherent and control risk, along with the expected errors."), "p")
+        jaspResults[["planningContainer"]][["figure3"]]$position <- 7
+        jaspResults[["planningContainer"]][["figure3"]]$dependOn(optionsFromObject = jaspResults[["planningContainer"]][["priorPlot"]])
+        jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+      }
   } else if(options[["priorPlot"]]){
       errorPlot <- createJaspPlot(plot = NULL, title = "Implied prior from risk assessments")
       errorPlot$status <- "complete"
@@ -249,11 +255,13 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
                                                                                               "materialityValue", "materiality", "sampleFilter", "valuta"))
           jaspResults[["evaluationContainer"]][["evaluationInformation"]] 		$position <- 3
       }
-      jaspResults[["evaluationContainer"]][["figure4"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Results of the sample evaluation compared with materiality and expected errors. The most likely error (MLE)
-                                                            is an estimate of the true misstatement in the population. The maximum error is the upper credible bound on this MLE."), "p")
-      jaspResults[["evaluationContainer"]][["figure4"]]$position <- 4
-      jaspResults[["evaluationContainer"]][["figure4"]]$dependOn(optionsFromObject = jaspResults[["evaluationContainer"]][["evaluationInformation"]])
-      jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+      if(options[["explanatoryText"]]){
+        jaspResults[["evaluationContainer"]][["figure4"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Results of the sample evaluation compared with materiality and expected errors. The most likely error (MLE)
+                                                              is an estimate of the true misstatement in the population. The maximum error is the upper credible bound on this MLE."), "p")
+        jaspResults[["evaluationContainer"]][["figure4"]]$position <- 4
+        jaspResults[["evaluationContainer"]][["figure4"]]$dependOn(optionsFromObject = jaspResults[["evaluationContainer"]][["evaluationInformation"]])
+        jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+      }
   } else if(options[["evaluationInformation"]]){
       errorPlot <- createJaspPlot(plot = NULL, title = "Evaluation information")
       errorPlot$status <- "complete"
@@ -273,11 +281,13 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
                                                                                               "expectedErrors", "expectedPercentage", "expectedNumber", "sampleFilter", "planningModel", "materialityValue", "displayCredibleInterval"))
         jaspResults[["evaluationContainer"]][["priorAndPosteriorPlot"]] 		$position <- 5
       }
-      jaspResults[["evaluationContainer"]][["figure5"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The prior and posterior probability distrubution on the percentage of misstatement in the population. The red dot
-                                                            represents the set materiality. If the area under the distribution exceeds this limit, the population should be rejected."), "p")
-      jaspResults[["evaluationContainer"]][["figure5"]]$position <- 6
-      jaspResults[["evaluationContainer"]][["figure5"]]$dependOn(optionsFromObject = jaspResults[["evaluationContainer"]][["priorAndPosteriorPlot"]])
-      jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+      if(options[["explanatoryText"]]){
+        jaspResults[["evaluationContainer"]][["figure5"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The prior and posterior probability distrubution on the percentage of misstatement in the population. The red dot
+                                                              represents the set materiality. If the area under the distribution exceeds this limit, the population should be rejected."), "p")
+        jaspResults[["evaluationContainer"]][["figure5"]]$position <- 6
+        jaspResults[["evaluationContainer"]][["figure5"]]$dependOn(optionsFromObject = jaspResults[["evaluationContainer"]][["priorAndPosteriorPlot"]])
+        jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+      }
   } else if(options[["priorAndPosteriorPlot"]]){
       errorPlot <- createJaspPlot(plot = NULL, title = "Prior and posterior plot")
       errorPlot$status <- "complete"
@@ -292,12 +302,14 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
           jaspResults[["evaluationContainer"]][["correlationPlot"]]		$dependOn(options = c("auditResult", "correlationPlot", "monetaryVariable", "valuta"))
           jaspResults[["evaluationContainer"]][["correlationPlot"]] 		$position <- 7
       }
-      jaspResults[["evaluationContainer"]][["figure6"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Scatterplot of the sample book values versus their audit values. Red dots indicate observations that did not match
-                                                              their original book value. If these red dots lie in the bottom part of the graph, the observations are overstated. If these red dots
-                                                              lie in the upper part of the graph, they are understated."), "p")
-      jaspResults[["evaluationContainer"]][["figure6"]]$position <- 8
-      jaspResults[["evaluationContainer"]][["figure6"]]$dependOn(optionsFromObject = jaspResults[["evaluationContainer"]][["correlationPlot"]])
-      jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+      if(options[["explanatoryText"]]){
+        jaspResults[["evaluationContainer"]][["figure6"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Scatterplot of the sample book values versus their audit values. Red dots indicate observations that did not match
+                                                                their original book value. If these red dots lie in the bottom part of the graph, the observations are overstated. If these red dots
+                                                                lie in the upper part of the graph, they are understated."), "p")
+        jaspResults[["evaluationContainer"]][["figure6"]]$position <- 8
+        jaspResults[["evaluationContainer"]][["figure6"]]$dependOn(optionsFromObject = jaspResults[["evaluationContainer"]][["correlationPlot"]])
+        jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+      }
   } else if(options[["correlationPlot"]]){
       errorPlot <- createJaspPlot(plot = NULL, title = "Correlation plot")
       errorPlot$status <- "complete"
@@ -321,7 +333,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
                                                                 lower than materiality, in this case <b>", jaspResults[["materialityLevelLabel"]]$object ,"</b>. For the current data, the credible bound is <b>", above_below ,"</b> than materiality.
                                                                 The conclusion for these data is that the data contain ", approve ,"."), "p")
     jaspResults[["conclusionContainer"]][["conclusionParagraph"]]$position <- 1
-    jaspResults[["conclusionContainer"]][["conclusionParagraph"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "materialityPercentage", "estimator", "materialityValue", "sampleFilter", "materiality"))
+    jaspResults[["conclusionContainer"]][["conclusionParagraph"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "materialityPercentage", "estimator", "materialityValue", "sampleFilter", "materiality", "explanatoryText"))
   }
   # Finsh conclusion
 }

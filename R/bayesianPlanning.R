@@ -65,12 +65,14 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
                                                                                         "materialityValue", "materiality"))
           jaspResults[["planningContainer"]][["decisionPlot"]] 		$position <- 4
       }
-      jaspResults[["planningContainer"]][["figure2"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Decision analysis for the current options. The bars represent the sample size that is required under different planning distributions.
-                                                                                  The the number of expected errors in the selection is colored in red. The number of expected correct observations is colored in green. 
-                                                                                  The most efficient distribution for these data is the <b>", jaspResults[["mostEfficientPlanningDistribution"]]$object ,"</b> distribution."), "p")
-      jaspResults[["planningContainer"]][["figure2"]]$position <- 5
-      jaspResults[["planningContainer"]][["figure2"]]$dependOn(optionsFromObject= jaspResults[["planningContainer"]][["decisionPlot"]])
-      jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+      if(options[["explanatoryText"]]){
+        jaspResults[["planningContainer"]][["figure2"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Decision analysis for the current options. The bars represent the sample size that is required under different planning distributions.
+                                                                                    The the number of expected errors in the selection is colored in red. The number of expected correct observations is colored in green. 
+                                                                                    The most efficient distribution for these data is the <b>", jaspResults[["mostEfficientPlanningDistribution"]]$object ,"</b> distribution."), "p")
+        jaspResults[["planningContainer"]][["figure2"]]$position <- 5
+        jaspResults[["planningContainer"]][["figure2"]]$dependOn(optionsFromObject= jaspResults[["planningContainer"]][["decisionPlot"]])
+        jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+      }
     } else if(options[["decisionPlot"]]){
         errorPlot <- createJaspPlot(plot = NULL, title = "Decision analysis")
         errorPlot$status <- "complete"
@@ -86,11 +88,13 @@ bayesianPlanning <- function(jaspResults, dataset, options, ...){
                                                                                       "planningModel", "expectedPercentage", "expectedNumber", "materialityValue", "priorPlotExpectedPosterior", "materiality"))
             jaspResults[["planningContainer"]][["priorPlot"]] 		$position <- 6
         }
-        jaspResults[["planningContainer"]][["figure3"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The prior probability distribution <b>(", options[["planningModel"]] ,")</b> on the misstatement in the population. The prior parameters are
-                                                              derived from the assessments of the inherent and control risk, along with the expected errors."), "p")
-        jaspResults[["planningContainer"]][["figure3"]]$position <- 7
-        jaspResults[["planningContainer"]][["figure3"]]$dependOn(optionsFromObject= jaspResults[["planningContainer"]][["priorPlot"]])
-        jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+        if(options[["explanatoryText"]]){
+          jaspResults[["planningContainer"]][["figure3"]] <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The prior probability distribution <b>(", options[["planningModel"]] ,")</b> on the misstatement in the population. The prior parameters are
+                                                                derived from the assessments of the inherent and control risk, along with the expected errors."), "p")
+          jaspResults[["planningContainer"]][["figure3"]]$position <- 7
+          jaspResults[["planningContainer"]][["figure3"]]$dependOn(optionsFromObject= jaspResults[["planningContainer"]][["priorPlot"]])
+          jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
+        }
     } else if(options[["priorPlot"]]){
         errorPlot <- createJaspPlot(plot = NULL, title = "Implied prior from risk assessments")
         errorPlot$status <- "complete"
