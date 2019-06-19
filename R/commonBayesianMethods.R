@@ -369,9 +369,11 @@
   priorPlot$plotObject <- p
 
   if(options[["explanatoryText"]]){
-      figure3 <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The prior probability distribution <b>(", options[["planningModel"]] ,")</b> on the misstatement in the population. The prior parameters are
-                                                            derived from the assessments of the inherent and control risk, along with the expected errors. The expected posterior has its 
-                                                            upper confidence bound below materiality. The red dot represents the materiality, and the grey dot reprents the expected errors."), "p")
+      priorParameters <- paste0("<i>\u03B1 = ", planningResult[["priorA"]], ", \u03B2 = ", planningResult[["priorB"]], "</i>")
+      figure3 <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The prior probability distribution <b>(", options[["planningModel"]] ,")</b> on the misstatement in the population. The expected errors (grey) 
+                                        receive the highest probability. The red dot represents the materiality. The prior parameters ", priorParameters, " are derived 
+                                        from the assessments of the inherent and control risk, along with the expected errors.", ifelse(options[["priorPlotExpectedPosterior"]], yes = " 
+                                        The expected posterior has its upper confidence bound below materiality. ", no = "")), "p")
       figure3$position <- position + 1
       figure3$dependOn(optionsFromObject = priorPlot)
       planningContainer[["figure3"]] <- figure3
@@ -997,8 +999,12 @@
   priorAndPosteriorPlot$plotObject <- p
 
   if(options[["explanatoryText"]]){
-    figure5 <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The prior and posterior probability distrubution on the percentage of misstatement in the population. The red dot
-                                                          represents the set materiality. If the area under the distribution exceeds this limit, the population should be rejected."), "p")
+    posteriorName <- ifelse(options[["variableType"]] == "variableTypeCorrect", 
+                        yes = ifelse(options[["planningModel"]] == "beta", yes = "<b>(beta)</b>", no = "<b>(beta-binomial)</b>"),
+                        no = "<b>(Cox and Snell)</b>")
+    figure5 <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The prior and posterior probability distrubution ", posteriorName, " on the percentage of misstatement in the population. 
+                                      The red dot represents the specified materiality. If the credible area under the distribution surpasses this point, the 
+                                      estimate of the maximum misstatement exceeds the materiality."), "p")
     figure5$position <- position + 1
     figure5$dependOn(optionsFromObject = priorAndPosteriorPlot)
     evaluationContainer[["figure5"]] <- figure5

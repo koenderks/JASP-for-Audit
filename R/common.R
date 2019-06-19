@@ -266,8 +266,9 @@
   evaluationInformation$plotObject <- p
 
   if(options[["explanatoryText"]]){
-      figure4 <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Results of the sample evaluation compared with materiality and expected errors. The most likely error (MLE)
-                                                            is an estimate of the true misstatement in the population. The maximum error is the upper confidence bound on this MLE."), "p")
+      figure4 <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Evaluation information regarding the evaluation of the selection. The materiality is compared with the 
+                                        maximum misstatement and the most likely error. The most likely error (MLE) is an estimate of the true misstatement 
+                                        in the population. The maximum error is an estimate of the maximum error in the population."), "p")
       figure4$position <- position + 1
       figure4$dependOn(optionsFromObject = evaluationInformation)
       evaluationContainer[["figure4"]] <- figure4
@@ -288,7 +289,7 @@
   if(!jaspResults[["runEvaluation"]]$object) return()
 
   d <- data.frame(xx= dataset[,.v(options[["monetaryVariable"]])], yy= dataset[,.v(options[["auditResult"]])])
-  co <- cor(d$xx, d$yy)
+  co <- cor(d$xx, d$yy, method = "pearson")
   d <- na.omit(d)
   d <- ceiling(d)
   xVar <- d$xx
@@ -328,9 +329,10 @@
   correlationPlot$plotObject <- p
 
   if(options[["explanatoryText"]]){
-      figure6 <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Scatterplot of the sample book values versus their audit values. Red dots indicate observations that did not match
-                                                              their original book value. If these red dots lie in the bottom part of the graph, the observations are overstated. If these red dots
-                                                              lie in the upper part of the graph, they are understated."), "p")
+      figure6 <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Scatterplot of the book values in the selection and their audit values. Red dots indicate observations that 
+                                        did not match their original book value. If these red dots lie in the bottom part of the graph, the observations are overstated. 
+                                        If these red dots lie in the upper part of the graph, they are understated. <i>r</i> is the Pearson correlation coefficient of the 
+                                        book values and the audit values."), "p")
       figure6$position <- position + 1
       figure6$dependOn(optionsFromObject = correlationPlot)
       evaluationContainer[["figure6"]] <- figure6
@@ -559,8 +561,8 @@
 
   if(options[["explanatoryText"]]){
         figure2 <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Decision analysis for the current options. The bars represent the sample size that is required under different planning distributions.
-                                                                                    The the number of expected errors in the selection is colored in red. The number of expected correct observations is colored in green. 
-                                                                                    The most efficient distribution for these data is the <b>", jaspResults[["mostEfficientPlanningDistribution"]]$object ,"</b> distribution."), "p")
+                                                                                    The the number of expected errors in the selection is colored in red and the number of expected error-free observations is colored in green. 
+                                                                                    The most efficient distribution for these options is the <b>", jaspResults[["mostEfficientPlanningDistribution"]]$object ,"</b> distribution."), "p")
         figure2$position <- position + 1
         figure2$dependOn(optionsFromObject = decisionPlot)
         planningContainer[["figure2"]] <- figure2
