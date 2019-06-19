@@ -122,7 +122,7 @@
       figure1 <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> The distribution of book values in the audit population. The red and blue dots respectively represent the mean
                                                                                         and the values exactly one standard deviation from the mean. The orange dots represent the 25th, 50th (median) and
                                                                                         75th percentile of the book values."), "p")
-      figure1$position <- 4
+      figure1$position <- position + 1
       figure1$dependOn(optionsFromObject= bookValuePlot)
       procedureContainer[["figure1"]] <- figure1
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
@@ -268,7 +268,7 @@
   if(options[["explanatoryText"]]){
       figure4 <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Results of the sample evaluation compared with materiality and expected errors. The most likely error (MLE)
                                                             is an estimate of the true misstatement in the population. The maximum error is the upper confidence bound on this MLE."), "p")
-      figure4$position <- 4
+      figure4$position <- position + 1
       figure4$dependOn(optionsFromObject = evaluationInformation)
       evaluationContainer[["figure4"]] <- figure4
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
@@ -331,7 +331,7 @@
       figure6 <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Scatterplot of the sample book values versus their audit values. Red dots indicate observations that did not match
                                                               their original book value. If these red dots lie in the bottom part of the graph, the observations are overstated. If these red dots
                                                               lie in the upper part of the graph, they are understated."), "p")
-      figure6$position <- 8
+      figure6$position <- position + 1
       figure6$dependOn(optionsFromObject = correlationPlot)
       evaluationContainer[["figure6"]] <- figure6
       jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
@@ -561,7 +561,7 @@
         figure2 <- createJaspHtml(paste0("<b>Figure ", jaspResults[["figNumber"]]$object ,".</b> Decision analysis for the current options. The bars represent the sample size that is required under different planning distributions.
                                                                                     The the number of expected errors in the selection is colored in red. The number of expected correct observations is colored in green. 
                                                                                     The most efficient distribution for these data is the <b>", jaspResults[["mostEfficientPlanningDistribution"]]$object ,"</b> distribution."), "p")
-        figure2$position <- 5
+        figure2$position <- position + 1
         figure2$dependOn(optionsFromObject = decisionPlot)
         planningContainer[["figure2"]] <- figure2
         jaspResults[["figNumber"]] <- createJaspState(jaspResults[["figNumber"]]$object + 1)
