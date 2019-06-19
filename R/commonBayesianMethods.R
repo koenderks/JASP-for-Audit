@@ -689,7 +689,7 @@
     return(jaspResults[["evaluationResult"]]$object)
     # Based on the paper:
     # Cox, D. R., & Snell, E. J. (1979). On sampling and the estimation of rare errors. Biometrika, 66(1), 125-132.
-    # Default prior options (a = 1 and b = 3) are recommendations from the paper
+    # Default prior options (mu = 0.5, a = 1 and b = 3) are recommendations from the paper
     n                         <- 0
     M                         <- 0
     z                         <- 0
@@ -701,8 +701,7 @@
     priorPi                   <- priorA / (priorA + priorB)
     a                         <- 1
     b                         <- 3
-    priorMu                   <- 1 # prior mean taint is set to 1 when planning conservatively
-    
+    priorMu                   <- 0.5
 
     if(jaspResults[["runEvaluation"]]$object){
 
