@@ -3,6 +3,8 @@ Audit Workflow
 
 The audit workflow allows you to make a estimate of the population misstatement in an audit population using frequentist statistics.
 
+----
+
 Workflow
 -----------
 The audit workflow consists of four separate stages, each with their own purpose for the analysis:
@@ -11,6 +13,8 @@ The audit workflow consists of four separate stages, each with their own purpose
 - Execution: Annotate your data set with your assessment of the fairness of the selected observations
 - Evaluation: Make a population statement based on your annotated selection
 
+----
+
 Default options
 -------
 ### Population materiality:
@@ -18,8 +22,10 @@ Default options
 - Relative: Enter your population materiality as a percentage relative to the total value
 
 ### How would you like to evaluate your variables?
-- Audit values: When selected, you will annotate the selection with the observations' true values
-- Correct / Incorrect: When selected, you will annotate the selection with an indicator for whether the observations are correct (0) or incorrect (1)
+- Audit values: When selected, you will have to annotate the selection with the observations' true values. When correct, fill in the exact same value as is stated in the book value of the transaction.
+- Correct / Incorrect: When selected, you will have to annotate the selection with an indicator for whether the observations are correct (0) or incorrect (1)
+
+----
 
 Advanced options
 -------
@@ -29,31 +35,34 @@ Advanced options
 - Low: 50%
 
 ### Expected errors:
-- Absolute: Enter your expected errors as a number (e.g., 2 means that you expect two full errors in your selection)
+- Absolute: Enter your expected errors as a monetary value (e.g., $1.000 in a total balance of $1.000.000)
 - Relative: Enter your expected errors as a percentage relative to the total size of the selection
 
 ### Explanatory text:
 - Enables explanatory text throughout the workflow to help you interpret the statistical results and procedure
 
 ### Planning distribution:
-- Poisson: The poisson distribution for broken taints
+- Poisson: The poisson distribution for broken taints (AICPA, 2017)
 - Binomial: The infinite population binomial distribution for complete taints
 - Hypergeometric: The finite population hypergeometric distribution for complete taints
 
 ### Selection type:
-- Monetary unit sampling: Performs selection proportional to the observations' book values
-- Record sampling: Performs selection with equal probabilities
+- Monetary unit sampling: Performs selection on the level of individual sampling units
+- Record sampling: Performs selection on the level of individual records
 
-### Selection method
-- Random sampling: Performs random selection with replacement 
-- Cell sampling: Performs interval selection. Any observation that is larger than twice the interval will be selected multiple times.
+### Selection method:
+- Random sampling: Performs random selection.
+- Cell sampling: Performs interval selection with randomness. Any observation that is larger than twice the interval will be selected multiple times.
 - Systematic sampling: Performs interval selection. Any observation that is larger than the interval will be selected multiple times.
 
 ### Seed:
 - Random number generator seed to make results reproducible
 
-### Estimator
-- Stringer: The Stringer bound
+### Estimation method:
+- Stringer: The Stringer bound (Stringer, 1963)
+    - LTA adjustment: LTA adjustment for the stringer bound to incorporate understatements (Leslie, Teitlebaum, & Anderson, 1979)
+
+----
 
 Default Output
 -------
@@ -74,10 +83,12 @@ Default Output
 ### Evaluation summary:
 - Materiality: The population materiality
 - Sample size: The size of the selected subset
-- Errors: The number of errors in the selection
+- Errors: The number of erroneous elements in the selection
 - Total taining: The sum of the proportional errors
 - x-% Confidence bound: The estimate of the maximum misstatement in percentages
-- Maximum misstatement: The estimate of the maximum misstatement in monetary values
+- Maximum misstatement: The estimate of the projected maximum misstatement
+
+----
 
 Tables and plots
 -------
@@ -88,8 +99,8 @@ Tables and plots
 ### Book value distribution
 - Produces a histogram of the distribution of book values in the population. Important statistics like the mean, standard deviation, and quartiles are indicated with colors.
 
-### Decision plot
-- Produces a dot plot of the number of errors that are allowed in the selection before the population should be rejected.
+### Decision analysis
+- Produces a plot that compares all planning distributions and their corresponding sample sizes.
 
 ### Display selected observations
 - Produces a table containing the selected observations along with any additional observations inserted in the corresponding field
@@ -101,7 +112,18 @@ Tables and plots
 - Adds a cell to the evaluation summary table containing an estimate of the errors in the total population
 
 ### Evaluation information
-- Produces a bar chart comparing the materiality, maximum misstatement, most likely error, and expected errors
+- Produces a bar chart comparing the materiality, maximum misstatement and most likely error (MLE).
 
 ### Correlation plot
 - Produces a scatter plot comparing book values of the selection against their audit values. Observations that are in error are colored in red.
+
+----
+
+References
+-------
+
+AICPA (2017). <i>Audit Guide: Audit Sampling</i>. American Institute of Certied Public Accountants
+
+Leslie, D. A., Teitlebaum, A. D., Anderson, R. J. (1979). <i>Dollar-unit Sampling: A Practical Guide for Auditors</i>. Toronto: Copp Clark Pitman
+
+Stringer, K.W. (1963) Practical aspects of statistical sampling in auditing. <i>Proceedings of Business and Economic Statistics Section</i>, American Statistical Association
