@@ -20,19 +20,27 @@ import JASP.Widgets 1.0
 
 Form {
 
-	usesJaspResults: true
-	columns: 1
+	id: 				formRoot
+	usesJaspResults: 	true
+    columns: 			1
+
+	property bool evaluationPhase: evaluationChecked.checked
+
+	// --------------------------------------------------------------------------------------------------------------------------------------------
+	// ---------------------------------------------------  PLANNING  -----------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------------------------------------------------------
 
 	Section 
 	{
 		id: 		planningPhase
 		text: 		planningPhase.expanded ? qsTr("<b>1. Planning</b>") : qsTr("1. Planning")
+		expanded:	!samplingChecked.checked
 		columns: 	1
-		expanded: 	true
 
 		GridLayout 
 		{
 			columns: 2
+			enabled: !formRoot.evaluationPhase
 
 			RadioButtonGroup 
 			{
@@ -101,10 +109,7 @@ Form {
 			}
 		}
 
-		Divider 
-		{
-			width: parent.width
-		}
+		Divider { width: parent.width }
 
 		Item 
 		{
@@ -125,11 +130,9 @@ Form {
 		{
 			id: 			variablesFormPlanning
 			implicitHeight:	110
+			enabled:		!formRoot.evaluationPhase
 
-			AvailableVariablesList 
-			{
-				name: "variablesFormPlanning"
-			}
+			AvailableVariablesList { name: "variablesFormPlanning" }
 
 			AssignedVariablesList 
 			{
@@ -163,23 +166,11 @@ Form {
 					id: 		ir
 					title: 		qsTr("Inherent Risk")
 					name: 		"IR"
+					enabled:	!formRoot.evaluationPhase
 
-					RadioButton 
-					{
-						text: 		qsTr("High")
-						name: 		"High"
-						checked: 	true
-					}
-					RadioButton 
-					{
-						text: 		qsTr("Medium")
-						name: 		"Medium"
-					}
-					RadioButton 
-					{
-						text: 		qsTr("Low")
-						name: 		"Low"
-					}
+					RadioButton { text: qsTr("High"); 		name: "High"; 	checked: true	}
+					RadioButton { text: qsTr("Medium");		name: "Medium" 					}
+					RadioButton { text: qsTr("Low"); 		name: "Low" 					}
 				}
 
 				RadioButtonGroup 
@@ -187,17 +178,13 @@ Form {
 					id: 		expectedErrors
 					name: 		"expectedErrors"
 					title: 		qsTr("Expected Errors")
+					enabled:	!formRoot.evaluationPhase
 
 					RowLayout 
 					{
 						enabled: monetaryVariable.count > 0
 
-						RadioButton 
-						{
-							id: expectedAbsolute
-							text: 	qsTr("Absolute")
-							name: 	"expectedAbsolute"
-						}
+						RadioButton { text: qsTr("Absolute"); name: "expectedAbsolute"; id: expectedAbsolute}
 
 						DoubleField 
 						{
@@ -215,23 +202,16 @@ Form {
 
 					RowLayout 
 					{
-
-						RadioButton 
-						{
-							id: expectedRelative
-							text: 		qsTr("Relative")
-							name: 		"expectedRelative"
-							checked: true
-						}
-
+						RadioButton { text: qsTr("Relative") ; name: "expectedRelative"; id: expectedRelative; checked: true}
+						
 						PercentField 
-						{
+						{ 
 							name: 			"expectedPercentage"
 							enabled: 		expectedRelative.checked
 							decimals: 		3
 							defaultValue: 	0
 							visible: 		expectedRelative.checked
-							fieldWidth: 	40
+							fieldWidth: 	40 
 						}
 					}
 				}
@@ -264,10 +244,11 @@ Form {
 					id: 		cr
 					title: 		qsTr("Control Risk")
 					name: 		"CR"
+					enabled:	!formRoot.evaluationPhase
 
-					RadioButton { text: qsTr("High"); 		name: "High"; checked: true }
-					RadioButton { text: qsTr("Medium"); 	name: "Medium" }
-					RadioButton { text: qsTr("Low"); 		name: "Low" }
+					RadioButton { text: qsTr("High"); 		name: "High"; 	checked: true	}
+					RadioButton { text: qsTr("Medium"); 	name: "Medium" 					}
+					RadioButton { text: qsTr("Low"); 		name: "Low" 					}
 				}
 
 				RadioButtonGroup 
@@ -275,10 +256,12 @@ Form {
 					id: 		planningModel
 					title: 		qsTr("Planning Distribution")
 					name: 		"planningModel"
+					enabled:	!formRoot.evaluationPhase
 
 					RadioButton { id: beta; 		text: qsTr("Beta"); 			name: "beta"; 			checked: true}
 					RadioButton { id: betaBinomial; text: qsTr("Beta-binomial"); 	name: "beta-binomial"}
 				}
+
 
 				RadioButtonGroup 
 				{
@@ -286,20 +269,18 @@ Form {
 					title: 	qsTr("Currency")
 					name: 	"valuta"
 
-					RadioButton { id: euroValuta; 		text: qsTr("Euro (€)"); 	name: "euroValuta"; 	checked: true}
-					RadioButton { id: dollarValuta; 	text: qsTr("Dollar ($)"); 	name: "dollarValuta"; 	checked: false}
-
+					RadioButton 	{ text: qsTr("Euro (€)"); 	name: "euroValuta"; 	checked: true; 	id: euroValuta 		}
+					RadioButton 	{ text: qsTr("Dollar ($)"); name: "dollarValuta"; 	checked: false; id: dollarValuta	}
 					RowLayout 
 					{
-						RadioButton { id: otherValuta; 	text: qsTr("Other"); 		name: "otherValuta"; 	checked: false}
-
+						RadioButton	{ text:	qsTr("Other");		name: "otherValuta"; 	checked: false; id: otherValuta		}
 						TextField 
-						{
-							id: 			otherValutaName
-							name: 			"otherValutaName"
-							fieldWidth: 	40
-							enabled: 		otherValuta.checked
-							visible: 		otherValuta.checked
+						{ 
+							id: 		otherValutaName
+							name: 		"otherValutaName"
+							fieldWidth: 40
+							enabled: 	otherValuta.checked
+							visible: 	otherValuta.checked 
 						}
 					}
 				}
@@ -404,27 +385,28 @@ Form {
 		{
 			height: 			toSampling.height
 			Layout.fillWidth: 	true
+			enabled:			!formRoot.evaluationPhase
 
 			Button 
 			{
 				id: 				downloadReportPlanning
 				anchors.right: 		samplingChecked.left
 				text: 				qsTr("<b>Download Report</b>")
-				enabled: 			materialityRelative.checked ? (materialityPercentage.value == "0" ? false : true) : (materialityValue.value == "0" ? false : (recordNumberVariable.count > 0 && monetaryVariable.count > 0))
-				onClicked: 
-				{
-					form.exportResults()
-				}
+				enabled: 		materialityRelative.checked ? 
+									materialityPercentage.value != "0" 	: 
+									materialityValue.value 		!= "0" && recordNumberVariable.count > 0 && monetaryVariable.count > 0
+				
+				onClicked: 	form.exportResults()
 			}
 
 			CheckBox 
-			{
+			{ 
 				id: 			samplingChecked
-				anchors.right: 	toSampling.left
-				width: 			height
-				visible: 		false
 				name: 			"samplingChecked"
-				checked: 		false
+				anchors.right:	toSampling.left
+				width:			height
+				visible: 		false
+				checked: 		false 
 			}
 
 			Button 
@@ -432,38 +414,39 @@ Form {
 				id: 			toSampling
 				anchors.right: 	parent.right
 				text: 			qsTr("<b>To Selection</b>")
-				enabled: 		materialityRelative.checked ? (materialityPercentage.value == "0" ? false : (recordNumberVariable.count > 0)) : (materialityValue.value == "0" ? false : (recordNumberVariable.count > 0 && monetaryVariable.count > 0))
+				enabled: 		materialityRelative.checked ? 
+									materialityPercentage.value != "0" && recordNumberVariable.count > 0 : 
+									materialityValue.value 		!= "0" && recordNumberVariable.count > 0 && monetaryVariable.count > 0
 				onClicked: 
 				{
-					planningPhase.expanded = false
-					samplingPhase.expanded = true
-					samplingPhase.enabled = true
-					samplingChecked.checked = true
-					if (monetaryVariable.count == 0){
-						recordSampling.click()
-						variableTypeCorrect.click()
-					}
-					if (monetaryVariable.count > 0){
-						musSampling.click()
-						variableTypeAuditValues.click()
-					}
+					samplingChecked.checked	= true
+					
+					if (monetaryVariable.count == 0)  recordSampling.click()
+					if (monetaryVariable.count > 0)   musSampling.click()
+					if (monetaryVariable.count == 0)  variableTypeCorrect.click()
+					if (monetaryVariable.count > 0)   variableTypeAuditValues.click()
 				}
 			}
 		}
 	}
 
+	// --------------------------------------------------------------------------------------------------------------------------------------------
+	// ---------------------------------------------------  SELECTION  ----------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------------------------------------------------------
+
 	Section 
 	{
 		id: 		samplingPhase
 		text: 		samplingPhase.expanded ? qsTr("<b>2. Selection</b>") : qsTr("2. Selection")
-		enabled: 	false
-		expanded: 	false
+		enabled: 	samplingChecked.checked
+		expanded: 	samplingChecked.checked && !executionChecked.checked
 		columns: 	1
 
 		VariablesForm 
 		{
 			id: 			variablesFormSampling
 			implicitHeight: 200
+			enabled:		!formRoot.evaluationPhase
 
 			AvailableVariablesList 
 			{
@@ -495,6 +478,7 @@ Form {
 			GridLayout 
 			{
 				columns: 3
+				enabled:	!formRoot.evaluationPhase
 
 				RadioButtonGroup 
 				{
@@ -651,15 +635,13 @@ Form {
 		{
 			height: 			toExecution.height
 			Layout.fillWidth: 	true
+			enabled:			!formRoot.evaluationPhase
 
 			Button 
 			{
 				anchors.left: 	parent.left
 				text: 			qsTr("<b>Reset Workflow</b>")
-				onClicked: 
-				{
-					form.reset()
-				}
+				onClicked: 		form.reset()
 			}
 
 			Button 
@@ -668,10 +650,7 @@ Form {
 				enabled: 		materialityRelative.checked ? (materialityPercentage.value == "0" ? false : true) : (materialityValue.value == "0" ? false : true)
 				anchors.right: 	executionChecked.left
 				text: 			qsTr("<b>Download Report</b>")
-				onClicked: 
-				{
-					form.exportResults()
-				}
+				onClicked: 		form.exportResults()
 			}
 
 			CheckBox 
@@ -691,22 +670,25 @@ Form {
 				text: 				qsTr("<b>To Execution</b>")
 				onClicked: 
 				{
-					samplingPhase.expanded = false
-					executionPhase.expanded = true
-					executionPhase.enabled = true
+					executionChecked.checked = true
+
 					if (monetaryVariable.count == 0)	variableTypeCorrect.click()
-					if (monetaryVariable.count > 0)		variableTypeAuditValues.click()
+					else								variableTypeAuditValues.click()
 				}
 			}
 		}
 	}
 
+	// --------------------------------------------------------------------------------------------------------------------------------------------
+	// ---------------------------------------------------  EXECUTION  ----------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------------------------------------------------------
+
 	Section 
 	{
 		id: 		executionPhase
 		text: 		executionPhase.expanded ? qsTr("<b>3. Execution</b>") : qsTr("3. Execution")
-		expanded: 	false
-		enabled: 	false
+		expanded: 	executionChecked.checked && !evaluationChecked.checked
+		enabled: 	executionChecked.checked
 		columns: 	1
 
 		Item 
@@ -714,13 +696,11 @@ Form {
 			height: 				selectHowToAnalyseObservations.height
 			Layout.fillWidth: 		true
 			
-			Text 
-			{
+			Label
+			{ 
 				id: 						selectHowToAnalyseObservations
 				anchors.horizontalCenter: 	parent.horizontalCenter
 				text: 						qsTr("<b>How would you like to evaluate your observations?</b>")
-				font.family: 				"SansSerif"
-				font.pointSize: 			10 * preferencesModel.uiScale
 			}
 		}
 
@@ -735,6 +715,7 @@ Form {
 				name: 						"variableType"
 				title: 						qsTr("")
 				anchors.horizontalCenter: 	parent.horizontalCenter
+				enabled:					!formRoot.evaluationPhase
 				
 				RowLayout 
 				{
@@ -751,10 +732,7 @@ Form {
 							enabled: 	monetaryVariable.count > 0
 						}
 						
-						HelpButton
-						{ 
-							toolTip: 	"Adds a column to specify the audit value of the observations"
-						}
+						HelpButton { toolTip: "Adds a column to specify the audit value of the observations"; helpPage: "?" }	
 					}
 
 					RowLayout 
@@ -768,42 +746,37 @@ Form {
 							enabled: 	true
 						}
 
-						HelpButton
-						{ 
-							toolTip: 	"Adds a column to specify the observations as correct (0) or incorrect (1)"
-						}
+						HelpButton { toolTip:	"Adds a column to specify the observations as correct (0) or incorrect (1)"; helpPage: "?" }
 					}
 				}
 			}
 		}
 
-		Divider 
-		{
-			width: parent.width
-		}
+		Divider { width: parent.width }
 
 		RowLayout 
 		{
 			GroupBox 
 			{
-				id: groupBoxVariableNames
+				id: 		groupBoxVariableNames
+				enabled:	!formRoot.evaluationPhase
 
-				ComputedColumnField 
-				{
-					id: 			sampleFilter
-					name: 			"sampleFilter"
-					text: 			"Column name selection result: "
-					fieldWidth: 	120
-					enabled: 		!pasteVariables.checked
+				ComputedColumnField
+				{ 
+					id: 		sampleFilter
+					name: 		"sampleFilter"
+					text: 		"Column name selection result: "
+					fieldWidth: 120
+					enabled: 	!pasteVariables.checked 
 				}
 
-				AddColumnField 
-				{
-					id: 			variableName
-					name: 			"variableName"
-					text: 			"Column name audit result: "
-					fieldWidth: 	120
-					enabled: 		!pasteVariables.checked
+				ComputedColumnField 
+				{ 
+					id: 		variableName
+					name: 		"variableName"
+					text: 		"Column name audit result: "
+					fieldWidth: 120
+					enabled: 	!pasteVariables.checked
 				}
 			}
 
@@ -822,32 +795,17 @@ Form {
 					checked: 			false
 				}
 
-				Button 
-				{
+				Button
+				{ 
 					id: 			pasteButton
-					text: 			qsTr("<b>Add Variables</b>")
-					anchors.right: 	parent.parent.right
-					enabled: 		(sampleFilter.value != "" & variableName.value != "")
-					onClicked: 
+					text: 			qsTr("<b>Fill Variables</b>")
+					enabled: 		sampleFilter.value != "" && variableName.value != "" && !pasteVariables.checked
+					onClicked: 		
 					{
-						toEvaluation.enabled 			= true
-						pasteButton.enabled 			= false
-						pasteVariables.checked 			= true
-						variableType.enabled 			= false
-						materiality.enabled 			= false
-						auditRisk.enabled 				= false
-						ir.enabled 						= false
-						cr.enabled 						= false
-						planningModel.enabled 			= false
-						expectedErrors.enabled 			= false
-						variablesFormSampling.enabled 	= false
-						seed.enabled 					= false
-						selectionType.enabled 			= false
-						pasteButton.enabled 			= false
-						variablesFormPlanning.enabled 	= false
-						selectionMethod.enabled 		= false
-						performAuditText.visible 		= true
+						pasteVariables.checked 		= true
+						performAuditTable.filter 	= sampleFilter.value + " > 0"
 					}
+
 				}
 			}
 		}
@@ -865,19 +823,35 @@ Form {
 			}
 		}
 
+		Section
+		{
+			id: 					executeAuditSection
+			title:					"Execute Audit"
+			expanded:				pasteVariables.checked
+
+			TableView
+			{
+				id:					performAuditTable
+				name:				"performAudit"
+				Layout.fillWidth: 	true
+				modelType:			"FilteredDataEntryModel"
+        		source:     		"recordNumberVariable"
+        		colName:    		variableName.value
+				enabled:			!formRoot.evaluationPhase
+			}
+		}
+
 		Item 
 		{
 			height: 			toEvaluation.height
 			Layout.fillWidth: 	true
+			enabled:			!formRoot.evaluationPhase
 
-			Button 
-			{
+			Button
+			{ 
 				anchors.left: 	parent.left
-				text: 			qsTr("<b>Reset Workflow</b>")
-				onClicked: 
-				{
-					form.reset()
-				}
+				text: 			qsTr("<b>Reset Workflow</b>");
+				onClicked: 		form.reset()
 			}
 
 			CheckBox 
@@ -893,50 +867,41 @@ Form {
 			Button 
 			{
 				id: 				toEvaluation
-				enabled: 			false
+				enabled: 			pasteVariables.checked
 				anchors.right: 		parent.right
 				text: 				qsTr("<b>To Evaluation</b>")
 				onClicked: 
 				{
-					executionPhase.expanded = false
-					evaluationPhase.expanded = true
-					evaluationPhase.enabled = true
-					evaluationChecked.checked = true
-					if (variableTypeAuditValues.checked){
-						if(musSampling.checked){
-							coxAndSnellBound.click()
-							coxAndSnellBound.visible = true
-						}
-						if(recordSampling.checked){
-							regressionBound.click()
-							regressionBound.visible = true
-							bayesFactor.visible = false
-							priorAndPosteriorPlot.visible = false
-							priorAndPosteriorPlotLimit.visible = false
-							priorAndPosteriorPlotAdditionalInfo.visible = false
-						}
+					executionPhase.expanded 		= false
+					executeAuditSection.expanded	= false
+					evaluationChecked.checked 		= true
+
+					if (musSampling.checked && variableTypeAuditValues.checked) 
+						coxAndSnellBound.click()
+
+					if (recordSampling.checked && variableTypeAuditValues.checked)
+						regressionBound.click()
+
+					if(variableTypeCorrect.checked)
+					{
+						if (beta.checked) 				betaBound.click()
+						if (betaBinomial.checked) 		betabinomialBound.click()
 					}
-					if (variableTypeCorrect.checked){
-						betaBound.visible = true
-						betabinomialBound.visible = true
-						if(beta.checked){
-							betaBound.click()
-						}
-						if(betaBinomial.checked){
-							betabinomialBound.click()
-						}
-					} 
 				}
 			}
 		}
 	}
 
+	// --------------------------------------------------------------------------------------------------------------------------------------------
+	// ---------------------------------------------------  EVALUATION  ---------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------------------------------------------------------
+
 	Section 
 	{
 		id: 			evaluationPhase
 		text: 			evaluationPhase.expanded ? qsTr("<b>4. Evaluation</b>") : qsTr("4. Evaluation")
-		expanded: 		false
-		enabled: 		false
+		expanded: 		evaluationChecked.checked
+		enabled: 		evaluationChecked.checked
 		columns: 		1
 
 		VariablesForm 
@@ -978,7 +943,7 @@ Form {
 						id: 		coxAndSnellBound
 						name: 		"coxAndSnellBound"
 						text: 		qsTr("Cox and Snell")
-						visible: 	false
+						visible: 	musSampling.checked && variableTypeAuditValues.checked
 					}
 
 					RadioButton 
@@ -986,7 +951,7 @@ Form {
 						id: 		betaBound
 						name: 		"betaBound"
 						text: 		qsTr("Beta")
-						visible: 	false
+						visible: 	variableTypeCorrect.checked
 					}
 
 					RadioButton 
@@ -994,7 +959,7 @@ Form {
 						id: 		betabinomialBound
 						name: 		"betabinomialBound"
 						text: 		qsTr("Beta-binomial")
-						visible: 	false
+						visible: 	variableTypeCorrect.checked
 					}
 
 					RadioButton 
@@ -1002,7 +967,7 @@ Form {
 						id: 		regressionBound
 						name: 		"regressionBound"
 						text: 		qsTr("Regression")
-						visible: 	false
+						visible: 	recordSampling.checked && variableTypeAuditValues.checked && evaluationChecked.checked
 					}
 				}
 
@@ -1046,9 +1011,10 @@ Form {
 
 					CheckBox 
 					{
-						id: 	bayesFactor
-						text: 	qsTr("Bayes factor\u208B\u208A")
-						name: 	"bayesFactor"
+						id: 		bayesFactor
+						text: 		qsTr("Bayes factor\u208B\u208A")
+						name: 		"bayesFactor"
+						visible: 	!regressionBound.visible
 					}
 				}
 
@@ -1064,9 +1030,10 @@ Form {
 
 					CheckBox 
 					{
-						id: 	priorAndPosteriorPlot
-						text: 	qsTr("Prior and posterior")
-						name: 	"priorAndPosteriorPlot"
+						id: 		priorAndPosteriorPlot
+						text: 		qsTr("Prior and posterior")
+						name: 		"priorAndPosteriorPlot"
+						visible: 	!regressionBound.visible
 					}
 
 					PercentField 
@@ -1076,6 +1043,7 @@ Form {
 						defaultValue: 		20
 						name: 				"priorAndPosteriorPlotLimit"
 						Layout.leftMargin: 	20 * preferencesModel.uiScale
+						visible:			!regressionBound.visible
 					}
 
 					CheckBox 
@@ -1086,6 +1054,7 @@ Form {
 						Layout.leftMargin: 		20 * preferencesModel.uiScale
 						checked: 				true
 						enabled: 				priorAndPosteriorPlot.checked
+						visible:				!regressionBound.visible
 					}
 
 					CheckBox 

@@ -38,9 +38,7 @@ Form
 		id: 		planningPhase
 		text: 		planningPhase.expanded ? qsTr("<b>1. Planning</b>") : qsTr("1. Planning")
 		expanded: 	!samplingChecked.checked
-		columns: 	1
-
-		
+		columns: 	1	
 
 		GridLayout 
 		{ 
@@ -266,9 +264,9 @@ Form
 
 				RadioButtonGroup 
 				{
+					id: 	valuta
 					title: 	qsTr("Currency")
 					name: 	"valuta"
-					id: 	valuta
 
 					RadioButton 	{ text: qsTr("Euro (€)"); 	name: "euroValuta"; 	checked: true; 	id: euroValuta 		}
 					RadioButton 	{ text: qsTr("Dollar ($)"); name: "dollarValuta"; 	checked: false; id: dollarValuta	}
@@ -637,7 +635,6 @@ Form
 		text: 		executionPhase.expanded ? qsTr("<b>3. Execution</b>") : qsTr("3. Execution")
 		expanded: 	executionChecked.checked && !evaluationChecked.checked
 		enabled: 	executionChecked.checked
-		
 		columns: 	1
 
 		Item 
@@ -668,7 +665,7 @@ Form
 				
 				RowLayout 
 				{ 
-					spacing: 200
+					spacing: 200 * preferencesModel.uiScale
 
 					RowLayout 
 					{
@@ -748,8 +745,8 @@ Form
 				Button
 				{ 
 					id: 			pasteButton
-					text: 			qsTr("<b>Add Variables</b>")
-					enabled: 		sampleFilter.value != "" & variableName.value != "" && !pasteVariables.checked
+					text: 			qsTr("<b>Fill Variables</b>")
+					enabled: 		sampleFilter.value != "" && variableName.value != "" && !pasteVariables.checked
 					onClicked: 		
 					{
 						pasteVariables.checked 		= true
@@ -776,6 +773,7 @@ Form
 
 		Section
 		{
+			id:						executeAuditSection
 			title:					"Execute Audit"
 			expanded:				pasteVariables.checked
 
@@ -823,13 +821,14 @@ Form
 				
 				onClicked: 
 				{
-					executionPhase.expanded 	= false
-					evaluationChecked.checked 	= true
+					executionPhase.expanded 		= false
+					executeAuditSection.expanded	= false
+					evaluationChecked.checked 		= true
 					
-					if (musSampling.checked & variableTypeAuditValues.checked) 
+					if (musSampling.checked && variableTypeAuditValues.checked) 
 						stringerBound.click()
 
-					if (recordSampling.checked & variableTypeAuditValues.checked)
+					if (recordSampling.checked && variableTypeAuditValues.checked)
 						regressionBound.click()
 					
 					
