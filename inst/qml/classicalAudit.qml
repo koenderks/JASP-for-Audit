@@ -112,9 +112,8 @@ Form
 			{ 
 				id: 						variableSelectionTitle
 				anchors.horizontalCenter: 	parent.horizontalCenter
-				text: 						qsTr("Variable definition")
+				text: 						qsTr("<b>Variable definition</b>")
 				font:						Theme.font
-				bold:						true
 			}
 		}
 
@@ -219,7 +218,7 @@ Form
 							checked: 	true 
 						}
 
-						AuditHelpButton 
+						HelpButton 
 						{ 
 							helpPage:			"explanatoryText"
 							toolTip: 			"Show explanatory text at each step of the analysis"
@@ -435,7 +434,7 @@ Form
 							checked: 	true 
 						}
 
-						AuditHelpButton 
+						HelpButton 
 						{ 
 							helpPage:			"monetaryUnitSampling"
 							toolTip: 			"Select observations with probability proportional to their value"
@@ -451,7 +450,7 @@ Form
 							name: 	"recordSampling"
 						}
 
-						AuditHelpButton
+						HelpButton
 						{ 
 							toolTip: 			"Select observations with equal probability"
 							helpPage:			"recordSampling"
@@ -474,7 +473,7 @@ Form
 							name: 	"randomSampling"
 						}
 
-						AuditHelpButton 
+						HelpButton 
 						{ 
 							toolTip: 			"Select observations by random sampling"
 							helpPage:			"randomSampling"
@@ -490,7 +489,7 @@ Form
 							name: 	"cellSampling" 
 						}
 						
-						AuditHelpButton	
+						HelpButton	
 						{ 
 							toolTip: 	"Select observations by cell sampling"
 							helpPage:	"cellSampling"
@@ -507,7 +506,7 @@ Form
 							checked: 	true
 						}
 
-						AuditHelpButton
+						HelpButton
 						{ 
 							toolTip: 	"Select observations by fixed interval sampling"
 							helpPage:	"fixedIntervalSampling"
@@ -592,145 +591,379 @@ Form
 			onClicked: 		form.exportResults()
 		}
 	}
-	
-CheckBox { anchors.right: toExecution.left; width: height; visible: false; name: "executionChecked"; id: executionChecked; checked: false }
-Button { id: toExecution; anchors.right: parent.right; text: qsTr("<b>To Execution</b>")
-onClicked: {
-samplingPhase.expanded = false
-executionPhase.expanded = true
-executionPhase.enabled = true
-if (monetaryVariable.count == 0)  variableTypeCorrect.click()
-if (monetaryVariable.count > 0)   variableTypeAuditValues.click()
-}
-}
-}
-}
-Section { text: executionPhase.expanded ? qsTr("<b>3. Execution</b>") : qsTr("3. Execution"); expanded: false; enabled: false; id: executionPhase; columns: 1
-Item { height: selectHowToAnalyseObservations.height; Layout.fillWidth: true
-Text { id: selectHowToAnalyseObservations; anchors.horizontalCenter: parent.horizontalCenter
-text: qsTr("<b>How would you like to evaluate your observations?</b>"); font.family: "SansSerif"; font.pointSize: 10
-}
-}
-Item { height: variableType.height; Layout.fillWidth: true
-RadioButtonGroup { name: "variableType"; id: variableType; title: qsTr(""); anchors.horizontalCenter: parent.horizontalCenter
-RowLayout { spacing: 200
-RowLayout {
-RadioButton { text: qsTr("Audit values") ; name: "variableTypeAuditValues" ; id: variableTypeAuditValues; checked: true; enabled: (monetaryVariable.count > 0 ? true : false) }
-MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip: "Adds a column to specify the audit value of the observations"; radius: 20; Layout.alignment: Qt.AlignRight }
-}
-RowLayout {
-RadioButton { text: qsTr("Correct / Incorrect") ; name: "variableTypeCorrect" ; id: variableTypeCorrect; checked: false; enabled: true }
-MenuButton { width: 20; iconSource: "qrc:/images/info-button.png"; toolTip:	"Adds a column to specify the observations as correct (0) or incorrect (1)"; radius: 20; Layout.alignment: Qt.AlignRight }
-}
-}
-}
-}
 
-Divider { width: parent.width }
+	CheckBox 
+	{ 
+		id: 				executionChecked
+		width: 				height
+		visible: 			false
+		name: 				"executionChecked"
+		checked: 			false 
+	}
 
-RowLayout{
-GroupBox { id: groupBoxVariableNames
-AddColumnField { name: "sampleFilter"; text: "Column name selection result: "; fieldWidth: 120; enabled: pasteVariables.checked ? false : true; id: sampleFilter }
-AddColumnField { name: "variableName"; text: "Column name audit result: "; fieldWidth: 120; enabled: pasteVariables.checked ? false : true; id: variableName}
-}
-Item { height: groupBoxVariableNames.height; Layout.fillWidth: true; id: hoi
-CheckBox { anchors.right: pasteButton.left; width: height; visible: false; name: "pasteVariables"; id: pasteVariables; checked: false }
-Button { text: qsTr("<b>Add Variables</b>"); id: pasteButton; anchors.right: parent.parent.right; enabled: (sampleFilter.value != "" & variableName.value != "")
-onClicked: {
-toEvaluation.enabled = true
-pasteButton.enabled = false
-pasteVariables.checked = true
-variableType.enabled = false
-materiality.enabled = false
-auditRisk.enabled = false
-ir.enabled = false
-cr.enabled = false
-planningModel.enabled = false
-expectedErrors.enabled = false
-variablesFormSampling.enabled = false
-seed.enabled = false
-selectionType.enabled = false
-pasteButton.enabled = false
-variablesFormPlanning.enabled = false
-selectionMethod.enabled = false
-performAuditText.visible = true
-}
-}
-}
-}
-Item { height: performAuditText.height; Layout.fillWidth: true
-Text { id: performAuditText; anchors.horizontalCenter: parent.horizontalCenter
-text: qsTr("<b>Execute the audit before continuing to the evaluation stage.</b>"); font.family: "SansSerif"; font.pointSize: 7; visible: false
-}
-}
-Item { height: toEvaluation.height; Layout.fillWidth: true
-Button { anchors.left: parent.left; text: qsTr("<b>Reset Workflow</b>");
-onClicked: {
-form.reset()
-}
-}
-CheckBox { anchors.right: toEvaluation.left; width: height; visible: false; name: "evaluationChecked"; id: evaluationChecked; checked: false }
-Button { enabled: false; id: toEvaluation; anchors.right: parent.right; text: qsTr("<b>To Evaluation</b>")
-onClicked: {
-executionPhase.expanded = false
-evaluationPhase.expanded = true
-evaluationPhase.enabled = true
-evaluationChecked.checked = true
-if (musSampling.checked & variableTypeAuditValues.checked) stringerBound.click()
-if (musSampling.checked & variableTypeAuditValues.checked) stringerBound.visible = true
-if (musSampling.checked & variableTypeAuditValues.checked) stringerBoundLtaAdjustment.visible = true
-if (recordSampling.checked & variableTypeAuditValues.checked) regressionBound.click()
-if (recordSampling.checked & variableTypeAuditValues.checked) directBound.visible = true
-if (recordSampling.checked & variableTypeAuditValues.checked) differenceBound.visible = true
-if (recordSampling.checked & variableTypeAuditValues.checked) ratioBound.visible = true
-if (recordSampling.checked & variableTypeAuditValues.checked) regressionBound.visible = true
-if (variableTypeCorrect.checked & poisson.checked) gammaBound.click()
-if (variableTypeCorrect.checked) gammaBound.visible = true
-if (variableTypeCorrect.checked & binomial.checked) binomialBound.click()
-if (variableTypeCorrect.checked) binomialBound.visible = true
-if (variableTypeCorrect.checked & hypergeometric.checked) hyperBound.click()
-if (variableTypeCorrect.checked) hyperBound.visible = true
-}
-}
-}
-}
-Section { text: evaluationPhase.expanded ? qsTr("<b>4. Evaluation</b>") : qsTr("4. Evaluation"); expanded: false; enabled: false; id: evaluationPhase; columns: 1
-VariablesForm { implicitHeight: 150
-AvailableVariablesList { name: "evaluationVariables"; source: "variablesFormPlanning" }
-AssignedVariablesList { name: "auditResult"; title: qsTr("Audit Result"); singleVariable: true; allowedColumns: ["nominal" ,"scale"]; id: auditResult }
-}
-Section { title: qsTr("Advanced Options"); columns: 1
-GridLayout { columns: 2
-RadioButtonGroup { title: qsTr("Estimation Method"); name: "estimator"
-RadioButton { name: "stringerBound"; text: qsTr("Stringer"); id: stringerBound; visible: false;
-CheckBox { name: "stringerBoundLtaAdjustment"; text: qsTr("LTA adjustment"); id: stringerBoundLtaAdjustment; visible: false; checked: true }
-}
-RadioButton { name: "directBound"; text: qsTr("Direct"); id: directBound; visible: false }
-RadioButton { name: "differenceBound"; text: qsTr("Difference"); id: differenceBound; visible: false }
-RadioButton { name: "ratioBound"; text: qsTr("Ratio"); id: ratioBound; visible: false }
-RadioButton { name: "regressionBound"; text: qsTr("Regression"); id: regressionBound; visible: false }
-RadioButton { name: "gammaBound"; text: qsTr("Gamma"); id: gammaBound; visible: false }
-RadioButton { name: "binomialBound"; text: qsTr("Binomial"); id: binomialBound; visible: false }
-RadioButton { name: "hyperBound"; text: qsTr("Hypergeometric"); id: hyperBound; visible: false }
-}
-}
-}
-Section { title: qsTr("Tables and Plots")
-GridLayout { columns: 2
-GroupBox { title: qsTr("Statistics")
-CheckBox { text: qsTr("Most likely error (MLE)"); name: "mostLikelyError"; checked: false }
-}
-GroupBox { title: qsTr("Plots")
-CheckBox { text: qsTr("Evaluation information"); name: "evaluationInformation" }
-CheckBox { text: qsTr("Correlation plot"); name: "correlationPlot"; visible: variableTypeAuditValues.checked }
-}
-}
-}
-Item { height: toInterpretation.height; Layout.fillWidth: true
-Button { id: toInterpretation; anchors.right: parent.right; text: qsTr("<b>Download Report</b>")
-enabled: auditResult.count > 0
-onClicked: { evaluationPhase.expanded = false; form.exportResults()}
-}
-}
-}
+	Button 
+	{ 
+		id: 			toExecution
+		text: 			qsTr("<b>To Execution</b>")
+
+		onClicked: 
+		{
+			samplingPhase.expanded 	= false
+			executionPhase.expanded = true
+			executionPhase.enabled 	= true
+			if (monetaryVariable.count == 0)  variableTypeCorrect.click()
+			if (monetaryVariable.count > 0)   variableTypeAuditValues.click()
+		}
+	}
+
+
+
+	Section 
+	{ 
+		text: 		executionPhase.expanded ? qsTr("<b>3. Execution</b>") : qsTr("3. Execution")
+		expanded: 	false
+		enabled: 	false
+		id: 		executionPhase
+		columns: 	1
+
+		Item 
+		{ 
+			height: 			selectHowToAnalyseObservations.height
+			Layout.fillWidth: 	true
+
+			Text 
+			{ 
+				id: 						selectHowToAnalyseObservations
+				anchors.horizontalCenter: 	parent.horizontalCenter
+				text: 						qsTr("<b>How would you like to evaluate your observations?</b>")
+				font.family: 				"SansSerif"
+				font.pointSize: 			10 * preferencesModel.uiScale
+			}
+		}
+
+		Item 
+		{ 
+			height: 			variableType.height
+			Layout.fillWidth:	true
+
+			RadioButtonGroup 
+			{ 
+				id: 						variableType
+				name: 						"variableType"
+				title: 						qsTr("")
+				anchors.horizontalCenter: 	parent.horizontalCenter
+				
+				RowLayout 
+				{ 
+					spacing: 200
+
+					RowLayout 
+					{
+						RadioButton 
+						{ 
+							id: 		variableTypeAuditValues
+							text: 		qsTr("Audit values")
+							name: 		"variableTypeAuditValues"
+							checked: 	true
+							enabled: 	monetaryVariable.count > 0
+						}
+
+						HelpButton { toolTip: "Adds a column to specify the audit value of the observations"; helpPage: "?" }
+					}
+
+					RowLayout 
+					{
+						RadioButton 
+						{ 
+							id: 		variableTypeCorrect
+							text: 		qsTr("Correct / Incorrect")
+							name: 		"variableTypeCorrect"
+							checked: 	false
+							enabled: 	true 
+						}
+
+						HelpButton { toolTip:	"Adds a column to specify the observations as correct (0) or incorrect (1)"; helpPage: "?" }
+					}
+				}
+			}
+		}
+
+		Divider { width: parent.width }
+
+		RowLayout
+		{
+
+			GroupBox 
+			{ 
+				id: groupBoxVariableNames
+
+				ComputedColumnField
+				{ 
+					id: 		sampleFilter
+					name: 		"sampleFilter"
+					text: 		"Column name selection result: "
+					fieldWidth: 120
+					enabled: 	!pasteVariables.checked 
+				}
+				
+				AddColumnField 
+				{ 
+					id: 		variableName
+					name: 		"variableName"
+					text: 		"Column name audit result: "
+					fieldWidth: 120
+					enabled: 	!pasteVariables.checked
+				}
+			}
+
+			Item 
+			{ 
+				id: 				hoi
+				height:				groupBoxVariableNames.height
+				Layout.fillWidth: 	true
+
+				CheckBox 
+				{ 
+					id: 				pasteVariables
+					anchors.right: 		pasteButton.left
+					width: 				height
+					visible: 			false
+					name: 				"pasteVariables"
+					checked: 			false 
+				}
+
+				Button
+				{ 
+					id: 			pasteButton
+					text: 			qsTr("<b>Add Variables</b>")
+					anchors.right: 	parent.parent.right
+					enabled: 		sampleFilter.value != "" & variableName.value != ""
+					
+					onClicked: 
+					{
+						toEvaluation.enabled			= true
+						pasteButton.enabled 			= false
+						pasteVariables.checked 			= true
+						variableType.enabled 			= false
+						materiality.enabled 			= false
+						auditRisk.enabled 				= false
+						ir.enabled 						= false
+						cr.enabled 						= false
+						planningModel.enabled 			= false
+						expectedErrors.enabled 			= false
+						variablesFormSampling.enabled 	= false
+						seed.enabled 					= false
+						selectionType.enabled 			= false
+						pasteButton.enabled 			= false
+						variablesFormPlanning.enabled 	= false
+						selectionMethod.enabled 		= false
+						performAuditText.visible 		= true
+					}
+				}
+			}
+		}
+
+		Item 
+		{ 
+			height: 			performAuditText.height
+			Layout.fillWidth: 	true
+			
+			Text 
+			{ 
+				id: 						performAuditText
+				anchors.horizontalCenter: 	parent.horizontalCenter
+				text: 						qsTr("<b>Execute the audit before continuing to the evaluation stage.</b>")
+				font.family: 				"SansSerif"
+				font.pointSize: 			7 * preferencesModel.uiScale
+				visible: 					false
+			}
+		}
+
+		Item 
+		{
+			height: 			toEvaluation.height
+			Layout.fillWidth: 	true
+			
+			Button
+			{ 
+				anchors.left: 	parent.left
+				text: 			qsTr("<b>Reset Workflow</b>");
+				onClicked: 		form.reset()
+			}
+
+			CheckBox 
+			{ 
+				id: 			evaluationChecked
+				anchors.right:	toEvaluation.left
+				width: 			height
+				visible: 		false
+				name: 			"evaluationChecked"
+				checked: 		false 
+			}
+
+			Button 
+			{ 
+				id: 			toEvaluation
+				enabled: 		false
+				anchors.right: 	parent.right
+				text: 			qsTr("<b>To Evaluation</b>")
+				
+				onClicked: 
+				{
+					executionPhase.expanded 	= false
+					evaluationPhase.expanded 	= true
+					evaluationPhase.enabled 	= true
+					evaluationChecked.checked 	= true
+					
+					if (musSampling.checked & variableTypeAuditValues.checked) 
+					{
+						stringerBound.click()
+						stringerBound.visible 				= true
+						stringerBoundLtaAdjustment.visible 	= true
+					}
+
+					if (recordSampling.checked & variableTypeAuditValues.checked)
+					{
+						regressionBound.click()
+						directBound.visible 	= true
+						differenceBound.visible	= true
+						ratioBound.visible 		= true
+						regressionBound.visible	= true
+					}
+					
+					if(variableTypeCorrect.checked)
+					{
+						if (poisson.checked) gammaBound.click()
+						gammaBound.visible = true
+						
+						if (binomial.checked) binomialBound.click()
+						binomialBound.visible = true
+						
+						if (hypergeometric.checked) hyperBound.click()
+						hyperBound.visible = true
+					}
+				}
+			}
+		}
+	}
+
+	Section 
+	{ 
+		id: 		evaluationPhase
+		text: 		evaluationPhase.expanded ? qsTr("<b>4. Evaluation</b>") : qsTr("4. Evaluation")
+		expanded: 	false
+		enabled: 	false
+		columns: 	1
+
+		VariablesForm 
+		{ 
+			implicitHeight: 150
+			
+			AvailableVariablesList 
+			{ 
+				name: 	"evaluationVariables"
+				source: "variablesFormPlanning" 
+			}
+
+			AssignedVariablesList 
+			{ 
+				id: 			auditResult 
+				name: 			"auditResult"
+				title: 			qsTr("Audit Result")
+				singleVariable: true
+				allowedColumns: ["nominal" ,"scale"]
+			}
+		}
+
+		Section 
+		{ 
+			title: 		qsTr("Advanced Options"); 
+			columns: 	1
+			
+			GridLayout 
+			{ 
+				columns: 2
+				
+				RadioButtonGroup 
+				{ 
+					title: 	qsTr("Estimation Method")
+					name: 	"estimator"
+					
+					RadioButton 
+					{ 
+						id: 		stringerBound
+						name: 		"stringerBound"
+						text: 		qsTr("Stringer")
+						visible: 	false
+
+						CheckBox 
+						{ 
+							id: 		stringerBoundLtaAdjustment
+							name: 		"stringerBoundLtaAdjustment"
+							text: 		qsTr("LTA adjustment")
+							visible:	false
+							checked: 	true 
+						}
+					}
+
+					RadioButton { name: "directBound"; 		text: qsTr("Direct"); 			id: directBound; 		visible: false }
+					RadioButton { name: "differenceBound"; 	text: qsTr("Difference"); 		id: differenceBound; 	visible: false }
+					RadioButton { name: "ratioBound";		text: qsTr("Ratio"); 			id: ratioBound; 		visible: false }
+					RadioButton { name: "regressionBound"; 	text: qsTr("Regression"); 		id: regressionBound; 	visible: false }
+					RadioButton { name: "gammaBound"; 		text: qsTr("Gamma"); 			id: gammaBound; 		visible: false }
+					RadioButton { name: "binomialBound"; 	text: qsTr("Binomial"); 		id: binomialBound; 		visible: false }
+					RadioButton { name: "hyperBound"; 		text: qsTr("Hypergeometric");	id: hyperBound; 		visible: false }
+				}
+			}
+		}
+
+		Section 
+		{ 
+			title: qsTr("Tables and Plots")
+
+			GridLayout 
+			{ 
+				columns: 2
+
+				GroupBox 
+				{ 
+					title: qsTr("Statistics")
+					
+					CheckBox 
+					{ 
+						text: 		qsTr("Most likely error (MLE)")
+						name: 		"mostLikelyError"
+						checked: 	false 
+					}
+				}
+
+				GroupBox 
+				{ 
+					title: qsTr("Plots")
+
+					CheckBox { text: qsTr("Evaluation information"); 	name: "evaluationInformation" 												}
+					CheckBox { text: qsTr("Correlation plot"); 			name: "correlationPlot";		visible: variableTypeAuditValues.checked 	}
+				}
+			}
+		}
+
+		Item 
+		{ 
+			height: 			toInterpretation.height
+			Layout.fillWidth: 	true
+			
+			Button
+			{ 
+				id: 			toInterpretation
+				anchors.right:	parent.right
+				text:			qsTr("<b>Download Report</b>")
+				enabled: 		auditResult.count > 0
+				onClicked: 
+				{ 
+					evaluationPhase.expanded = false
+					form.exportResults()
+				}
+			}
+		}
+	}
 }
