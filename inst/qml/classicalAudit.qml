@@ -261,9 +261,10 @@ Form
 
 				RadioButtonGroup 
 				{
-					id: 	valuta
-					title: 	qsTr("Currency")
-					name: 	"valuta"
+					id: 		valuta
+					title: 		qsTr("Currency")
+					name: 		"valuta"
+					visible:	monetaryVariable.count > 0 || materialityAbsolute.checked
 
 					RadioButton 	{ text: qsTr("Euro (€)"); 	name: "euroValuta"; 	checked: true; 	id: euroValuta 		}
 					RadioButton 	{ text: qsTr("Dollar ($)"); name: "dollarValuta"; 	checked: false; id: dollarValuta	}
@@ -274,7 +275,7 @@ Form
 						{ 
 							id: 		otherValutaName
 							name: 		"otherValutaName"
-							fieldWidth: 40
+							fieldWidth: 100
 							enabled: 	otherValuta.checked
 							visible: 	otherValuta.checked 
 						}

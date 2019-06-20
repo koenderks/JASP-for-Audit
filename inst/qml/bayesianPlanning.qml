@@ -281,6 +281,7 @@ Form {
 				id: 		valuta
 				title: 		qsTr("Currency")
 				name: 		"valuta"
+				visible:	materialityAbsolute.checked
 
 				RadioButton 
 				{
@@ -312,7 +313,7 @@ Form {
 					{
 						id: 			otherValutaName
 						name: 			"otherValutaName"
-						fieldWidth: 	40
+						fieldWidth: 	100
 						enabled: 		otherValuta.checked
 						visible: 		otherValuta.checked
 					}
