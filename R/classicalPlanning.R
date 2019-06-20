@@ -48,10 +48,22 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
   }
 
   planningResult <- .classicalPlanningManual(options, jaspResults, planningContainer)
-
-  expected.errors   <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = paste0(round(options[["expectedPercentage"]] * 100, 2), "%"), no = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]]))
-  max.errors        <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = ceiling(options[["expectedPercentage"]] * planningResult[["n"]]), no = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]] + 1))
-
+  
+  if(options[["explanatoryText"]] && is.null(planningContainer[["planningParagraph"]])){
+    materialityLevelLabel           <- base::switch(options[["materiality"]], "materialityRelative" = paste0(round(options[["materialityPercentage"]], 4) * 100, "%"), "materialityAbsolute" = paste(jaspResults[["valutaTitle"]]$object, format(options[["materialityValue"]], scientific = FALSE)))
+    expected.errors <- max.errors <- requiredSampleSize <- 0
+    if(!is.null(jaspResults[["planningResult"]]$object)){
+      requiredSampleSize <- planningResult[["n"]]
+      expected.errors   <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = paste0(round(options[["expectedPercentage"]] * 100, 2), "%"), no = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]]))
+      max.errors        <- ifelse(options[["expectedErrors"]] == "expectedRelative", yes = ceiling(options[["expectedPercentage"]] * planningResult[["n"]]), no = paste(jaspResults[["valutaTitle"]]$object, options[["expectedNumber"]] + 1))
+    }
+    planningContainer[["planningParagraph"]] <- createJaspHtml(paste0("The most likely error in the data was expected to be <b>", expected.errors ,"</b>. The sample size that is required to prove a materiality of <b>", materialityLevelLabel ,"</b>, assuming
+                                                                                              the sample contains <b>", expected.errors ,"</b> full errors, is <b>", requiredSampleSize ,"</b>. This sample size is based on the <b>", options[["planningModel"]] , "</b> distribution, the inherent risk <b>(", options[["IR"]] , ")</b>, the
+                                                                                              control risk <b>(", options[["CR"]] , ")</b> and the expected errors. Consequently, if the sum of errors from the audited observations exceeds <b>", max.errors ,"</b>, the
+                                                                                              maximum misstatement exceeds materiality and the population cannot be approved."), "p")
+    planningContainer[["planningParagraph"]]$position <- 1
+    planningContainer[["planningParagraph"]]$dependOn(options = c("expectedPercentage", "expectedErrors", "expectedNumber", "planningModel", "IR", "CR", "materialityPercentage", "confidence", "materialityValue"))
+  }
   jaspResults[["figNumber"]] <- createJaspState(1)
 
   # Create a decision plot (if the user wants it)
@@ -64,7 +76,7 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
 .classicalPlanningManual <- function(options, jaspResults, planningContainer){
 
   summaryTable <- createJaspTable("Planning Summary")
-  summaryTable$position <- 1
+  summaryTable$position <- 2
   summaryTable$dependOn(options = c("IR", "CR", "confidence", "expectedErrors", "materialityPercentage", "populationSize", "expectedPercentage", "expectedNumber", "expectedBF",
                                   "planningModel", "materialityValue", "populationValue", "materiality", "valuta"))
 

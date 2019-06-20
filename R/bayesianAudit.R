@@ -215,9 +215,9 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
     # Produce relevant terms conditional on the analysis result
     above_below   <- ifelse(evaluationResult[["bound"]] < jaspResults[["materiality"]]$object, yes = "lower", no = "higher")
     approve       <- ifelse(evaluationResult[["bound"]] < jaspResults[["materiality"]]$object, yes = "<b>no material misstatement</b>", no = "<b>material misstatement</b>")
-    conclusionContainer[["conclusionParagraph"]] <- createJaspHtml(paste0("To approve these data, a <b>", jaspResults[["confidenceLevelLabel"]]$object ,"</b> upper credible bound on the population proportion of full errors should be determined to be
-                                                                lower than materiality, in this case <b>", jaspResults[["materialityLevelLabel"]]$object ,"</b>. For the current data, the credible bound is <b>", above_below ,"</b> than materiality.
-                                                                The conclusion for these data is that the data contain ", approve ,"."), "p")
+    conclusionContainer[["conclusionParagraph"]] <- createJaspHtml(paste0("To approve these data, a <b>", jaspResults[["confidenceLevelLabel"]]$object ,"</b> upper credible bound on the population proportion of errors should be determined to be
+                                                                lower than materiality, in this case <b>", jaspResults[["materialityLevelLabel"]]$object ,"</b>. For the current data, the credible bound is <b>", above_below ,"</b> than materiality. The conclusion 
+                                                                for these data is that the data contain ", approve ,"."), "p")
     conclusionContainer[["conclusionParagraph"]]$position <- 1
     conclusionContainer[["conclusionParagraph"]]$dependOn(optionsFromObject =conclusionContainer)
     # Finsh conclusion

@@ -206,8 +206,8 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
     above_below   <- ifelse(evaluationResult[["bound"]] < jaspResults[["materiality"]]$object, yes = "lower", no = "higher")
     approve       <- ifelse(evaluationResult[["bound"]] < jaspResults[["materiality"]]$object, yes = "<b>no material misstatement</b>", no = "<b>material misstatement</b>")
     conclusionContainer[["conclusionParagraph"]] <- createJaspHtml(paste0("To approve these data, a <b>", jaspResults[["confidenceLevelLabel"]]$object ,"</b> upper confidence bound on the population proportion of full errors should be determined to be
-                                                                lower than materiality, in this case <b>", jaspResults[["materialityLevelLabel"]]$object ,"</b>. For the current data, the confidence bound is <b>", above_below ,"</b> than materiality.
-                                                                The conclusion for these data is that the data contain ", approve ,"."), "p")
+                                                                lower than materiality, in this case <b>", jaspResults[["materialityLevelLabel"]]$object ,"</b>. For the current data, the confidence bound is <b>", above_below ,"</b> than materiality. The conclusion 
+                                                                for these data is that the data contain ", approve ,"."), "p")
     conclusionContainer[["conclusionParagraph"]]$position <- 1
     conclusionContainer[["conclusionParagraph"]]$dependOn(optionsFromObject =conclusionContainer)
     # Finsh conclusion
