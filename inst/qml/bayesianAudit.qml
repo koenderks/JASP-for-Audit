@@ -11,6 +11,8 @@
 // You should have received a copy of the GNU Affero General Public
 // License along with this program.  If not, see
 // <http://www.gnu.org/licenses/>.
+//
+
 import QtQuick 2.8
 import QtQuick.Layouts 1.3
 import JASP.Controls 1.0
@@ -854,13 +856,11 @@ Form {
 			height: 			performAuditText.height
 			Layout.fillWidth: 	true
 
-			Text 
+			Label 
 			{
 				id: 						performAuditText
 				anchors.horizontalCenter: 	parent.horizontalCenter
 				text: 						qsTr("<b>Execute the audit before continuing to the evaluation stage.</b>")
-				font.family: 				"SansSerif"
-				font.pointSize: 			7 * preferencesModel.uiScale
 				visible: 					false
 			}
 		}

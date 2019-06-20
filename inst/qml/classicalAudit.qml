@@ -772,13 +772,11 @@ Form
 			height: 			performAuditText.height
 			Layout.fillWidth: 	true
 			
-			Text 
+			Label 
 			{ 
 				id: 						performAuditText
 				anchors.horizontalCenter: 	parent.horizontalCenter
 				text: 						qsTr("<b>Execute the audit before continuing to the evaluation stage.</b>")
-				font.family: 				"SansSerif"
-				font.pointSize: 			7 * preferencesModel.uiScale
 				visible: 					false
 			}
 		}
