@@ -248,7 +248,7 @@ Form {
 							checked: 	true
 						}
 
-						AuditHelpButton 
+						HelpButton 
 						{ 
 							helpPage:			"explanatoryText"
 							toolTip: 			"Show explanatory text at each step of the analysis"
@@ -510,7 +510,7 @@ Form {
 							checked: 	true
 						}
 
-						AuditHelpButton 
+						HelpButton 
 						{ 
 							helpPage:			"monetaryUnitSampling"
 							toolTip: 			"Select observations with probability proportional to their value"
@@ -526,7 +526,7 @@ Form {
 							name: 		"recordSampling"
 						}
 
-						AuditHelpButton
+						HelpButton
 						{ 
 							toolTip: 			"Select observations with equal probability"
 							helpPage:			"recordSampling"
@@ -549,7 +549,7 @@ Form {
 							name: "randomSampling"
 						}
 
-						AuditHelpButton 
+						HelpButton 
 						{ 
 							toolTip: 			"Select observations by random sampling"
 							helpPage:			"randomSampling"
@@ -565,7 +565,7 @@ Form {
 							name: 		"cellSampling"
 						}
 
-						AuditHelpButton	
+						HelpButton	
 						{ 
 							toolTip: 	"Select observations by cell sampling"
 							helpPage:	"cellSampling"
@@ -582,7 +582,7 @@ Form {
 							checked: 	true
 						}
 
-						AuditHelpButton
+						HelpButton
 						{ 
 							toolTip: 	"Select observations by fixed interval sampling"
 							helpPage:	"fixedIntervalSampling"
@@ -609,25 +609,37 @@ Form {
 
 			GridLayout 
 			{ 
-				Layout.leftMargin: 20 * preferencesModel.uiScale
+				GroupBox 
+				{ 	
+					id: 	samplingTables
+					title: 	qsTr("Tables")
+					
+					CheckBox { text: qsTr("Display selected observations"); 	name: "displaySample"									}
+					CheckBox { text: qsTr("Selection descriptives"); 			name: "sampleDescriptives"; 	id: sampleDescriptives	}
 
-				ColumnLayout 
-				{ 
-					spacing: 		5 * preferencesModel.uiScale
+					GridLayout 
+					{ 
+						Layout.leftMargin: 20 * preferencesModel.uiScale
 
-					CheckBox { text: qsTr("Mean"); 				name: "mean"; 	enabled: sampleDescriptives.checked; checked: true	}
-					CheckBox { text: qsTr("Median"); 			name: "median"; enabled: sampleDescriptives.checked; checked: true	}
-					CheckBox { text: qsTr("Std. deviation"); 	name: "sd"; 	enabled: sampleDescriptives.checked; checked: true	}
-					CheckBox { text: qsTr("Variance"); 			name: "var"; 	enabled: sampleDescriptives.checked					}
-				}
+						ColumnLayout 
+						{ 
+							spacing: 		5 * preferencesModel.uiScale
 
-				ColumnLayout 
-				{ 
-					spacing: 	5 * preferencesModel.uiScale
+							CheckBox { text: qsTr("Mean"); 				name: "mean"; 	enabled: sampleDescriptives.checked; checked: true	}
+							CheckBox { text: qsTr("Median"); 			name: "median"; enabled: sampleDescriptives.checked; checked: true	}
+							CheckBox { text: qsTr("Std. deviation"); 	name: "sd"; 	enabled: sampleDescriptives.checked; checked: true	}
+							CheckBox { text: qsTr("Variance"); 			name: "var"; 	enabled: sampleDescriptives.checked					}
+						}
 
-					CheckBox { text: qsTr("Minimum"); 	name: "min"; 	enabled: sampleDescriptives.checked	}
-					CheckBox { text: qsTr("Maximum"); 	name: "max"; 	enabled: sampleDescriptives.checked	}
-					CheckBox { text: qsTr("Range"); 	name: "range"; 	enabled: sampleDescriptives.checked	}
+						ColumnLayout 
+						{ 
+							spacing: 	5 * preferencesModel.uiScale
+
+							CheckBox { text: qsTr("Minimum"); 	name: "min"; 	enabled: sampleDescriptives.checked	}
+							CheckBox { text: qsTr("Maximum"); 	name: "max"; 	enabled: sampleDescriptives.checked	}
+							CheckBox { text: qsTr("Range"); 	name: "range"; 	enabled: sampleDescriptives.checked	}
+						}
+					}
 				}
 			}
 		}
@@ -704,7 +716,7 @@ Form {
 				id: 						selectHowToAnalyseObservations
 				anchors.horizontalCenter: 	parent.horizontalCenter
 				text: 						qsTr("<b>How would you like to evaluate your observations?</b>")
-				font:						Theme.font
+				font.family: 				"SansSerif"
 				font.pointSize: 			10 * preferencesModel.uiScale
 			}
 		}
@@ -736,11 +748,10 @@ Form {
 							enabled: 	monetaryVariable.count > 0
 						}
 						
-						AuditHelpButton
+						HelpButton
 						{ 
 							toolTip: 	"Adds a column to specify the audit value of the observations"
 						}
-
 					}
 
 					RowLayout 
@@ -754,7 +765,7 @@ Form {
 							enabled: 	true
 						}
 
-						AuditHelpButton
+						HelpButton
 						{ 
 							toolTip: 	"Adds a column to specify the observations as correct (0) or incorrect (1)"
 						}
@@ -847,7 +858,7 @@ Form {
 				id: 						performAuditText
 				anchors.horizontalCenter: 	parent.horizontalCenter
 				text: 						qsTr("<b>Execute the audit before continuing to the evaluation stage.</b>")
-				font: 						Theme.font
+				font.family: 				"SansSerif"
 				font.pointSize: 			7 * preferencesModel.uiScale
 				visible: 					false
 			}
