@@ -774,7 +774,7 @@ Form
 		Section
 		{
 			id:						executeAuditSection
-			title:					"Execute Audit"
+			title:					"Data Entry"
 			expanded:				pasteVariables.checked
 
 			TableView

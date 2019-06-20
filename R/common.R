@@ -424,18 +424,19 @@
 }
 
 .execution <- function(options, jaspResults){
-  if(options[["pasteVariables"]] && is.null(jaspResults[["pastingDone"]]$object)){  
+  if(options[["pasteVariables"]]){  
     dataset                       <- .readDataSetToEnd(columns.as.numeric = options[["recordNumberVariable"]])
     sampleFilter                  <- rep(0, jaspResults[["N"]]$object)
     rowNumber                     <- which(dataset[, .v(options[["recordNumberVariable"]])] %in% jaspResults[["sample"]]$object[, .v(options[["recordNumberVariable"]])])
     noOfTimesInSample             <- table(jaspResults[["sampleVector"]]$object)
     sampleFilter[rowNumber]       <- 1 * noOfTimesInSample
     sampleFilter                  <- as.numeric(sampleFilter)
-    emptyVariable                 <- rep(NA, jaspResults[["N"]]$object)
+    auditDataVariable             <- rep(NA, jaspResults[["N"]]$object)
+
+    auditDataVariable[options[["performAudit"]][[1]]$rowIndices + 1] <- options[["performAudit"]][[1]]$values
 
     .setColumnDataAsScale(options[["sampleFilter"]], sampleFilter)
-    #base::switch(options[["variableType"]], "variableTypeCorrect" = .setColumnDataAsNominal(options[["variableName"]], emptyVariable), "variableTypeAuditValues" = .setColumnDataAsScale(options[["variableName"]], emptyVariable))
-    jaspResults[["pastingDone"]]  <- createJaspState(TRUE)                
+    .setColumnDataAsScale(options[["variableName"]], auditDataVariable)          
   }
 }
 
