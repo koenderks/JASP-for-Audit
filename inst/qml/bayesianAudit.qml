@@ -818,7 +818,7 @@ Form {
 			{
 				id: 						performAuditText
 				anchors.horizontalCenter: 	parent.horizontalCenter
-				text: 						qsTr("<b>Execute the audit before continuing to the evaluation stage.</b>")
+				text: 						variableTypeAuditValues.checked ? qsTr("<b>Annotate your observations with their audit values.</b>") : qsTr("<b>Annotate your observations with 0 (correct) or 1 (incorrect).</b>")
 				visible: 					false
 			}
 		}
@@ -828,6 +828,7 @@ Form {
 			id: 					executeAuditSection
 			title:					"Data Entry"
 			expanded:				pasteVariables.checked
+			enabled:				pasteVariables.checked	
 
 			TableView
 			{
