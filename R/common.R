@@ -430,9 +430,10 @@
     rowNumber                     <- which(dataset[, .v(options[["recordNumberVariable"]])] %in% jaspResults[["sample"]]$object[, .v(options[["recordNumberVariable"]])])
     noOfTimesInSample             <- table(jaspResults[["sampleVector"]]$object)
     sampleFilter[rowNumber]       <- 1 * noOfTimesInSample
-    sampleFilter                  <- as.integer(sampleFilter)
+    sampleFilter                  <- as.numeric(sampleFilter)
     emptyVariable                 <- rep(NA, jaspResults[["N"]]$object)
-    .setColumnDataAsNominal(options[["sampleFilter"]], sampleFilter)
+
+    .setColumnDataAsScale(options[["sampleFilter"]], sampleFilter)
     #base::switch(options[["variableType"]], "variableTypeCorrect" = .setColumnDataAsNominal(options[["variableName"]], emptyVariable), "variableTypeAuditValues" = .setColumnDataAsScale(options[["variableName"]], emptyVariable))
     jaspResults[["pastingDone"]]  <- createJaspState(TRUE)                
   }

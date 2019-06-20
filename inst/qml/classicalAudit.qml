@@ -29,6 +29,10 @@ Form
 
 	property bool evaluationPhase: evaluationChecked.checked
 
+	// --------------------------------------------------------------------------------------------------------------------------------------------
+	// ---------------------------------------------------  PLANNING  -----------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------------------------------------------------------
+
 	Section 
 	{ 
 		id: 		planningPhase
@@ -374,6 +378,10 @@ Form
 		}
 	}
 
+	// --------------------------------------------------------------------------------------------------------------------------------------------
+	// ---------------------------------------------------  SELECTION  ----------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------------------------------------------------------
+
 	Section 
 	{ 
 		id: 		samplingPhase
@@ -619,6 +627,10 @@ Form
 		}
 	}
 
+	// --------------------------------------------------------------------------------------------------------------------------------------------
+	// ---------------------------------------------------  EXECUTION  ----------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------------------------------------------------------
+
 	Section 
 	{ 
 		id: 		executionPhase
@@ -708,7 +720,7 @@ Form
 					enabled: 	!pasteVariables.checked 
 				}
 				
-				AddColumnField 
+				ComputedColumnField 
 				{ 
 					id: 		variableName
 					name: 		"variableName"
@@ -737,9 +749,12 @@ Form
 				{ 
 					id: 			pasteButton
 					text: 			qsTr("<b>Add Variables</b>")
-					anchors.right: 	parent.parent.right
 					enabled: 		sampleFilter.value != "" & variableName.value != "" && !pasteVariables.checked
-					onClicked: 		pasteVariables.checked = true
+					onClicked: 		
+					{
+						pasteVariables.checked 		= true
+						performAuditTable.filter 	= sampleFilter.value + " > 0"
+					}
 
 				}
 			}
@@ -756,6 +771,22 @@ Form
 				anchors.horizontalCenter: 	parent.horizontalCenter
 				text: 						qsTr("<b>Execute the audit before continuing to the evaluation stage.</b>")
 				visible: 					pasteVariables.checked
+			}
+		}
+
+		Section
+		{
+			title:					"Perform Audit"
+			expanded:				pasteVariables.checked
+
+			TableView
+			{
+				id:					performAuditTable
+				name:				"performAudit"
+				Layout.fillWidth: 	true
+				modelType:			"FilteredDataEntryModel"
+        		source:     		"recordNumberVariable"
+        		colName:    		variableName.value
 			}
 		}
 
@@ -811,6 +842,10 @@ Form
 			}
 		}
 	}
+
+	// --------------------------------------------------------------------------------------------------------------------------------------------
+	// ---------------------------------------------------  EVALUATION  ---------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------------------------------------------------------
 
 	Section 
 	{ 
