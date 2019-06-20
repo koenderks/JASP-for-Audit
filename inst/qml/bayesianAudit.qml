@@ -17,937 +17,1088 @@ import JASP.Controls 1.0
 import JASP.Widgets 1.0
 
 Form {
+
 	usesJaspResults: true
 	columns: 1
 
-	Section {
-		id: planningPhase
-		text: planningPhase.expanded ? qsTr("<b>1. Planning</b>") : qsTr(
-										   "1. Planning")
-		columns: 1
-		expanded: true
-		GridLayout {
+	Section 
+	{
+		id: 		planningPhase
+		text: 		planningPhase.expanded ? qsTr("<b>1. Planning</b>") : qsTr("1. Planning")
+		columns: 	1
+		expanded: 	true
+
+		GridLayout 
+		{
 			columns: 2
-			RadioButtonGroup {
-				id: materiality
-				name: "materiality"
-				title: qsTr("Population Materiality")
-				RowLayout {
-					RadioButton {
-						id: materialityAbsolute
-						name: "materialityAbsolute"
-						text: qsTr("Absolute")
-						checked: true
-						childrenOnSameRow: true
-						DoubleField {
-							id: materialityValue
-							visible: materialityAbsolute.checked
-							name: "materialityValue"
-							defaultValue: 0
-							min: 0
-							fieldWidth: 90
-							decimals: 2
-							label: euroValuta.checked ? "€" : (dollarValuta.checked ? "$" : otherValutaName.value)
+
+			RadioButtonGroup 
+			{
+				id: 	materiality
+				name: 	"materiality"
+				title: 	qsTr("Population Materiality")
+
+				RowLayout 
+				{
+					RadioButton 
+					{
+						id: 				materialityAbsolute
+						name: 				"materialityAbsolute"
+						text: 				qsTr("Absolute")
+						checked: 			true
+						childrenOnSameRow: 	true
+
+						DoubleField 
+						{
+							id: 			materialityValue
+							visible: 		materialityAbsolute.checked
+							name: 			"materialityValue"
+							defaultValue: 	0
+							min: 			0
+							fieldWidth: 	90
+							decimals: 		2
+							label: 			euroValuta.checked ? "€" : (dollarValuta.checked ? "$" : otherValutaName.value)
 						}
 					}
 				}
-				RowLayout {
-					RadioButton {
-						id: materialityRelative
-						name: "materialityRelative"
-						text: qsTr("Relative")
-						childrenOnSameRow: true
-						PercentField {
-							id: materialityPercentage
-							visible: materialityRelative.checked
-							decimals: 2
-							defaultValue: 0
-							name: "materialityPercentage"
-							fieldWidth: 40
+
+				RowLayout 
+				{
+					RadioButton 
+					{
+						id: 				materialityRelative
+						name: 				"materialityRelative"
+						text: 				qsTr("Relative")
+						childrenOnSameRow: 	true
+
+						PercentField 
+						{
+							id: 			materialityPercentage
+							visible: 		materialityRelative.checked
+							decimals: 		2
+							defaultValue: 	0
+							name: 			"materialityPercentage"
+							fieldWidth: 	40
 						}
 					}
 				}
 			}
-			GroupBox {
-				title: qsTr("Audit Risk")
-				id: auditRisk
-				PercentField {
-					name: "confidence"
-					label: qsTr("Confidence")
-					decimals: 2
-					defaultValue: 95
+
+			GroupBox 
+			{
+				id: 		auditRisk
+				title: 		qsTr("Audit Risk")
+
+				PercentField 
+				{
+					name: 			"confidence"
+					label: 			qsTr("Confidence")
+					decimals: 		2
+					defaultValue: 	95
 				}
 			}
 		}
 
-		Divider {
+		Divider 
+		{
 			width: parent.width
 		}
 
-		Item {
-			height: variableSelectionTitle.height
-			Layout.fillWidth: true
-			Text {
-				id: variableSelectionTitle
-				anchors.horizontalCenter: parent.horizontalCenter
-				text: qsTr("<b>Variable definition</b>")
-				font.family: "SansSerif"
-				font.pointSize: 12
+		Item 
+		{
+			height: 				variableSelectionTitle.height
+			Layout.fillWidth: 		true
+
+			Text 
+			{
+				id: 						variableSelectionTitle
+				anchors.horizontalCenter: 	parent.horizontalCenter
+				text: 						qsTr("<b>Variable definition</b>")
+				font:						Theme.font
 			}
 		}
-		VariablesForm {
-			id: variablesFormPlanning
-			implicitHeight: 110
-			AvailableVariablesList {
+
+		VariablesForm 
+		{
+			id: 			variablesFormPlanning
+			implicitHeight:	110
+
+			AvailableVariablesList 
+			{
 				name: "variablesFormPlanning"
 			}
-			AssignedVariablesList {
-				name: "recordNumberVariable"
-				title: qsTr("Record ID's")
-				singleVariable: true
-				allowedColumns: ["nominal", "ordinal", "scale"]
-				id: recordNumberVariable
+
+			AssignedVariablesList 
+			{
+				id: 				recordNumberVariable
+				name: 				"recordNumberVariable"
+				title: 				qsTr("Record ID's")
+				singleVariable: 	true
+				allowedColumns: 	["nominal", "ordinal", "scale"]
 			}
-			AssignedVariablesList {
-				name: "monetaryVariable"
-				title: materialityAbsolute.checked ? qsTr("Book Values <i>(required)</i>") : qsTr(
-														 "Book Values <i>(optional)</i>")
-				singleVariable: true
-				allowedColumns: ["scale"]
-				id: monetaryVariable
+
+			AssignedVariablesList 
+			{
+				id: 				monetaryVariable
+				name: 				"monetaryVariable"
+				title: 				materialityAbsolute.checked ? qsTr("Book Values <i>(required)</i>") : qsTr("Book Values <i>(optional)</i>")
+				singleVariable: 	true
+				allowedColumns: 	["scale"]
 			}
 		}
 
-		Section {
+		Section 
+		{
 			text: qsTr("Advanced Options")
-			GridLayout {
-				columns: 3
-				RadioButtonGroup {
-					title: qsTr("Inherent Risk")
-					name: "IR"
-					id: ir
-					RadioButton {
-						text: qsTr("High")
-						name: "High"
-						checked: true
-					}
-					RadioButton {
-						text: qsTr("Medium")
-						name: "Medium"
-					}
-					RadioButton {
-						text: qsTr("Low")
-						name: "Low"
-					}
-				}
-				RadioButtonGroup {
-					name: "expectedErrors"
-					id: expectedErrors
-					title: qsTr("Expected Errors")
-					RowLayout {
-						enabled: monetaryVariable.count > 0
-						RadioButton {
-							text: qsTr("Absolute")
-							name: "expectedAbsolute"
-							id: expectedAbsolute
-						}
-						DoubleField {
-							name: "expectedNumber"
-							enabled: expectedAbsolute.checked
-							defaultValue: 0
-							min: 0
-							max: 1e10
-							decimals: 2
-							visible: expectedAbsolute.checked
-							fieldWidth: 60
-							label: euroValuta.checked ? "€" : (dollarValuta.checked ? "$" : otherValutaName.value)
-						}
-					}
-					RowLayout {
-						RadioButton {
-							text: qsTr("Relative")
-							name: "expectedRelative"
-							id: expectedRelative
-							checked: true
-						}
-						PercentField {
-							name: "expectedPercentage"
-							enabled: expectedRelative.checked
-							decimals: 3
-							defaultValue: 0
-							visible: expectedRelative.checked
-							fieldWidth: 40
-						}
-					}
-				}
-				GroupBox {
-					title: qsTr("Explanatory Text")
-					RowLayout {
-						CheckBox {
-							id: explanatoryText
-							text: qsTr("Enable")
-							name: "explanatoryText"
-							checked: true
-						}
-						MenuButton {
-							width: 20
-							iconSource: "qrc:/images/info-button.png"
-							toolTip: "Show explanatory text at each step of the analysis"
-							radius: 20
-							Layout.alignment: Qt.AlignRight
-							onClicked: helpModel.showOrTogglePage(
-										   myAnalysis.fullHelpPath(
-											   "explanatoryText"))
-						}
-					}
-				}
-				RadioButtonGroup {
-					title: qsTr("Control Risk")
-					name: "CR"
-					id: cr
-					RadioButton {
-						text: qsTr("High")
-						name: "High"
-						checked: true
-					}
-					RadioButton {
-						text: qsTr("Medium")
-						name: "Medium"
-					}
-					RadioButton {
-						text: qsTr("Low")
-						name: "Low"
-					}
-				}
-				RadioButtonGroup {
-					title: qsTr("Planning Distribution")
-					name: "planningModel"
-					id: planningModel
-					RadioButton {
-						text: qsTr("Beta")
-						name: "beta"
-						checked: true
-						id: beta
-					}
-					RadioButton {
-						text: qsTr("Beta-binomial")
-						name: "beta-binomial"
-						id: betaBinomial
-					}
-				}
-				RadioButtonGroup {
-					title: qsTr("Currency")
-					name: "valuta"
-					id: valuta
 
-					RadioButton {
-						text: qsTr("Euro (€)")
-						name: "euroValuta"
-						checked: true
-						id: euroValuta
+			GridLayout 
+			{
+				columns: 3
+
+				RadioButtonGroup 
+				{
+					id: 		ir
+					title: 		qsTr("Inherent Risk")
+					name: 		"IR"
+
+					RadioButton 
+					{
+						text: 		qsTr("High")
+						name: 		"High"
+						checked: 	true
 					}
-					RadioButton {
-						text: qsTr("Dollar ($)")
-						name: "dollarValuta"
-						checked: false
-						id: dollarValuta
+					RadioButton 
+					{
+						text: 		qsTr("Medium")
+						name: 		"Medium"
 					}
-					RowLayout {
-						RadioButton {
-							text: qsTr("Other")
-							name: "otherValuta"
-							checked: false
-							id: otherValuta
+					RadioButton 
+					{
+						text: 		qsTr("Low")
+						name: 		"Low"
+					}
+				}
+
+				RadioButtonGroup 
+				{
+					id: 		expectedErrors
+					name: 		"expectedErrors"
+					title: 		qsTr("Expected Errors")
+
+					RowLayout 
+					{
+						enabled: monetaryVariable.count > 0
+
+						RadioButton 
+						{
+							id: expectedAbsolute
+							text: 	qsTr("Absolute")
+							name: 	"expectedAbsolute"
 						}
-						TextField {
-							name: "otherValutaName"
-							fieldWidth: 40
-							id: otherValutaName
-							enabled: otherValuta.checked
-							visible: otherValuta.checked
+
+						DoubleField 
+						{
+							name: 			"expectedNumber"
+							enabled: 		expectedAbsolute.checked
+							defaultValue: 	0
+							min: 			0
+							max: 			1e10
+							decimals: 		2
+							visible: 		expectedAbsolute.checked
+							fieldWidth: 	60
+							label: 			euroValuta.checked ? "€" : (dollarValuta.checked ? "$" : otherValutaName.value)
+						}
+					}
+
+					RowLayout 
+					{
+
+						RadioButton 
+						{
+							id: expectedRelative
+							text: 		qsTr("Relative")
+							name: 		"expectedRelative"
+							checked: true
+						}
+
+						PercentField 
+						{
+							name: 			"expectedPercentage"
+							enabled: 		expectedRelative.checked
+							decimals: 		3
+							defaultValue: 	0
+							visible: 		expectedRelative.checked
+							fieldWidth: 	40
+						}
+					}
+				}
+
+				GroupBox 
+				{
+					title: qsTr("Explanatory Text")
+
+					RowLayout 
+					{
+
+						CheckBox 
+						{
+							id: 		explanatoryText
+							text: 		qsTr("Enable")
+							name: 		"explanatoryText"
+							checked: 	true
+						}
+
+						AuditHelpButton 
+						{ 
+							helpPage:			"explanatoryText"
+							toolTip: 			"Show explanatory text at each step of the analysis"
+						}
+					}
+				}
+
+				RadioButtonGroup 
+				{
+					id: 		cr
+					title: 		qsTr("Control Risk")
+					name: 		"CR"
+
+					RadioButton { text: qsTr("High"); 		name: "High"; checked: true }
+					RadioButton { text: qsTr("Medium"); 	name: "Medium" }
+					RadioButton { text: qsTr("Low"); 		name: "Low" }
+				}
+
+				RadioButtonGroup 
+				{
+					id: 		planningModel
+					title: 		qsTr("Planning Distribution")
+					name: 		"planningModel"
+
+					RadioButton { id: beta; 		text: qsTr("Beta"); 			name: "beta"; 			checked: true}
+					RadioButton { id: betaBinomial; text: qsTr("Beta-binomial"); 	name: "beta-binomial"}
+				}
+
+				RadioButtonGroup 
+				{
+					id: 	valuta
+					title: 	qsTr("Currency")
+					name: 	"valuta"
+
+					RadioButton { id: euroValuta; 		text: qsTr("Euro (€)"); 	name: "euroValuta"; 	checked: true}
+					RadioButton { id: dollarValuta; 	text: qsTr("Dollar ($)"); 	name: "dollarValuta"; 	checked: false}
+
+					RowLayout 
+					{
+						RadioButton { id: otherValuta; 	text: qsTr("Other"); 		name: "otherValuta"; 	checked: false}
+
+						TextField 
+						{
+							id: 			otherValutaName
+							name: 			"otherValutaName"
+							fieldWidth: 	40
+							enabled: 		otherValuta.checked
+							visible: 		otherValuta.checked
 						}
 					}
 				}
 			}
 		}
-		Section {
+		
+		Section 
+		{
 			title: qsTr("Tables and Plots")
-			GridLayout {
+
+			GridLayout 
+			{
 				columns: 2
-				ColumnLayout {
-					GroupBox {
+
+				ColumnLayout 
+				{
+					GroupBox 
+					{
 						title: qsTr("Statistics")
-						CheckBox {
+
+						CheckBox 
+						{
 							text: qsTr("Expected Bayes factor\u208B\u208A")
 							name: "expectedBF"
 						}
 					}
-					GroupBox {
-						title: qsTr("Tables")
-						CheckBox {
-							text: qsTr("Book value descriptives")
-							name: "bookValueDescriptives"
-							enabled: monetaryVariable.count > 0
+
+					GroupBox 
+					{
+						title: 	qsTr("Tables")
+
+						CheckBox 
+						{
+							text: 		qsTr("Book value descriptives")
+							name: 		"bookValueDescriptives"
+							enabled: 	monetaryVariable.count > 0
 						}
-						CheckBox {
-							text: qsTr("Implicit sample")
-							name: "implicitSampleTable"
+
+						CheckBox 
+						{
+							text: 		qsTr("Implicit sample")
+							name: 		"implicitSampleTable"
 						}
 					}
 				}
-				GroupBox {
+
+				GroupBox 
+				{
 					title: qsTr("Plots")
-					CheckBox {
-						enabled: monetaryVariable.count > 0
-						text: qsTr("Book value distribution")
-						name: "bookValueDistribution"
-						id: bookValueDistribution
+
+					CheckBox 
+					{
+						id: 		bookValueDistribution
+						enabled: 	monetaryVariable.count > 0
+						text: 		qsTr("Book value distribution")
+						name: 		"bookValueDistribution"
 					}
-					CheckBox {
-						text: qsTr("Decision analysis")
-						name: "decisionPlot"
+
+					CheckBox 
+					{
+						text: 		qsTr("Decision analysis")
+						name: 		"decisionPlot"
 					}
-					CheckBox {
-						text: qsTr("Implied prior from risk assessments")
-						name: "priorPlot"
-						id: priorPlot
+
+					CheckBox 
+					{
+						id: 		priorPlot
+						text: 		qsTr("Implied prior from risk assessments")
+						name: 		"priorPlot"
 					}
-					PercentField {
-						text: qsTr("x-axis limit")
-						name: "priorPlotLimit"
-						defaultValue: 100
-						Layout.leftMargin: 20
-						enabled: priorPlot.checked
+
+					PercentField 
+					{
+						text: 				qsTr("x-axis limit")
+						name: 				"priorPlotLimit"
+						defaultValue: 		100
+						Layout.leftMargin: 	20 * preferencesModel.uiScale
+						enabled: 			priorPlot.checked
 					}
-					CheckBox {
-						text: qsTr("Additional info")
-						name: "priorPlotAdditionalInfo"
-						Layout.leftMargin: 20
-						checked: true
-						enabled: priorPlot.checked
+
+					CheckBox 
+					{
+						text: 				qsTr("Additional info")
+						name: 				"priorPlotAdditionalInfo"
+						Layout.leftMargin: 	20 * preferencesModel.uiScale
+						checked: 			true
+						enabled: 			priorPlot.checked
 					}
+
 					CheckBox {
-						text: qsTr("Expected posterior")
-						name: "priorPlotExpectedPosterior"
-						Layout.leftMargin: 20
-						checked: false
-						enabled: priorPlot.checked
+						text: 				qsTr("Expected posterior")
+						name: 				"priorPlotExpectedPosterior"
+						Layout.leftMargin: 	20 * preferencesModel.uiScale
+						checked: 			false
+						enabled: 			priorPlot.checked
 					}
 				}
 			}
 		}
-		Item {
-			height: toSampling.height
-			Layout.fillWidth: true
-			Button {
-				id: downloadReportPlanning
-				anchors.right: samplingChecked.left
-				text: qsTr("<b>Download Report</b>")
-				enabled: materialityRelative.checked ? (materialityPercentage.value == "0" ? false : true) : (materialityValue.value == "0" ? false : (recordNumberVariable.count > 0 && monetaryVariable.count > 0))
-				onClicked: {
+
+		Item 
+		{
+			height: 			toSampling.height
+			Layout.fillWidth: 	true
+
+			Button 
+			{
+				id: 				downloadReportPlanning
+				anchors.right: 		samplingChecked.left
+				text: 				qsTr("<b>Download Report</b>")
+				enabled: 			materialityRelative.checked ? (materialityPercentage.value == "0" ? false : true) : (materialityValue.value == "0" ? false : (recordNumberVariable.count > 0 && monetaryVariable.count > 0))
+				onClicked: 
+				{
 					form.exportResults()
 				}
 			}
-			CheckBox {
-				anchors.right: toSampling.left
-				width: height
-				visible: false
-				name: "samplingChecked"
-				id: samplingChecked
-				checked: false
+
+			CheckBox 
+			{
+				id: 			samplingChecked
+				anchors.right: 	toSampling.left
+				width: 			height
+				visible: 		false
+				name: 			"samplingChecked"
+				checked: 		false
 			}
-			Button {
-				id: toSampling
-				anchors.right: parent.right
-				text: qsTr("<b>To Selection</b>")
-				enabled: materialityRelative.checked ? (materialityPercentage.value == "0" ? false : (recordNumberVariable.count > 0)) : (materialityValue.value == "0" ? false : (recordNumberVariable.count > 0 && monetaryVariable.count > 0))
-				onClicked: {
+
+			Button 
+			{
+				id: 			toSampling
+				anchors.right: 	parent.right
+				text: 			qsTr("<b>To Selection</b>")
+				enabled: 		materialityRelative.checked ? (materialityPercentage.value == "0" ? false : (recordNumberVariable.count > 0)) : (materialityValue.value == "0" ? false : (recordNumberVariable.count > 0 && monetaryVariable.count > 0))
+				onClicked: 
+				{
 					planningPhase.expanded = false
 					samplingPhase.expanded = true
 					samplingPhase.enabled = true
 					samplingChecked.checked = true
-					if (monetaryVariable.count == 0)
+					if (monetaryVariable.count == 0){
 						recordSampling.click()
-					if (monetaryVariable.count > 0)
-						musSampling.click()
-					if (monetaryVariable.count == 0)
 						variableTypeCorrect.click()
-					if (monetaryVariable.count > 0)
+					}
+					if (monetaryVariable.count > 0){
+						musSampling.click()
 						variableTypeAuditValues.click()
+					}
 				}
 			}
 		}
 	}
 
-	Section {
-		text: samplingPhase.expanded ? qsTr("<b>2. Selection</b>") : qsTr(
-										   "2. Selection")
-		enabled: false
-		expanded: false
-		id: samplingPhase
-		columns: 1
-		VariablesForm {
-			id: variablesFormSampling
+	Section 
+	{
+		id: 		samplingPhase
+		text: 		samplingPhase.expanded ? qsTr("<b>2. Selection</b>") : qsTr("2. Selection")
+		enabled: 	false
+		expanded: 	false
+		columns: 	1
+
+		VariablesForm 
+		{
+			id: 			variablesFormSampling
 			implicitHeight: 200
-			AvailableVariablesList {
-				name: "variablesFormSampling"
-				source: "variablesFormPlanning"
+
+			AvailableVariablesList 
+			{
+				name: 			"variablesFormSampling"
+				source: 		"variablesFormPlanning"
 			}
-			AssignedVariablesList {
-				name: "rankingVariable"
-				title: qsTr("Ranking Variable <i>(optional)</i>")
+
+			AssignedVariablesList 
+			{
+				name: 			"rankingVariable"
+				title: 			qsTr("Ranking Variable <i>(optional)</i>")
 				singleVariable: true
 				allowedColumns: ["scale"]
 			}
-			AssignedVariablesList {
-				name: "additionalVariables"
-				title: qsTr("Additional Variables <i>(optional)</i>")
-				height: 140
+
+			AssignedVariablesList 
+			{
+				name: 			"additionalVariables"
+				title: 			qsTr("Additional Variables <i>(optional)</i>")
+				height: 		140
 				allowedColumns: ["scale", "ordinal", "nominal"]
 			}
 		}
-		Section {
+
+		Section 
+		{
 			title: qsTr("Advanced Options")
-			GridLayout {
+
+			GridLayout 
+			{
 				columns: 3
-				RadioButtonGroup {
-					title: qsTr("Sampling Units")
-					name: "selectionType"
-					id: selectionType
-					RowLayout {
-						RadioButton {
-							text: qsTr("Monetary unit sampling")
-							name: "musSampling"
-							id: musSampling
-							enabled: (monetaryVariable.count > 0 ? true : false)
-							checked: true
+
+				RadioButtonGroup 
+				{
+					id: 		selectionType
+					title: 		qsTr("Sampling Units")
+					name: 		"selectionType"
+
+					RowLayout 
+					{
+						RadioButton 
+						{
+							id: 		musSampling
+							text: 		qsTr("Monetary unit sampling")
+							name: 		"musSampling"
+							enabled: 	monetaryVariable.count > 0
+							checked: 	true
 						}
-						MenuButton {
-							width: 20
-							iconSource: "qrc:/images/info-button.png"
-							toolTip: "Select observations with probability proportional to their value"
-							radius: 20
-							Layout.alignment: Qt.AlignRight
-							onClicked: helpModel.showOrTogglePage(
-										   myAnalysis.fullHelpPath(
-											   "monetaryUnitSampling"))
+
+						AuditHelpButton 
+						{ 
+							helpPage:			"monetaryUnitSampling"
+							toolTip: 			"Select observations with probability proportional to their value"
 						}
 					}
-					RowLayout {
-						RadioButton {
-							text: qsTr("Record sampling")
-							name: "recordSampling"
-							id: recordSampling
+
+					RowLayout 
+					{
+						RadioButton 
+						{
+							id: 		recordSampling
+							text: 		qsTr("Record sampling")
+							name: 		"recordSampling"
 						}
-						MenuButton {
-							width: 20
-							iconSource: "qrc:/images/info-button.png"
-							toolTip: "Select observations with equal probability"
-							radius: 20
-							Layout.alignment: Qt.AlignRight
-							onClicked: helpModel.showOrTogglePage(
-										   myAnalysis.fullHelpPath(
-											   "recordSampling"))
+
+						AuditHelpButton
+						{ 
+							toolTip: 			"Select observations with equal probability"
+							helpPage:			"recordSampling"
 						}
 					}
 				}
-				RadioButtonGroup {
-					title: qsTr("Selection Method")
-					name: "selectionMethod"
-					id: selectionMethod
-					RowLayout {
-						RadioButton {
+
+				RadioButtonGroup 
+				{
+					id: 		selectionMethod
+					title: 		qsTr("Selection Method")
+					name: 		"selectionMethod"
+
+					RowLayout 
+					{
+						RadioButton 
+						{
+							id: randomSampling
 							text: qsTr("Random sampling")
 							name: "randomSampling"
-							id: randomSampling
 						}
-						MenuButton {
-							width: 20
-							iconSource: "qrc:/images/info-button.png"
-							toolTip: "Select observations by random sampling"
-							radius: 20
-							Layout.alignment: Qt.AlignRight
-							onClicked: helpModel.showOrTogglePage(
-										   myAnalysis.fullHelpPath(
-											   "randomSampling"))
+
+						AuditHelpButton 
+						{ 
+							toolTip: 			"Select observations by random sampling"
+							helpPage:			"randomSampling"
 						}
 					}
-					RowLayout {
-						RadioButton {
-							text: qsTr("Cell sampling")
-							name: "cellSampling"
-							id: cellSampling
+
+					RowLayout 
+					{
+						RadioButton 
+						{
+							id: 		cellSampling
+							text: 		qsTr("Cell sampling")
+							name: 		"cellSampling"
 						}
-						MenuButton {
-							width: 20
-							iconSource: "qrc:/images/info-button.png"
-							toolTip: "Select observations by cell sampling"
-							radius: 20
-							Layout.alignment: Qt.AlignRight
-							onClicked: helpModel.showOrTogglePage(
-										   myAnalysis.fullHelpPath(
-											   "cellSampling"))
+
+						AuditHelpButton	
+						{ 
+							toolTip: 	"Select observations by cell sampling"
+							helpPage:	"cellSampling"
 						}
 					}
-					RowLayout {
-						RadioButton {
-							text: qsTr("Fixed interval sampling")
-							name: "systematicSampling"
-							id: systematicSampling
-							checked: true
+
+					RowLayout 
+					{
+						RadioButton 
+						{
+							id: 		systematicSampling
+							text: 		qsTr("Fixed interval sampling")
+							name: 		"systematicSampling"
+							checked: 	true
 						}
-						MenuButton {
-							width: 20
-							iconSource: "qrc:/images/info-button.png"
-							toolTip: "Select observations by fixed interval sampling"
-							radius: 20
-							Layout.alignment: Qt.AlignRight
-							onClicked: helpModel.showOrTogglePage(
-										   myAnalysis.fullHelpPath(
-											   "fixedIntervalSampling"))
+
+						AuditHelpButton
+						{ 
+							toolTip: 	"Select observations by fixed interval sampling"
+							helpPage:	"fixedIntervalSampling"
 						}
 					}
 				}
-				IntegerField {
-					text: qsTr("Seed")
-					name: "seed"
-					id: seed
-					defaultValue: 1
-					min: 1
-					max: 999
-					fieldWidth: 60
+
+				IntegerField 
+				{
+					id: 			seed
+					text: 			qsTr("Seed")
+					name: 			"seed"
+					defaultValue: 	1
+					min: 			1
+					max: 			999
+					fieldWidth: 	60
 				}
 			}
 		}
-		Section {
+
+		Section 
+		{
 			title: qsTr("Tables and Plots")
-			GridLayout {
-				GroupBox {
-					title: qsTr("Tables")
-					id: samplingTables
-					CheckBox {
-						text: qsTr("Display selected observations")
-						name: "displaySample"
-					}
-					CheckBox {
-						text: qsTr("Selection descriptives")
-						name: "sampleDescriptives"
-						id: sampleDescriptives
-					}
-					GridLayout {
-						Layout.leftMargin: 20
-						ColumnLayout {
-							spacing: 5
-							CheckBox {
-								text: qsTr("Mean")
-								name: "mean"
-								enabled: sampleDescriptives.checked
-								checked: true
-							}
-							CheckBox {
-								text: qsTr("Median")
-								name: "median"
-								enabled: sampleDescriptives.checked
-								checked: true
-							}
-							CheckBox {
-								text: qsTr("Std. deviation")
-								name: "sd"
-								enabled: sampleDescriptives.checked
-								checked: true
-							}
-							CheckBox {
-								text: qsTr("Variance")
-								name: "var"
-								enabled: sampleDescriptives.checked
-							}
-						}
-						ColumnLayout {
-							spacing: 5
-							CheckBox {
-								text: qsTr("Minimum")
-								name: "min"
-								enabled: sampleDescriptives.checked
-							}
-							CheckBox {
-								text: qsTr("Maximum")
-								name: "max"
-								enabled: sampleDescriptives.checked
-							}
-							CheckBox {
-								text: qsTr("Range")
-								name: "range"
-								enabled: sampleDescriptives.checked
-							}
-						}
-					}
+
+			GridLayout 
+			{ 
+				Layout.leftMargin: 20 * preferencesModel.uiScale
+
+				ColumnLayout 
+				{ 
+					spacing: 		5 * preferencesModel.uiScale
+
+					CheckBox { text: qsTr("Mean"); 				name: "mean"; 	enabled: sampleDescriptives.checked; checked: true	}
+					CheckBox { text: qsTr("Median"); 			name: "median"; enabled: sampleDescriptives.checked; checked: true	}
+					CheckBox { text: qsTr("Std. deviation"); 	name: "sd"; 	enabled: sampleDescriptives.checked; checked: true	}
+					CheckBox { text: qsTr("Variance"); 			name: "var"; 	enabled: sampleDescriptives.checked					}
+				}
+
+				ColumnLayout 
+				{ 
+					spacing: 	5 * preferencesModel.uiScale
+
+					CheckBox { text: qsTr("Minimum"); 	name: "min"; 	enabled: sampleDescriptives.checked	}
+					CheckBox { text: qsTr("Maximum"); 	name: "max"; 	enabled: sampleDescriptives.checked	}
+					CheckBox { text: qsTr("Range"); 	name: "range"; 	enabled: sampleDescriptives.checked	}
 				}
 			}
 		}
-		Item {
-			height: toExecution.height
-			Layout.fillWidth: true
-			Button {
-				anchors.left: parent.left
-				text: qsTr("<b>Reset Workflow</b>")
-				onClicked: {
+
+		Item 
+		{
+			height: 			toExecution.height
+			Layout.fillWidth: 	true
+
+			Button 
+			{
+				anchors.left: 	parent.left
+				text: 			qsTr("<b>Reset Workflow</b>")
+				onClicked: 
+				{
 					form.reset()
 				}
 			}
-			Button {
-				id: downloadReportSelection
-				enabled: materialityRelative.checked ? (materialityPercentage.value == "0" ? false : true) : (materialityValue.value == "0" ? false : true)
-				anchors.right: executionChecked.left
-				text: qsTr("<b>Download Report</b>")
-				onClicked: {
+
+			Button 
+			{
+				id: 			downloadReportSelection
+				enabled: 		materialityRelative.checked ? (materialityPercentage.value == "0" ? false : true) : (materialityValue.value == "0" ? false : true)
+				anchors.right: 	executionChecked.left
+				text: 			qsTr("<b>Download Report</b>")
+				onClicked: 
+				{
 					form.exportResults()
 				}
 			}
-			CheckBox {
-				anchors.right: toExecution.left
-				width: height
-				visible: false
-				name: "executionChecked"
-				id: executionChecked
-				checked: false
+
+			CheckBox 
+			{
+				id: 				executionChecked
+				anchors.right: 		toExecution.left
+				width: 				height
+				visible: 			false
+				name: 				"executionChecked"
+				checked: 			false
 			}
-			Button {
-				id: toExecution
-				anchors.right: parent.right
-				text: qsTr("<b>To Execution</b>")
-				onClicked: {
+
+			Button 
+			{
+				id: 				toExecution
+				anchors.right: 		parent.right
+				text: 				qsTr("<b>To Execution</b>")
+				onClicked: 
+				{
 					samplingPhase.expanded = false
 					executionPhase.expanded = true
 					executionPhase.enabled = true
-					if (monetaryVariable.count == 0)
-						variableTypeCorrect.click()
-					if (monetaryVariable.count > 0)
-						variableTypeAuditValues.click()
+					if (monetaryVariable.count == 0)	variableTypeCorrect.click()
+					if (monetaryVariable.count > 0)		variableTypeAuditValues.click()
 				}
 			}
 		}
 	}
-	Section {
-		text: executionPhase.expanded ? qsTr("<b>3. Execution</b>") : qsTr(
-											"3. Execution")
-		expanded: false
-		enabled: false
-		id: executionPhase
-		columns: 1
-		Item {
-			height: selectHowToAnalyseObservations.height
-			Layout.fillWidth: true
-			Text {
-				id: selectHowToAnalyseObservations
-				anchors.horizontalCenter: parent.horizontalCenter
-				text: qsTr("<b>How would you like to evaluate your observations?</b>")
-				font.family: "SansSerif"
-				font.pointSize: 10
+
+	Section 
+	{
+		id: 		executionPhase
+		text: 		executionPhase.expanded ? qsTr("<b>3. Execution</b>") : qsTr("3. Execution")
+		expanded: 	false
+		enabled: 	false
+		columns: 	1
+
+		Item 
+		{
+			height: 				selectHowToAnalyseObservations.height
+			Layout.fillWidth: 		true
+			
+			Text 
+			{
+				id: 						selectHowToAnalyseObservations
+				anchors.horizontalCenter: 	parent.horizontalCenter
+				text: 						qsTr("<b>How would you like to evaluate your observations?</b>")
+				font:						Theme.font
+				font.pointSize: 			10 * preferencesModel.uiScale
 			}
 		}
-		Item {
-			height: variableType.height
-			Layout.fillWidth: true
-			RadioButtonGroup {
-				name: "variableType"
-				id: variableType
-				title: qsTr("")
-				anchors.horizontalCenter: parent.horizontalCenter
-				RowLayout {
-					spacing: 200
-					RowLayout {
-						RadioButton {
-							text: qsTr("Audit values")
-							name: "variableTypeAuditValues"
-							id: variableTypeAuditValues
-							checked: true
-							enabled: (monetaryVariable.count > 0 ? true : false)
+
+		Item 
+		{
+			height: 				variableType.height
+			Layout.fillWidth: 		true
+
+			RadioButtonGroup 
+			{
+				id: 						variableType
+				name: 						"variableType"
+				title: 						qsTr("")
+				anchors.horizontalCenter: 	parent.horizontalCenter
+				
+				RowLayout 
+				{
+					spacing: 200 * preferencesModel.uiScale
+
+					RowLayout 
+					{
+						RadioButton 
+						{
+							id: 		variableTypeAuditValues
+							text: 		qsTr("Audit values")
+							name: 		"variableTypeAuditValues"
+							checked: 	true
+							enabled: 	monetaryVariable.count > 0
 						}
-						MenuButton {
-							width: 20
-							iconSource: "qrc:/images/info-button.png"
-							toolTip: "Adds a column to specify the audit value of the observations"
-							radius: 20
-							Layout.alignment: Qt.AlignRight
+						
+						AuditHelpButton
+						{ 
+							toolTip: 	"Adds a column to specify the audit value of the observations"
 						}
+
 					}
-					RowLayout {
-						RadioButton {
-							text: qsTr("Correct / Incorrect")
-							name: "variableTypeCorrect"
-							id: variableTypeCorrect
-							checked: false
-							enabled: true
+
+					RowLayout 
+					{
+						RadioButton 
+						{
+							id: 		variableTypeCorrect
+							text: 		qsTr("Correct / Incorrect")
+							name: 		"variableTypeCorrect"
+							checked: 	false
+							enabled: 	true
 						}
-						MenuButton {
-							width: 20
-							iconSource: "qrc:/images/info-button.png"
-							toolTip: "Adds a column to specify the observations as correct (0) or incorrect (1)"
-							radius: 20
-							Layout.alignment: Qt.AlignRight
+
+						AuditHelpButton
+						{ 
+							toolTip: 	"Adds a column to specify the observations as correct (0) or incorrect (1)"
 						}
 					}
 				}
 			}
 		}
 
-		Divider {
+		Divider 
+		{
 			width: parent.width
 		}
 
-		RowLayout {
-			GroupBox {
+		RowLayout 
+		{
+			GroupBox 
+			{
 				id: groupBoxVariableNames
-				AddColumnField {
-					name: "sampleFilter"
-					text: "Column name selection result: "
-					fieldWidth: 120
-					enabled: pasteVariables.checked ? false : true
-					id: sampleFilter
+
+				ComputedColumnField 
+				{
+					id: 			sampleFilter
+					name: 			"sampleFilter"
+					text: 			"Column name selection result: "
+					fieldWidth: 	120
+					enabled: 		!pasteVariables.checked
 				}
-				AddColumnField {
-					name: "variableName"
-					text: "Column name audit result: "
-					fieldWidth: 120
-					enabled: pasteVariables.checked ? false : true
-					id: variableName
+
+				AddColumnField 
+				{
+					id: 			variableName
+					name: 			"variableName"
+					text: 			"Column name audit result: "
+					fieldWidth: 	120
+					enabled: 		!pasteVariables.checked
 				}
 			}
-			Item {
-				height: groupBoxVariableNames.height
-				Layout.fillWidth: true
-				id: hoi
-				CheckBox {
-					anchors.right: pasteButton.left
-					width: height
-					visible: false
-					name: "pasteVariables"
-					id: pasteVariables
-					checked: false
+
+			Item 
+			{
+				height: 				groupBoxVariableNames.height
+				Layout.fillWidth: 		true
+
+				CheckBox 
+				{
+					id: 				pasteVariables
+					anchors.right: 		pasteButton.left
+					width: 				height
+					visible: 			false
+					name: 				"pasteVariables"
+					checked: 			false
 				}
-				Button {
-					text: qsTr("<b>Add Variables</b>")
-					id: pasteButton
-					anchors.right: parent.parent.right
-					enabled: (sampleFilter.value != "" & variableName.value != "")
-					onClicked: {
-						toEvaluation.enabled = true
-						pasteButton.enabled = false
-						pasteVariables.checked = true
-						variableType.enabled = false
-						materiality.enabled = false
-						auditRisk.enabled = false
-						ir.enabled = false
-						cr.enabled = false
-						planningModel.enabled = false
-						expectedErrors.enabled = false
-						variablesFormSampling.enabled = false
-						seed.enabled = false
-						selectionType.enabled = false
-						pasteButton.enabled = false
-						variablesFormPlanning.enabled = false
-						selectionMethod.enabled = false
-						performAuditText.visible = true
+
+				Button 
+				{
+					id: 			pasteButton
+					text: 			qsTr("<b>Add Variables</b>")
+					anchors.right: 	parent.parent.right
+					enabled: 		(sampleFilter.value != "" & variableName.value != "")
+					onClicked: 
+					{
+						toEvaluation.enabled 			= true
+						pasteButton.enabled 			= false
+						pasteVariables.checked 			= true
+						variableType.enabled 			= false
+						materiality.enabled 			= false
+						auditRisk.enabled 				= false
+						ir.enabled 						= false
+						cr.enabled 						= false
+						planningModel.enabled 			= false
+						expectedErrors.enabled 			= false
+						variablesFormSampling.enabled 	= false
+						seed.enabled 					= false
+						selectionType.enabled 			= false
+						pasteButton.enabled 			= false
+						variablesFormPlanning.enabled 	= false
+						selectionMethod.enabled 		= false
+						performAuditText.visible 		= true
 					}
 				}
 			}
 		}
+
 		Item {
-			height: performAuditText.height
-			Layout.fillWidth: true
-			Text {
-				id: performAuditText
-				anchors.horizontalCenter: parent.horizontalCenter
-				text: qsTr("<b>Execute the audit before continuing to the evaluation stage.</b>")
-				font.family: "SansSerif"
-				font.pointSize: 7
-				visible: false
+			height: 			performAuditText.height
+			Layout.fillWidth: 	true
+
+			Text 
+			{
+				id: 						performAuditText
+				anchors.horizontalCenter: 	parent.horizontalCenter
+				text: 						qsTr("<b>Execute the audit before continuing to the evaluation stage.</b>")
+				font: 						Theme.font
+				font.pointSize: 			7 * preferencesModel.uiScale
+				visible: 					false
 			}
 		}
-		Item {
-			height: toEvaluation.height
-			Layout.fillWidth: true
-			Button {
-				anchors.left: parent.left
-				text: qsTr("<b>Reset Workflow</b>")
-				onClicked: {
+
+		Item 
+		{
+			height: 			toEvaluation.height
+			Layout.fillWidth: 	true
+
+			Button 
+			{
+				anchors.left: 	parent.left
+				text: 			qsTr("<b>Reset Workflow</b>")
+				onClicked: 
+				{
 					form.reset()
 				}
 			}
-			CheckBox {
-				anchors.right: toEvaluation.left
-				width: height
-				visible: false
-				name: "evaluationChecked"
-				id: evaluationChecked
-				checked: false
+
+			CheckBox 
+			{
+				id: 				evaluationChecked
+				anchors.right: 		toEvaluation.left
+				width: 				height
+				visible: 			false
+				name: 				"evaluationChecked"
+				checked: 			false
 			}
-			Button {
-				enabled: false
-				id: toEvaluation
-				anchors.right: parent.right
-				text: qsTr("<b>To Evaluation</b>")
-				onClicked: {
+
+			Button 
+			{
+				id: 				toEvaluation
+				enabled: 			false
+				anchors.right: 		parent.right
+				text: 				qsTr("<b>To Evaluation</b>")
+				onClicked: 
+				{
 					executionPhase.expanded = false
 					evaluationPhase.expanded = true
 					evaluationPhase.enabled = true
 					evaluationChecked.checked = true
-					if (musSampling.checked & variableTypeAuditValues.checked)
-						coxAndSnellBound.click()
-					if (musSampling.checked & variableTypeAuditValues.checked)
-						coxAndSnellBound.visible = true
-					if (recordSampling.checked & variableTypeAuditValues.checked)
-						regressionBound.click()
-					if (recordSampling.checked & variableTypeAuditValues.checked)
-						regressionBound.visible = true
-					if (recordSampling.checked & variableTypeAuditValues.checked)
-						bayesFactor.visible = false
-					if (recordSampling.checked & variableTypeAuditValues.checked)
-						priorAndPosteriorPlot.visible = false
-					if (recordSampling.checked & variableTypeAuditValues.checked)
-						priorAndPosteriorPlotLimit.visible = false
-					if (recordSampling.checked & variableTypeAuditValues.checked)
-						priorAndPosteriorPlotAdditionalInfo.visible = false
-					if (variableTypeCorrect.checked & beta.checked)
-						betaBound.click()
-					if (variableTypeCorrect.checked)
+					if (variableTypeAuditValues.checked){
+						if(musSampling.checked){
+							coxAndSnellBound.click()
+							coxAndSnellBound.visible = true
+						}
+						if(recordSampling.checked){
+							regressionBound.click()
+							regressionBound.visible = true
+							bayesFactor.visible = false
+							priorAndPosteriorPlot.visible = false
+							priorAndPosteriorPlotLimit.visible = false
+							priorAndPosteriorPlotAdditionalInfo.visible = false
+						}
+					}
+					if (variableTypeCorrect.checked){
 						betaBound.visible = true
-					if (variableTypeCorrect.checked & betaBinomial.checked)
-						betabinomialBound.click()
-					if (variableTypeCorrect.checked)
 						betabinomialBound.visible = true
+						if(beta.checked){
+							betaBound.click()
+						}
+						if(betaBinomial.checked){
+							betabinomialBound.click()
+						}
+					} 
 				}
 			}
 		}
 	}
-	Section {
-		text: evaluationPhase.expanded ? qsTr("<b>4. Evaluation</b>") : qsTr(
-											 "4. Evaluation")
-		expanded: false
-		enabled: false
-		id: evaluationPhase
-		columns: 1
-		VariablesForm {
+
+	Section 
+	{
+		id: 			evaluationPhase
+		text: 			evaluationPhase.expanded ? qsTr("<b>4. Evaluation</b>") : qsTr("4. Evaluation")
+		expanded: 		false
+		enabled: 		false
+		columns: 		1
+
+		VariablesForm 
+		{
 			implicitHeight: 150
-			AvailableVariablesList {
-				name: "evaluationVariables"
-				source: "variablesFormPlanning"
+
+			AvailableVariablesList 
+			{
+				name: 		"evaluationVariables"
+				source: 	"variablesFormPlanning"
 			}
-			AssignedVariablesList {
-				name: "auditResult"
-				title: qsTr("Audit Result")
+
+			AssignedVariablesList 
+			{
+				id: 			auditResult
+				name: 			"auditResult"
+				title: 			qsTr("Audit Result")
 				singleVariable: true
 				allowedColumns: ["nominal", "scale"]
-				id: auditResult
 			}
 		}
-		Section {
-			title: qsTr("Advanced Options")
-			columns: 1
-			GridLayout {
+
+		Section 
+		{
+			title: 		qsTr("Advanced Options")
+			columns: 	1
+
+			GridLayout 
+			{
 				columns: 2
-				RadioButtonGroup {
-					title: qsTr("Estimation Method")
-					name: "estimator"
-					RadioButton {
-						name: "coxAndSnellBound"
-						text: qsTr("Cox and Snell")
-						id: coxAndSnellBound
-						visible: false
+
+				RadioButtonGroup 
+				{
+					title: 		qsTr("Estimation Method")
+					name: 		"estimator"
+
+					RadioButton 
+					{
+						id: 		coxAndSnellBound
+						name: 		"coxAndSnellBound"
+						text: 		qsTr("Cox and Snell")
+						visible: 	false
 					}
-					RadioButton {
-						name: "betaBound"
-						text: qsTr("Beta")
-						id: betaBound
-						visible: false
+
+					RadioButton 
+					{
+						id: 		betaBound
+						name: 		"betaBound"
+						text: 		qsTr("Beta")
+						visible: 	false
 					}
-					RadioButton {
-						name: "betabinomialBound"
-						text: qsTr("Beta-binomial")
-						id: betabinomialBound
-						visible: false
+
+					RadioButton 
+					{
+						id: 		betabinomialBound
+						name: 		"betabinomialBound"
+						text: 		qsTr("Beta-binomial")
+						visible: 	false
 					}
-					RadioButton {
-						name: "regressionBound"
-						text: qsTr("Regression")
-						id: regressionBound
-						visible: false
+
+					RadioButton 
+					{
+						id: 		regressionBound
+						name: 		"regressionBound"
+						text: 		qsTr("Regression")
+						visible: 	false
 					}
 				}
 
-				RadioButtonGroup {
-					title: qsTr("Area Under Posterior")
-					name: "areaUnderPosterior"
-					RadioButton {
-						text: qsTr("Credible bound")
-						name: "displayCredibleBound"
+				RadioButtonGroup 
+				{
+					title: 		qsTr("Area Under Posterior")
+					name: 		"areaUnderPosterior"
+
+					RadioButton 
+					{
+						text: 	qsTr("Credible bound")
+						name: 	"displayCredibleBound"
 					}
-					RadioButton {
-						text: qsTr("Credible interval")
-						name: "displayCredibleInterval"
+
+					RadioButton 
+					{
+						text: 	qsTr("Credible interval")
+						name: 	"displayCredibleInterval"
 					}
 				}
 			}
 		}
-		Section {
+
+		Section 
+		{
 			title: qsTr("Tables and Plots")
-			GridLayout {
+
+			GridLayout 
+			{
 				columns: 2
-				GroupBox {
+
+				GroupBox 
+				{
 					title: qsTr("Statistics")
-					CheckBox {
-						text: qsTr("Most likely error (MLE)")
-						name: "mostLikelyError"
+
+					CheckBox 
+					{
+						text: 	qsTr("Most likely error (MLE)")
+						name: 	"mostLikelyError"
 					}
-					CheckBox {
-						text: qsTr("Bayes factor\u208B\u208A")
-						name: "bayesFactor"
-						id: bayesFactor
+
+					CheckBox 
+					{
+						id: 	bayesFactor
+						text: 	qsTr("Bayes factor\u208B\u208A")
+						name: 	"bayesFactor"
 					}
 				}
-				GroupBox {
+
+				GroupBox 
+				{
 					title: qsTr("Plots")
-					CheckBox {
-						text: qsTr("Evaluation information")
-						name: "evaluationInformation"
+
+					CheckBox 
+					{
+						text: 	qsTr("Evaluation information")
+						name: 	"evaluationInformation"
 					}
-					CheckBox {
-						text: qsTr("Prior and posterior")
-						name: "priorAndPosteriorPlot"
-						id: priorAndPosteriorPlot
+
+					CheckBox 
+					{
+						id: 	priorAndPosteriorPlot
+						text: 	qsTr("Prior and posterior")
+						name: 	"priorAndPosteriorPlot"
 					}
-					PercentField {
-						text: qsTr("x-axis limit")
-						defaultValue: 20
-						name: "priorAndPosteriorPlotLimit"
-						Layout.leftMargin: 20
-						id: priorAndPosteriorPlotLimit
+
+					PercentField 
+					{
+						id: 				priorAndPosteriorPlotLimit
+						text: 				qsTr("x-axis limit")
+						defaultValue: 		20
+						name: 				"priorAndPosteriorPlotLimit"
+						Layout.leftMargin: 	20 * preferencesModel.uiScale
 					}
-					CheckBox {
-						text: qsTr("Additional info")
-						name: "priorAndPosteriorPlotAdditionalInfo"
-						Layout.leftMargin: 20
-						checked: true
-						enabled: priorAndPosteriorPlot.checked
-						id: priorAndPosteriorPlotAdditionalInfo
+
+					CheckBox 
+					{
+						id: 					priorAndPosteriorPlotAdditionalInfo
+						text: 					qsTr("Additional info")
+						name: 					"priorAndPosteriorPlotAdditionalInfo"
+						Layout.leftMargin: 		20 * preferencesModel.uiScale
+						checked: 				true
+						enabled: 				priorAndPosteriorPlot.checked
 					}
-					CheckBox {
-						text: qsTr("Correlation plot")
-						name: "correlationPlot"
-						visible: variableTypeAuditValues.checked
+
+					CheckBox 
+					{
+						text: 		qsTr("Correlation plot")
+						name: 		"correlationPlot"
+						visible: 	variableTypeAuditValues.checked
 					}
 				}
 			}
 		}
-		Item {
-			height: toInterpretation.height
-			Layout.fillWidth: true
-			Button {
-				id: toInterpretation
-				anchors.right: parent.right
-				text: qsTr("<b>Download Report</b>")
-				enabled: auditResult.count > 0
-				onClicked: {
+
+		Item 
+		{
+			height: 				toInterpretation.height
+			Layout.fillWidth: 		true
+
+			Button 
+			{
+				id: 			toInterpretation
+				anchors.right: 	parent.right
+				text: 			qsTr("<b>Download Report</b>")
+				enabled: 		auditResult.count > 0
+				onClicked: 
+				{
 					evaluationPhase.expanded = false
 					form.exportResults()
 				}
