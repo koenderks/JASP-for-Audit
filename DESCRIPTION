@@ -2,7 +2,7 @@ Package: DevelopmentModule
 Type: Package
 Title: Audit Module for JASP
 Version: 0.1
-Date: 2019-04-16
+Date: 2019-06-20
 Author: Koen Derks, Jacques de Swart & Ruud Wetzels
 Website: www.github.com/koenderks/JASP-for-Audit
 Maintainer: Koen Derks <k.derks@nyenrode.nl>
