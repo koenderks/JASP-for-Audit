@@ -137,7 +137,7 @@ Form
 				name: 			"recordNumberVariable"
 				title: 			qsTr("Record ID's")
 				singleVariable:	true
-				allowedColumns:	["nominal", "ordinal", "scale"]
+				allowedColumns:	["ordinal", "scale"]
 			}
 			
 			AssignedVariablesList 	
