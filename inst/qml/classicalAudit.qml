@@ -113,7 +113,8 @@ Form
 				id: 						variableSelectionTitle
 				anchors.horizontalCenter: 	parent.horizontalCenter
 				text: 						qsTr("<b>Variable definition</b>")
-				font:						Theme.font
+				font.family: 				"SansSerif"
+				font.pointSize: 			12 * preferencesModel.uiScale
 			}
 		}
 
@@ -568,55 +569,59 @@ Form
 			}
 		}
 
-		Item
-		{ 
+		Item 
+		{
 			height: 			toExecution.height
 			Layout.fillWidth: 	true
 
 			Button 
-			{ 
+			{
 				anchors.left: 	parent.left
 				text: 			qsTr("<b>Reset Workflow</b>")
-				onClicked: 		form.reset()
+				onClicked: 
+				{
+					form.reset()
+				}
+			}
+
+			Button 
+			{
+				id: 			downloadReportSelection
+				enabled: 		materialityRelative.checked ? (materialityPercentage.value == "0" ? false : true) : (materialityValue.value == "0" ? false : true)
+				anchors.right: 	executionChecked.left
+				text: 			qsTr("<b>Download Report</b>")
+				onClicked: 
+				{
+					form.exportResults()
+				}
+			}
+
+			CheckBox 
+			{
+				id: 				executionChecked
+				anchors.right: 		toExecution.left
+				width: 				height
+				visible: 			false
+				name: 				"executionChecked"
+				checked: 			false
+			}
+
+			Button 
+			{
+				id: 				toExecution
+				anchors.right: 		parent.right
+				text: 				qsTr("<b>To Execution</b>")
+				onClicked: 
+				{
+					samplingPhase.expanded = false
+					executionPhase.expanded = true
+					executionPhase.enabled = true
+					if (monetaryVariable.count == 0)	variableTypeCorrect.click()
+					if (monetaryVariable.count > 0)		variableTypeAuditValues.click()
+				}
 			}
 		}
-
-		Button 
-		{ 
-			id: 			downloadReportSelection
-			enabled: 		(materialityRelative.checked ? materialityPercentage.value : materialityValue.value) != "0"
-			anchors.right: 	executionChecked.left
-			text: 			qsTr("<b>Download Report</b>") 
-			
-			onClicked: 		form.exportResults()
-		}
 	}
-
-	CheckBox 
-	{ 
-		id: 				executionChecked
-		width: 				height
-		visible: 			false
-		name: 				"executionChecked"
-		checked: 			false 
-	}
-
-	Button 
-	{ 
-		id: 			toExecution
-		text: 			qsTr("<b>To Execution</b>")
-
-		onClicked: 
-		{
-			samplingPhase.expanded 	= false
-			executionPhase.expanded = true
-			executionPhase.enabled 	= true
-			if (monetaryVariable.count == 0)  variableTypeCorrect.click()
-			if (monetaryVariable.count > 0)   variableTypeAuditValues.click()
-		}
-	}
-
-
 
 	Section 
 	{ 
@@ -718,7 +723,6 @@ Form
 
 			Item 
 			{ 
-				id: 				hoi
 				height:				groupBoxVariableNames.height
 				Layout.fillWidth: 	true
 

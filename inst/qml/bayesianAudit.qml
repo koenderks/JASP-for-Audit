@@ -114,7 +114,8 @@ Form {
 				id: 						variableSelectionTitle
 				anchors.horizontalCenter: 	parent.horizontalCenter
 				text: 						qsTr("<b>Variable definition</b>")
-				font:						Theme.font
+				font.family: 				"SansSerif"
+				font.pointSize: 			12 * preferencesModel.uiScale
 			}
 		}
 
