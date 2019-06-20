@@ -23,11 +23,8 @@ import JASP.Widgets 1.0
 
 Form 
 {
-	id: 				formRoot
 	usesJaspResults: 	true
     columns: 			1
-
-	property bool evaluationPhase: evaluationChecked.checked
 
 	// --------------------------------------------------------------------------------------------------------------------------------------------
 	// ---------------------------------------------------  PLANNING  -----------------------------------------------------------------------------
@@ -43,7 +40,7 @@ Form
 		GridLayout 
 		{ 
 			columns: 	2
-			enabled:	!formRoot.evaluationPhase
+			enabled:	!pasteVariables.checked
 			
 			RadioButtonGroup 
 			{ 
@@ -130,7 +127,7 @@ Form
 		{ 
 			id: 			variablesFormPlanning
 			implicitHeight:	110
-			enabled:		!formRoot.evaluationPhase
+			enabled:		!pasteVariables.checked
 
 			AvailableVariablesList	{ name: "variablesFormPlanning" }
 			
@@ -166,7 +163,7 @@ Form
 					id: 		ir
 					title: 		qsTr("Inherent Risk")
 					name: 		"IR"
-					enabled:	!formRoot.evaluationPhase
+					enabled:	!pasteVariables.checked
 
 					RadioButton { text: qsTr("High"); 		name: "High"; 	checked: true	}
 					RadioButton { text: qsTr("Medium");		name: "Medium" 					}
@@ -178,7 +175,7 @@ Form
 					id:			expectedErrors
 					name: 		"expectedErrors"
 					title: 		qsTr("Expected Errors")
-					enabled:	!formRoot.evaluationPhase
+					enabled:	!pasteVariables.checked
 
 					RowLayout 
 					{ 
@@ -243,7 +240,7 @@ Form
 					id: 		cr
 					title: 		qsTr("Control Risk")
 					name: 		"CR"
-					enabled:	!formRoot.evaluationPhase
+					enabled:	!pasteVariables.checked
 
 					RadioButton { text: qsTr("High"); 		name: "High"; 	checked: true	}
 					RadioButton { text: qsTr("Medium"); 	name: "Medium" 					}
@@ -255,7 +252,7 @@ Form
 					id: 		planningModel
 					title: 		qsTr("Planning Distribution")
 					name: 		"planningModel"
-					enabled:	!formRoot.evaluationPhase
+					enabled:	!pasteVariables.checked
 					
 					RadioButton { text: qsTr("Poisson")         ; name: "Poisson" ; 		checked: true; 	id: poisson			}
 					RadioButton { text: qsTr("Binomial")        ; name: "binomial"; 						id: binomial		}
@@ -331,7 +328,7 @@ Form
 		{ 
 			height: 			toSampling.height
 			Layout.fillWidth: 	true
-			enabled:			!formRoot.evaluationPhase
+			enabled:			!pasteVariables.checked
 
 			Button 
 			{ 	
@@ -392,7 +389,7 @@ Form
 		{ 
 			id: 			variablesFormSampling
 			implicitHeight:	200
-			enabled:		!formRoot.evaluationPhase
+			enabled:		!pasteVariables.checked
 
 			AvailableVariablesList 
 			{ 
@@ -424,7 +421,7 @@ Form
 			GridLayout 
 			{ 
 				columns:	3
-				enabled:	!formRoot.evaluationPhase
+				enabled:	!pasteVariables.checked
 				
 				RadioButtonGroup 
 				{ 
@@ -581,7 +578,7 @@ Form
 		{
 			height: 			toExecution.height
 			Layout.fillWidth: 	true
-			enabled:			!formRoot.evaluationPhase
+			enabled:			!pasteVariables.checked
 
 			Button 
 			{
@@ -661,7 +658,7 @@ Form
 				name: 						"variableType"
 				title: 						qsTr("")
 				anchors.horizontalCenter: 	parent.horizontalCenter
-				enabled:					!formRoot.evaluationPhase
+				enabled:					!pasteVariables.checked
 				
 				RowLayout 
 				{ 
@@ -706,15 +703,14 @@ Form
 			GroupBox 
 			{ 
 				id: 		groupBoxVariableNames
-				enabled:	!formRoot.evaluationPhase
+				enabled:	!pasteVariables.checked
 
 				ComputedColumnField
 				{ 
 					id: 		sampleFilter
 					name: 		"sampleFilter"
 					text: 		"Column name selection result: "
-					fieldWidth: 120
-					enabled: 	!pasteVariables.checked 
+					fieldWidth: 120 
 				}
 				
 				ComputedColumnField 
@@ -723,7 +719,6 @@ Form
 					name: 		"variableName"
 					text: 		"Column name audit result: "
 					fieldWidth: 120
-					enabled: 	!pasteVariables.checked
 				}
 			}
 
@@ -786,7 +781,7 @@ Form
 				modelType:			"FilteredDataEntryModel"
         		source:     		"recordNumberVariable"
         		colName:    		variableName.value
-				enabled:			!formRoot.evaluationPhase
+				enabled:			!evaluationChecked.checked
 			}
 		}
 
@@ -794,7 +789,7 @@ Form
 		{
 			height: 			toEvaluation.height
 			Layout.fillWidth: 	true
-			enabled:			!formRoot.evaluationPhase
+			enabled:			!evaluationChecked.checked
 			
 			Button
 			{ 
