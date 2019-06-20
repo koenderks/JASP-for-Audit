@@ -776,7 +776,7 @@ Form
 
 		Section
 		{
-			title:					"Perform Audit"
+			title:					"Execute Audit"
 			expanded:				pasteVariables.checked
 
 			TableView
@@ -787,6 +787,7 @@ Form
 				modelType:			"FilteredDataEntryModel"
         		source:     		"recordNumberVariable"
         		colName:    		variableName.value
+				enabled:			!formRoot.evaluationPhase
 			}
 		}
 
