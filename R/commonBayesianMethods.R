@@ -909,6 +909,7 @@
 }
 
 .regressionBoundBayesian <- function(dataset, options, total_data_value, jaspResults){
+
   if(!is.null(jaspResults[["evaluationResult"]]$object))
     return(jaspResults[["evaluationResult"]]$object)
 
@@ -921,6 +922,7 @@
     M                       <- 0
     z                       <- 0
     bound                   <- "."
+    interval              <- c(".", ".")
     mle                     <- 0
     mleTable                <- 0
 
@@ -938,26 +940,36 @@
         b                       <- sample[, .v(options[["monetaryVariable"]])]
         w                       <- sample[, .v(options[["auditResult"]])]
 
+        # Bayesian Linear Regression Using the BAS package
         colnames(sample)        <- c("bookValue", "auditValue")
         formula                 <- auditValue ~ bookValue
-        basResult               <- BAS::bas.lm(formula = formula, data = sample)
-        coefBasResult           <- coef(basResult)
-        b1                      <- coefBasResult$postmean[2]
-        b1max                   <- coefBasResult$postmean[2] + coefBasResult$postsd[2]
+
+        regResult               <- BAS::bas.lm(formula, data=sample)
+        coefReg                 <- coef(regResult)  
+        beta                    <- coefReg$postmean[2]
+
+        cred.interval           <- BAS:::confint.coef.bas(coefReg, level = options[["confidence"]])  
+        betaMaxInterval         <- cred.interval[2, c(1,2)] 
+
+        cred.bound              <- BAS:::confint.coef.bas(coefReg, level = options[["confidence"]] - (1 - options[["confidence"]])) 
+        betaMax                 <- cred.bound[2, 2] 
 
         meanb                   <- mean(b)
         meanw                   <- mean(w)
 
-        # Posterior distribution of regression coefficient
-        mle                     <- N * meanw + b1 * (B - N * meanb)
+        mle                     <- N * meanw + beta * (B - N * meanb)
         stand.dev               <- sd(w) * sqrt(1 - cor(b, w)^2) * ( N / sqrt(n)) * sqrt( (N-n) / (N-1) )
-        lowerValue              <- mle - b1max * stand.dev
+        lowerValue              <- mle - betaMax * stand.dev
+        lowerValueInterval      <- c(mle + betaMaxInterval[1] * stand.dev, mle - betaMaxInterval[2] * stand.dev)
+
         if(lowerValue == 0){
           bound                 <- 0
+          interval              <- c(0, 0)
         } else {
           bound                 <- (B - lowerValue) / B
+          interval              <- (B - lowerValueInterval) / B
         }
-        mleTable                <- (B - mle) / B
+        mleTable                <- (B - mle) / B    
     }
 
     resultList <- list()
@@ -968,6 +980,7 @@
     resultList[["CR"]]          <- options[["CR"]]
     resultList[["confidence"]]  <- options[["confidence"]]
     resultList[["bound"]]       <- bound
+    resultList[["interval"]]    <- interval
     resultList[["alpha"]]       <- alpha
     resultList[["mle"]]         <- mle
     resultList[["mleTable"]]    <- mleTable

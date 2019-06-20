@@ -303,6 +303,10 @@ Form {
                 if (musSampling.checked & variableTypeAuditValues.checked)    coxAndSnellBound.visible = true
                 if (recordSampling.checked & variableTypeAuditValues.checked) regressionBound.click()
                 if (recordSampling.checked & variableTypeAuditValues.checked) regressionBound.visible = true
+                if (recordSampling.checked & variableTypeAuditValues.checked) bayesFactor.visible = false
+                if (recordSampling.checked & variableTypeAuditValues.checked) priorAndPosteriorPlot.visible = false
+                if (recordSampling.checked & variableTypeAuditValues.checked) priorAndPosteriorPlotLimit.visible = false
+                if (recordSampling.checked & variableTypeAuditValues.checked) priorAndPosteriorPlotAdditionalInfo.visible = false
                 if (variableTypeCorrect.checked & beta.checked) betaBound.click()
                 if (variableTypeCorrect.checked) betaBound.visible = true
                 if (variableTypeCorrect.checked & betaBinomial.checked) betabinomialBound.click()
@@ -335,13 +339,13 @@ Form {
           GridLayout { columns: 2
             GroupBox { title: qsTr("Statistics")
               CheckBox { text: qsTr("Most likely error (MLE)"); name: "mostLikelyError" }
-              CheckBox { text: qsTr("Bayes factor\u208B\u208A"); name: "bayesFactor" }
+              CheckBox { text: qsTr("Bayes factor\u208B\u208A"); name: "bayesFactor"; id: bayesFactor }
             }
             GroupBox { title: qsTr("Plots")
               CheckBox { text: qsTr("Evaluation information"); name: "evaluationInformation" }
               CheckBox { text: qsTr("Prior and posterior"); name: "priorAndPosteriorPlot"; id: priorAndPosteriorPlot }
-              PercentField { text: qsTr("x-axis limit"); defaultValue: 20; name: "priorAndPosteriorPlotLimit"; Layout.leftMargin: 20 }
-              CheckBox { text: qsTr("Additional info"); name: "priorAndPosteriorPlotAdditionalInfo"; Layout.leftMargin: 20; checked: true; enabled: priorAndPosteriorPlot.checked }
+              PercentField { text: qsTr("x-axis limit"); defaultValue: 20; name: "priorAndPosteriorPlotLimit"; Layout.leftMargin: 20; id: priorAndPosteriorPlotLimit }
+              CheckBox { text: qsTr("Additional info"); name: "priorAndPosteriorPlotAdditionalInfo"; Layout.leftMargin: 20; checked: true; enabled: priorAndPosteriorPlot.checked; id: priorAndPosteriorPlotAdditionalInfo }
               CheckBox { text: qsTr("Correlation plot"); name: "correlationPlot"; visible: variableTypeAuditValues.checked }
             }
           }
