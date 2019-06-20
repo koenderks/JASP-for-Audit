@@ -39,6 +39,8 @@ classicalPlanning <- function(jaspResults, dataset, options, ...){
     jaspResults[["materiality"]] <- createJaspState(materiality)
     jaspResults[["materiality"]]$dependOn(options = c("materialityValue", "materialityPercentage", "populationSize", "populationValue", "materiality"))
 
+    if(options[["materiality"]] == "materialityAbsolute" && options[["materialityValue"]] >= jaspResults[["total_data_value"]]$object)
+     planningContainer$setError("Analysis not possible: Your materiality is higher than the total value of the observations.") 
     expTMP <- ifelse(options[['expectedErrors']] == "expectedRelative", yes = options[["expectedPercentage"]], no = options[["expectedNumber"]] / populationValue)
     if(expTMP > materiality){
       planningContainer$setError("Analysis not possible: Your expected errors are higher than materiality.")
