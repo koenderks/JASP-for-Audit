@@ -454,7 +454,7 @@
 
     jaspResults[["evaluationResult"]]     <- createJaspState(resultList)
     jaspResults[["evaluationResult"]]     $dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "expectedErrors", "expectedPercentage", "expectedNumber", "sampleFilter",
-                                                    "planningModel", "materialityValue", "variableType", "materiality"))
+                                                    "planningModel", "materialityValue", "variableType", "materiality", "performAudit"))
     return(jaspResults[["evaluationResult"]]$object)
 }
 
@@ -465,7 +465,7 @@
     evaluationTable                       <- createJaspTable("Evaluation Summary")
     evaluationTable$position              <- position
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "expectedErrors", "expectedPercentage", "expectedNumber",
-                                      "sampleFilter", "mostLikelyError", "bayesFactor", "planningModel", "materialityValue", "variableType", "estimator", "areaUnderPosterior", "valuta"))
+                                      "sampleFilter", "mostLikelyError", "bayesFactor", "planningModel", "materialityValue", "variableType", "estimator", "areaUnderPosterior", "valuta", "performAudit"))
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",        type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",        type = 'string')
@@ -749,7 +749,7 @@
     resultList[["posterior"]]   <- posterior
 
     jaspResults[["evaluationResult"]] <- createJaspState(resultList)
-    jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materiality", "estimator", "monetaryVariable"))
+    jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materiality", "estimator", "monetaryVariable", "performAudit"))
     return(jaspResults[["evaluationResult"]]$object)
 }
 
@@ -759,7 +759,7 @@
 
     evaluationTable                       <- createJaspTable("Evaluation Summary")
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "sampleFilter", "planningModel", "mostLikelyError", "estimator", "bayesFactor",
-                                        "materialityValue", "variableType", "areaUnderPosterior", "valuta"))
+                                        "materialityValue", "variableType", "areaUnderPosterior", "valuta", "performAudit"))
     evaluationTable$position <- position
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",            type = 'string')
@@ -986,7 +986,7 @@
     resultList[["mleTable"]]    <- mleTable
 
     jaspResults[["evaluationResult"]] <- createJaspState(resultList)
-    jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materiality", "estimator", "monetaryVariable"))
+    jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materiality", "estimator", "monetaryVariable", "performAudit"))
     return(jaspResults[["evaluationResult"]]$object)
 }
 
@@ -997,7 +997,7 @@
   priorAndPosteriorPlot <- createJaspPlot(plot = NULL, title = "Prior and Posterior", width = 600, height = 400)
   priorAndPosteriorPlot$position <- position
   priorAndPosteriorPlot$dependOn(options = c("IR", "CR", "confidence", "priorAndPosteriorPlotLimit", "priorAndPosteriorPlot", "priorAndPosteriorPlotAdditionalInfo", "materialityPercentage", "auditResult",
-                                              "expectedErrors", "expectedPercentage", "expectedNumber", "sampleFilter", "planningModel", "materialityValue", "displayCredibleInterval"))
+                                              "expectedErrors", "expectedPercentage", "expectedNumber", "sampleFilter", "planningModel", "materialityValue", "displayCredibleInterval", "performAudit"))
 
   evaluationContainer[["priorAndPosteriorPlot"]] <- priorAndPosteriorPlot
 

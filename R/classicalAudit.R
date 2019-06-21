@@ -180,7 +180,7 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
                                                                                         is a <b>", jaspResults[["confidenceLevelLabel"]]$object , "</b> probability that, when one would repeaditly sample from this population, the maximum misstatement is calculated to be lower
                                                                                         than <b>", boundLabel ,"</b>."), "p")
     evaluationContainer[["resultParagraph"]]$position <- 1
-    evaluationContainer[["resultParagraph"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "materialityPercentage", "estimator", "materialityValue", "sampleFilter"))
+    evaluationContainer[["resultParagraph"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "materialityPercentage", "estimator", "materialityValue", "sampleFilter", "performAudit"))
   }
   # Create a plot containing evaluation information (if the user wants it)
   if(options[["evaluationInformation"]])
@@ -201,7 +201,7 @@ classicalAudit <- function(jaspResults, dataset, options, ...){
     # Create a container for the conclusion
     conclusionContainer <- createJaspContainer(title = "<u>Conclusion</u>")
     conclusionContainer$position <- 5
-    conclusionContainer$dependOn(options = c("IR", "CR", "confidence", "auditResult", "materialityPercentage", "estimator", "materialityValue", "sampleFilter", "explanatoryText"))
+    conclusionContainer$dependOn(options = c("IR", "CR", "confidence", "auditResult", "materialityPercentage", "estimator", "materialityValue", "sampleFilter", "explanatoryText", "performAudit"))
     # Produce relevant terms conditional on the analysis result
     above_below   <- ifelse(evaluationResult[["bound"]] < jaspResults[["materiality"]]$object, yes = "lower", no = "higher")
     approve       <- ifelse(evaluationResult[["bound"]] < jaspResults[["materiality"]]$object, yes = "<b>no material misstatement</b>", no = "<b>material misstatement</b>")

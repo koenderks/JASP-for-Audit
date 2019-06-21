@@ -782,7 +782,6 @@ Form
 				modelType:			"FilteredDataEntryModel"
         		source:     		"recordNumberVariable"
         		colName:    		variableName.value
-				enabled:			!evaluationChecked.checked
 			}
 		}
 

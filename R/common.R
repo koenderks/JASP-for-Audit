@@ -211,7 +211,7 @@
 
   evaluationInformation <- createJaspPlot(plot = NULL, title = "Evaluation Information", width = 600, height = 300)
   evaluationInformation$position <- position
-  evaluationInformation$dependOn(options = c("IR", "CR", "confidence", "auditResult", "evaluationInformation", "materialityPercentage", "estimator", "materialityValue", "valuta"))
+  evaluationInformation$dependOn(options = c("IR", "CR", "confidence", "auditResult", "evaluationInformation", "materialityPercentage", "estimator", "materialityValue", "valuta", "performAudit"))
 
   evaluationContainer[["evaluationInformation"]] <- evaluationInformation
 
@@ -282,7 +282,7 @@
 
   correlationPlot <- createJaspPlot(plot = NULL, title = "Correlation Plot", width = 500, height = 400)
   correlationPlot$position <- position
-  correlationPlot$dependOn(options = c("auditResult", "correlationPlot", "monetaryVariable", "valuta"))
+  correlationPlot$dependOn(options = c("auditResult", "correlationPlot", "monetaryVariable", "valuta", "performAudit"))
 
   evaluationContainer[["correlationPlot"]] <- correlationPlot
 
@@ -453,7 +453,7 @@
   dataset                         <- .readDataSetToEnd(columns.as.numeric = variables.to.read)
 
   jaspResults[["runEvaluation"]] <- createJaspState( (!is.null(auditResult) && !is.null(sampleFilter)) )
-  jaspResults[["runEvaluation"]]$dependOn(options = c("auditResult", "sampleFilter"))
+  jaspResults[["runEvaluation"]]$dependOn(options = c("auditResult", "sampleFilter", "performAudit"))
   return(dataset)
 }
 

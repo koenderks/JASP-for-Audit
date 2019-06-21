@@ -187,7 +187,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
                                                           bined with the prior knowledge results in an <b>", jaspResults[["confidenceLevelLabel"]]$object , "</b> upper confidence bound of <b>", boundLabel ,"</b>. The cumulative knowledge states that there
                                                           is a true probability of <b>", jaspResults[["confidenceLevelLabel"]]$object , "</b> that the misstatement in the population is lower than <b>", boundLabel ,"</b>."), "p")
     evaluationContainer[["resultParagraph"]]$position <- 1
-    evaluationContainer[["resultParagraph"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "materialityPercentage", "estimator", "materialityValue", "materiality"))
+    evaluationContainer[["resultParagraph"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "materialityPercentage", "estimator", "materialityValue", "materiality", "performAudit"))
   }
   # Create a plot containing evaluation information (if the user wants it)
   if(options[["evaluationInformation"]])
@@ -211,7 +211,7 @@ bayesianAudit <- function(jaspResults, dataset, options, ...){
     # Create a container for the conclusion
     conclusionContainer <- createJaspContainer(title = "<u>Conclusion</u>")
     conclusionContainer$position <- 5
-    conclusionContainer$dependOn(options = c("IR", "CR", "confidence", "auditResult", "materialityPercentage", "estimator", "materialityValue", "sampleFilter", "materiality", "explanatoryText"))
+    conclusionContainer$dependOn(options = c("IR", "CR", "confidence", "auditResult", "materialityPercentage", "estimator", "materialityValue", "sampleFilter", "materiality", "explanatoryText", "performAudit"))
     # Produce relevant terms conditional on the analysis result
     above_below   <- ifelse(evaluationResult[["bound"]] < jaspResults[["materiality"]]$object, yes = "lower", no = "higher")
     approve       <- ifelse(evaluationResult[["bound"]] < jaspResults[["materiality"]]$object, yes = "<b>no material misstatement</b>", no = "<b>material misstatement</b>")

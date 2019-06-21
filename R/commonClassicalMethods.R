@@ -220,7 +220,7 @@
   resultList[["alpha"]]       <- alpha
 
   jaspResults[["evaluationResult"]] <- createJaspState(resultList)
-  jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materialityPercentage", "materialityValue"))
+  jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materialityPercentage", "materialityValue", "performAudit"))
   return(jaspResults[["evaluationResult"]]$object)
 }
 
@@ -231,7 +231,7 @@
     evaluationTable                       <- createJaspTable("Evaluation Summary")
     evaluationTable$position              <- position
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "sampleFilter", "planningModel",
-                                      "mostLikelyError", "materialityValue", "auditType", "valuta"))
+                                      "mostLikelyError", "materialityValue", "auditType", "valuta", "performAudit"))
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",          type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",          type = 'string')
@@ -327,7 +327,7 @@
     resultList[["alpha"]]       <- alpha
 
     jaspResults[["evaluationResult"]] <- createJaspState(resultList)
-    jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "variableType", "auditResult", "materiality", "estimator", "materialityValue", "materialityPercentage", "stringerBoundLtaAdjustment"))
+    jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "variableType", "auditResult", "materiality", "estimator", "materialityValue", "materialityPercentage", "stringerBoundLtaAdjustment", "performAudit"))
     return(jaspResults[["evaluationResult"]]$object)
 }
 
@@ -338,7 +338,7 @@
     evaluationTable                       <- createJaspTable("Evaluation Summary")
     evaluationTable$position              <- position
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "planningModel", "mostLikelyError", "sampleFilter", "variableType",
-                                      "estimator", "monetaryVariable", "materialityValue", "valuta", "stringerBoundLtaAdjustment"))
+                                      "estimator", "monetaryVariable", "materialityValue", "valuta", "stringerBoundLtaAdjustment", "performAudit"))
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",                      type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",                      type = 'string')
@@ -443,7 +443,7 @@
     resultList[["mleTable"]]    <- mleTable
 
     jaspResults[["evaluationResult"]] <- createJaspState(resultList)
-    jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materialityPercentage", "estimator", "monetaryVariable", "materialityValue", "variableType"))
+    jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materialityPercentage", "estimator", "monetaryVariable", "materialityValue", "variableType", "performAudit"))
     return(jaspResults[["evaluationResult"]]$object)
 }
 
@@ -503,7 +503,7 @@
     resultList[["mleTable"]]    <- mleTable
 
     jaspResults[["evaluationResult"]] <- createJaspState(resultList)
-    jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materialityPercentage", "estimator", "monetaryVariable", "materialityValue", "variableType"))
+    jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materialityPercentage", "estimator", "monetaryVariable", "materialityValue", "variableType", "performAudit"))
     return(jaspResults[["evaluationResult"]]$object)
 }
 
@@ -567,7 +567,7 @@
     resultList[["mleTable"]]    <- mleTable
 
     jaspResults[["evaluationResult"]] <- createJaspState(resultList)
-    jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materialityPercentage", "estimator", "monetaryVariable", "materialityValue", "variableType"))
+    jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materialityPercentage", "estimator", "monetaryVariable", "materialityValue", "variableType", "performAudit"))
     return(jaspResults[["evaluationResult"]]$object)
 }
 
@@ -631,6 +631,6 @@
 
     jaspResults[["evaluationResult"]] <- createJaspState(resultList)
     jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materialityPercentage", 
-                                                            "estimator", "monetaryVariable", "materialityValue", "variableType"))
+                                                            "estimator", "monetaryVariable", "materialityValue", "variableType", "performAudit"))
     return(jaspResults[["evaluationResult"]]$object)
 }
