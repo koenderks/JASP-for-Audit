@@ -454,7 +454,7 @@
 
     jaspResults[["evaluationResult"]]     <- createJaspState(resultList)
     jaspResults[["evaluationResult"]]     $dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "expectedErrors", "expectedPercentage", "expectedNumber", "sampleFilter",
-                                                    "planningModel", "materialityValue", "variableType", "materiality", "performAudit"))
+                                                    "planningModel", "materialityValue", "variableType", "materiality", "performAudit", "estimator"))
     return(jaspResults[["evaluationResult"]]$object)
 }
 
@@ -997,7 +997,7 @@
   priorAndPosteriorPlot <- createJaspPlot(plot = NULL, title = "Prior and Posterior", width = 600, height = 400)
   priorAndPosteriorPlot$position <- position
   priorAndPosteriorPlot$dependOn(options = c("IR", "CR", "confidence", "priorAndPosteriorPlotLimit", "priorAndPosteriorPlot", "priorAndPosteriorPlotAdditionalInfo", "materialityPercentage", "auditResult",
-                                              "expectedErrors", "expectedPercentage", "expectedNumber", "sampleFilter", "planningModel", "materialityValue", "displayCredibleInterval", "performAudit"))
+                                              "expectedErrors", "expectedPercentage", "expectedNumber", "sampleFilter", "planningModel", "materialityValue", "displayCredibleInterval", "performAudit", "estimator"))
 
   evaluationContainer[["priorAndPosteriorPlot"]] <- priorAndPosteriorPlot
 

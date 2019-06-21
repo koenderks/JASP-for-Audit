@@ -220,7 +220,7 @@
   resultList[["alpha"]]       <- alpha
 
   jaspResults[["evaluationResult"]] <- createJaspState(resultList)
-  jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materialityPercentage", "materialityValue", "performAudit"))
+  jaspResults[["evaluationResult"]]$dependOn(options = c("IR", "CR", "confidence", "auditResult", "sampleFilter", "materialityPercentage", "materialityValue", "performAudit", "estimator"))
   return(jaspResults[["evaluationResult"]]$object)
 }
 
@@ -231,7 +231,7 @@
     evaluationTable                       <- createJaspTable("Evaluation Summary")
     evaluationTable$position              <- position
     evaluationTable$dependOn(options = c("IR", "CR", "confidence", "materialityPercentage", "auditResult", "sampleFilter", "planningModel",
-                                      "mostLikelyError", "materialityValue", "auditType", "valuta", "performAudit"))
+                                      "mostLikelyError", "materialityValue", "auditType", "valuta", "performAudit", "estimator"))
 
     evaluationTable$addColumnInfo(name = 'materiality',   title = "Materiality",          type = 'string')
     evaluationTable$addColumnInfo(name = 'n',             title = "Sample size",          type = 'string')
