@@ -815,7 +815,7 @@ Form
 				id: 						performAuditText
 				anchors.horizontalCenter: 	parent.horizontalCenter
 				text: 						variableTypeAuditValues.checked ? qsTr("<b>Annotate your observations with their audit values.</b>") : qsTr("<b>Annotate your observations with 0 (correct) or 1 (incorrect).</b>")
-				visible: 					false
+				visible: 					pasteVariables.checked
 			}
 		}
 
