@@ -747,6 +747,7 @@ Form
 					{
 						pasteVariables.checked 		= true
 						performAuditTable.filter 	= sampleFilter.value + " > 0"
+						performAuditTable.extraCol	= sampleFilter.value
 					}
 
 				}
@@ -780,7 +781,7 @@ Form
 				name:				"performAudit"
 				Layout.fillWidth: 	true
 				modelType:			"FilteredDataEntryModel"
-        		source:     		"recordNumberVariable"
+        		source:     		["recordNumberVariable", "monetaryVariable", "additionalVariables"]
         		colName:    		variableName.value
 			}
 		}
