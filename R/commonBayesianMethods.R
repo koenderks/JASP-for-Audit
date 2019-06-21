@@ -297,7 +297,7 @@
       xseq <- seq(0, jaspResults[["N"]]$object, 1)[1:ceiling(options[["priorPlotLimit"]] * jaspResults[["N"]]$object)]
       d <- data.frame(
           x = xseq,
-          y = .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, shape1 = planningResult[["priorA"]], shape2 = planningResult[["priorB"]])[1:ceiling(options[["priorPlotLimit"]] * jaspResults[["N"]]$object)],
+          y = .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object - planningResult[["n"]], shape1 = planningResult[["priorA"]], shape2 = planningResult[["priorB"]])[1:ceiling(options[["priorPlotLimit"]] * jaspResults[["N"]]$object)],
           type = c(rep("Prior", length(xseq)))
       )
     } else {
@@ -306,8 +306,8 @@
         xseq <- seq(0, jaspResults[["N"]]$object, 1)[1:ceiling(options[["priorPlotLimit"]] * jaspResults[["N"]]$object)]
         d <- data.frame(
             x = rep(xseq, 2),
-            y = c(.dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, shape1 = planningResult[["priorA"]], shape2 = planningResult[["priorB"]])[1:ceiling(options[["priorPlotLimit"]] * jaspResults[["N"]]$object)] ,
-                  .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, shape1 = planningResult[["priorA"]] + k, shape2 = planningResult[["priorB"]] + (planningResult[["n"]] - k))[1:ceiling(options[["priorPlotLimit"]] * jaspResults[["N"]]$object)]),
+            y = c(.dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object - planningResult[["n"]], shape1 = planningResult[["priorA"]], shape2 = planningResult[["priorB"]])[1:ceiling(options[["priorPlotLimit"]] * jaspResults[["N"]]$object)] ,
+                  .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object - planningResult[["n"]], shape1 = planningResult[["priorA"]] + k, shape2 = planningResult[["priorB"]] + (planningResult[["n"]] - k))[1:ceiling(options[["priorPlotLimit"]] * jaspResults[["N"]]$object)]),
             type = c(rep("Prior", length(xseq)), rep("Expected Posterior", length(xseq)))
         )
         # Reorder factor levels to display in legend
@@ -320,7 +320,7 @@
     yLim <- range(yBreaks)
 
     pointdata <- data.frame(x = jaspResults[["materiality"]]$object * jaspResults[["N"]]$object, y = .dBetaBinom(ceiling(jaspResults[["materiality"]]$object * jaspResults[["N"]]$object),
-                          N = jaspResults[["N"]]$object, shape1 = planningResult[["priorA"]], shape2 = planningResult[["priorB"]]))
+                          N = jaspResults[["N"]]$object - planningResult[["n"]], shape1 = planningResult[["priorA"]], shape2 = planningResult[["priorB"]]))
     kk <- base::switch(options[["expectedErrors"]], "expectedRelative" = options[["expectedPercentage"]] * jaspResults[["N"]]$object, "expectedAbsolute" = round(options[["expectedNumber"]] / jaspResults[["total_data_value"]]$object * jaspResults[["N"]]$object, 2))
     secondPointData <- data.frame(x = kk, y = .dBetaBinom(kk, N = jaspResults[["N"]]$object, planningResult[["priorA"]], planningResult[["priorB"]]))
 
@@ -348,8 +348,8 @@
         }
         p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 1, 0.5, .7), stroke = 2, color = "black")))
 
-        df <- data.frame(x = 0:jaspResults[["N"]]$object, y = .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, shape1 = planningResult[["priorA"]], shape2 = planningResult[["priorB"]]))
-        lim <- .qBetaBinom(p = options[["confidence"]], N = jaspResults[["N"]]$object, shape1 = planningResult[["priorA"]], shape2 = planningResult[["priorB"]])
+        df <- data.frame(x = 0:jaspResults[["N"]]$object, y = .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object - planningResult[["n"]], shape1 = planningResult[["priorA"]], shape2 = planningResult[["priorB"]]))
+        lim <- .qBetaBinom(p = options[["confidence"]], N = jaspResults[["N"]]$object - planningResult[["n"]], shape1 = planningResult[["priorA"]], shape2 = planningResult[["priorB"]])
         df <- df[1:lim, ]
         p <- p + ggplot2::geom_bar(data = df, stat="identity", fill = rgb(0, 1, 0.5, .7))
     }
@@ -607,8 +607,8 @@
       xseq <- seq(0, jaspResults[["N"]]$object, 1)[1:ceiling(options[["priorAndPosteriorPlotLimit"]] * jaspResults[["N"]]$object)]
       d <- data.frame(
           x = rep(xseq, 2),
-          y = c(.dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, shape1 = evaluationResult[["priorA"]], shape2 = evaluationResult[["priorB"]])[1:ceiling(options[["priorAndPosteriorPlotLimit"]] * jaspResults[["N"]]$object)],
-                .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, shape1 = evaluationResult[["posteriorA"]], shape2 = evaluationResult[["posteriorB"]])[1:ceiling(options[["priorAndPosteriorPlotLimit"]] * jaspResults[["N"]]$object)]),
+          y = c(.dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object - evaluationResult[["n"]], shape1 = evaluationResult[["priorA"]], shape2 = evaluationResult[["priorB"]])[1:ceiling(options[["priorAndPosteriorPlotLimit"]] * jaspResults[["N"]]$object)],
+                .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object - evaluationResult[["n"]], shape1 = evaluationResult[["posteriorA"]], shape2 = evaluationResult[["posteriorB"]])[1:ceiling(options[["priorAndPosteriorPlotLimit"]] * jaspResults[["N"]]$object)]),
           type = c(rep("Prior", length(xseq)), rep("Posterior", length(xseq)))
       )
 
@@ -618,7 +618,7 @@
       yLim <- range(yBreaks)
 
       pointdata <- data.frame(x = jaspResults[["materiality"]]$object * jaspResults[["N"]]$object, y = .dBetaBinom(ceiling(jaspResults[["materiality"]]$object * jaspResults[["N"]]$object),
-                            N = jaspResults[["N"]]$object, shape1 = evaluationResult[["posteriorA"]], shape2 = evaluationResult[["posteriorB"]]))
+                            N = jaspResults[["N"]]$object - evaluationResult[["n"]], shape1 = evaluationResult[["posteriorA"]], shape2 = evaluationResult[["posteriorB"]]))
 
       p <- ggplot2::ggplot(d, ggplot2::aes(x = x, y = y)) +
           ggplot2::geom_line(ggplot2::aes(x = x, y = y, linetype = type), lwd = 1) +
@@ -632,7 +632,7 @@
           p <- p + ggplot2::scale_shape_manual(name = "", values = 21, labels = paste0(options[["confidence"]]*100, "% Posterior credible region"))
           p <- p + ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(size = 15, shape = 22, fill = rgb(0, 0.25, 1, .5), stroke = 2, color = "black")))
 
-          df <- data.frame(x = 0:jaspResults[["N"]]$object, y = .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object, shape1 = evaluationResult[["posteriorA"]], shape2 = evaluationResult[["posteriorB"]]))
+          df <- data.frame(x = 0:jaspResults[["N"]]$object, y = .dBetaBinom(x = 0:jaspResults[["N"]]$object, N = jaspResults[["N"]]$object - evaluationResult[["n"]], shape1 = evaluationResult[["posteriorA"]], shape2 = evaluationResult[["posteriorB"]]))
           if(options[["areaUnderPosterior"]]=="displayCredibleBound"){
             lim <- .qBetaBinom(p = options[["confidence"]], N = jaspResults[["N"]]$object - evaluationResult[["n"]], shape1 = evaluationResult[["posteriorA"]], shape2 = evaluationResult[["posteriorB"]])
             df <- df[1:lim, ]
