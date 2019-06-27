@@ -230,7 +230,7 @@ Form
 
 						HelpButton 
 						{ 
-							helpPage:			"explanatoryText"
+							helpPage:			"Audit/explanatoryText"
 							toolTip: 			"Show explanatory text at each step of the analysis"
 						}
 					}
@@ -412,9 +412,9 @@ Form
 				id: 			toSampling
 				anchors.right: 	parent.right
 				text: 			qsTr("<b>To Selection</b>")
-				enabled: 		materialityRelative.checked ? 
+				enabled: 		!samplingChecked.checked && (materialityRelative.checked ?
 									materialityPercentage.value != "0" && recordNumberVariable.count > 0 : 
-									materialityValue.value 		!= "0" && recordNumberVariable.count > 0 && monetaryVariable.count > 0
+									materialityValue.value 		!= "0" && recordNumberVariable.count > 0 && monetaryVariable.count > 0)
 				onClicked: 
 				{
 					samplingChecked.checked	= true
@@ -497,7 +497,7 @@ Form
 
 						HelpButton 
 						{ 
-							helpPage:			"monetaryUnitSampling"
+							helpPage:			"Audit/monetaryUnitSampling"
 							toolTip: 			"Select observations with probability proportional to their value"
 						}
 					}
@@ -514,7 +514,7 @@ Form
 						HelpButton
 						{ 
 							toolTip: 			"Select observations with equal probability"
-							helpPage:			"recordSampling"
+							helpPage:			"Audit/recordSampling"
 						}
 					}
 				}
@@ -537,7 +537,7 @@ Form
 						HelpButton 
 						{ 
 							toolTip: 			"Select observations by random sampling"
-							helpPage:			"randomSampling"
+							helpPage:			"Audit/randomSampling"
 						}
 					}
 
@@ -553,7 +553,7 @@ Form
 						HelpButton	
 						{ 
 							toolTip: 	"Select observations by cell sampling"
-							helpPage:	"cellSampling"
+							helpPage:	"Audit/cellSampling"
 						}
 					}
 
@@ -570,7 +570,7 @@ Form
 						HelpButton
 						{ 
 							toolTip: 	"Select observations by fixed interval sampling"
-							helpPage:	"fixedIntervalSampling"
+							helpPage:	"Audit/fixedIntervalSampling"
 						}
 					}
 				}
@@ -590,7 +590,7 @@ Form
 
 		Section 
 		{
-			title: qsTr("Tables and Plots")
+			title: qsTr("Tables")
 
 			GridLayout 
 			{ 
@@ -666,6 +666,7 @@ Form
 				id: 				toExecution
 				anchors.right: 		parent.right
 				text: 				qsTr("<b>To Execution</b>")
+				enabled:			!executionChecked.checked
 				onClicked: 
 				{
 					executionChecked.checked = true
@@ -799,8 +800,21 @@ Form
 					onClicked: 		
 					{
 						pasteVariables.checked 		= true
-						performAuditTable.filter 	= sampleFilter.value + " > 0"
-						performAuditTable.extraCol	= sampleFilter.value
+						tableViewDelay.start()
+					}
+
+					Timer
+					{
+						id:			tableViewDelay
+						repeat:		false
+						running:	false
+						interval:	1000
+						onTriggered:
+						{
+                            performAuditTable.colName   = variableName.value
+							performAuditTable.filter 	= sampleFilter.value + " > 0"
+							performAuditTable.extraCol	= sampleFilter.value
+						}
 					}
 
 				}
@@ -834,7 +848,7 @@ Form
 				Layout.fillWidth: 	true
 				modelType:			"FilteredDataEntryModel"
         		source:     		["recordNumberVariable", "monetaryVariable", "additionalVariables"]
-        		colName:    		variableName.value
+                colName:    		"Filter"
 			}
 		}
 

@@ -221,7 +221,11 @@
   bound             <- evaluationResult[["bound"]]
   proj.misstatement <- bound * jaspResults[["total_data_value"]]$object
   if(options[["variableType"]] == "variableTypeCorrect"){
-    mle <- evaluationResult[["k"]] / evaluationResult[["n"]]
+    if(options[["estimator"]] == "gammaBound" || options[["estimator"]] == "binomialBound" || options[["estimator"]] == "hyperBound"){
+      mle <- evaluationResult[["k"]] / evaluationResult[["n"]]
+    } else {
+      mle <- (evaluationResult[["posteriorA"]] - 1) / (evaluationResult[["posteriorA"]] + evaluationResult[["posteriorB"]] - 2)
+    }
   } else {
     if(options[["estimator"]] == "stringerBound" || options[["estimator"]] == "coxAndSnellBound"){
       mle <- sum(evaluationResult[["z"]]) / evaluationResult[["n"]]
@@ -433,10 +437,13 @@
     sampleFilter                  <- as.numeric(sampleFilter)
     auditDataVariable             <- rep(NA, jaspResults[["N"]]$object)
 
-    auditDataVariable[options[["performAudit"]][[1]]$rowIndices + 1] <- options[["performAudit"]][[1]]$values
+    auditDataVariable[options[["performAudit"]][[1]]$rowIndices] <- options[["performAudit"]][[1]]$values
 
-    .setColumnDataAsScale(options[["sampleFilter"]], sampleFilter)
-    .setColumnDataAsScale(options[["variableName"]], auditDataVariable)          
+    if(is.null(jaspResults[["sampleFilter"]]))  jaspResults[["sampleFilter"]] <- createJaspColumn(columnName=options[["sampleFilter"]], dependencies="sampleFilter")
+    if(is.null(jaspResults[["variableName"]]))  jaspResults[["variableName"]] <- createJaspColumn(columnName=options[["variableName"]], dependencies="variableName")
+
+    jaspResults[["sampleFilter"]]$setScale(sampleFilter)
+    jaspResults[["variableName"]]$setScale(auditDataVariable)
   }
 }
 
